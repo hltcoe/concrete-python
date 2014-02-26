@@ -10,7 +10,7 @@ Requirements
 
 Concrete-Python requires the following:
 * Python >= 2.7.x
-* Apache Thrift >= 0.9.1
+* 'thrift' Python package >= 0.9.1
 
 Installation
 ------------

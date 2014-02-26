@@ -17,7 +17,7 @@ Installation
 
 Install Concrete using the pip Python manager:
 
-  pip install git+https://github.com/charman/concrete-python.git#egg=concrete
+    pip install git+https://github.com/charman/concrete-python.git#egg=concrete
 
 
 Using the code in your project

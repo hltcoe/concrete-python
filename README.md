@@ -15,7 +15,7 @@ Concrete-Python requires the following:
 Installation
 ------------
 
-Install Concrete using the pip Python manager:
+Install Concrete using the pip package manager:
 
     pip install git+https://github.com/charman/concrete-python.git#egg=concrete
 

@@ -1,5 +1,6 @@
 from ez_setup import use_setuptools
 use_setuptools()
+from setuptools import setup
 
 setup(
     name = "concrete",
@@ -17,6 +18,11 @@ setup(
         'concrete.spans',
         'concrete.structure',
         'concrete.twitter',
+        ],
+
+    scripts = [
+        'scripts/concrete2json.py',
+        'scripts/validate_communication.py',
         ],
 
     install_requires = ['thrift>=0.9.1'],

@@ -1,4 +1,5 @@
-from setuptools import setup
+from ez_setup import use_setuptools
+use_setuptools()
 
 setup(
     name = "concrete",

@@ -18,6 +18,7 @@ setup(
         'concrete.spans',
         'concrete.structure',
         'concrete.twitter',
+        'concrete.validate',
         ],
 
     scripts = [

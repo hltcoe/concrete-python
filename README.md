@@ -50,7 +50,10 @@ to read and to use for diffs.
 **validate_communication.py** reads in a Concrete Communication file
 and prints out information about any invalid fields.  This script is a
 command-line wrapper around the functionality in the
-*concrete.validate* library.
+`concrete.validate` library.
+
+Use the '-h/--help' flag for details about the scripts' command line
+arguments.
 
 
 Using the code in your project

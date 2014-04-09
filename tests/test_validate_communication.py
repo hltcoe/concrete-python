@@ -13,7 +13,7 @@ import unittest
 from testfixtures import LogCapture, StringComparison
 from thrift import TSerialization
 
-from concrete.communication.ttypes import Communication, CommunicationType
+from concrete import Communication, CommunicationType
 from concrete.validate import *
 
 

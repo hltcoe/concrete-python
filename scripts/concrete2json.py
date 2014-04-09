@@ -8,7 +8,7 @@ import codecs
 import json
 import sys
 
-from concrete.communication.ttypes import Communication
+from concrete import Communication
 from thrift import TSerialization
 from thrift.protocol import TJSONProtocol
 

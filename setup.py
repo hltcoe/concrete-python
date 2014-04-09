@@ -25,6 +25,8 @@ setup(
         'scripts/validate_communication.py',
         ],
 
+    test_suite = "tests",
+
     install_requires = ['thrift>=0.9.1'],
 
     url = "https://github.com/hltcoe/concrete",

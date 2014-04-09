@@ -27,7 +27,10 @@ setup(
 
     test_suite = "tests",
 
-    install_requires = ['thrift>=0.9.1'],
+    install_requires = [
+        'networkx',
+        'thrift>=0.9.1',
+        ],
 
     url = "https://github.com/hltcoe/concrete",
     license="BSD",

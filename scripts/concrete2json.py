@@ -5,13 +5,9 @@ Pretty-prints a Concrete Communication file as JSON
 
 import argparse
 import codecs
-import json
 import sys
 
-from concrete import Communication
-from thrift import TSerialization
-from thrift.protocol import TJSONProtocol
-
+from concrete.util import concrete2json
 
 
 def main():
@@ -22,18 +18,7 @@ def main():
     parser.add_argument('communication_file')
     args = parser.parse_args()
 
-    concrete2json(args.communication_file)
-
-
-def concrete2json(communication_filename):
-    comm = Communication()
-
-    comm_bytestring = open(communication_filename).read()
-    TSerialization.deserialize(comm, comm_bytestring)
-
-    comm_json_string = TSerialization.serialize(comm, TJSONProtocol.TSimpleJSONProtocolFactory())
-    comm_json = json.loads(comm_json_string)
-    print json.dumps(comm_json, indent=2, separators=(',', ': '), ensure_ascii=False, sort_keys=True)
+    print concrete2json(args.communication_file)
 
 
 if __name__ == "__main__":

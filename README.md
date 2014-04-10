@@ -42,15 +42,15 @@ Useful Scripts
 
 The Concrete Python package comes with two scripts.
 
-**concrete2json.py** reads in a Concrete Communication and prints a
-JSON version of the Communication to stdout.  The JSON is "pretty
-printed" with indentation and whitespace, which makes the JSON easier
-to read and to use for diffs.
+* **concrete2json.py** reads in a Concrete Communication and prints a
+  JSON version of the Communication to stdout.  The JSON is "pretty
+  printed" with indentation and whitespace, which makes the JSON
+  easier to read and to use for diffs.
 
-**validate_communication.py** reads in a Concrete Communication file
-and prints out information about any invalid fields.  This script is a
-command-line wrapper around the functionality in the
-`concrete.validate` library.
+* **validate_communication.py** reads in a Concrete Communication file
+  and prints out information about any invalid fields.  This script is
+  a command-line wrapper around the functionality in the
+  `concrete.validate` library.
 
 Use the '-h/--help' flag for details about the scripts' command line
 arguments.
@@ -69,3 +69,42 @@ foo = Communication()
 foo.text = 'hello world'
 ...
 ```
+
+
+Validating Concrete Communications
+----------------------------------
+
+The Python version of the Thrift Libraries does not perform any
+validation of Thrift objects.  You should use the
+`validate_communication()` function after reading and before writing a
+Concrete Communication:
+
+```python
+from concrete.util import read_communication_from_file
+from concrete.validate import validate_communication
+
+comm = read_communication_from_file('tests/testdata/agiga_dog-bites-man.concrete')
+
+# Returns True|False, logs details using Python stdlib 'logging' module
+validate_communication(comm)
+```
+
+Thrift fields have three levels of requiredness:
+* explicitly labeled as **required**
+* explicitly labeled as **optional**
+* no requiredness label given ("default required")
+
+The Java version of the Thrift libraries will raise an exception if a
+**required** field is missing on deserialization or serialization, and
+will raise an exception if a "default required" field is missing on
+serialization.  The Python version of the Thrift Libraries (as of
+Thrift 0.9.1) does not perform any validation of Thrift objects on
+serialization or deserialization.  The Python Thrift libraries do
+provide a `validate()` function, but this function only checks for
+explicitly **required** fields, and not "default required" fields.
+The Thrift `validate()` function also only performs shallow validation
+- nested data structures are not checked for required fields.
+
+The `validate_communication()` function recursively checks a
+Communication object for required fields, plus additional checks for
+UUID mismatches.

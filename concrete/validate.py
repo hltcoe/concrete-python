@@ -30,7 +30,7 @@ from thrift import TSerialization
 from thrift.protocol import TProtocol
 from thrift.Thrift import TType
 
-from concrete.communication.ttypes import Communication
+from concrete import Communication
 
 
 

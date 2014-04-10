@@ -7,7 +7,7 @@ import argparse
 import codecs
 import sys
 
-from concrete.util import concrete2json
+from concrete.util import communication_file_to_json
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     parser.add_argument('communication_file')
     args = parser.parse_args()
 
-    print concrete2json(args.communication_file)
+    print communication_file_to_json(args.communication_file)
 
 
 if __name__ == "__main__":

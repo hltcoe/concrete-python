@@ -102,8 +102,8 @@ Thrift 0.9.1) does not perform any validation of Thrift objects on
 serialization or deserialization.  The Python Thrift libraries do
 provide a `validate()` function, but this function only checks for
 explicitly **required** fields, and not "default required" fields.
-The Thrift `validate()` function also only performs shallow validation
-- nested data structures are not checked for required fields.
+The Thrift `validate()` function also only performs shallow validation -
+nested data structures are not checked for required fields.
 
 The `validate_communication()` function recursively checks a
 Communication object for required fields, plus additional checks for

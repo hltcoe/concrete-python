@@ -2,7 +2,6 @@
 Libary to (partially) validate a Concrete Communication
 
 Current validation checks:
-  - does the Communication have at least one SectionSegmentation?
   - do all sentenceSegmentation.sectionId's match the uuid of the
     enclosing section?
   - for each constituent parse, do any of the constituent ID's for
@@ -57,29 +56,29 @@ def validate_communication(comm):
 
     valid &= validate_thrift_object_required_fields_recursively(comm)
 
-    if not comm.sectionSegmentations:
-        valid = False
-        logging.error(ilm(1, "Expecting at least one Communication SectionSegmentation"))
-        return valid
-
-    logging.debug(ilm(1, "Communication '%s' has %d sectionSegmentations" % (comm.id, len(comm.sectionSegmentations))))
-
-    for sectionSegmentation in comm.sectionSegmentations:
-        logging.debug(ilm(2, "sectionSegmentation '%s' has %d sections" % (sectionSegmentation.uuid, len(sectionSegmentation.sectionList))))
-        for section in sectionSegmentation.sectionList:
-            if section.sentenceSegmentation:
-                logging.debug(ilm(3, "section '%s' has %d sentenceSegmentations" % (section.uuid, len(section.sentenceSegmentation))))
-                for sentenceSegmentation in section.sentenceSegmentation:
-                    logging.debug(ilm(4, "sentenceSegmentation '%s' has %d sentences" % (sentenceSegmentation.uuid, len(sentenceSegmentation.sentenceList))))
-                    if sentenceSegmentation.sectionId != section.uuid:
-                        valid = False
-                        logging.error(ilm(5, "sentenceSegmentation.sectionId '%s' does not match section.uuid '%s'" %
-                                          (sentenceSegmentation.sectionId, sentenceSegmentation.uuid)))
-                    for sentence in sentenceSegmentation.sentenceList:
-                        logging.debug(ilm(5, "sentence '%s' has %d tokenizations" % (sentence.uuid, len(sentence.tokenizationList))))
-                        for tokenization in sentence.tokenizationList:
-                            valid &= validate_constituency_parse(tokenization)
-                            valid &= validate_dependency_parses(tokenization)
+    if comm.sectionSegmentations:
+        logging.debug(ilm(1, "Communication '%s' has %d sectionSegmentations" %
+                          (comm.id, len(comm.sectionSegmentations))))
+        for sectionSegmentation in comm.sectionSegmentations:
+            logging.debug(ilm(2, "sectionSegmentation '%s' has %d sections" %
+                              (sectionSegmentation.uuid, len(sectionSegmentation.sectionList))))
+            for section in sectionSegmentation.sectionList:
+                if section.sentenceSegmentation:
+                    logging.debug(ilm(3, "section '%s' has %d sentenceSegmentations" %
+                                      (section.uuid, len(section.sentenceSegmentation))))
+                    for sentenceSegmentation in section.sentenceSegmentation:
+                        logging.debug(ilm(4, "sentenceSegmentation '%s' has %d sentences" %
+                                          (sentenceSegmentation.uuid, len(sentenceSegmentation.sentenceList))))
+                        if sentenceSegmentation.sectionId != section.uuid:
+                            valid = False
+                            logging.error(ilm(5, "sentenceSegmentation.sectionId '%s' does not match section.uuid '%s'" %
+                                              (sentenceSegmentation.sectionId, sentenceSegmentation.uuid)))
+                        for sentence in sentenceSegmentation.sentenceList:
+                            logging.debug(ilm(5, "sentence '%s' has %d tokenizations" %
+                                              (sentence.uuid, len(sentence.tokenizationList))))
+                            for tokenization in sentence.tokenizationList:
+                                valid &= validate_constituency_parse(tokenization)
+                                valid &= validate_dependency_parses(tokenization)
 
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)

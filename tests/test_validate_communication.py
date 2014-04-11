@@ -96,9 +96,5 @@ def read_test_comm():
     return comm
 
 
-def test_validate_communication():
-    unittest.main(buffer=True)
-
-
 if __name__ == '__main__':
     unittest.main(buffer=True)

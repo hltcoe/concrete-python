@@ -6,3 +6,4 @@ concrete.egg-info/
 dist/
 setuptools*.zip
 setuptools*.egg
+testfixtures*.egg

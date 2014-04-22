@@ -336,24 +336,24 @@ def validate_situations(comm):
                         for argument in situation.argumentList:
                             if argument.situationId and argument.situationId not in situation_uuid_set:
                                 valid = False
-                                logging.error(ilm(2, "Argument for Situation '%s' has an invalid situationId (%s)" %
-                                                  (situation.uuid, argument.situationId)))
+                                logging.error(ilm(2, "Argument for Situation '%s' has an invalid situationId (%s). Tool='%s'" %
+                                                  (situation.uuid, argument.situationId, situationSet.metadata.tool)))
                             if argument.entityId and argument.entityId not in entity_uuid_set:
                                 valid = False
-                                logging.error(ilm(2, "Argument for Situation '%s' has an invalid entityId (%s)" %
-                                                  (situation.uuid, argument.entityId)))
+                                logging.error(ilm(2, "Argument for Situation '%s' has an invalid entityId (%s). Tool='%s'" %
+                                                  (situation.uuid, argument.entityId, situationSet.metadata.tool)))
                     if situation.justificationList:
                         for justification in situation.justificationList:
                             if justification.mentionId not in situation_mention_uuid_set:
                                 valid = False
-                                logging.error(ilm(2, "Justification for Situation '%s' has an invalid [situation] mentionId (%s)" %
-                                                  (situation.uuid, justification.mentionId)))
+                                logging.error(ilm(2, "Justification for Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
+                                                  (situation.uuid, justification.mentionId, situationSet.metadata.tool)))
                     if situation.mentionIdList:
                         for mentionId in situation.mentionIdList:
                             if mentionId not in situation_mention_uuid_set:
                                 valid = False
-                                logging.error(ilm(2, "Situation '%s' has an invalid [situation] mentionId (%s)" %
-                                                  (situation.uuid, mentionId)))
+                                logging.error(ilm(2, "Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
+                                                  (situation.uuid, mentionId, situationSet.metadata.tool)))
     return valid
 
 

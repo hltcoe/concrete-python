@@ -17,7 +17,8 @@ Current validation checks:
 
 
 TODO: Validate...
-  - MentionArgument.situationMentionId  (as part of validating SituationMentions)
+  - SituationMention.tokens
+  - other TokenRefSequences
 """
 
 import logging
@@ -80,6 +81,7 @@ def validate_communication(comm):
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)
     valid &= validate_situations(comm)
+    valid &= validate_situation_mentions(comm)
 
     if not valid:
         logging.error(ilm(0, "The Communication with ID '%s' IS NOT valid" % comm.id))
@@ -318,6 +320,28 @@ def validate_entity_mention_tokenization_ids(comm):
                     if entityMention.tokens.tokenizationId not in tokenization_uuid_set:
                         valid = False
                         logging.error(ilm(2, "Mention '%s' has an invalid tokenizationId (%s)" % (entityMention.uuid, entityMention.tokens.tokenizationId)))
+    return valid
+
+
+def validate_situation_mentions(comm):
+    valid = True
+
+    entity_mention_uuid_set = get_entity_mention_uuid_set(comm)
+    situation_mention_uuid_set = get_situation_mention_uuid_set(comm)
+
+    if comm.situationMentionSets:
+        for situationMentionSet in comm.situationMentionSets:
+            if situationMentionSet.mentionList:
+                for situationMention in situationMentionSet.mentionList:
+                    for mentionArgument in situationMention.argumentList:
+                        if mentionArgument.entityMentionId and mentionArgument.entityMentionId not in entity_mention_uuid_set:
+                            valid = False
+                            logging.error(ilm(2, "MentionArgument for SituationMention '%s' has an invalid entityMentionId (%s). Tool='%s'" %
+                                              (situationMention.uuid, mentionArgument.entityMentionId, situationMentionSet.metadata.tool)))
+                        if mentionArgument.situationMentionId and mentionArgument.situationMentionId not in situation_mention_uuid_set:
+                            valid = False
+                            logging.error(ilm(2, "SituationArgument for SituationMention '%s' has an invalid situationMentionId (%s). Tool='%s'" %
+                                              (situationMention.uuid, mentionArgument.situationMentionId, situationMentionSet.metadata.tool)))
     return valid
 
 

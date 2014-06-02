@@ -19,141 +19,6 @@ except:
   fastbinary = None
 
 
-class EntityType(object):
-  """
-  A span of text with a specific referent, such as a person,
-  organization, or time. Things that can be referred to by a mention
-  are called "entities."
-
-  It is left up to individual EntityMention taggers to decide which
-  referent types and phrase types to identify. For example, some
-  EntityMention taggers may only identify proper nouns, or may only
-  identify EntityMentions that refer to people.
-
-  Each EntityMention consists of a sequence of tokens. This sequence
-  is usually annotated with information about the referent type
-  (e.g., is it a person, or a location, or an organization, etc) as
-  well as the phrase type (is it a name, pronoun, common noun, etc.).
-
-  EntityMentions typically consist of a single noun phrase; however,
-  other phrase types may also be marked as mentions. For
-  example, in the phrase "French hotel," the adjective "French" might
-  be marked as a mention for France.
-  """
-  PERSON = 1
-  ORGANIZATION = 2
-  GPE = 3
-  OTHER = 4
-  DATE = 5
-  FACILITY = 6
-  VEHICLE = 7
-  WEAPON = 8
-  LOCATION = 9
-  TIME = 10
-  URL = 11
-  EMAIL = 12
-  MONEY = 13
-  PERCENTAGE = 14
-  PHONE_NUMBER = 15
-  OCCUPATION = 16
-  CHEMICAL = 17
-  AGE = 18
-  PERCENT = 19
-  PERSON_NN = 20
-  GPE_ITE = 21
-  ORGANIZATION_ITE = 22
-  JOB_TITLE = 23
-  UNKNOWN = 24
-  SET = 25
-  DURATION = 26
-
-  _VALUES_TO_NAMES = {
-    1: "PERSON",
-    2: "ORGANIZATION",
-    3: "GPE",
-    4: "OTHER",
-    5: "DATE",
-    6: "FACILITY",
-    7: "VEHICLE",
-    8: "WEAPON",
-    9: "LOCATION",
-    10: "TIME",
-    11: "URL",
-    12: "EMAIL",
-    13: "MONEY",
-    14: "PERCENTAGE",
-    15: "PHONE_NUMBER",
-    16: "OCCUPATION",
-    17: "CHEMICAL",
-    18: "AGE",
-    19: "PERCENT",
-    20: "PERSON_NN",
-    21: "GPE_ITE",
-    22: "ORGANIZATION_ITE",
-    23: "JOB_TITLE",
-    24: "UNKNOWN",
-    25: "SET",
-    26: "DURATION",
-  }
-
-  _NAMES_TO_VALUES = {
-    "PERSON": 1,
-    "ORGANIZATION": 2,
-    "GPE": 3,
-    "OTHER": 4,
-    "DATE": 5,
-    "FACILITY": 6,
-    "VEHICLE": 7,
-    "WEAPON": 8,
-    "LOCATION": 9,
-    "TIME": 10,
-    "URL": 11,
-    "EMAIL": 12,
-    "MONEY": 13,
-    "PERCENTAGE": 14,
-    "PHONE_NUMBER": 15,
-    "OCCUPATION": 16,
-    "CHEMICAL": 17,
-    "AGE": 18,
-    "PERCENT": 19,
-    "PERSON_NN": 20,
-    "GPE_ITE": 21,
-    "ORGANIZATION_ITE": 22,
-    "JOB_TITLE": 23,
-    "UNKNOWN": 24,
-    "SET": 25,
-    "DURATION": 26,
-  }
-
-class PhraseType(object):
-  """
-  Enumeration of phrase types.
-  """
-  NAME = 1
-  PRONOUN = 2
-  COMMON_NOUN = 3
-  OTHER = 4
-  APPOSITIVE = 5
-  LIST = 6
-
-  _VALUES_TO_NAMES = {
-    1: "NAME",
-    2: "PRONOUN",
-    3: "COMMON_NOUN",
-    4: "OTHER",
-    5: "APPOSITIVE",
-    6: "LIST",
-  }
-
-  _NAMES_TO_VALUES = {
-    "NAME": 1,
-    "PRONOUN": 2,
-    "COMMON_NOUN": 3,
-    "OTHER": 4,
-    "APPOSITIVE": 5,
-    "LIST": 6,
-  }
-
 
 class Entity(object):
   """
@@ -183,7 +48,7 @@ class Entity(object):
     None, # 0
     (1, TType.STRING, 'uuid', None, None, ), # 1
     (2, TType.LIST, 'mentionIdList', (TType.STRING,None), None, ), # 2
-    (3, TType.I32, 'type', None, None, ), # 3
+    (3, TType.STRING, 'type', None, None, ), # 3
     (4, TType.DOUBLE, 'confidence', None, None, ), # 4
     (5, TType.STRING, 'canonicalName', None, None, ), # 5
   )
@@ -220,8 +85,8 @@ class Entity(object):
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.I32:
-          self.type = iprot.readI32();
+        if ftype == TType.STRING:
+          self.type = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -256,8 +121,8 @@ class Entity(object):
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.type is not None:
-      oprot.writeFieldBegin('type', TType.I32, 3)
-      oprot.writeI32(self.type)
+      oprot.writeFieldBegin('type', TType.STRING, 3)
+      oprot.writeString(self.type.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.confidence is not None:
       oprot.writeFieldBegin('confidence', TType.DOUBLE, 4)
@@ -430,8 +295,8 @@ class EntityMention(object):
     None, # 0
     (1, TType.STRING, 'uuid', None, None, ), # 1
     (2, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ), # 2
-    (3, TType.I32, 'entityType', None, None, ), # 3
-    (4, TType.I32, 'phraseType', None, None, ), # 4
+    (3, TType.STRING, 'entityType', None, None, ), # 3
+    (4, TType.STRING, 'phraseType', None, None, ), # 4
     (5, TType.DOUBLE, 'confidence', None, None, ), # 5
     (6, TType.STRING, 'text', None, None, ), # 6
   )
@@ -465,13 +330,13 @@ class EntityMention(object):
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.I32:
-          self.entityType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.entityType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.I32:
-          self.phraseType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.phraseType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 5:
@@ -503,12 +368,12 @@ class EntityMention(object):
       self.tokens.write(oprot)
       oprot.writeFieldEnd()
     if self.entityType is not None:
-      oprot.writeFieldBegin('entityType', TType.I32, 3)
-      oprot.writeI32(self.entityType)
+      oprot.writeFieldBegin('entityType', TType.STRING, 3)
+      oprot.writeString(self.entityType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.phraseType is not None:
-      oprot.writeFieldBegin('phraseType', TType.I32, 4)
-      oprot.writeI32(self.phraseType)
+      oprot.writeFieldBegin('phraseType', TType.STRING, 4)
+      oprot.writeString(self.phraseType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.confidence is not None:
       oprot.writeFieldBegin('confidence', TType.DOUBLE, 5)

@@ -36,38 +36,6 @@ class TokenizationKind(object):
     "TOKEN_LATTICE": 2,
   }
 
-class SectionKind(object):
-  """
-  Possible types of Sections.
-  """
-  OTHER = 0
-  PASSAGE = 1
-  METADATA = 2
-  LIST = 3
-  TABLE = 4
-  IMAGE = 5
-  TITLE = 6
-
-  _VALUES_TO_NAMES = {
-    0: "OTHER",
-    1: "PASSAGE",
-    2: "METADATA",
-    3: "LIST",
-    4: "TABLE",
-    5: "IMAGE",
-    6: "TITLE",
-  }
-
-  _NAMES_TO_VALUES = {
-    "OTHER": 0,
-    "PASSAGE": 1,
-    "METADATA": 2,
-    "LIST": 3,
-    "TABLE": 4,
-    "IMAGE": 5,
-    "TITLE": 6,
-  }
-
 
 class Token(object):
   """
@@ -1953,7 +1921,7 @@ class Section(object):
     (1, TType.STRING, 'uuid', None, None, ), # 1
     (2, TType.LIST, 'sentenceSegmentation', (TType.STRUCT,(SentenceSegmentation, SentenceSegmentation.thrift_spec)), None, ), # 2
     (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 3
-    (4, TType.I32, 'kind', None, None, ), # 4
+    (4, TType.STRING, 'kind', None, None, ), # 4
     (5, TType.STRING, 'label', None, None, ), # 5
     (6, TType.LIST, 'number', (TType.I32,None), None, ), # 6
     None, # 7
@@ -2008,8 +1976,8 @@ class Section(object):
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.I32:
-          self.kind = iprot.readI32();
+        if ftype == TType.STRING:
+          self.kind = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 5:
@@ -2053,8 +2021,8 @@ class Section(object):
       self.textSpan.write(oprot)
       oprot.writeFieldEnd()
     if self.kind is not None:
-      oprot.writeFieldBegin('kind', TType.I32, 4)
-      oprot.writeI32(self.kind)
+      oprot.writeFieldBegin('kind', TType.STRING, 4)
+      oprot.writeString(self.kind.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.label is not None:
       oprot.writeFieldBegin('label', TType.STRING, 5)

@@ -24,41 +24,6 @@ except:
   fastbinary = None
 
 
-class CommunicationType(object):
-  """
-  Possible communication types. This list will likely grow over time.
-  """
-  OTHER = 0
-  EMAIL = 1
-  NEWS = 2
-  WIKIPEDIA = 3
-  TWEET = 4
-  PHONE_CALL = 5
-  USENET = 6
-  BLOG = 7
-
-  _VALUES_TO_NAMES = {
-    0: "OTHER",
-    1: "EMAIL",
-    2: "NEWS",
-    3: "WIKIPEDIA",
-    4: "TWEET",
-    5: "PHONE_CALL",
-    6: "USENET",
-    7: "BLOG",
-  }
-
-  _NAMES_TO_VALUES = {
-    "OTHER": 0,
-    "EMAIL": 1,
-    "NEWS": 2,
-    "WIKIPEDIA": 3,
-    "TWEET": 4,
-    "PHONE_CALL": 5,
-    "USENET": 6,
-    "BLOG": 7,
-  }
-
 
 class Communication(object):
   """
@@ -119,7 +84,7 @@ class Communication(object):
     None, # 0
     (1, TType.STRING, 'id', None, None, ), # 1
     (2, TType.STRING, 'uuid', None, None, ), # 2
-    (3, TType.I32, 'type', None, None, ), # 3
+    (3, TType.STRING, 'type', None, None, ), # 3
     (4, TType.STRING, 'text', None, None, ), # 4
     (5, TType.I64, 'startTime', None, None, ), # 5
     (6, TType.I64, 'endTime', None, None, ), # 6
@@ -187,8 +152,8 @@ class Communication(object):
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.I32:
-          self.type = iprot.readI32();
+        if ftype == TType.STRING:
+          self.type = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -320,8 +285,8 @@ class Communication(object):
       oprot.writeString(self.uuid.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.type is not None:
-      oprot.writeFieldBegin('type', TType.I32, 3)
-      oprot.writeI32(self.type)
+      oprot.writeFieldBegin('type', TType.STRING, 3)
+      oprot.writeString(self.type.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.text is not None:
       oprot.writeFieldBegin('text', TType.STRING, 4)

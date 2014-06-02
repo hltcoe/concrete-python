@@ -19,581 +19,6 @@ except:
   fastbinary = None
 
 
-class Role(object):
-  """
-  Enumerated type used to record the relationship between an
-  argument and the situation that owns it.
-  """
-  OTHER_ROLE = 1
-  PERSON_ROLE = 2
-  TIME_ROLE = 3
-  PLACE_ROLE = 4
-  AGENT_ROLE = 5
-  VICTIM_ROLE = 6
-  INSTRUMENT_ROLE = 7
-  VEHICLE_ROLE = 8
-  ARTIFACT_ROLE = 9
-  PRICE_ROLE = 10
-  ORIGIN_ROLE = 11
-  DESTINATION_ROLE = 12
-  BUYER_ROLE = 13
-  SELLER_ROLE = 14
-  BENEFICIARY_ROLE = 15
-  GIVER_ROLE = 16
-  RECIPIENT_ROLE = 17
-  MONEY_ROLE = 18
-  ORG_ROLE = 19
-  ATTACKER_ROLE = 20
-  TARGET_ROLE = 21
-  ENTITY_ROLE = 22
-  POSITION_ROLE = 23
-  DEFENDANT_ROLE = 24
-  ADJUDICATOR_ROLE = 25
-  PROSECUTOR_ROLE = 26
-  CRIME_ROLE = 27
-  PLAINTIFF_ROLE = 28
-  SENTENCE_ROLE = 29
-  TIME_WITHIN_ROLE = 30
-  TIME_STARTING_ROLE = 31
-  TIME_ENDING_ROLE = 32
-  TIME_BEFORE_ROLE = 33
-  TIME_AFTER_ROLE = 34
-  TIME_HOLDS_ROLE = 35
-  TIME_AT_BEGINNING_ROLE = 36
-  TIME_AT_END_ROLE = 37
-  RELATION_SOURCE_ROLE = 38
-  RELATION_TARGET_ROLE = 39
-
-  _VALUES_TO_NAMES = {
-    1: "OTHER_ROLE",
-    2: "PERSON_ROLE",
-    3: "TIME_ROLE",
-    4: "PLACE_ROLE",
-    5: "AGENT_ROLE",
-    6: "VICTIM_ROLE",
-    7: "INSTRUMENT_ROLE",
-    8: "VEHICLE_ROLE",
-    9: "ARTIFACT_ROLE",
-    10: "PRICE_ROLE",
-    11: "ORIGIN_ROLE",
-    12: "DESTINATION_ROLE",
-    13: "BUYER_ROLE",
-    14: "SELLER_ROLE",
-    15: "BENEFICIARY_ROLE",
-    16: "GIVER_ROLE",
-    17: "RECIPIENT_ROLE",
-    18: "MONEY_ROLE",
-    19: "ORG_ROLE",
-    20: "ATTACKER_ROLE",
-    21: "TARGET_ROLE",
-    22: "ENTITY_ROLE",
-    23: "POSITION_ROLE",
-    24: "DEFENDANT_ROLE",
-    25: "ADJUDICATOR_ROLE",
-    26: "PROSECUTOR_ROLE",
-    27: "CRIME_ROLE",
-    28: "PLAINTIFF_ROLE",
-    29: "SENTENCE_ROLE",
-    30: "TIME_WITHIN_ROLE",
-    31: "TIME_STARTING_ROLE",
-    32: "TIME_ENDING_ROLE",
-    33: "TIME_BEFORE_ROLE",
-    34: "TIME_AFTER_ROLE",
-    35: "TIME_HOLDS_ROLE",
-    36: "TIME_AT_BEGINNING_ROLE",
-    37: "TIME_AT_END_ROLE",
-    38: "RELATION_SOURCE_ROLE",
-    39: "RELATION_TARGET_ROLE",
-  }
-
-  _NAMES_TO_VALUES = {
-    "OTHER_ROLE": 1,
-    "PERSON_ROLE": 2,
-    "TIME_ROLE": 3,
-    "PLACE_ROLE": 4,
-    "AGENT_ROLE": 5,
-    "VICTIM_ROLE": 6,
-    "INSTRUMENT_ROLE": 7,
-    "VEHICLE_ROLE": 8,
-    "ARTIFACT_ROLE": 9,
-    "PRICE_ROLE": 10,
-    "ORIGIN_ROLE": 11,
-    "DESTINATION_ROLE": 12,
-    "BUYER_ROLE": 13,
-    "SELLER_ROLE": 14,
-    "BENEFICIARY_ROLE": 15,
-    "GIVER_ROLE": 16,
-    "RECIPIENT_ROLE": 17,
-    "MONEY_ROLE": 18,
-    "ORG_ROLE": 19,
-    "ATTACKER_ROLE": 20,
-    "TARGET_ROLE": 21,
-    "ENTITY_ROLE": 22,
-    "POSITION_ROLE": 23,
-    "DEFENDANT_ROLE": 24,
-    "ADJUDICATOR_ROLE": 25,
-    "PROSECUTOR_ROLE": 26,
-    "CRIME_ROLE": 27,
-    "PLAINTIFF_ROLE": 28,
-    "SENTENCE_ROLE": 29,
-    "TIME_WITHIN_ROLE": 30,
-    "TIME_STARTING_ROLE": 31,
-    "TIME_ENDING_ROLE": 32,
-    "TIME_BEFORE_ROLE": 33,
-    "TIME_AFTER_ROLE": 34,
-    "TIME_HOLDS_ROLE": 35,
-    "TIME_AT_BEGINNING_ROLE": 36,
-    "TIME_AT_END_ROLE": 37,
-    "RELATION_SOURCE_ROLE": 38,
-    "RELATION_TARGET_ROLE": 39,
-  }
-
-class JustificationType(object):
-  """
-  The way in which the justification's mention provides evidence
-  for the situation.
-  """
-  DIRECT_MENTION = 1
-  IMPLICIT = 2
-
-  _VALUES_TO_NAMES = {
-    1: "DIRECT_MENTION",
-    2: "IMPLICIT",
-  }
-
-  _NAMES_TO_VALUES = {
-    "DIRECT_MENTION": 1,
-    "IMPLICIT": 2,
-  }
-
-class EventType(object):
-  OTHER_EVENT = 1
-  BUSINESS_DECLARE_BANKRUPTCY_EVENT = 2
-  BUSINESS_END_ORG_EVENT = 3
-  BUSINESS_MERGE_ORG_EVENT = 4
-  BUSINESS_START_ORG_EVENT = 5
-  CONFLICT_ATTACK_EVENT = 6
-  CONFLICT_DEMONSTRATE_EVENT = 7
-  CONTACT_MEET_EVENT = 8
-  CONTACT_PHONE_WRITE_EVENT = 9
-  JUSTICE_ACQUIT_EVENT = 10
-  JUSTICE_APPEAL_EVENT = 11
-  JUSTICE_ARREST_JAIL_EVENT = 12
-  JUSTICE_CHARGE_INDICT_EVENT = 13
-  JUSTICE_CONVICT_EVENT = 14
-  JUSTICE_EXECUTE_EVENT = 15
-  JUSTICE_EXTRADITE_EVENT = 16
-  JUSTICE_FINE_EVENT = 17
-  JUSTICE_PARDON_EVENT = 18
-  JUSTICE_RELEASE_PAROLE_EVENT = 19
-  JUSTICE_SENTENCE_EVENT = 20
-  JUSTICE_SUE_EVENT = 21
-  JUSTICE_TRIAL_HEARING_EVENT = 22
-  LIFE_BE_BORN_EVENT = 23
-  LIFE_DIE_EVENT = 24
-  LIFE_DIVORCE_EVENT = 25
-  LIFE_INJURE_EVENT = 26
-  LIFE_MARRY_EVENT = 27
-  MOVEMENT_TRANSPORT_EVENT = 28
-  PERSONNEL_ELECT_EVENT = 29
-  PERSONNEL_END_POSITION_EVENT = 30
-  PERSONNEL_NOMINATE_EVENT = 31
-  PERSONNEL_START_POSITION_EVENT = 32
-  QUOTATION_DEFINITE_EVENT = 33
-  QUOTATION_POSSIBLE_EVENT = 34
-  TRANSACTION_TRANSFER_MONEY_EVENT = 35
-  TRANSACTION_TRANSFER_OWNERSHIP_EVENT = 36
-
-  _VALUES_TO_NAMES = {
-    1: "OTHER_EVENT",
-    2: "BUSINESS_DECLARE_BANKRUPTCY_EVENT",
-    3: "BUSINESS_END_ORG_EVENT",
-    4: "BUSINESS_MERGE_ORG_EVENT",
-    5: "BUSINESS_START_ORG_EVENT",
-    6: "CONFLICT_ATTACK_EVENT",
-    7: "CONFLICT_DEMONSTRATE_EVENT",
-    8: "CONTACT_MEET_EVENT",
-    9: "CONTACT_PHONE_WRITE_EVENT",
-    10: "JUSTICE_ACQUIT_EVENT",
-    11: "JUSTICE_APPEAL_EVENT",
-    12: "JUSTICE_ARREST_JAIL_EVENT",
-    13: "JUSTICE_CHARGE_INDICT_EVENT",
-    14: "JUSTICE_CONVICT_EVENT",
-    15: "JUSTICE_EXECUTE_EVENT",
-    16: "JUSTICE_EXTRADITE_EVENT",
-    17: "JUSTICE_FINE_EVENT",
-    18: "JUSTICE_PARDON_EVENT",
-    19: "JUSTICE_RELEASE_PAROLE_EVENT",
-    20: "JUSTICE_SENTENCE_EVENT",
-    21: "JUSTICE_SUE_EVENT",
-    22: "JUSTICE_TRIAL_HEARING_EVENT",
-    23: "LIFE_BE_BORN_EVENT",
-    24: "LIFE_DIE_EVENT",
-    25: "LIFE_DIVORCE_EVENT",
-    26: "LIFE_INJURE_EVENT",
-    27: "LIFE_MARRY_EVENT",
-    28: "MOVEMENT_TRANSPORT_EVENT",
-    29: "PERSONNEL_ELECT_EVENT",
-    30: "PERSONNEL_END_POSITION_EVENT",
-    31: "PERSONNEL_NOMINATE_EVENT",
-    32: "PERSONNEL_START_POSITION_EVENT",
-    33: "QUOTATION_DEFINITE_EVENT",
-    34: "QUOTATION_POSSIBLE_EVENT",
-    35: "TRANSACTION_TRANSFER_MONEY_EVENT",
-    36: "TRANSACTION_TRANSFER_OWNERSHIP_EVENT",
-  }
-
-  _NAMES_TO_VALUES = {
-    "OTHER_EVENT": 1,
-    "BUSINESS_DECLARE_BANKRUPTCY_EVENT": 2,
-    "BUSINESS_END_ORG_EVENT": 3,
-    "BUSINESS_MERGE_ORG_EVENT": 4,
-    "BUSINESS_START_ORG_EVENT": 5,
-    "CONFLICT_ATTACK_EVENT": 6,
-    "CONFLICT_DEMONSTRATE_EVENT": 7,
-    "CONTACT_MEET_EVENT": 8,
-    "CONTACT_PHONE_WRITE_EVENT": 9,
-    "JUSTICE_ACQUIT_EVENT": 10,
-    "JUSTICE_APPEAL_EVENT": 11,
-    "JUSTICE_ARREST_JAIL_EVENT": 12,
-    "JUSTICE_CHARGE_INDICT_EVENT": 13,
-    "JUSTICE_CONVICT_EVENT": 14,
-    "JUSTICE_EXECUTE_EVENT": 15,
-    "JUSTICE_EXTRADITE_EVENT": 16,
-    "JUSTICE_FINE_EVENT": 17,
-    "JUSTICE_PARDON_EVENT": 18,
-    "JUSTICE_RELEASE_PAROLE_EVENT": 19,
-    "JUSTICE_SENTENCE_EVENT": 20,
-    "JUSTICE_SUE_EVENT": 21,
-    "JUSTICE_TRIAL_HEARING_EVENT": 22,
-    "LIFE_BE_BORN_EVENT": 23,
-    "LIFE_DIE_EVENT": 24,
-    "LIFE_DIVORCE_EVENT": 25,
-    "LIFE_INJURE_EVENT": 26,
-    "LIFE_MARRY_EVENT": 27,
-    "MOVEMENT_TRANSPORT_EVENT": 28,
-    "PERSONNEL_ELECT_EVENT": 29,
-    "PERSONNEL_END_POSITION_EVENT": 30,
-    "PERSONNEL_NOMINATE_EVENT": 31,
-    "PERSONNEL_START_POSITION_EVENT": 32,
-    "QUOTATION_DEFINITE_EVENT": 33,
-    "QUOTATION_POSSIBLE_EVENT": 34,
-    "TRANSACTION_TRANSFER_MONEY_EVENT": 35,
-    "TRANSACTION_TRANSFER_OWNERSHIP_EVENT": 36,
-  }
-
-class StateType(object):
-  """
-  An enumerated type used to record event types for Situations
-  and SituationMentions where situation_type=STATE.
-  """
-  OTHER_STATE = 1
-  ART_INVENTOR_OR_MANUFACTURER_STATE = 37
-  ART_OTHER_STATE = 38
-  ART_USER_OR_OWNER_STATE = 39
-  DISC_STATE = 40
-  PHYS_LOCATED_STATE = 41
-  PHYS_NEAR_STATE = 42
-  PHYS_PART_WHOLE_STATE = 43
-  EMP_ORG_EMPLOY_EXECUTIVE_STATE = 44
-  EMP_ORG_EMPLOY_STAFF_STATE = 45
-  EMP_ORG_EMPLOY_UNDETERMINED_STATE = 46
-  EMP_ORG_MEMBER_OF_GROUP_STATE = 47
-  EMP_ORG_OTHER_STATE = 48
-  EMP_ORG_PARTNER_STATE = 49
-  EMP_ORG_SUBSIDIARY_STATE = 50
-  GPE_AFF_BASED_IN_STATE = 51
-  GPE_AFF_CITIZEN_OR_RESIDENT_STATE = 52
-  GPE_AFF_OTHER_STATE = 53
-  OTHER_AFF_ETHNIC_STATE = 54
-  OTHER_AFF_IDEOLOGY_STATE = 55
-  OTHER_AFF_OTHER_STATE = 56
-  PER_SOC_BUSINESS_STATE = 57
-  PER_SOC_FAMILY_STATE = 58
-  PER_SOC_OTHER_STATE = 59
-  ART_USER_OWNER_INVENTOR_MANUFACTURER_STATE = 60
-  GEN_AFF_CITIZEN_RESIDENT_RELIGION_ETHNICITY_STATE = 61
-  GEN_AFF_ORG_LOCATION_STATE = 62
-  ORG_AFF_EMPLOYMENT_STATE = 63
-  ORG_AFF_FOUNDER_STATE = 64
-  ORG_AFF_OWNERSHIP_STATE = 65
-  ORG_AFF_STUDENT_ALUM_STATE = 66
-  ORG_AFF_SPORTS_AFFILIATION_STATE = 67
-  ORG_AFF_INVESTOR_SHAREHOLDER_STATE = 68
-  ORG_AFF_MEMBERSHIP_STATE = 69
-  PART_WHOLE_ARTIFACT_STATE = 70
-  PART_WHOLE_GEOGRAPHICAL_STATE = 71
-  PART_WHOLE_SUBSIDIARY_STATE = 72
-  PER_SOC_LASTING_PERSONAL_STATE = 73
-
-  _VALUES_TO_NAMES = {
-    1: "OTHER_STATE",
-    37: "ART_INVENTOR_OR_MANUFACTURER_STATE",
-    38: "ART_OTHER_STATE",
-    39: "ART_USER_OR_OWNER_STATE",
-    40: "DISC_STATE",
-    41: "PHYS_LOCATED_STATE",
-    42: "PHYS_NEAR_STATE",
-    43: "PHYS_PART_WHOLE_STATE",
-    44: "EMP_ORG_EMPLOY_EXECUTIVE_STATE",
-    45: "EMP_ORG_EMPLOY_STAFF_STATE",
-    46: "EMP_ORG_EMPLOY_UNDETERMINED_STATE",
-    47: "EMP_ORG_MEMBER_OF_GROUP_STATE",
-    48: "EMP_ORG_OTHER_STATE",
-    49: "EMP_ORG_PARTNER_STATE",
-    50: "EMP_ORG_SUBSIDIARY_STATE",
-    51: "GPE_AFF_BASED_IN_STATE",
-    52: "GPE_AFF_CITIZEN_OR_RESIDENT_STATE",
-    53: "GPE_AFF_OTHER_STATE",
-    54: "OTHER_AFF_ETHNIC_STATE",
-    55: "OTHER_AFF_IDEOLOGY_STATE",
-    56: "OTHER_AFF_OTHER_STATE",
-    57: "PER_SOC_BUSINESS_STATE",
-    58: "PER_SOC_FAMILY_STATE",
-    59: "PER_SOC_OTHER_STATE",
-    60: "ART_USER_OWNER_INVENTOR_MANUFACTURER_STATE",
-    61: "GEN_AFF_CITIZEN_RESIDENT_RELIGION_ETHNICITY_STATE",
-    62: "GEN_AFF_ORG_LOCATION_STATE",
-    63: "ORG_AFF_EMPLOYMENT_STATE",
-    64: "ORG_AFF_FOUNDER_STATE",
-    65: "ORG_AFF_OWNERSHIP_STATE",
-    66: "ORG_AFF_STUDENT_ALUM_STATE",
-    67: "ORG_AFF_SPORTS_AFFILIATION_STATE",
-    68: "ORG_AFF_INVESTOR_SHAREHOLDER_STATE",
-    69: "ORG_AFF_MEMBERSHIP_STATE",
-    70: "PART_WHOLE_ARTIFACT_STATE",
-    71: "PART_WHOLE_GEOGRAPHICAL_STATE",
-    72: "PART_WHOLE_SUBSIDIARY_STATE",
-    73: "PER_SOC_LASTING_PERSONAL_STATE",
-  }
-
-  _NAMES_TO_VALUES = {
-    "OTHER_STATE": 1,
-    "ART_INVENTOR_OR_MANUFACTURER_STATE": 37,
-    "ART_OTHER_STATE": 38,
-    "ART_USER_OR_OWNER_STATE": 39,
-    "DISC_STATE": 40,
-    "PHYS_LOCATED_STATE": 41,
-    "PHYS_NEAR_STATE": 42,
-    "PHYS_PART_WHOLE_STATE": 43,
-    "EMP_ORG_EMPLOY_EXECUTIVE_STATE": 44,
-    "EMP_ORG_EMPLOY_STAFF_STATE": 45,
-    "EMP_ORG_EMPLOY_UNDETERMINED_STATE": 46,
-    "EMP_ORG_MEMBER_OF_GROUP_STATE": 47,
-    "EMP_ORG_OTHER_STATE": 48,
-    "EMP_ORG_PARTNER_STATE": 49,
-    "EMP_ORG_SUBSIDIARY_STATE": 50,
-    "GPE_AFF_BASED_IN_STATE": 51,
-    "GPE_AFF_CITIZEN_OR_RESIDENT_STATE": 52,
-    "GPE_AFF_OTHER_STATE": 53,
-    "OTHER_AFF_ETHNIC_STATE": 54,
-    "OTHER_AFF_IDEOLOGY_STATE": 55,
-    "OTHER_AFF_OTHER_STATE": 56,
-    "PER_SOC_BUSINESS_STATE": 57,
-    "PER_SOC_FAMILY_STATE": 58,
-    "PER_SOC_OTHER_STATE": 59,
-    "ART_USER_OWNER_INVENTOR_MANUFACTURER_STATE": 60,
-    "GEN_AFF_CITIZEN_RESIDENT_RELIGION_ETHNICITY_STATE": 61,
-    "GEN_AFF_ORG_LOCATION_STATE": 62,
-    "ORG_AFF_EMPLOYMENT_STATE": 63,
-    "ORG_AFF_FOUNDER_STATE": 64,
-    "ORG_AFF_OWNERSHIP_STATE": 65,
-    "ORG_AFF_STUDENT_ALUM_STATE": 66,
-    "ORG_AFF_SPORTS_AFFILIATION_STATE": 67,
-    "ORG_AFF_INVESTOR_SHAREHOLDER_STATE": 68,
-    "ORG_AFF_MEMBERSHIP_STATE": 69,
-    "PART_WHOLE_ARTIFACT_STATE": 70,
-    "PART_WHOLE_GEOGRAPHICAL_STATE": 71,
-    "PART_WHOLE_SUBSIDIARY_STATE": 72,
-    "PER_SOC_LASTING_PERSONAL_STATE": 73,
-  }
-
-class TemporalFactType(object):
-  """
-  An enumerated type used to record event types for Situations
-  and SituationMentions where situation_type=TEMPORAL_FACT.
-  """
-  BEFORE_TEMPORAL_FACT = 1
-  AFTER_TEMPORAL_FACT = 2
-  SIMULTANEOUS_TEMPORAL_FACT = 3
-  INCLUDES_TEMPORAL_FACT = 4
-  IS_INCLUDED_BY_TEMPORAL_FACT = 5
-  VAGUE_TEMPORAL_FACT = 6
-
-  _VALUES_TO_NAMES = {
-    1: "BEFORE_TEMPORAL_FACT",
-    2: "AFTER_TEMPORAL_FACT",
-    3: "SIMULTANEOUS_TEMPORAL_FACT",
-    4: "INCLUDES_TEMPORAL_FACT",
-    5: "IS_INCLUDED_BY_TEMPORAL_FACT",
-    6: "VAGUE_TEMPORAL_FACT",
-  }
-
-  _NAMES_TO_VALUES = {
-    "BEFORE_TEMPORAL_FACT": 1,
-    "AFTER_TEMPORAL_FACT": 2,
-    "SIMULTANEOUS_TEMPORAL_FACT": 3,
-    "INCLUDES_TEMPORAL_FACT": 4,
-    "IS_INCLUDED_BY_TEMPORAL_FACT": 5,
-    "VAGUE_TEMPORAL_FACT": 6,
-  }
-
-class TimeMLClass(object):
-  """
-  An enumeration used to record the TimeML class of a situation
-  """
-  OCCURRENCE_CLASS = 1
-  PERCEPTION_CLASS = 2
-  REPORTING_CLASS = 3
-  ASPECTUAL_CLASS = 4
-  STATE_CLASS = 5
-  I_STATE_CLASS = 6
-  I_ACTION_CLASS = 7
-
-  _VALUES_TO_NAMES = {
-    1: "OCCURRENCE_CLASS",
-    2: "PERCEPTION_CLASS",
-    3: "REPORTING_CLASS",
-    4: "ASPECTUAL_CLASS",
-    5: "STATE_CLASS",
-    6: "I_STATE_CLASS",
-    7: "I_ACTION_CLASS",
-  }
-
-  _NAMES_TO_VALUES = {
-    "OCCURRENCE_CLASS": 1,
-    "PERCEPTION_CLASS": 2,
-    "REPORTING_CLASS": 3,
-    "ASPECTUAL_CLASS": 4,
-    "STATE_CLASS": 5,
-    "I_STATE_CLASS": 6,
-    "I_ACTION_CLASS": 7,
-  }
-
-class TimeMLTense(object):
-  """
-  An enumeration used to record the TimeML tense of a situation
-  """
-  FUTURE_TENSE = 1
-  INFINITIVE_TENSE = 2
-  PAST_TENSE = 3
-  PASTPART_TENSE = 4
-  PRESENT_TENSE = 5
-  PRESPART_TENSE = 6
-  NONE_TENSE = 7
-
-  _VALUES_TO_NAMES = {
-    1: "FUTURE_TENSE",
-    2: "INFINITIVE_TENSE",
-    3: "PAST_TENSE",
-    4: "PASTPART_TENSE",
-    5: "PRESENT_TENSE",
-    6: "PRESPART_TENSE",
-    7: "NONE_TENSE",
-  }
-
-  _NAMES_TO_VALUES = {
-    "FUTURE_TENSE": 1,
-    "INFINITIVE_TENSE": 2,
-    "PAST_TENSE": 3,
-    "PASTPART_TENSE": 4,
-    "PRESENT_TENSE": 5,
-    "PRESPART_TENSE": 6,
-    "NONE_TENSE": 7,
-  }
-
-class TimeMLAspect(object):
-  """
-  An enumeration used to record the TimeML aspect of a situation
-  """
-  PROGRESSIVE_ASPECT = 1
-  PERFECTIVE_ASPECT = 2
-  PERFECTIVE_PROGRESSIVE_ASPECT = 3
-  NONE_ASPECT = 4
-
-  _VALUES_TO_NAMES = {
-    1: "PROGRESSIVE_ASPECT",
-    2: "PERFECTIVE_ASPECT",
-    3: "PERFECTIVE_PROGRESSIVE_ASPECT",
-    4: "NONE_ASPECT",
-  }
-
-  _NAMES_TO_VALUES = {
-    "PROGRESSIVE_ASPECT": 1,
-    "PERFECTIVE_ASPECT": 2,
-    "PERFECTIVE_PROGRESSIVE_ASPECT": 3,
-    "NONE_ASPECT": 4,
-  }
-
-class Polarity(object):
-  """
-  An enumeration used to record the polarity of a situation.
-  This is primarily intended for use with SENTIMENT situations.
-  """
-  POSITIVE_POLARITY = 1
-  NEGATIVE_POLARITY = 2
-  NEUTRAL_POLARITY = 3
-  BOTH_POLARITY = 4
-
-  _VALUES_TO_NAMES = {
-    1: "POSITIVE_POLARITY",
-    2: "NEGATIVE_POLARITY",
-    3: "NEUTRAL_POLARITY",
-    4: "BOTH_POLARITY",
-  }
-
-  _NAMES_TO_VALUES = {
-    "POSITIVE_POLARITY": 1,
-    "NEGATIVE_POLARITY": 2,
-    "NEUTRAL_POLARITY": 3,
-    "BOTH_POLARITY": 4,
-  }
-
-class SituationType(object):
-  """
-  An enumerated type used to record the core types of situations.
-  These types form a type hierarchy, as follows:
-
-  * SITUATION
-  * FACT
-  * CAUSAL_FACT
-  * TEMPORAL_FACT
-  * EVENT
-  * STATE (includes ACE-style relations)
-  * PRIVATE_STATE
-  * SENTIMENT
-  """
-  SITUATION = 0
-  FACT = 100
-  CAUSAL_FACT = 110
-  TEMPORAL_FACT = 120
-  EVENT = 200
-  STATE = 300
-  PRIVATE_STATE = 310
-  SENTIMENT = 311
-
-  _VALUES_TO_NAMES = {
-    0: "SITUATION",
-    100: "FACT",
-    110: "CAUSAL_FACT",
-    120: "TEMPORAL_FACT",
-    200: "EVENT",
-    300: "STATE",
-    310: "PRIVATE_STATE",
-    311: "SENTIMENT",
-  }
-
-  _NAMES_TO_VALUES = {
-    "SITUATION": 0,
-    "FACT": 100,
-    "CAUSAL_FACT": 110,
-    "TEMPORAL_FACT": 120,
-    "EVENT": 200,
-    "STATE": 300,
-    "PRIVATE_STATE": 310,
-    "SENTIMENT": 311,
-  }
-
 
 class Argument(object):
   """
@@ -616,7 +41,7 @@ class Argument(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.I32, 'role', None, None, ), # 1
+    (1, TType.STRING, 'role', None, None, ), # 1
     (2, TType.STRING, 'entityId', None, None, ), # 2
     (3, TType.STRING, 'situationId', None, None, ), # 3
     (4, TType.STRING, 'roleLabel', None, None, ), # 4
@@ -638,8 +63,8 @@ class Argument(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.I32:
-          self.role = iprot.readI32();
+        if ftype == TType.STRING:
+          self.role = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -668,8 +93,8 @@ class Argument(object):
       return
     oprot.writeStructBegin('Argument')
     if self.role is not None:
-      oprot.writeFieldBegin('role', TType.I32, 1)
-      oprot.writeI32(self.role)
+      oprot.writeFieldBegin('role', TType.STRING, 1)
+      oprot.writeString(self.role.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.entityId is not None:
       oprot.writeFieldBegin('entityId', TType.STRING, 2)
@@ -717,7 +142,7 @@ class Justification(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.I32, 'justificationType', None, None, ), # 1
+    (1, TType.STRING, 'justificationType', None, None, ), # 1
     (2, TType.STRING, 'mentionId', None, None, ), # 2
     (3, TType.LIST, 'tokens', (TType.STRUCT,(concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec)), None, ), # 3
   )
@@ -737,8 +162,8 @@ class Justification(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.I32:
-          self.justificationType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.justificationType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -768,8 +193,8 @@ class Justification(object):
       return
     oprot.writeStructBegin('Justification')
     if self.justificationType is not None:
-      oprot.writeFieldBegin('justificationType', TType.I32, 1)
-      oprot.writeI32(self.justificationType)
+      oprot.writeFieldBegin('justificationType', TType.STRING, 1)
+      oprot.writeString(self.justificationType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.mentionId is not None:
       oprot.writeFieldBegin('mentionId', TType.STRING, 2)
@@ -849,7 +274,7 @@ class Situation(object):
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'uuid', None, None, ), # 1
-    (2, TType.I32, 'situationType', None, None, ), # 2
+    (2, TType.STRING, 'situationType', None, None, ), # 2
     (3, TType.LIST, 'argumentList', (TType.STRUCT,(Argument, Argument.thrift_spec)), None, ), # 3
     (4, TType.LIST, 'mentionIdList', (TType.STRING,None), None, ), # 4
     (5, TType.LIST, 'justificationList', (TType.STRUCT,(Justification, Justification.thrift_spec)), None, ), # 5
@@ -897,13 +322,13 @@ class Situation(object):
     None, # 47
     None, # 48
     None, # 49
-    (50, TType.I32, 'eventType', None, None, ), # 50
-    (51, TType.I32, 'stateType', None, None, ), # 51
-    (52, TType.I32, 'temporalFactType', None, None, ), # 52
+    (50, TType.STRING, 'eventType', None, None, ), # 50
+    (51, TType.STRING, 'stateType', None, None, ), # 51
+    (52, TType.STRING, 'temporalFactType', None, None, ), # 52
     (53, TType.STRING, 'situationKindLemma', None, None, ), # 53
-    (54, TType.I32, 'timemlClass', None, None, ), # 54
-    (55, TType.I32, 'timemlTense', None, None, ), # 55
-    (56, TType.I32, 'timemlAspect', None, None, ), # 56
+    (54, TType.STRING, 'timemlClass', None, None, ), # 54
+    (55, TType.STRING, 'timemlTense', None, None, ), # 55
+    (56, TType.STRING, 'timemlAspect', None, None, ), # 56
     None, # 57
     None, # 58
     None, # 59
@@ -948,7 +373,7 @@ class Situation(object):
     None, # 98
     None, # 99
     (100, TType.DOUBLE, 'intensity', None, None, ), # 100
-    (101, TType.I32, 'polarity', None, None, ), # 101
+    (101, TType.STRING, 'polarity', None, None, ), # 101
     None, # 102
     None, # 103
     None, # 104
@@ -1082,8 +507,8 @@ class Situation(object):
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.I32:
-          self.situationType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.situationType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -1119,18 +544,18 @@ class Situation(object):
         else:
           iprot.skip(ftype)
       elif fid == 50:
-        if ftype == TType.I32:
-          self.eventType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.eventType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 51:
-        if ftype == TType.I32:
-          self.stateType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.stateType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 52:
-        if ftype == TType.I32:
-          self.temporalFactType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.temporalFactType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 53:
@@ -1139,18 +564,18 @@ class Situation(object):
         else:
           iprot.skip(ftype)
       elif fid == 54:
-        if ftype == TType.I32:
-          self.timemlClass = iprot.readI32();
+        if ftype == TType.STRING:
+          self.timemlClass = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 55:
-        if ftype == TType.I32:
-          self.timemlTense = iprot.readI32();
+        if ftype == TType.STRING:
+          self.timemlTense = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 56:
-        if ftype == TType.I32:
-          self.timemlAspect = iprot.readI32();
+        if ftype == TType.STRING:
+          self.timemlAspect = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 100:
@@ -1159,8 +584,8 @@ class Situation(object):
         else:
           iprot.skip(ftype)
       elif fid == 101:
-        if ftype == TType.I32:
-          self.polarity = iprot.readI32();
+        if ftype == TType.STRING:
+          self.polarity = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 200:
@@ -1183,8 +608,8 @@ class Situation(object):
       oprot.writeString(self.uuid.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.situationType is not None:
-      oprot.writeFieldBegin('situationType', TType.I32, 2)
-      oprot.writeI32(self.situationType)
+      oprot.writeFieldBegin('situationType', TType.STRING, 2)
+      oprot.writeString(self.situationType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.argumentList is not None:
       oprot.writeFieldBegin('argumentList', TType.LIST, 3)
@@ -1208,40 +633,40 @@ class Situation(object):
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.eventType is not None:
-      oprot.writeFieldBegin('eventType', TType.I32, 50)
-      oprot.writeI32(self.eventType)
+      oprot.writeFieldBegin('eventType', TType.STRING, 50)
+      oprot.writeString(self.eventType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.stateType is not None:
-      oprot.writeFieldBegin('stateType', TType.I32, 51)
-      oprot.writeI32(self.stateType)
+      oprot.writeFieldBegin('stateType', TType.STRING, 51)
+      oprot.writeString(self.stateType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.temporalFactType is not None:
-      oprot.writeFieldBegin('temporalFactType', TType.I32, 52)
-      oprot.writeI32(self.temporalFactType)
+      oprot.writeFieldBegin('temporalFactType', TType.STRING, 52)
+      oprot.writeString(self.temporalFactType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.situationKindLemma is not None:
       oprot.writeFieldBegin('situationKindLemma', TType.STRING, 53)
       oprot.writeString(self.situationKindLemma.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.timemlClass is not None:
-      oprot.writeFieldBegin('timemlClass', TType.I32, 54)
-      oprot.writeI32(self.timemlClass)
+      oprot.writeFieldBegin('timemlClass', TType.STRING, 54)
+      oprot.writeString(self.timemlClass.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.timemlTense is not None:
-      oprot.writeFieldBegin('timemlTense', TType.I32, 55)
-      oprot.writeI32(self.timemlTense)
+      oprot.writeFieldBegin('timemlTense', TType.STRING, 55)
+      oprot.writeString(self.timemlTense.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.timemlAspect is not None:
-      oprot.writeFieldBegin('timemlAspect', TType.I32, 56)
-      oprot.writeI32(self.timemlAspect)
+      oprot.writeFieldBegin('timemlAspect', TType.STRING, 56)
+      oprot.writeString(self.timemlAspect.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.intensity is not None:
       oprot.writeFieldBegin('intensity', TType.DOUBLE, 100)
       oprot.writeDouble(self.intensity)
       oprot.writeFieldEnd()
     if self.polarity is not None:
-      oprot.writeFieldBegin('polarity', TType.I32, 101)
-      oprot.writeI32(self.polarity)
+      oprot.writeFieldBegin('polarity', TType.STRING, 101)
+      oprot.writeString(self.polarity.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.confidence is not None:
       oprot.writeFieldBegin('confidence', TType.DOUBLE, 200)
@@ -1391,7 +816,7 @@ class MentionArgument(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.I32, 'role', None, None, ), # 1
+    (1, TType.STRING, 'role', None, None, ), # 1
     (2, TType.STRING, 'entityMentionId', None, None, ), # 2
     (3, TType.STRING, 'situationMentionId', None, None, ), # 3
     (4, TType.STRING, 'roleLabel', None, None, ), # 4
@@ -1413,8 +838,8 @@ class MentionArgument(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.I32:
-          self.role = iprot.readI32();
+        if ftype == TType.STRING:
+          self.role = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -1443,8 +868,8 @@ class MentionArgument(object):
       return
     oprot.writeStructBegin('MentionArgument')
     if self.role is not None:
-      oprot.writeFieldBegin('role', TType.I32, 1)
-      oprot.writeI32(self.role)
+      oprot.writeFieldBegin('role', TType.STRING, 1)
+      oprot.writeString(self.role.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.entityMentionId is not None:
       oprot.writeFieldBegin('entityMentionId', TType.STRING, 2)
@@ -1523,7 +948,7 @@ class SituationMention(object):
     None, # 0
     (1, TType.STRING, 'uuid', None, None, ), # 1
     (2, TType.STRING, 'text', None, None, ), # 2
-    (3, TType.I32, 'situationType', None, None, ), # 3
+    (3, TType.STRING, 'situationType', None, None, ), # 3
     (4, TType.LIST, 'argumentList', (TType.STRUCT,(MentionArgument, MentionArgument.thrift_spec)), None, ), # 4
     None, # 5
     None, # 6
@@ -1570,8 +995,8 @@ class SituationMention(object):
     None, # 47
     None, # 48
     None, # 49
-    (50, TType.I32, 'eventType', None, None, ), # 50
-    (51, TType.I32, 'stateType', None, None, ), # 51
+    (50, TType.STRING, 'eventType', None, None, ), # 50
+    (51, TType.STRING, 'stateType', None, None, ), # 51
     None, # 52
     (53, TType.STRING, 'situationKindLemma', None, None, ), # 53
     None, # 54
@@ -1621,7 +1046,7 @@ class SituationMention(object):
     None, # 98
     None, # 99
     (100, TType.DOUBLE, 'intensity', None, None, ), # 100
-    (101, TType.I32, 'polarity', None, None, ), # 101
+    (101, TType.STRING, 'polarity', None, None, ), # 101
     None, # 102
     None, # 103
     None, # 104
@@ -1756,8 +1181,8 @@ class SituationMention(object):
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.I32:
-          self.situationType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.situationType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -1772,13 +1197,13 @@ class SituationMention(object):
         else:
           iprot.skip(ftype)
       elif fid == 50:
-        if ftype == TType.I32:
-          self.eventType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.eventType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 51:
-        if ftype == TType.I32:
-          self.stateType = iprot.readI32();
+        if ftype == TType.STRING:
+          self.stateType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 53:
@@ -1792,8 +1217,8 @@ class SituationMention(object):
         else:
           iprot.skip(ftype)
       elif fid == 101:
-        if ftype == TType.I32:
-          self.polarity = iprot.readI32();
+        if ftype == TType.STRING:
+          self.polarity = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 150:
@@ -1826,8 +1251,8 @@ class SituationMention(object):
       oprot.writeString(self.text.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.situationType is not None:
-      oprot.writeFieldBegin('situationType', TType.I32, 3)
-      oprot.writeI32(self.situationType)
+      oprot.writeFieldBegin('situationType', TType.STRING, 3)
+      oprot.writeString(self.situationType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.argumentList is not None:
       oprot.writeFieldBegin('argumentList', TType.LIST, 4)
@@ -1837,12 +1262,12 @@ class SituationMention(object):
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.eventType is not None:
-      oprot.writeFieldBegin('eventType', TType.I32, 50)
-      oprot.writeI32(self.eventType)
+      oprot.writeFieldBegin('eventType', TType.STRING, 50)
+      oprot.writeString(self.eventType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.stateType is not None:
-      oprot.writeFieldBegin('stateType', TType.I32, 51)
-      oprot.writeI32(self.stateType)
+      oprot.writeFieldBegin('stateType', TType.STRING, 51)
+      oprot.writeString(self.stateType.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.situationKindLemma is not None:
       oprot.writeFieldBegin('situationKindLemma', TType.STRING, 53)
@@ -1853,8 +1278,8 @@ class SituationMention(object):
       oprot.writeDouble(self.intensity)
       oprot.writeFieldEnd()
     if self.polarity is not None:
-      oprot.writeFieldBegin('polarity', TType.I32, 101)
-      oprot.writeI32(self.polarity)
+      oprot.writeFieldBegin('polarity', TType.STRING, 101)
+      oprot.writeString(self.polarity.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.tokens is not None:
       oprot.writeFieldBegin('tokens', TType.STRUCT, 150)

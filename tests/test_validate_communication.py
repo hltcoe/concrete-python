@@ -13,7 +13,7 @@ import unittest
 from testfixtures import LogCapture, StringComparison
 from thrift import TSerialization
 
-from concrete import Communication, CommunicationType
+from concrete import Communication
 from concrete.validate import *
 
 
@@ -84,7 +84,7 @@ class TestRequiredThriftFields(unittest.TestCase):
             self.assertFalse(validate_thrift_object_required_fields_recursively(comm))
         log_capture.check(('root', 'ERROR', "Communication 'TEST_UUID': Required Field 'type' is unset!"))
 
-        comm.type = CommunicationType.OTHER
+        comm.type = "OTHER"
         self.assertTrue(validate_thrift_object_required_fields_recursively(comm))
 
 

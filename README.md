@@ -83,7 +83,7 @@ Concrete Communication:
 from concrete.util import read_communication_from_file
 from concrete.validate import validate_communication
 
-comm = read_communication_from_file('tests/testdata/agiga_dog-bites-man.concrete')
+comm = read_communication_from_file('tests/testdata/serif_dog-bites-man.concrete')
 
 # Returns True|False, logs details using Python stdlib 'logging' module
 validate_communication(comm)

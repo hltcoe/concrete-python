@@ -89,7 +89,7 @@ class TestRequiredThriftFields(unittest.TestCase):
 
 
 def read_test_comm():
-    communication_filename = "tests/testdata/agiga_dog-bites-man.concrete"
+    communication_filename = "tests/testdata/serif_dog-bites-man.concrete"
     comm = Communication()
     comm_bytestring = open(communication_filename).read()
     TSerialization.deserialize(comm, comm_bytestring)

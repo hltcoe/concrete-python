@@ -28,11 +28,11 @@ Installation
 
 You can install Concrete using the pip package manager:
 
-    pip install git+https://github.com/charman/concrete-python.git#egg=concrete
+    pip install git+https://github.com/hltcoe/concrete-python.git#egg=concrete
 
 or by cloning this repository and running setup.py:
 
-    git clone https://github.com/charman/concrete-python.git
+    git clone https://github.com/hltcoe/concrete-python.git
     cd concrete-python
     python setup.py test
     python setup.py install

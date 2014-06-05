@@ -74,6 +74,7 @@ def validate_communication(comm):
                         for sentence in sentenceSegmentation.sentenceList:
                             logging.debug(ilm(5, "sentence '%s' has %d tokenizations" %
                                               (sentence.uuid, len(sentence.tokenizationList))))
+                            valid &= validate_token_offsets_for_sentence(sentence)
                             for tokenization in sentence.tokenizationList:
                                 valid &= validate_constituency_parse(tokenization)
                                 valid &= validate_dependency_parses(tokenization)
@@ -381,6 +382,34 @@ def validate_situations(comm):
                                 valid = False
                                 logging.error(ilm(2, "Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
                                                   (situation.uuid, mentionId, situationSet.metadata.tool)))
+    return valid
+
+
+def validate_token_offsets_for_sentence(sentence):
+    """
+    Test if the TextSpan boundaries for all tokens in a sentence fall
+    within the boundaries of the sentence's TextSpan
+    """
+    valid = True
+
+    if sentence.textSpan.start > sentence.textSpan.ending:
+        valid = False
+        logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+                          (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
+    for tokenization in sentence.tokenizationList:
+        for token in tokenization.tokenList:
+            if token.textSpan.start > token.textSpan.ending:
+                valid = False
+                logging.error(ilm(2, "Token in Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+                                  (sentence.uuid, token.textSpan.start, token.textSpan.ending)))
+            elif (token.textSpan.start < sentence.textSpan.start) or \
+                 (token.textSpan.start > sentence.textSpan.ending) or \
+                 (token.textSpan.ending < sentence.textSpan.start) or \
+                 (token.textSpan.ending > sentence.textSpan.ending):
+                valid = False
+                logging.error(ilm(2, "Token in Sentence '%s' has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
+                                  (sentence.uuid, token.textSpan.start, token.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
+
     return valid
 
 

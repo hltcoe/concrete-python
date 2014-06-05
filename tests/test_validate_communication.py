@@ -13,7 +13,7 @@ import unittest
 from testfixtures import LogCapture, StringComparison
 from thrift import TSerialization
 
-from concrete import Communication
+import concrete
 from concrete.validate import *
 
 
@@ -68,7 +68,7 @@ class TestRequiredThriftFields(unittest.TestCase):
         # aside from assigning a value to the required field and
         # running validate() again.
 
-        comm = Communication()
+        comm = concrete.Communication()
 
         with LogCapture() as log_capture:
             self.assertFalse(validate_thrift_object_required_fields_recursively(comm))
@@ -88,9 +88,41 @@ class TestRequiredThriftFields(unittest.TestCase):
         self.assertTrue(validate_thrift_object_required_fields_recursively(comm))
 
 
+class TestTextspanOffsets(unittest.TestCase):
+    def test_validate_token_offsets_for_good_sentence(self):
+        sentence = self.create_sentence_with_token(0, 30, 0, 10)
+        self.assertTrue(validate_token_offsets_for_sentence(sentence))
+
+    def test_validate_token_offsets_for_sentence_with_reversed_sentence_offsets(self):
+        sentence = self.create_sentence_with_token(30, 0, 0, 10)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_sentence(sentence))
+
+    def test_validate_token_offsets_for_sentence_with_reversed_token_offsets(self):
+        sentence = self.create_sentence_with_token(0, 30, 10, 0)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_sentence(sentence))
+
+    def test_validate_token_offsets_for_sentence_with_token_not_fully_in_sentence(self):
+        sentence = self.create_sentence_with_token(0, 30, 25, 35)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_sentence(sentence))
+
+    def create_sentence_with_token(self, sentence_start, sentence_ending, token_start, token_ending):
+        token_textspan = concrete.spans.ttypes.TextSpan(start=token_start, ending=token_ending)
+        token = concrete.structure.ttypes.Token(textSpan=token_textspan)
+        tokenization = concrete.structure.ttypes.Tokenization(tokenList=[token])
+        sentence_textspan = concrete.spans.ttypes.TextSpan(start=sentence_start, ending=sentence_ending)
+        sentence = concrete.structure.ttypes.Sentence(
+            tokenizationList=[tokenization],
+            textSpan=sentence_textspan,
+            uuid='TEST')
+        return sentence
+
+
 def read_test_comm():
     communication_filename = "tests/testdata/serif_dog-bites-man.concrete"
-    comm = Communication()
+    comm = concrete.Communication()
     comm_bytestring = open(communication_filename).read()
     TSerialization.deserialize(comm, comm_bytestring)
     return comm

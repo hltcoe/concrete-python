@@ -108,6 +108,43 @@ class TestTextspanOffsets(unittest.TestCase):
         with LogCapture() as log_capture:
             self.assertFalse(validate_token_offsets_for_sentence(sentence))
 
+
+    def test_validate_token_offsets_for_good_section(self):
+        section = self.create_section_with_sentence(0, 30, 0, 10)
+        self.assertTrue(validate_token_offsets_for_section(section))
+
+    def test_validate_token_offsets_for_section_with_reversed_section_offsets(self):
+        section = self.create_section_with_sentence(30, 0, 0, 10)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_section(section))
+
+    def test_validate_token_offsets_for_section_with_reversed_token_offsets(self):
+        section = self.create_section_with_sentence(0, 30, 10, 0)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_section(section))
+
+    def test_validate_token_offsets_for_section_with_sentence_not_fully_in_section(self):
+        section = self.create_section_with_sentence(0, 30, 25, 35)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_section(section))
+
+    def test_validate_token_offsets_for_real_example_section_data(self):
+        section = self.create_section_with_sentence(55, 296, 0, 118)
+        with LogCapture() as log_capture:
+            self.assertFalse(validate_token_offsets_for_section(section))
+
+
+    def create_section_with_sentence(self, section_start, section_ending, sentence_start, sentence_ending):
+        sentence_textspan = concrete.spans.ttypes.TextSpan(start=sentence_start, ending=sentence_ending)
+        sentence = concrete.structure.ttypes.Sentence(textSpan=sentence_textspan, uuid='TEST_SENTENCE')
+        sentence_segmentation = concrete.structure.ttypes.SentenceSegmentation(sentenceList=[sentence])
+        section_textspan = concrete.spans.ttypes.TextSpan(start=section_start, ending=section_ending)
+        section = concrete.structure.ttypes.Section(
+            sentenceSegmentation=[sentence_segmentation],
+            textSpan=section_textspan,
+            uuid='TEST_SECTION')
+        return section
+
     def create_sentence_with_token(self, sentence_start, sentence_ending, token_start, token_ending):
         token_textspan = concrete.spans.ttypes.TextSpan(start=token_start, ending=token_ending)
         token = concrete.structure.ttypes.Token(textSpan=token_textspan)

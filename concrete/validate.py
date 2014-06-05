@@ -62,6 +62,7 @@ def validate_communication(comm):
                               (sectionSegmentation.uuid, len(sectionSegmentation.sectionList))))
             for section in sectionSegmentation.sectionList:
                 if section.sentenceSegmentation:
+                    valid &= validate_token_offsets_for_section(section)
                     logging.debug(ilm(3, "section '%s' has %d sentenceSegmentations" %
                                       (section.uuid, len(section.sentenceSegmentation))))
                     for sentenceSegmentation in section.sentenceSegmentation:
@@ -382,6 +383,36 @@ def validate_situations(comm):
                                 valid = False
                                 logging.error(ilm(2, "Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
                                                   (situation.uuid, mentionId, situationSet.metadata.tool)))
+    return valid
+
+
+def validate_token_offsets_for_section(section):
+    """
+    Test if the TextSpan boundaries for all sentences in a section fall
+    within the boundaries of the section's TextSpan
+    """
+    valid = True
+
+    if section.textSpan.start > section.textSpan.ending:
+        valid = False
+        logging.error(ilm(2, "Section '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+                          (section.uuid, section.textSpan.start, section.textSpan.ending)))
+
+    if section.sentenceSegmentation:
+        for sentenceSegmentation in section.sentenceSegmentation:
+            for sentence in sentenceSegmentation.sentenceList:
+                if sentence.textSpan.start > sentence.textSpan.ending:
+                    valid = False
+                    logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+                                      (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
+                elif (sentence.textSpan.start < section.textSpan.start) or \
+                     (sentence.textSpan.start > section.textSpan.ending) or \
+                     (sentence.textSpan.ending < section.textSpan.start) or \
+                     (sentence.textSpan.ending > section.textSpan.ending):
+                    valid = False
+                    logging.error(ilm(2, "Sentence '%s' in Section '%s' has a TextSpan [%d, %d] that does not fit within the Section TextSpan [%d, %d]" %
+                                      (sentence.uuid, section.uuid, sentence.textSpan.start, sentence.textSpan.ending, section.textSpan.start, section.textSpan.ending)))
+
     return valid
 
 

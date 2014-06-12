@@ -40,6 +40,6 @@ setup(
         'thrift>=0.9.1',
         ],
 
-    url = "https://github.com/hltcoe/concrete",
+    url = "https://github.com/hltcoe/concrete-python",
     license="BSD",
 )

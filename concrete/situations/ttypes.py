@@ -21,6 +21,100 @@ except:
 
 
 
+class Property(object):
+  """
+  Attached to Arguments to support situations where
+  a 'participant' has more than one 'property' (in BinarySRL terms),
+  whereas Arguments notionally only support one Role.
+
+  Attributes:
+   - value: The required value of the property.
+   - metadata: Metadata to support this particular property object.
+   - polarity: This value is typically boolean, 0.0 or 1.0, but we use a
+  float in order to potentially capture cases where an annotator is
+  highly confident that the value is underspecified, via a value of
+  0.5.
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'value', None, None, ), # 1
+    (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
+    (3, TType.DOUBLE, 'polarity', None, None, ), # 3
+  )
+
+  def __init__(self, value=None, metadata=None, polarity=None,):
+    self.value = value
+    self.metadata = metadata
+    self.polarity = polarity
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.value = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
+          self.metadata.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.DOUBLE:
+          self.polarity = iprot.readDouble();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('Property')
+    if self.value is not None:
+      oprot.writeFieldBegin('value', TType.STRING, 1)
+      oprot.writeString(self.value.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.metadata is not None:
+      oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
+      self.metadata.write(oprot)
+      oprot.writeFieldEnd()
+    if self.polarity is not None:
+      oprot.writeFieldBegin('polarity', TType.DOUBLE, 3)
+      oprot.writeDouble(self.polarity)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.value is None:
+      raise TProtocol.TProtocolException(message='Required field value is unset!')
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class Argument(object):
   """
   A situation argument, consisting of an argument role and a value.
@@ -38,6 +132,9 @@ class Argument(object):
   cases with many varied and possibly dynamic role names, this can be
   used. Presumably this would only be used in a prototype stage of an
   analytic, with roles eventually "hardening" and moving to the enum.
+   - properties: For the BinarySRL task, there may be situations
+  where more than one property is attached to a single
+  participant. A list of these properties can be stored in this field.
   """
 
   thrift_spec = (
@@ -46,13 +143,15 @@ class Argument(object):
     (2, TType.STRUCT, 'entityId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'situationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
     (4, TType.STRING, 'roleLabel', None, None, ), # 4
+    (5, TType.LIST, 'properties', (TType.STRUCT,(Property, Property.thrift_spec)), None, ), # 5
   )
 
-  def __init__(self, role=None, entityId=None, situationId=None, roleLabel=None,):
+  def __init__(self, role=None, entityId=None, situationId=None, roleLabel=None, properties=None,):
     self.role = role
     self.entityId = entityId
     self.situationId = situationId
     self.roleLabel = roleLabel
+    self.properties = properties
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -85,6 +184,17 @@ class Argument(object):
           self.roleLabel = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.LIST:
+          self.properties = []
+          (_etype3, _size0) = iprot.readListBegin()
+          for _i4 in xrange(_size0):
+            _elem5 = Property()
+            _elem5.read(iprot)
+            self.properties.append(_elem5)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -110,6 +220,13 @@ class Argument(object):
     if self.roleLabel is not None:
       oprot.writeFieldBegin('roleLabel', TType.STRING, 4)
       oprot.writeString(self.roleLabel.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.properties is not None:
+      oprot.writeFieldBegin('properties', TType.LIST, 5)
+      oprot.writeListBegin(TType.STRUCT, len(self.properties))
+      for iter6 in self.properties:
+        iter6.write(oprot)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -178,11 +295,11 @@ class Justification(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.tokens = []
-          (_etype3, _size0) = iprot.readListBegin()
-          for _i4 in xrange(_size0):
-            _elem5 = concrete.structure.ttypes.TokenRefSequence()
-            _elem5.read(iprot)
-            self.tokens.append(_elem5)
+          (_etype10, _size7) = iprot.readListBegin()
+          for _i11 in xrange(_size7):
+            _elem12 = concrete.structure.ttypes.TokenRefSequence()
+            _elem12.read(iprot)
+            self.tokens.append(_elem12)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -207,8 +324,8 @@ class Justification(object):
     if self.tokens is not None:
       oprot.writeFieldBegin('tokens', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.tokens))
-      for iter6 in self.tokens:
-        iter6.write(oprot)
+      for iter13 in self.tokens:
+        iter13.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -519,33 +636,33 @@ class Situation(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.argumentList = []
-          (_etype10, _size7) = iprot.readListBegin()
-          for _i11 in xrange(_size7):
-            _elem12 = Argument()
-            _elem12.read(iprot)
-            self.argumentList.append(_elem12)
+          (_etype17, _size14) = iprot.readListBegin()
+          for _i18 in xrange(_size14):
+            _elem19 = Argument()
+            _elem19.read(iprot)
+            self.argumentList.append(_elem19)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.LIST:
           self.mentionIdList = []
-          (_etype16, _size13) = iprot.readListBegin()
-          for _i17 in xrange(_size13):
-            _elem18 = concrete.uuid.ttypes.UUID()
-            _elem18.read(iprot)
-            self.mentionIdList.append(_elem18)
+          (_etype23, _size20) = iprot.readListBegin()
+          for _i24 in xrange(_size20):
+            _elem25 = concrete.uuid.ttypes.UUID()
+            _elem25.read(iprot)
+            self.mentionIdList.append(_elem25)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.LIST:
           self.justificationList = []
-          (_etype22, _size19) = iprot.readListBegin()
-          for _i23 in xrange(_size19):
-            _elem24 = Justification()
-            _elem24.read(iprot)
-            self.justificationList.append(_elem24)
+          (_etype29, _size26) = iprot.readListBegin()
+          for _i30 in xrange(_size26):
+            _elem31 = Justification()
+            _elem31.read(iprot)
+            self.justificationList.append(_elem31)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -620,22 +737,22 @@ class Situation(object):
     if self.argumentList is not None:
       oprot.writeFieldBegin('argumentList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.argumentList))
-      for iter25 in self.argumentList:
-        iter25.write(oprot)
+      for iter32 in self.argumentList:
+        iter32.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.mentionIdList is not None:
       oprot.writeFieldBegin('mentionIdList', TType.LIST, 4)
       oprot.writeListBegin(TType.STRUCT, len(self.mentionIdList))
-      for iter26 in self.mentionIdList:
-        iter26.write(oprot)
+      for iter33 in self.mentionIdList:
+        iter33.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.justificationList is not None:
       oprot.writeFieldBegin('justificationList', TType.LIST, 5)
       oprot.writeListBegin(TType.STRUCT, len(self.justificationList))
-      for iter27 in self.justificationList:
-        iter27.write(oprot)
+      for iter34 in self.justificationList:
+        iter34.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.eventType is not None:
@@ -747,11 +864,11 @@ class SituationSet(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.situationList = []
-          (_etype31, _size28) = iprot.readListBegin()
-          for _i32 in xrange(_size28):
-            _elem33 = Situation()
-            _elem33.read(iprot)
-            self.situationList.append(_elem33)
+          (_etype38, _size35) = iprot.readListBegin()
+          for _i39 in xrange(_size35):
+            _elem40 = Situation()
+            _elem40.read(iprot)
+            self.situationList.append(_elem40)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -776,8 +893,8 @@ class SituationSet(object):
     if self.situationList is not None:
       oprot.writeFieldBegin('situationList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.situationList))
-      for iter34 in self.situationList:
-        iter34.write(oprot)
+      for iter41 in self.situationList:
+        iter41.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1198,11 +1315,11 @@ class SituationMention(object):
       elif fid == 4:
         if ftype == TType.LIST:
           self.argumentList = []
-          (_etype38, _size35) = iprot.readListBegin()
-          for _i39 in xrange(_size35):
-            _elem40 = MentionArgument()
-            _elem40.read(iprot)
-            self.argumentList.append(_elem40)
+          (_etype45, _size42) = iprot.readListBegin()
+          for _i46 in xrange(_size42):
+            _elem47 = MentionArgument()
+            _elem47.read(iprot)
+            self.argumentList.append(_elem47)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1267,8 +1384,8 @@ class SituationMention(object):
     if self.argumentList is not None:
       oprot.writeFieldBegin('argumentList', TType.LIST, 4)
       oprot.writeListBegin(TType.STRUCT, len(self.argumentList))
-      for iter41 in self.argumentList:
-        iter41.write(oprot)
+      for iter48 in self.argumentList:
+        iter48.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.eventType is not None:
@@ -1368,11 +1485,11 @@ class SituationMentionSet(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.mentionList = []
-          (_etype45, _size42) = iprot.readListBegin()
-          for _i46 in xrange(_size42):
-            _elem47 = SituationMention()
-            _elem47.read(iprot)
-            self.mentionList.append(_elem47)
+          (_etype52, _size49) = iprot.readListBegin()
+          for _i53 in xrange(_size49):
+            _elem54 = SituationMention()
+            _elem54.read(iprot)
+            self.mentionList.append(_elem54)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1397,8 +1514,8 @@ class SituationMentionSet(object):
     if self.mentionList is not None:
       oprot.writeFieldBegin('mentionList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.mentionList))
-      for iter48 in self.mentionList:
-        iter48.write(oprot)
+      for iter55 in self.mentionList:
+        iter55.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()

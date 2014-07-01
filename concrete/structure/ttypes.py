@@ -62,7 +62,17 @@ class Token(object):
   may be given a value indicating "approximately" where the token
   comes from. A span covering the entire sentence may be used if
   no more precise value seems appropriate.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
    - audioSpan: Location of this token in the original audio.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
   """
 
   thrift_spec = (
@@ -175,7 +185,17 @@ class TokenRefSequence(object):
   annotation that has a head.
    - tokenizationId: The UUID of the tokenization that contains the tokens.
    - textSpan: The text span associated with this TokenRefSequence.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
    - audioSpan: The audio span associated with this TokenRefSequence.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
   """
 
   thrift_spec = (
@@ -1238,6 +1258,91 @@ class TokenLattice(object):
   def __ne__(self, other):
     return not (self == other)
 
+class TokenList(object):
+  """
+  A wrapper around a list of tokens.
+
+  Attributes:
+   - tokenList
+   - reconstructedText
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.LIST, 'tokenList', (TType.STRUCT,(Token, Token.thrift_spec)), None, ), # 1
+    (2, TType.STRING, 'reconstructedText', None, None, ), # 2
+  )
+
+  def __init__(self, tokenList=None, reconstructedText=None,):
+    self.tokenList = tokenList
+    self.reconstructedText = reconstructedText
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.tokenList = []
+          (_etype52, _size49) = iprot.readListBegin()
+          for _i53 in xrange(_size49):
+            _elem54 = Token()
+            _elem54.read(iprot)
+            self.tokenList.append(_elem54)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.reconstructedText = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('TokenList')
+    if self.tokenList is not None:
+      oprot.writeFieldBegin('tokenList', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
+      for iter55 in self.tokenList:
+        iter55.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.reconstructedText is not None:
+      oprot.writeFieldBegin('reconstructedText', TType.STRING, 2)
+      oprot.writeString(self.reconstructedText.encode('utf-8'))
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.tokenList is None:
+      raise TProtocol.TProtocolException(message='Required field tokenList is unset!')
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class Tokenization(object):
   """
   A theory (or set of alternative theories) about the sequence of
@@ -1248,7 +1353,7 @@ class Tokenization(object):
   machine translation systems, text normalizers, part-of-speech
   taggers, and stemmers.
 
-  Each Tokenization is encoded using either a single list of tokens,
+  Each Tokenization is encoded using either a TokenList
   or a TokenLattice. (If you want to encode an n-best list, then
   you should store it as n separate Tokenization objects.) The
   "kind" field is used to indicate whether this Tokenization contains
@@ -1272,8 +1377,10 @@ class Tokenization(object):
   Attributes:
    - uuid
    - metadata: Information about where this tokenization came from.
-   - tokenList: An ordered list of the tokens in this tokenization.  This field
-  should only have a value if kind==TOKEN_LIST.
+   - tokenList: A wrapper around an ordered list of the tokens in this tokenization.
+  This may also give easy access to the "reconstructed text" associated
+  with this tokenization.
+  This field should only have a value if kind==TOKEN_LIST.
    - lattice: A lattice that compactly describes a set of token sequences that
   might make up this tokenization.  This field should only have a
   value if kind==LATTICE.
@@ -1292,7 +1399,7 @@ class Tokenization(object):
     None, # 0
     (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
-    (3, TType.LIST, 'tokenList', (TType.STRUCT,(Token, Token.thrift_spec)), None, ), # 3
+    (3, TType.STRUCT, 'tokenList', (TokenList, TokenList.thrift_spec), None, ), # 3
     (4, TType.STRUCT, 'lattice', (TokenLattice, TokenLattice.thrift_spec), None, ), # 4
     (5, TType.I32, 'kind', None, None, ), # 5
     (6, TType.STRUCT, 'posTagList', (TokenTagging, TokenTagging.thrift_spec), None, ), # 6
@@ -1340,14 +1447,9 @@ class Tokenization(object):
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.LIST:
-          self.tokenList = []
-          (_etype52, _size49) = iprot.readListBegin()
-          for _i53 in xrange(_size49):
-            _elem54 = Token()
-            _elem54.read(iprot)
-            self.tokenList.append(_elem54)
-          iprot.readListEnd()
+        if ftype == TType.STRUCT:
+          self.tokenList = TokenList()
+          self.tokenList.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -1394,11 +1496,11 @@ class Tokenization(object):
       elif fid == 11:
         if ftype == TType.LIST:
           self.dependencyParseList = []
-          (_etype58, _size55) = iprot.readListBegin()
-          for _i59 in xrange(_size55):
-            _elem60 = DependencyParse()
-            _elem60.read(iprot)
-            self.dependencyParseList.append(_elem60)
+          (_etype59, _size56) = iprot.readListBegin()
+          for _i60 in xrange(_size56):
+            _elem61 = DependencyParse()
+            _elem61.read(iprot)
+            self.dependencyParseList.append(_elem61)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1427,11 +1529,8 @@ class Tokenization(object):
       self.metadata.write(oprot)
       oprot.writeFieldEnd()
     if self.tokenList is not None:
-      oprot.writeFieldBegin('tokenList', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
-      for iter61 in self.tokenList:
-        iter61.write(oprot)
-      oprot.writeListEnd()
+      oprot.writeFieldBegin('tokenList', TType.STRUCT, 3)
+      self.tokenList.write(oprot)
       oprot.writeFieldEnd()
     if self.lattice is not None:
       oprot.writeFieldBegin('lattice', TType.STRUCT, 4)
@@ -1595,7 +1694,17 @@ class Sentence(object):
   of machine translation systems and text normalization
   systems.
    - textSpan: Location of this sentence in the original text.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
    - audioSpan: Location of this sentence in the original audio.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
   """
 
   thrift_spec = (
@@ -1919,12 +2028,23 @@ class Section(object):
   contain a list of sentences.
 
   Attributes:
-   - uuid
+   - uuid: The unique identifier for this section.
    - sentenceSegmentation: Theories about how this section is divided into sentences.
    - textSpan: Location of this section in the original text.
+
+  NOTE: This text span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
    - audioSpan: Location of this section in the original audio.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
    - kind: The type of this section.
-   - label: The name of the section
+   - label: The name of the section. For example, a title of a section on
+  Wikipedia.
    - number: Position within the communication with respect to other Sections:
   The section number, E.g., 3, or 3.1, or 3.1.2, etc. Aimed at
   Communications with content organized in a hierarchy, such as a Book

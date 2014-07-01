@@ -23,7 +23,7 @@ class TestCommunication(unittest.TestCase):
         self.assertTrue(validate_communication(comm))
         self.assertTrue(validate_entity_mention_ids(comm))
 
-        comm.entitySets[0].entityList[0].mentionIdList[0] = 'BAD_ENTITY_MENTION_UUID'
+        comm.entitySets[0].entityList[0].mentionIdList[0] = concrete.UUID(uuidString='BAD_ENTITY_MENTION_UUID')
         
         with LogCapture() as log_capture:
             self.assertFalse(validate_entity_mention_ids(comm))
@@ -34,7 +34,7 @@ class TestCommunication(unittest.TestCase):
         self.assertTrue(validate_communication(comm))
         self.assertTrue(validate_entity_mention_ids(comm))
 
-        comm.entityMentionSets[0].mentionSet[0].tokens.tokenizationId = 'BAD_TOKENIZATION_UUID'
+        comm.entityMentionSets[0].mentionSet[0].tokens.tokenizationId = concrete.UUID(uuidString='BAD_TOKENIZATION_UUID')
         
         with LogCapture() as log_capture:
             self.assertFalse(validate_entity_mention_tokenization_ids(comm))
@@ -79,7 +79,7 @@ class TestRequiredThriftFields(unittest.TestCase):
             self.assertFalse(validate_thrift_object_required_fields_recursively(comm))
         log_capture.check(('root', 'ERROR', "Communication: Required Field 'uuid' is unset!"))
 
-        comm.uuid = "TEST_UUID"
+        comm.uuid = concrete.UUID(uuidString="TEST_UUID")
         with LogCapture() as log_capture:
             self.assertFalse(validate_thrift_object_required_fields_recursively(comm))
         log_capture.check(('root', 'ERROR', "Communication 'TEST_UUID': Required Field 'type' is unset!"))
@@ -158,7 +158,7 @@ class TestTextspanOffsets(unittest.TestCase):
 
 
 def read_test_comm():
-    communication_filename = "tests/testdata/serif_dog-bites-man.concrete"
+    communication_filename = "tests/testdata/agiga_dog-bites-man.concrete"
     comm = concrete.Communication()
     comm_bytestring = open(communication_filename).read()
     TSerialization.deserialize(comm, comm_bytestring)

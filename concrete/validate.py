@@ -93,83 +93,83 @@ def validate_communication(comm):
     return valid
 
 
-def get_entity_uuid_set(comm):
+def get_entity_uuidString_set(comm):
     """
     Args:
       comm (concrete.structure.ttypes.Communication)
 
     Returns:
-      set of strings: UUIDs for all Entities in the Communication
+      set of strings: uuidStrings for all Entities in the Communication
     """
-    entity_uuid_set = set()
+    entity_uuidString_set = set()
     if comm.entitySets:
         for entitySet in comm.entitySets:
             if entitySet.entityList:
                 for entity in entitySet.entityList:
-                    entity_uuid_set.add(entity.uuid)
-    return entity_uuid_set
+                    entity_uuidString_set.add(entity.uuid.uuidString)
+    return entity_uuidString_set
 
 
-def get_entity_mention_uuid_set(comm):
+def get_entity_mention_uuidString_set(comm):
     """
     Args:
       comm (concrete.structure.ttypes.Communication)
 
     Returns:
-      set of strings: UUIDs for all EntityMentions in the Communication
+      set of strings: uuidStrings for all EntityMentions in the Communication
     """
-    entity_mention_uuid_set = set()
+    entity_mention_uuidString_set = set()
     if comm.entityMentionSets:
         for entityMentionSet in comm.entityMentionSets:
             if entityMentionSet.mentionSet:
                 for entityMention in entityMentionSet.mentionSet:
-                    entity_mention_uuid_set.add(entityMention.uuid)
-    return entity_mention_uuid_set
+                    entity_mention_uuidString_set.add(entityMention.uuid.uuidString)
+    return entity_mention_uuidString_set
 
 
-def get_situation_uuid_set(comm):
+def get_situation_uuidString_set(comm):
     """
     Args:
       comm (concrete.structure.ttypes.Communication)
 
     Returns:
-      set of strings: UUIDs for all Situations in the Communication
+      set of strings: uuidStrings for all Situations in the Communication
     """
-    situation_uuid_set = set()
+    situation_uuidString_set = set()
     if comm.situationSets:
         for situationSet in comm.situationSets:
             if situationSet.situationList:
                 for situation in situationSet.situationList:
-                    situation_uuid_set.add(situation.uuid)
-    return situation_uuid_set
+                    situation_uuidString_set.add(situation.uuid.uuidString)
+    return situation_uuidString_set
 
 
-def get_situation_mention_uuid_set(comm):
+def get_situation_mention_uuidString_set(comm):
     """
     Args:
       comm (concrete.structure.ttypes.Communication)
 
     Returns:
-      set of strings: UUIDs for all SituationMentions in the Communication
+      set of strings: uuidStrings for all SituationMentions in the Communication
     """
-    situation_mention_uuid_set = set()
+    situation_mention_uuidString_set = set()
     if comm.situationMentionSets:
         for situationMentionSet in comm.situationMentionSets:
             if situationMentionSet.mentionList:
                 for situationMention in situationMentionSet.mentionList:
-                    situation_mention_uuid_set.add(situationMention.uuid)
-    return situation_mention_uuid_set
+                    situation_mention_uuidString_set.add(situationMention.uuid.uuidString)
+    return situation_mention_uuidString_set
 
 
-def get_tokenization_uuid_set(comm):
+def get_tokenization_uuidString_set(comm):
     """
     Args:
       comm (concrete.structure.ttypes.Communication)
 
     Returns:
-      set of strings: UUIDs for all Tokenizations in the Communication
+      set of strings: uuidStrings for all Tokenizations in the Communication
     """
-    tokenization_uuid_set = set()
+    tokenization_uuidString_set = set()
     if comm.sectionSegmentations:
         for sectionSegmentation in comm.sectionSegmentations:
             for section in sectionSegmentation.sectionList:
@@ -177,8 +177,8 @@ def get_tokenization_uuid_set(comm):
                     for sentenceSegmentation in section.sentenceSegmentation:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
-                                tokenization_uuid_set.add(tokenization.uuid)
-    return tokenization_uuid_set
+                                tokenization_uuidString_set.add(tokenization.uuid.uuidString)
+    return tokenization_uuidString_set
 
 
 def ilm(indent_level, log_message):
@@ -300,14 +300,14 @@ def validate_dependency_parses(tokenization):
 
 def validate_entity_mention_ids(comm):
     valid = True
-    entity_mention_uuid_set = get_entity_mention_uuid_set(comm)
+    entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
 
     if comm.entitySets:
         for entitySet in comm.entitySets:
             if entitySet.entityList:
                 for entity in entitySet.entityList:
                     for entityMentionId in entity.mentionIdList:
-                        if entityMentionId not in entity_mention_uuid_set:
+                        if entityMentionId.uuidString not in entity_mention_uuidString_set:
                             valid = False
                             logging.error(ilm(2, "Entity '%s' has an invalid entityMentionId (%s)" % (entity.uuid, entityMentionId)))
     return valid
@@ -315,14 +315,13 @@ def validate_entity_mention_ids(comm):
 
 def validate_entity_mention_tokenization_ids(comm):
     valid = True
-    entity_mention_uuid_set = get_entity_mention_uuid_set(comm)
-    tokenization_uuid_set = get_tokenization_uuid_set(comm)
+    tokenization_uuidString_set = get_tokenization_uuidString_set(comm)
 
     if comm.entityMentionSets:
         for entityMentionSet in comm.entityMentionSets:
             if entityMentionSet.mentionSet:
                 for entityMention in entityMentionSet.mentionSet:
-                    if entityMention.tokens.tokenizationId not in tokenization_uuid_set:
+                    if entityMention.tokens.tokenizationId.uuidString not in tokenization_uuidString_set:
                         valid = False
                         logging.error(ilm(2, "Mention '%s' has an invalid tokenizationId (%s)" % (entityMention.uuid, entityMention.tokens.tokenizationId)))
     return valid
@@ -330,20 +329,21 @@ def validate_entity_mention_tokenization_ids(comm):
 
 def validate_situation_mentions(comm):
     valid = True
-
-    entity_mention_uuid_set = get_entity_mention_uuid_set(comm)
-    situation_mention_uuid_set = get_situation_mention_uuid_set(comm)
+    entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
+    situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
 
     if comm.situationMentionSets:
         for situationMentionSet in comm.situationMentionSets:
             if situationMentionSet.mentionList:
                 for situationMention in situationMentionSet.mentionList:
                     for mentionArgument in situationMention.argumentList:
-                        if mentionArgument.entityMentionId and mentionArgument.entityMentionId not in entity_mention_uuid_set:
+                        if mentionArgument.entityMentionId and \
+                           mentionArgument.entityMentionId.uuidString not in entity_mention_uuidString_set:
                             valid = False
                             logging.error(ilm(2, "MentionArgument for SituationMention '%s' has an invalid entityMentionId (%s). Tool='%s'" %
                                               (situationMention.uuid, mentionArgument.entityMentionId, situationMentionSet.metadata.tool)))
-                        if mentionArgument.situationMentionId and mentionArgument.situationMentionId not in situation_mention_uuid_set:
+                        if mentionArgument.situationMentionId and \
+                           mentionArgument.situationMentionId.uuidString not in situation_mention_uuidString_set:
                             valid = False
                             logging.error(ilm(2, "SituationArgument for SituationMention '%s' has an invalid situationMentionId (%s). Tool='%s'" %
                                               (situationMention.uuid, mentionArgument.situationMentionId, situationMentionSet.metadata.tool)))
@@ -353,9 +353,9 @@ def validate_situation_mentions(comm):
 def validate_situations(comm):
     valid = True
 
-    entity_uuid_set = get_entity_uuid_set(comm)
-    situation_mention_uuid_set = get_situation_mention_uuid_set(comm)
-    situation_uuid_set = get_situation_uuid_set(comm)
+    entity_uuidString_set = get_entity_uuidString_set(comm)
+    situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
+    situation_uuidString_set = get_situation_uuidString_set(comm)
 
     if comm.situationSets:
         for situationSet in comm.situationSets:
@@ -363,23 +363,25 @@ def validate_situations(comm):
                 for situation in situationSet.situationList:
                     if situation.argumentList:
                         for argument in situation.argumentList:
-                            if argument.situationId and argument.situationId not in situation_uuid_set:
+                            if argument.situationId and \
+                               argument.situationId.uuidString not in situation_uuidString_set:
                                 valid = False
                                 logging.error(ilm(2, "Argument for Situation '%s' has an invalid situationId (%s). Tool='%s'" %
                                                   (situation.uuid, argument.situationId, situationSet.metadata.tool)))
-                            if argument.entityId and argument.entityId not in entity_uuid_set:
+                            if argument.entityId and \
+                               argument.entityId.uuidString not in entity_uuidString_set:
                                 valid = False
                                 logging.error(ilm(2, "Argument for Situation '%s' has an invalid entityId (%s). Tool='%s'" %
                                                   (situation.uuid, argument.entityId, situationSet.metadata.tool)))
                     if situation.justificationList:
                         for justification in situation.justificationList:
-                            if justification.mentionId not in situation_mention_uuid_set:
+                            if justification.mentionId.uuidString not in situation_mention_uuidString_set:
                                 valid = False
                                 logging.error(ilm(2, "Justification for Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
                                                   (situation.uuid, justification.mentionId, situationSet.metadata.tool)))
                     if situation.mentionIdList:
                         for mentionId in situation.mentionIdList:
-                            if mentionId not in situation_mention_uuid_set:
+                            if mentionId.uuidString not in situation_mention_uuidString_set:
                                 valid = False
                                 logging.error(ilm(2, "Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
                                                   (situation.uuid, mentionId, situationSet.metadata.tool)))

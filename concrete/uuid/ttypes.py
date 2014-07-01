@@ -81,3 +81,7 @@ class UUID(object):
 
   def __ne__(self, other):
     return not (self == other)
+
+  # This __str__ function IS NOT auto-generated
+  def __str__(self):
+    return self.uuidString

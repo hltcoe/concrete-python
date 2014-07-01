@@ -7,6 +7,7 @@
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
+import concrete.uuid.ttypes
 import concrete.language.ttypes
 import concrete.structure.ttypes
 import concrete.entities.ttypes
@@ -14,6 +15,7 @@ import concrete.situations.ttypes
 import concrete.email.ttypes
 import concrete.twitter.ttypes
 import concrete.audio.ttypes
+import concrete.nitf.ttypes
 
 
 from thrift.transport import TTransport
@@ -58,6 +60,9 @@ class Communication(object):
   i.e., seconds since January 1, 1970).
    - endTime: The time when this communication ended (in unix time UTC --
   i.e., seconds since January 1, 1970).
+   - processedContent: Text that can be lightly processed - for example, taking an
+  HTML document and removing tags so that NLP tools can better
+  run over it.
    - lids: Theories about the languages that are present in this
   communication.
    - sectionSegmentations: Theories about the block structure of this communication.
@@ -77,18 +82,20 @@ class Communication(object):
   API.  For information about the Twitter API, see:
   <https://dev.twitter.com/docs/platform-objects>
    - emailInfo: Extra information for communications where kind==EMAIL
+   - nitfInfo: Extra information that may come from the NITF
+  (News Industry Text Format) schema. See 'nitf.thrift'.
    - keyValueMap: A catch-all store of keys and values. Use sparingly!
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'id', None, None, ), # 1
-    (2, TType.STRING, 'uuid', None, None, ), # 2
+    (2, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
     (3, TType.STRING, 'type', None, None, ), # 3
     (4, TType.STRING, 'text', None, None, ), # 4
     (5, TType.I64, 'startTime', None, None, ), # 5
     (6, TType.I64, 'endTime', None, None, ), # 6
-    None, # 7
+    (7, TType.STRING, 'processedContent', None, None, ), # 7
     None, # 8
     None, # 9
     (10, TType.LIST, 'lids', (TType.STRUCT,(concrete.language.ttypes.LanguageIdentification, concrete.language.ttypes.LanguageIdentification.thrift_spec)), None, ), # 10
@@ -104,7 +111,7 @@ class Communication(object):
     (20, TType.STRUCT, 'sound', (concrete.audio.ttypes.Sound, concrete.audio.ttypes.Sound.thrift_spec), None, ), # 20
     (21, TType.STRUCT, 'tweetInfo', (concrete.twitter.ttypes.TweetInfo, concrete.twitter.ttypes.TweetInfo.thrift_spec), None, ), # 21
     (22, TType.STRUCT, 'emailInfo', (concrete.email.ttypes.EmailCommunicationInfo, concrete.email.ttypes.EmailCommunicationInfo.thrift_spec), None, ), # 22
-    None, # 23
+    (23, TType.STRUCT, 'nitfInfo', (concrete.nitf.ttypes.NITFInfo, concrete.nitf.ttypes.NITFInfo.thrift_spec), None, ), # 23
     None, # 24
     None, # 25
     None, # 26
@@ -114,13 +121,14 @@ class Communication(object):
     (30, TType.MAP, 'keyValueMap', (TType.STRING,None,TType.STRING,None), None, ), # 30
   )
 
-  def __init__(self, id=None, uuid=None, type=None, text=None, startTime=None, endTime=None, lids=None, sectionSegmentations=None, entityMentionSets=None, entitySets=None, situationMentionSets=None, situationSets=None, sound=None, tweetInfo=None, emailInfo=None, keyValueMap=None,):
+  def __init__(self, id=None, uuid=None, type=None, text=None, startTime=None, endTime=None, processedContent=None, lids=None, sectionSegmentations=None, entityMentionSets=None, entitySets=None, situationMentionSets=None, situationSets=None, sound=None, tweetInfo=None, emailInfo=None, nitfInfo=None, keyValueMap=None,):
     self.id = id
     self.uuid = uuid
     self.type = type
     self.text = text
     self.startTime = startTime
     self.endTime = endTime
+    self.processedContent = processedContent
     self.lids = lids
     self.sectionSegmentations = sectionSegmentations
     self.entityMentionSets = entityMentionSets
@@ -130,6 +138,7 @@ class Communication(object):
     self.sound = sound
     self.tweetInfo = tweetInfo
     self.emailInfo = emailInfo
+    self.nitfInfo = nitfInfo
     self.keyValueMap = keyValueMap
 
   def read(self, iprot):
@@ -147,8 +156,9 @@ class Communication(object):
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -169,6 +179,11 @@ class Communication(object):
       elif fid == 6:
         if ftype == TType.I64:
           self.endTime = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.STRING:
+          self.processedContent = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 10:
@@ -255,6 +270,12 @@ class Communication(object):
           self.emailInfo.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 23:
+        if ftype == TType.STRUCT:
+          self.nitfInfo = concrete.nitf.ttypes.NITFInfo()
+          self.nitfInfo.read(iprot)
+        else:
+          iprot.skip(ftype)
       elif fid == 30:
         if ftype == TType.MAP:
           self.keyValueMap = {}
@@ -281,8 +302,8 @@ class Communication(object):
       oprot.writeString(self.id.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 2)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 2)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.type is not None:
       oprot.writeFieldBegin('type', TType.STRING, 3)
@@ -299,6 +320,10 @@ class Communication(object):
     if self.endTime is not None:
       oprot.writeFieldBegin('endTime', TType.I64, 6)
       oprot.writeI64(self.endTime)
+      oprot.writeFieldEnd()
+    if self.processedContent is not None:
+      oprot.writeFieldBegin('processedContent', TType.STRING, 7)
+      oprot.writeString(self.processedContent.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.lids is not None:
       oprot.writeFieldBegin('lids', TType.LIST, 10)
@@ -353,6 +378,10 @@ class Communication(object):
     if self.emailInfo is not None:
       oprot.writeFieldBegin('emailInfo', TType.STRUCT, 22)
       self.emailInfo.write(oprot)
+      oprot.writeFieldEnd()
+    if self.nitfInfo is not None:
+      oprot.writeFieldBegin('nitfInfo', TType.STRUCT, 23)
+      self.nitfInfo.write(oprot)
       oprot.writeFieldEnd()
     if self.keyValueMap is not None:
       oprot.writeFieldBegin('keyValueMap', TType.MAP, 30)

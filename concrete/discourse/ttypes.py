@@ -8,6 +8,7 @@
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
 import concrete.metadata.ttypes
+import concrete.uuid.ttypes
 
 
 from thrift.transport import TTransport
@@ -30,8 +31,8 @@ class EntityRef(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'entityId', None, None, ), # 1
-    (2, TType.STRING, 'communicationId', None, None, ), # 2
+    (1, TType.STRUCT, 'entityId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'communicationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
   )
 
   def __init__(self, entityId=None, communicationId=None,):
@@ -48,13 +49,15 @@ class EntityRef(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.entityId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.entityId = concrete.uuid.ttypes.UUID()
+          self.entityId.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.STRING:
-          self.communicationId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.communicationId = concrete.uuid.ttypes.UUID()
+          self.communicationId.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -68,12 +71,12 @@ class EntityRef(object):
       return
     oprot.writeStructBegin('EntityRef')
     if self.entityId is not None:
-      oprot.writeFieldBegin('entityId', TType.STRING, 1)
-      oprot.writeString(self.entityId.encode('utf-8'))
+      oprot.writeFieldBegin('entityId', TType.STRUCT, 1)
+      self.entityId.write(oprot)
       oprot.writeFieldEnd()
     if self.communicationId is not None:
-      oprot.writeFieldBegin('communicationId', TType.STRING, 2)
-      oprot.writeString(self.communicationId.encode('utf-8'))
+      oprot.writeFieldBegin('communicationId', TType.STRUCT, 2)
+      self.communicationId.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -108,8 +111,8 @@ class SituationRef(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'situationId', None, None, ), # 1
-    (2, TType.STRING, 'communicationId', None, None, ), # 2
+    (1, TType.STRUCT, 'situationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'communicationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
   )
 
   def __init__(self, situationId=None, communicationId=None,):
@@ -126,13 +129,15 @@ class SituationRef(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.situationId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.situationId = concrete.uuid.ttypes.UUID()
+          self.situationId.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.STRING:
-          self.communicationId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.communicationId = concrete.uuid.ttypes.UUID()
+          self.communicationId.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -146,12 +151,12 @@ class SituationRef(object):
       return
     oprot.writeStructBegin('SituationRef')
     if self.situationId is not None:
-      oprot.writeFieldBegin('situationId', TType.STRING, 1)
-      oprot.writeString(self.situationId.encode('utf-8'))
+      oprot.writeFieldBegin('situationId', TType.STRUCT, 1)
+      self.situationId.write(oprot)
       oprot.writeFieldEnd()
     if self.communicationId is not None:
-      oprot.writeFieldBegin('communicationId', TType.STRING, 2)
-      oprot.writeString(self.communicationId.encode('utf-8'))
+      oprot.writeFieldBegin('communicationId', TType.STRUCT, 2)
+      self.communicationId.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -187,7 +192,7 @@ class DiscourseEntity(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.LIST, 'entityRefList', (TType.STRUCT,(EntityRef, EntityRef.thrift_spec)), None, ), # 2
     (3, TType.DOUBLE, 'confidence', None, None, ), # 3
   )
@@ -207,8 +212,9 @@ class DiscourseEntity(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -238,8 +244,8 @@ class DiscourseEntity(object):
       return
     oprot.writeStructBegin('DiscourseEntity')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.entityRefList is not None:
       oprot.writeFieldBegin('entityRefList', TType.LIST, 2)
@@ -286,7 +292,7 @@ class DiscourseSituation(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.LIST, 'situationRefList', (TType.STRUCT,(SituationRef, SituationRef.thrift_spec)), None, ), # 2
     (3, TType.DOUBLE, 'confidence', None, None, ), # 3
   )
@@ -306,8 +312,9 @@ class DiscourseSituation(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -337,8 +344,8 @@ class DiscourseSituation(object):
       return
     oprot.writeStructBegin('DiscourseSituation')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.situationRefList is not None:
       oprot.writeFieldBegin('situationRefList', TType.LIST, 2)
@@ -386,7 +393,7 @@ class DiscourseAnnotation(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'discourseEntityList', (TType.STRUCT,(DiscourseEntity, DiscourseEntity.thrift_spec)), None, ), # 3
     (4, TType.LIST, 'discourseSituationList', (TType.STRUCT,(DiscourseSituation, DiscourseSituation.thrift_spec)), None, ), # 4
@@ -408,8 +415,9 @@ class DiscourseAnnotation(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -451,8 +459,8 @@ class DiscourseAnnotation(object):
       return
     oprot.writeStructBegin('DiscourseAnnotation')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -511,7 +519,7 @@ class Discourse(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'annotationList', (TType.STRUCT,(DiscourseAnnotation, DiscourseAnnotation.thrift_spec)), None, ), # 3
   )
@@ -531,8 +539,9 @@ class Discourse(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -563,8 +572,8 @@ class Discourse(object):
       return
     oprot.writeStructBegin('Discourse')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)

@@ -8,6 +8,7 @@
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
 import concrete.metadata.ttypes
+import concrete.uuid.ttypes
 
 
 from thrift.transport import TTransport
@@ -43,7 +44,7 @@ class LanguageIdentification(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.MAP, 'languageToProbabilityMap', (TType.STRING,None,TType.DOUBLE,None), None, ), # 3
   )
@@ -63,8 +64,9 @@ class LanguageIdentification(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -95,8 +97,8 @@ class LanguageIdentification(object):
       return
     oprot.writeStructBegin('LanguageIdentification')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)

@@ -9,6 +9,7 @@
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
 import concrete.metadata.ttypes
 import concrete.spans.ttypes
+import concrete.uuid.ttypes
 
 
 from thrift.transport import TTransport
@@ -181,7 +182,7 @@ class TokenRefSequence(object):
     None, # 0
     (1, TType.LIST, 'tokenIndexList', (TType.I32,None), None, ), # 1
     (2, TType.I32, 'anchorTokenIndex', None, -1, ), # 2
-    (3, TType.STRING, 'tokenizationId', None, None, ), # 3
+    (3, TType.STRUCT, 'tokenizationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
     (4, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 4
     (5, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 5
   )
@@ -218,8 +219,9 @@ class TokenRefSequence(object):
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.STRING:
-          self.tokenizationId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.tokenizationId = concrete.uuid.ttypes.UUID()
+          self.tokenizationId.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -256,8 +258,8 @@ class TokenRefSequence(object):
       oprot.writeI32(self.anchorTokenIndex)
       oprot.writeFieldEnd()
     if self.tokenizationId is not None:
-      oprot.writeFieldBegin('tokenizationId', TType.STRING, 3)
-      oprot.writeString(self.tokenizationId.encode('utf-8'))
+      oprot.writeFieldBegin('tokenizationId', TType.STRUCT, 3)
+      self.tokenizationId.write(oprot)
       oprot.writeFieldEnd()
     if self.textSpan is not None:
       oprot.writeFieldBegin('textSpan', TType.STRUCT, 4)
@@ -406,7 +408,7 @@ class TokenTagging(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'taggedTokenList', (TType.STRUCT,(TaggedToken, TaggedToken.thrift_spec)), None, ), # 3
   )
@@ -426,8 +428,9 @@ class TokenTagging(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -458,8 +461,8 @@ class TokenTagging(object):
       return
     oprot.writeStructBegin('TokenTagging')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -478,6 +481,8 @@ class TokenTagging(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.taggedTokenList is None:
+      raise TProtocol.TProtocolException(message='Required field taggedTokenList is unset!')
     return
 
 
@@ -590,7 +595,7 @@ class DependencyParse(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'dependencyList', (TType.STRUCT,(Dependency, Dependency.thrift_spec)), None, ), # 3
   )
@@ -610,8 +615,9 @@ class DependencyParse(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -642,8 +648,8 @@ class DependencyParse(object):
       return
     oprot.writeStructBegin('DependencyParse')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -829,7 +835,7 @@ class Parse(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'constituentList', (TType.STRUCT,(Constituent, Constituent.thrift_spec)), None, ), # 3
   )
@@ -849,8 +855,9 @@ class Parse(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -881,8 +888,8 @@ class Parse(object):
       return
     oprot.writeStructBegin('Parse')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -1283,7 +1290,7 @@ class Tokenization(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'tokenList', (TType.STRUCT,(Token, Token.thrift_spec)), None, ), # 3
     (4, TType.STRUCT, 'lattice', (TokenLattice, TokenLattice.thrift_spec), None, ), # 4
@@ -1294,7 +1301,7 @@ class Tokenization(object):
     (9, TType.STRUCT, 'langIdList', (TokenTagging, TokenTagging.thrift_spec), None, ), # 9
     (10, TType.STRUCT, 'parse', (Parse, Parse.thrift_spec), None, ), # 10
     (11, TType.LIST, 'dependencyParseList', (TType.STRUCT,(DependencyParse, DependencyParse.thrift_spec)), None, ), # 11
-    (12, TType.STRING, 'sentenceId', None, None, ), # 12
+    (12, TType.STRUCT, 'sentenceId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 12
   )
 
   def __init__(self, uuid=None, metadata=None, tokenList=None, lattice=None, kind=None, posTagList=None, nerTagList=None, lemmaList=None, langIdList=None, parse=None, dependencyParseList=None, sentenceId=None,):
@@ -1321,8 +1328,9 @@ class Tokenization(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -1395,8 +1403,9 @@ class Tokenization(object):
         else:
           iprot.skip(ftype)
       elif fid == 12:
-        if ftype == TType.STRING:
-          self.sentenceId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.sentenceId = concrete.uuid.ttypes.UUID()
+          self.sentenceId.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -1410,8 +1419,8 @@ class Tokenization(object):
       return
     oprot.writeStructBegin('Tokenization')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -1460,13 +1469,17 @@ class Tokenization(object):
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.sentenceId is not None:
-      oprot.writeFieldBegin('sentenceId', TType.STRING, 12)
-      oprot.writeString(self.sentenceId.encode('utf-8'))
+      oprot.writeFieldBegin('sentenceId', TType.STRUCT, 12)
+      self.sentenceId.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
   def validate(self):
+    if self.uuid is None:
+      raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.kind is None:
+      raise TProtocol.TProtocolException(message='Required field kind is unset!')
     return
 
 
@@ -1587,7 +1600,7 @@ class Sentence(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.LIST, 'tokenizationList', (TType.STRUCT,(Tokenization, Tokenization.thrift_spec)), None, ), # 2
     (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 3
     (4, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 4
@@ -1609,8 +1622,9 @@ class Sentence(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -1647,8 +1661,8 @@ class Sentence(object):
       return
     oprot.writeStructBegin('Sentence')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.tokenizationList is not None:
       oprot.writeFieldBegin('tokenizationList', TType.LIST, 2)
@@ -1708,10 +1722,10 @@ class SentenceSegmentation(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'sentenceList', (TType.STRUCT,(Sentence, Sentence.thrift_spec)), None, ), # 3
-    (4, TType.STRING, 'sectionId', None, None, ), # 4
+    (4, TType.STRUCT, 'sectionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 4
   )
 
   def __init__(self, uuid=None, metadata=None, sentenceList=None, sectionId=None,):
@@ -1730,8 +1744,9 @@ class SentenceSegmentation(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -1752,8 +1767,9 @@ class SentenceSegmentation(object):
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.STRING:
-          self.sectionId = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.sectionId = concrete.uuid.ttypes.UUID()
+          self.sectionId.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -1767,8 +1783,8 @@ class SentenceSegmentation(object):
       return
     oprot.writeStructBegin('SentenceSegmentation')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -1782,13 +1798,15 @@ class SentenceSegmentation(object):
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.sectionId is not None:
-      oprot.writeFieldBegin('sectionId', TType.STRING, 4)
-      oprot.writeString(self.sectionId.encode('utf-8'))
+      oprot.writeFieldBegin('sectionId', TType.STRUCT, 4)
+      self.sectionId.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
   def validate(self):
+    if self.uuid is None:
+      raise TProtocol.TProtocolException(message='Required field uuid is unset!')
     if self.sentenceList is None:
       raise TProtocol.TProtocolException(message='Required field sentenceList is unset!')
     return
@@ -1918,7 +1936,7 @@ class Section(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.LIST, 'sentenceSegmentation', (TType.STRUCT,(SentenceSegmentation, SentenceSegmentation.thrift_spec)), None, ), # 2
     (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 3
     (4, TType.STRING, 'kind', None, None, ), # 4
@@ -1948,8 +1966,9 @@ class Section(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -2006,8 +2025,8 @@ class Section(object):
       return
     oprot.writeStructBegin('Section')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.sentenceSegmentation is not None:
       oprot.writeFieldBegin('sentenceSegmentation', TType.LIST, 2)
@@ -2075,7 +2094,7 @@ class SectionSegmentation(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'sectionList', (TType.STRUCT,(Section, Section.thrift_spec)), None, ), # 3
   )
@@ -2095,8 +2114,9 @@ class SectionSegmentation(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -2127,8 +2147,8 @@ class SectionSegmentation(object):
       return
     oprot.writeStructBegin('SectionSegmentation')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)

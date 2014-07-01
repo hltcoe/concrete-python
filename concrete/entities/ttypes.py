@@ -9,6 +9,7 @@
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
 import concrete.structure.ttypes
 import concrete.metadata.ttypes
+import concrete.uuid.ttypes
 
 
 from thrift.transport import TTransport
@@ -46,8 +47,8 @@ class Entity(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
-    (2, TType.LIST, 'mentionIdList', (TType.STRING,None), None, ), # 2
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
+    (2, TType.LIST, 'mentionIdList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 2
     (3, TType.STRING, 'type', None, None, ), # 3
     (4, TType.DOUBLE, 'confidence', None, None, ), # 4
     (5, TType.STRING, 'canonicalName', None, None, ), # 5
@@ -70,8 +71,9 @@ class Entity(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -79,7 +81,8 @@ class Entity(object):
           self.mentionIdList = []
           (_etype3, _size0) = iprot.readListBegin()
           for _i4 in xrange(_size0):
-            _elem5 = iprot.readString().decode('utf-8')
+            _elem5 = concrete.uuid.ttypes.UUID()
+            _elem5.read(iprot)
             self.mentionIdList.append(_elem5)
           iprot.readListEnd()
         else:
@@ -110,14 +113,14 @@ class Entity(object):
       return
     oprot.writeStructBegin('Entity')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.mentionIdList is not None:
       oprot.writeFieldBegin('mentionIdList', TType.LIST, 2)
-      oprot.writeListBegin(TType.STRING, len(self.mentionIdList))
+      oprot.writeListBegin(TType.STRUCT, len(self.mentionIdList))
       for iter6 in self.mentionIdList:
-        oprot.writeString(iter6.encode('utf-8'))
+        iter6.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.type is not None:
@@ -169,7 +172,7 @@ class EntitySet(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'entityList', (TType.STRUCT,(Entity, Entity.thrift_spec)), None, ), # 3
   )
@@ -189,8 +192,9 @@ class EntitySet(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -221,8 +225,8 @@ class EntitySet(object):
       return
     oprot.writeStructBegin('EntitySet')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
@@ -293,7 +297,7 @@ class EntityMention(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ), # 2
     (3, TType.STRING, 'entityType', None, None, ), # 3
     (4, TType.STRING, 'phraseType', None, None, ), # 4
@@ -319,8 +323,9 @@ class EntityMention(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -360,8 +365,8 @@ class EntityMention(object):
       return
     oprot.writeStructBegin('EntityMention')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.tokens is not None:
       oprot.writeFieldBegin('tokens', TType.STRUCT, 2)
@@ -426,7 +431,7 @@ class EntityMentionSet(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'uuid', None, None, ), # 1
+    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'mentionSet', (TType.STRUCT,(EntityMention, EntityMention.thrift_spec)), None, ), # 3
   )
@@ -446,8 +451,9 @@ class EntityMentionSet(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRING:
-          self.uuid = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.uuid = concrete.uuid.ttypes.UUID()
+          self.uuid.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -478,8 +484,8 @@ class EntityMentionSet(object):
       return
     oprot.writeStructBegin('EntityMentionSet')
     if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRING, 1)
-      oprot.writeString(self.uuid.encode('utf-8'))
+      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+      self.uuid.write(oprot)
       oprot.writeFieldEnd()
     if self.metadata is not None:
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)

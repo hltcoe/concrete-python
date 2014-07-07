@@ -395,6 +395,9 @@ def validate_token_offsets_for_section(section):
     """
     valid = True
 
+    if section.textSpan == None:
+        return valid
+
     if section.textSpan.start > section.textSpan.ending:
         valid = False
         logging.error(ilm(2, "Section '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
@@ -403,6 +406,8 @@ def validate_token_offsets_for_section(section):
     if section.sentenceSegmentation:
         for sentenceSegmentation in section.sentenceSegmentation:
             for sentence in sentenceSegmentation.sentenceList:
+                if sentence.textSpan == None:
+                    continue
                 if sentence.textSpan.start > sentence.textSpan.ending:
                     valid = False
                     logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
@@ -425,12 +430,17 @@ def validate_token_offsets_for_sentence(sentence):
     """
     valid = True
 
+    if sentence.textSpan == None:
+        return valid
+
     if sentence.textSpan.start > sentence.textSpan.ending:
         valid = False
         logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
     for tokenization in sentence.tokenizationList:
         for token in tokenization.tokenList.tokenList:
+            if token.textSpan == None:
+                continue
             if token.textSpan.start > token.textSpan.ending:
                 valid = False
                 logging.error(ilm(2, "Token in Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %

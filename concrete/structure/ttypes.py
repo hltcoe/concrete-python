@@ -1263,18 +1263,18 @@ class TokenList(object):
   A wrapper around a list of tokens.
 
   Attributes:
-   - tokenList
+   - tokens
    - reconstructedText
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.LIST, 'tokenList', (TType.STRUCT,(Token, Token.thrift_spec)), None, ), # 1
+    (1, TType.LIST, 'tokens', (TType.STRUCT,(Token, Token.thrift_spec)), None, ), # 1
     (2, TType.STRING, 'reconstructedText', None, None, ), # 2
   )
 
-  def __init__(self, tokenList=None, reconstructedText=None,):
-    self.tokenList = tokenList
+  def __init__(self, tokens=None, reconstructedText=None,):
+    self.tokens = tokens
     self.reconstructedText = reconstructedText
 
   def read(self, iprot):
@@ -1288,12 +1288,12 @@ class TokenList(object):
         break
       if fid == 1:
         if ftype == TType.LIST:
-          self.tokenList = []
+          self.tokens = []
           (_etype52, _size49) = iprot.readListBegin()
           for _i53 in xrange(_size49):
             _elem54 = Token()
             _elem54.read(iprot)
-            self.tokenList.append(_elem54)
+            self.tokens.append(_elem54)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1312,10 +1312,10 @@ class TokenList(object):
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('TokenList')
-    if self.tokenList is not None:
-      oprot.writeFieldBegin('tokenList', TType.LIST, 1)
-      oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
-      for iter55 in self.tokenList:
+    if self.tokens is not None:
+      oprot.writeFieldBegin('tokens', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.tokens))
+      for iter55 in self.tokens:
         iter55.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -1327,8 +1327,8 @@ class TokenList(object):
     oprot.writeStructEnd()
 
   def validate(self):
-    if self.tokenList is None:
-      raise TProtocol.TProtocolException(message='Required field tokenList is unset!')
+    if self.tokens is None:
+      raise TProtocol.TProtocolException(message='Required field tokens is unset!')
     return
 
 

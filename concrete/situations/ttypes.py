@@ -348,6 +348,92 @@ class Justification(object):
   def __ne__(self, other):
     return not (self == other)
 
+class TimeML(object):
+  """
+  A wrapper for various TimeML annotations.
+
+  Attributes:
+   - timemlClass: The TimeML class for situations representing TimeML events
+   - timemlTense: The TimeML tense for situations representing TimeML events
+   - timemlAspect: The TimeML aspect for situations representing TimeML events
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'timemlClass', None, None, ), # 1
+    (2, TType.STRING, 'timemlTense', None, None, ), # 2
+    (3, TType.STRING, 'timemlAspect', None, None, ), # 3
+  )
+
+  def __init__(self, timemlClass=None, timemlTense=None, timemlAspect=None,):
+    self.timemlClass = timemlClass
+    self.timemlTense = timemlTense
+    self.timemlAspect = timemlAspect
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.timemlClass = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.timemlTense = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.timemlAspect = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('TimeML')
+    if self.timemlClass is not None:
+      oprot.writeFieldBegin('timemlClass', TType.STRING, 1)
+      oprot.writeString(self.timemlClass.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.timemlTense is not None:
+      oprot.writeFieldBegin('timemlTense', TType.STRING, 2)
+      oprot.writeString(self.timemlTense.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.timemlAspect is not None:
+      oprot.writeFieldBegin('timemlAspect', TType.STRING, 3)
+      oprot.writeString(self.timemlAspect.encode('utf-8'))
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class Situation(object):
   """
   A single situation, along with pointers to situation mentions that
@@ -378,9 +464,7 @@ class Situation(object):
   not appear in the event_type enumeration).
   If this kind is grounded in a token sequence from the original text, the
   appropriate SituationMention should have a reference to the token sequence.
-   - timemlClass: The TimeML class for situations representing TimeML events
-   - timemlTense: The TimeML tense for situations representing TimeML events
-   - timemlAspect: The TimeML aspect for situations representing TimeML events
+   - timeML: A wrapper for TimeML annotations.
    - intensity: An "intensity" rating for this situation, typically ranging from
   0-1. In the case of SENTIMENT situations, this is used to record
   the intensity of the sentiment.
@@ -447,9 +531,9 @@ class Situation(object):
     (51, TType.STRING, 'stateType', None, None, ), # 51
     (52, TType.STRING, 'temporalFactType', None, None, ), # 52
     (53, TType.STRING, 'situationKindLemma', None, None, ), # 53
-    (54, TType.STRING, 'timemlClass', None, None, ), # 54
-    (55, TType.STRING, 'timemlTense', None, None, ), # 55
-    (56, TType.STRING, 'timemlAspect', None, None, ), # 56
+    (54, TType.STRUCT, 'timeML', (TimeML, TimeML.thrift_spec), None, ), # 54
+    None, # 55
+    None, # 56
     None, # 57
     None, # 58
     None, # 59
@@ -596,7 +680,7 @@ class Situation(object):
     (200, TType.DOUBLE, 'confidence', None, None, ), # 200
   )
 
-  def __init__(self, uuid=None, situationType=None, argumentList=None, mentionIdList=None, justificationList=None, eventType=None, stateType=None, temporalFactType=None, situationKindLemma=None, timemlClass=None, timemlTense=None, timemlAspect=None, intensity=None, polarity=None, confidence=None,):
+  def __init__(self, uuid=None, situationType=None, argumentList=None, mentionIdList=None, justificationList=None, eventType=None, stateType=None, temporalFactType=None, situationKindLemma=None, timeML=None, intensity=None, polarity=None, confidence=None,):
     self.uuid = uuid
     self.situationType = situationType
     self.argumentList = argumentList
@@ -606,9 +690,7 @@ class Situation(object):
     self.stateType = stateType
     self.temporalFactType = temporalFactType
     self.situationKindLemma = situationKindLemma
-    self.timemlClass = timemlClass
-    self.timemlTense = timemlTense
-    self.timemlAspect = timemlAspect
+    self.timeML = timeML
     self.intensity = intensity
     self.polarity = polarity
     self.confidence = confidence
@@ -687,18 +769,9 @@ class Situation(object):
         else:
           iprot.skip(ftype)
       elif fid == 54:
-        if ftype == TType.STRING:
-          self.timemlClass = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 55:
-        if ftype == TType.STRING:
-          self.timemlTense = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 56:
-        if ftype == TType.STRING:
-          self.timemlAspect = iprot.readString().decode('utf-8')
+        if ftype == TType.STRUCT:
+          self.timeML = TimeML()
+          self.timeML.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 100:
@@ -771,17 +844,9 @@ class Situation(object):
       oprot.writeFieldBegin('situationKindLemma', TType.STRING, 53)
       oprot.writeString(self.situationKindLemma.encode('utf-8'))
       oprot.writeFieldEnd()
-    if self.timemlClass is not None:
-      oprot.writeFieldBegin('timemlClass', TType.STRING, 54)
-      oprot.writeString(self.timemlClass.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.timemlTense is not None:
-      oprot.writeFieldBegin('timemlTense', TType.STRING, 55)
-      oprot.writeString(self.timemlTense.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.timemlAspect is not None:
-      oprot.writeFieldBegin('timemlAspect', TType.STRING, 56)
-      oprot.writeString(self.timemlAspect.encode('utf-8'))
+    if self.timeML is not None:
+      oprot.writeFieldBegin('timeML', TType.STRUCT, 54)
+      self.timeML.write(oprot)
       oprot.writeFieldEnd()
     if self.intensity is not None:
       oprot.writeFieldBegin('intensity', TType.DOUBLE, 100)

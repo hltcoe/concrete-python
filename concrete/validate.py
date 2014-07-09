@@ -438,7 +438,7 @@ def validate_token_offsets_for_sentence(sentence):
         logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
     for tokenization in sentence.tokenizationList:
-        for token in tokenization.tokenList.tokenList:
+        for token in tokenization.tokenList.tokens:
             if token.textSpan == None:
                 continue
             if token.textSpan.start > token.textSpan.ending:

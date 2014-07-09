@@ -148,7 +148,7 @@ class TestTextspanOffsets(unittest.TestCase):
     def create_sentence_with_token(self, sentence_start, sentence_ending, token_start, token_ending):
         token_textspan = concrete.spans.ttypes.TextSpan(start=token_start, ending=token_ending)
         token = concrete.structure.ttypes.Token(textSpan=token_textspan)
-        tokenization = concrete.structure.ttypes.Tokenization(tokenList=concrete.TokenList(tokenList=[token]))
+        tokenization = concrete.structure.ttypes.Tokenization(tokenList=concrete.TokenList(tokens=[token]))
         sentence_textspan = concrete.spans.ttypes.TextSpan(start=sentence_start, ending=sentence_ending)
         sentence = concrete.structure.ttypes.Sentence(
             tokenizationList=[tokenization],

@@ -41,7 +41,7 @@ setup(
     install_requires = [
         'networkx',
         'testfixtures',
-        'thrift>=0.9.1',
+        'thrift>=0.9.0',
         ],
 
     url = "https://github.com/hltcoe/concrete-python",

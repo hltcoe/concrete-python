@@ -13,9 +13,10 @@ def read_thrift_from_file(thrift_obj, filename):
 
     Return the deserialized thrift object.
     """
-    thrift_bytes = open(filename).read()
+    thrift_file = open(filename)
+    thrift_bytes = thrift_file.read()
     TSerialization.deserialize(thrift_obj, thrift_bytes)
-    thrift_bytes.close()
+    thrift_file.close()
     return thrift_obj
 
 def read_communication_from_file(communication_filename):

@@ -14,9 +14,7 @@ from concrete.validate import validate_communication
 def main():
     comm = create_comm_from_tweet(JSON_TWEET_STRING)
     concrete.util.write_communication_to_file(comm, "tweet.comm")
-
     add_dictionary_tagging(comm)
-
     concrete.util.write_communication_to_file(comm, "tweet_pos.comm")
 
 
@@ -71,7 +69,7 @@ def add_dictionary_tagging(comm):
     """
     dictionary = set()
     for w in open('/usr/share/dict/words'):
-        dictionary.add(w.strip())
+        dictionary.add(w.strip().lower())
 
     if comm.sectionSegmentations:
         for sectionSegmentation in comm.sectionSegmentations:
@@ -87,7 +85,7 @@ def add_dictionary_tagging(comm):
                                     for i, token in enumerate(tokenization.tokenList.tokens):
                                         tt = concrete.TaggedToken()
                                         tt.tokenIndex = i
-                                        if token.text in dictionary:
+                                        if token.text.lower() in dictionary:
                                             tt.tag = "In"
                                         else:
                                             tt.tag = "Out"

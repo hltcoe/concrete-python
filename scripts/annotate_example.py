@@ -10,15 +10,10 @@ import concrete
 import concrete.util
 from concrete.validate import validate_communication
 
-DICTIONARY = set()
-
 
 def main():
     comm = create_comm_from_tweet(JSON_TWEET_STRING)
     concrete.util.write_communication_to_file(comm, "tweet.comm")
-
-    for w in open('/usr/share/dict/words'):
-        DICTIONARY.add(w.strip())
 
     add_dictionary_tagging(comm)
 
@@ -74,6 +69,10 @@ def create_comm_from_tweet(json_tweet_string):
 def add_dictionary_tagging(comm):
     """
     """
+    dictionary = set()
+    for w in open('/usr/share/dict/words'):
+        dictionary.add(w.strip())
+
     if comm.sectionSegmentations:
         for sectionSegmentation in comm.sectionSegmentations:
             for section in sectionSegmentation.sectionList:
@@ -88,7 +87,7 @@ def add_dictionary_tagging(comm):
                                     for i, token in enumerate(tokenization.tokenList.tokens):
                                         tt = concrete.TaggedToken()
                                         tt.tokenIndex = i
-                                        if token.text in DICTIONARY:
+                                        if token.text in dictionary:
                                             tt.tag = "In"
                                         else:
                                             tt.tag = "Out"

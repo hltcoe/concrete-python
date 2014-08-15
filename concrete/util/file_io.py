@@ -34,3 +34,12 @@ def read_tokenlattice_from_file(tokenlattice_filename):
     TokenLattice instance.
     """
     return read_thrift_from_file(TokenLattice(), tokenlattice_filename)
+
+def write_communication_to_file(communication, communication_filename):
+    return write_thrift_to_file(communication, communication_filename)
+
+def write_thrift_to_file(thrift_obj, filename):
+    thrift_bytes = TSerialization.serialize(thrift_obj)
+    thrift_file = open(filename, "w")
+    thrift_file.write(thrift_bytes)
+    thrift_file.close()

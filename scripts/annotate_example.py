@@ -19,7 +19,15 @@ def main():
 
 
 def create_comm_from_tweet(json_tweet_string):
-    """
+    """Create a Concrete Communication from a JSON Tweet string
+
+    Args:
+        json_tweet_string: A JSON string for a Tweet, using the JSON
+            format specified by the Twitter API:
+              https://dev.twitter.com/docs/platform-objects/tweets
+
+    Returns:
+        A Concrete Communication object
     """
     tweet_data = json.loads(json_tweet_string)
 
@@ -65,7 +73,17 @@ def create_comm_from_tweet(json_tweet_string):
 
 
 def add_dictionary_tagging(comm):
-    """
+    """Adds In/Out of dictionary 'POS' tags to a Communication
+
+    Takes a Concrete Communication, adds a Part-Of-Speech tag to each
+    token, where the tags record whether the token is 'In' or 'Out' of
+    the system dictionary.
+
+    Args:
+        comm: A Concrete Communication with tokens
+
+    Returns:
+        A copy of the original Communication, with POS tags added
     """
     dictionary = set()
     for w in open('/usr/share/dict/words'):

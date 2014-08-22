@@ -509,7 +509,7 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
             except IndexError:
                 valid = False
                 logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenIndex (%d)" %
-                                  (token_ref_sequence.uuid.uuidString, tokenIndex)))
+                                  (token_ref_sequence.tokenizationId.uuidString, tokenIndex)))
     return valid
 
 

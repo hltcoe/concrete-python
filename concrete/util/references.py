@@ -6,20 +6,21 @@ def add_references_to_communication(comm):
     Concrete objects.  This function adds member variables to Concrete
     objects that link to the Concrete objects pointed to by the UUIDs.
 
-    For example, each EntityMention object has a 'tokenizationId'
-    variable that gives the UUID of a Tokenization object.  This
-    function adds a 'tokenization' variable to the EntityMention that
-    is a reference to the actual Tokenization object.  This allows you
-    to access the tokenization using:
+    For example, each Entity has a 'mentionIdlist' that lists the
+    UUIDs of the EntityMentions for that Entity.  This function adds a
+    'mentionList' variable to the Entity that is a list of references
+    to the actual EntityMention objects.  This allows you to access
+    the EntityMentions using:
 
-      entityMention.tokenization
+      entity.mentionList
 
     This function adds:
-    - a 'tokenization' variable to each EntityMention
+    - a 'tokenization' variable to each TokenRefSequence
     - a 'mentionList' to each Entity
     - an 'entityMention' to an Argument if the Argument has an 'entityMentionId'
     - a 'situationMention' to an Argument if the Argument has a 'situationMentionId'
     - a 'mentionList' to a Situation if the Situation has a 'mentionIdList'
+
     """
 #    comm.dependencyParseForUUID = {}
     comm.entityForUUID = {}
@@ -71,7 +72,7 @@ def add_references_to_communication(comm):
                     if argument.situationMentionId:
                         argument.situationMention = comm.situationMentionForUUID[argument.situationMentionId.uuidString]
                 if situationMention.tokens:
-                    situationMention.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
+                    situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
 
     if comm.situationSets:
         for situationSet in comm.situationSets:

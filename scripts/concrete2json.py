@@ -19,13 +19,10 @@ def main():
 
     parser = argparse.ArgumentParser(description="Pretty Print a Concrete file")
     parser.add_argument('concrete_file')
-    parser.add_argument('concrete_type', default='communication')
+    parser.add_argument('concrete_type', default='communication', choices=type_to_fn.keys(),
+                        help='Default: communication')
     parser.add_argument('json_file', nargs='?', default='STDOUT')
     args = parser.parse_args()
-
-    if args.concrete_type not in type_to_fn.keys():
-        print "This script does not support file type: {}".format(args.concrete_type)
-        exit(1)
 
     conc_obj = type_to_fn[args.concrete_type](args.concrete_file)
 

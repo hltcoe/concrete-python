@@ -18,9 +18,9 @@ def main():
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
     parser = argparse.ArgumentParser(description="Pretty Print a Concrete file")
-    parser.add_argument('concrete_file')
-    parser.add_argument('concrete_type', default='communication', choices=type_to_fn.keys(),
+    parser.add_argument('--concrete_type', default='communication', choices=type_to_fn.keys(),
                         help='Default: communication')
+    parser.add_argument('concrete_file')
     parser.add_argument('json_file', nargs='?', default='STDOUT')
     args = parser.parse_args()
 

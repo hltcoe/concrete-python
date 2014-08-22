@@ -14,11 +14,8 @@ Current validation checks:
     point to a valid tokenization uuid?
   - for each entity, do all the entity's entityMentionId's point to a
     valid entityMention uuid?
-
-
-TODO: Validate...
-  - SituationMention.tokens
-  - other TokenRefSequences
+  - for each TokenRefSequence, are the token indices valid indices
+    into the corresponding tokenization?
 """
 
 import logging
@@ -77,11 +74,12 @@ def validate_communication(comm):
                                               (sentence.uuid, len(sentence.tokenizationList))))
                             valid &= validate_token_offsets_for_sentence(sentence)
                             for tokenization in sentence.tokenizationList:
-                                valid &= validate_constituency_parse(tokenization)
+                                valid &= validate_constituency_parse(comm, tokenization)
                                 valid &= validate_dependency_parses(tokenization)
 
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)
+    valid &= validate_entity_mention_token_ref_sequences(comm)
     valid &= validate_situations(comm)
     valid &= validate_situation_mentions(comm)
 
@@ -161,6 +159,27 @@ def get_situation_mention_uuidString_set(comm):
     return situation_mention_uuidString_set
 
 
+def get_tokenization_uuidString_dict(comm):
+    """
+    Args:
+      comm (concrete.structure.ttypes.Communication)
+
+    Returns:
+      dictionary mapping uuidStrings to Tokenizations
+    """
+    if not hasattr(comm, '_tokenization_uuidString_dict'):
+        comm._tokenization_uuidString_dict = {}
+        if comm.sectionSegmentations:
+            for sectionSegmentation in comm.sectionSegmentations:
+                for section in sectionSegmentation.sectionList:
+                    if section.sentenceSegmentation:
+                        for sentenceSegmentation in section.sentenceSegmentation:
+                            for sentence in sentenceSegmentation.sentenceList:
+                                for tokenization in sentence.tokenizationList:
+                                    comm._tokenization_uuidString_dict[tokenization.uuid.uuidString] = tokenization
+    return comm._tokenization_uuidString_dict
+
+
 def get_tokenization_uuidString_set(comm):
     """
     Args:
@@ -198,7 +217,7 @@ def ilm(indent_level, log_message):
     return "  " * indent_level + log_message
 
 
-def validate_constituency_parse(tokenization):
+def validate_constituency_parse(comm, tokenization):
     """
     Args:
       tokenization (concrete.structure.ttypes.Tokenization)
@@ -230,6 +249,9 @@ def validate_constituency_parse(tokenization):
             #   "Typically, this field will only be defined for leaf constituents (i.e., constituents with no children)."
             if constituent.tokenSequence and constituent.tokenSequence.tokenizationId != tokenization.uuid:
                 total_uuid_mismatches += 1
+
+            if constituent.tokenSequence:
+                valid &= validate_token_ref_sequence(comm, constituent.tokenSequence)
 
         if total_uuid_mismatches > 0:
             valid = False
@@ -327,6 +349,16 @@ def validate_entity_mention_tokenization_ids(comm):
     return valid
 
 
+def validate_entity_mention_token_ref_sequences(comm):
+    valid = True
+    if comm.entityMentionSets:
+        for entityMentionSet in comm.entityMentionSets:
+            if entityMentionSet.mentionSet:
+                for entityMention in entityMentionSet.mentionSet:
+                    valid &= validate_token_ref_sequence(comm, entityMention.tokens)
+    return valid
+
+
 def validate_situation_mentions(comm):
     valid = True
     entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
@@ -336,6 +368,8 @@ def validate_situation_mentions(comm):
         for situationMentionSet in comm.situationMentionSets:
             if situationMentionSet.mentionList:
                 for situationMention in situationMentionSet.mentionList:
+                    if situationMention.tokens:
+                        valid &= validate_token_ref_sequence(comm, situationMention.tokens)
                     for mentionArgument in situationMention.argumentList:
                         if mentionArgument.entityMentionId and \
                            mentionArgument.entityMentionId.uuidString not in entity_mention_uuidString_set:
@@ -379,6 +413,8 @@ def validate_situations(comm):
                                 valid = False
                                 logging.error(ilm(2, "Justification for Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
                                                   (situation.uuid, justification.mentionId, situationSet.metadata.tool)))
+                            if justification.tokens:
+                                valid &= validate_token_ref_sequence(comm, justification.tokens)
                     if situation.mentionIdList:
                         for mentionId in situation.mentionIdList:
                             if mentionId.uuidString not in situation_mention_uuidString_set:
@@ -435,7 +471,7 @@ def validate_token_offsets_for_sentence(sentence):
 
     if sentence.textSpan.start > sentence.textSpan.ending:
         valid = False
-        logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+        logging.error(ilm(7, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
     for tokenization in sentence.tokenizationList:
         for token in tokenization.tokenList.tokens:
@@ -443,16 +479,37 @@ def validate_token_offsets_for_sentence(sentence):
                 continue
             if token.textSpan.start > token.textSpan.ending:
                 valid = False
-                logging.error(ilm(2, "Token in Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+                logging.error(ilm(7, "Token in Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                                   (sentence.uuid, token.textSpan.start, token.textSpan.ending)))
             elif (token.textSpan.start < sentence.textSpan.start) or \
                  (token.textSpan.start > sentence.textSpan.ending) or \
                  (token.textSpan.ending < sentence.textSpan.start) or \
                  (token.textSpan.ending > sentence.textSpan.ending):
                 valid = False
-                logging.error(ilm(2, "Token in Sentence '%s' has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
+                logging.error(ilm(7, "Token in Sentence '%s' has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
                                   (sentence.uuid, token.textSpan.start, token.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
 
+    return valid
+
+
+def validate_token_ref_sequence(comm, token_ref_sequence):
+    valid = True
+
+    tokenization_mapping = get_tokenization_uuidString_dict(comm)
+
+    if token_ref_sequence.tokenizationId.uuidString not in tokenization_mapping:
+        valid = False
+        logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenizationId (%s)" %
+                          (token_ref_sequence.uuid.uuidString, token_ref_sequence.tokenizationId.uuidString)))
+    else:
+        tokenization = tokenization_mapping[token_ref_sequence.tokenizationId.uuidString]
+        for tokenIndex in token_ref_sequence.tokenIndexList:
+            try:
+                tokenization.tokenList.tokens[tokenIndex]
+            except IndexError:
+                valid = False
+                logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenIndex (%d)" %
+                                  (token_ref_sequence.uuid.uuidString, tokenIndex)))
     return valid
 
 

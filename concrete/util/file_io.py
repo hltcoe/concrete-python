@@ -4,6 +4,7 @@
 from thrift import TSerialization
 
 from concrete import Communication, TokenLattice
+from concrete.util.references import add_references_to_communication
 
 
 def read_thrift_from_file(thrift_obj, filename):
@@ -25,7 +26,9 @@ def read_communication_from_file(communication_filename):
     reads the Communication from the file and returns an instantiated
     Communication instance.
     """
-    return read_thrift_from_file(Communication(), communication_filename)
+    comm = read_thrift_from_file(Communication(), communication_filename)
+    add_references_to_communication(comm)
+    return comm
 
 def read_tokenlattice_from_file(tokenlattice_filename):
     """

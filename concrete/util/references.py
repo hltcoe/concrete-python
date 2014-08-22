@@ -51,7 +51,7 @@ def add_references_to_communication(comm):
         for entityMentionSet in comm.entityMentionSets:
             for entityMention in entityMentionSet.mentionSet:
                 comm.entityMentionForUUID[entityMention.uuid.uuidString] = entityMention
-                entityMention.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
+                entityMention.tokens.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
 
     if comm.entitySets:
         for entitySet in comm.entitySets:

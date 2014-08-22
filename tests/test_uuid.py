@@ -20,3 +20,7 @@ class TestUUID(unittest.TestCase):
         comm.type = "Test Communication"
         comm.uuid = generate_UUID()
         self.assertTrue(validate_communication(comm))
+
+
+if __name__ == '__main__':
+    unittest.main(buffer=True)

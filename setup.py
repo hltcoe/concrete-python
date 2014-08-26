@@ -33,6 +33,7 @@ setup(
 
     scripts = [
         'scripts/concrete2json.py',
+        'scripts/concrete_dump.py',
         'scripts/validate_communication.py',
         ],
 

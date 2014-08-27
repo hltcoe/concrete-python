@@ -93,6 +93,7 @@ def print_pos_tags_for_communication(comm):
     """
     tokenizations = get_tokenizations(comm)
     for tokenization in tokenizations:
+        head_list = get_conll_head_tags_for_tokenization(tokenization)
         if tokenization.tokenList and tokenization.posTagList:
             tag_for_tokenIndex = {}
             for taggedToken in tokenization.posTagList.taggedTokenList:
@@ -102,7 +103,7 @@ def print_pos_tags_for_communication(comm):
                     pos_tag = tag_for_tokenIndex[i]
                 except IndexError:
                     pos_tag = ""
-                print "%d\t%s\t%s" % (i+1, token.text, pos_tag)
+                print "%d\t%s\t%s\t%s" % (i+1, token.text, pos_tag, head_list[i])
             print
 
 
@@ -221,6 +222,46 @@ def get_entity_number_for_entityMention_uuid(comm):
                     entity_number_for_entityMention_uuid[entityMention.uuid.uuidString] = entity_number_counter
                 entity_number_counter += 1
     return entity_number_for_entityMention_uuid
+
+
+def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0):
+    """Get a list of ConLL 'HEAD tags' for a tokenization
+
+    In the ConLL data format:
+
+        http://ufal.mff.cuni.cz/conll2009-st/task-description.html
+
+    the HEAD for a token is the (1-indexed) index of that token's
+    parent token.  The root token of the dependency parse has a HEAD
+    index of 0.
+
+    Args:
+        tokenization: A Concrete Tokenization object
+
+    Returns:
+        A list of ConLL 'HEAD tag' strings, with one HEAD tag for each
+        token in the supplied tokenization.  If a token does not have
+        a HEAD tag (e.g. punctuation tokens), the HEAD tag is an empty
+        string.
+
+        If the tokenization does not have a Dependency Parse, this
+        function returns a list of empty strings for each token in the
+        supplied tokenization.
+    """
+    if tokenization.tokenList:
+        # Tokens that are not part of the dependency parse
+        # (e.g. punctuation) are represented using an empty string
+        head_list = [""]*len(tokenization.tokenList.tokens)
+
+        if tokenization.dependencyParseList:
+            for dependency in tokenization.dependencyParseList[dependency_parse_index].dependencyList:
+                if dependency.gov is None:
+                    head_list[dependency.dep] = 0
+                else:
+                    head_list[dependency.dep] = dependency.gov + 1
+        return head_list
+    else:
+        return []
 
 
 def get_tokenizations(comm):

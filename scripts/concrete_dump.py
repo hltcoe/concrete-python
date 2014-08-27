@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-"""Command-line utility to print human-readable information about a
-Communication to stdout
+"""Print human-readable information about a Communication to stdout
+
+concrete_dump.py is a command-line script for printing out information
+about a Concrete Communication.
 """
 
 import argparse
@@ -12,16 +14,18 @@ import concrete.util
 
 def main():
     parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
-    parser.add_argument("--lemmas", help="",
+    parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-like' format",
                         action="store_true")
-    parser.add_argument("--mentions", help="",
+    parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
+                        "using <ENTITY ID=x> tags, where 'x' is the (zero-indexed) entity number",
                         action="store_true")
-    parser.add_argument("--ner", help="Print Named Entity Recognition tags in 'pseudo-ConLL' format",
+    parser.add_argument("--ner", help="Print Named Entity Recognition token tags in 'ConLL-like' format",
                         action="store_true")
-    parser.add_argument("--pos", help="Print Part-Of-Speech tags in 'pseudo-ConLL' format",
+    parser.add_argument("--pos", help="Print Part-Of-Speech token tags in 'ConLL-like' format",
                         action="store_true")
     parser.add_argument("--tokens", help="Print whitespace-seperated tokens for *all* Tokenizations in a "
-                        "Communication.  There is one line per sentence, and section breaks are marked by '-'",
+                        "Communication.  Each sentence tokenization is printed on a separate line, and "
+                        "empty lines indicate a section break",
                         action="store_true")
     parser.add_argument("--treebank", help="Print Penn-Treebank style parse trees for *all* Constituent "
                         "Parses in the Communication",
@@ -34,7 +38,7 @@ def main():
     if args.lemmas:
         print_lemma_tags_for_communication(comm)
     elif args.mentions:
-        print_tokens_with_entity_mentions(comm)
+        print_tokens_with_entityMentions(comm)
     elif args.ner:
         print_ner_tags_for_communication(comm)
     elif args.pos:
@@ -52,8 +56,8 @@ def print_lemma_tags_for_communication(comm):
     for tokenization in tokenizations:
         if tokenization.tokenList and tokenization.lemmaList:
             tag_for_tokenIndex = {}
-            for tagged_token in tokenization.lemmaList.taggedTokenList:
-                tag_for_tokenIndex[tagged_token.tokenIndex] = tagged_token.tag
+            for taggedToken in tokenization.lemmaList.taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
             for i, token in enumerate(tokenization.tokenList.tokens):
                 try:
                     lemma_tag = tag_for_tokenIndex[i]
@@ -70,8 +74,8 @@ def print_ner_tags_for_communication(comm):
     for tokenization in tokenizations:
         if tokenization.tokenList and tokenization.nerTagList:
             tag_for_tokenIndex = {}
-            for tagged_token in tokenization.nerTagList.taggedTokenList:
-                tag_for_tokenIndex[tagged_token.tokenIndex] = tagged_token.tag
+            for taggedToken in tokenization.nerTagList.taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
             for i, token in enumerate(tokenization.tokenList.tokens):
                 try:
                     ner_tag = tag_for_tokenIndex[i]
@@ -90,8 +94,8 @@ def print_pos_tags_for_communication(comm):
     for tokenization in tokenizations:
         if tokenization.tokenList and tokenization.posTagList:
             tag_for_tokenIndex = {}
-            for tagged_token in tokenization.posTagList.taggedTokenList:
-                tag_for_tokenIndex[tagged_token.tokenIndex] = tagged_token.tag
+            for taggedToken in tokenization.posTagList.taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
             for i, token in enumerate(tokenization.tokenList.tokens):
                 try:
                     pos_tag = tag_for_tokenIndex[i]
@@ -101,37 +105,38 @@ def print_pos_tags_for_communication(comm):
             print
 
 
-def print_tokens_with_entity_mentions(comm):
-    entity_mentions_by_tokenization_id = get_entity_mentions_by_tokenization_id(comm)
-    entity_number_for_entity_mention_id = get_entity_numbers_for_entity_mention_ids(comm)
-    tokenizations_by_section = get_tokenizations_by_section(comm)
+def print_tokens_with_entityMentions(comm):
+    entityMentions_by_tokenizationId = get_entityMentions_by_tokenizationId(comm)
+    entity_number_for_entityMention_uuid = get_entity_number_for_entityMention_uuid(comm)
+    tokenizations_by_section = get_tokenizations_grouped_by_section(comm)
 
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
             if tokenization.tokenList:
                 text_tokens = [token.text for token in tokenization.tokenList.tokens]
-                if tokenization.uuid.uuidString in entity_mentions_by_tokenization_id:
-                    for entity_mention in entity_mentions_by_tokenization_id[tokenization.uuid.uuidString]:
-                        first_token_index = entity_mention.tokens.tokenIndexList[0]
-                        last_token_index = entity_mention.tokens.tokenIndexList[-1]
-                        entity_number = entity_number_for_entity_mention_id[entity_mention.uuid.uuidString]
+                if tokenization.uuid.uuidString in entityMentions_by_tokenizationId:
+                    for entityMention in entityMentions_by_tokenizationId[tokenization.uuid.uuidString]:
+                        # TODO: Handle non-contiguous tokens in a tokenIndexLists
+                        first_token_index = entityMention.tokens.tokenIndexList[0]
+                        last_token_index = entityMention.tokens.tokenIndexList[-1]
+                        entity_number = entity_number_for_entityMention_uuid[entityMention.uuid.uuidString]
                         text_tokens[first_token_index] = "<ENTITY ID=%d>%s" % (entity_number, text_tokens[first_token_index])
                         text_tokens[last_token_index] = "%s</ENTITY>" % text_tokens[last_token_index]
                 print " ".join(text_tokens)
-        print "-"
+        print
 
 
 def print_tokens_for_communication(comm):
     """
     """
-    tokenizations_by_section = get_tokenizations_by_section(comm)
+    tokenizations_by_section = get_tokenizations_grouped_by_section(comm)
 
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
             if tokenization.tokenList:
                 text_tokens = [token.text for token in tokenization.tokenList.tokens]
                 print " ".join(text_tokens)
-        print "-"
+        print
 
 
 def print_penn_treebank_for_communication(comm):
@@ -173,27 +178,27 @@ def penn_treebank_for_parse(parse):
     return _traverse_parse(parse.constituentList, 0)
 
 
-def get_entity_mentions_by_tokenization_id(comm):
+def get_entityMentions_by_tokenizationId(comm):
     """Get entity mentions for a Communication grouped by Tokenization UUID string
 
     Args:
         comm: A Concrete Communication object
 
     Returns:
-        A dictionary lists of EntityMentions, where the dictionary
+        A dictionary of lists of EntityMentions, where the dictionary
         keys are Tokenization UUID strings.
     """
-    mentions_by_tokenization_id = defaultdict(list)
+    mentions_by_tokenizationId = defaultdict(list)
     if comm.entitySets:
         for entitySet in comm.entitySets:
             for entity in entitySet.entityList:
                 for entityMention in entity.mentionList:
-                    mentions_by_tokenization_id[entityMention.tokens.tokenizationId.uuidString].append(entityMention)
-    return mentions_by_tokenization_id
+                    mentions_by_tokenizationId[entityMention.tokens.tokenizationId.uuidString].append(entityMention)
+    return mentions_by_tokenizationId
 
 
-def get_entity_numbers_for_entity_mention_ids(comm):
-    """Create mapping from EntityMention UUID to (zero-indexed) "Entity Number"
+def get_entity_number_for_entityMention_uuid(comm):
+    """Create mapping from EntityMention UUID to (zero-indexed) 'Entity Number'
 
     Args:
         comm: A Concrete Communication object
@@ -203,18 +208,17 @@ def get_entity_numbers_for_entity_mention_ids(comm):
         and the values are "Entity Numbers", where the first Entity is
         assigned number 0, the second Entity is assigned number 1,
         etc.
-
     """
-    entity_numbers_for_entity_mention_ids = {}
+    entity_number_for_entityMention_uuid = {}
     entity_number_counter = 0
 
     if comm.entitySets:
         for entitySet in comm.entitySets:
             for entity in entitySet.entityList:
                 for entityMention in entity.mentionList:
-                    entity_numbers_for_entity_mention_ids[entityMention.uuid.uuidString] = entity_number_counter
+                    entity_number_for_entityMention_uuid[entityMention.uuid.uuidString] = entity_number_counter
                 entity_number_counter += 1
-    return entity_numbers_for_entity_mention_ids
+    return entity_number_for_entityMention_uuid
 
 
 def get_tokenizations(comm):
@@ -239,7 +243,7 @@ def get_tokenizations(comm):
     return tokenizations
 
 
-def get_tokenizations_by_section(comm):
+def get_tokenizations_grouped_by_section(comm):
     """Returns a list of lists of Tokenization objects in a Communication
 
     Args:

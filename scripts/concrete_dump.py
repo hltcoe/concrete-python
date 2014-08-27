@@ -15,6 +15,8 @@ import concrete.util
 
 def main():
     parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
+    parser.add_argument("--dependency", help="Print HEAD tags for first dependency parse in 'ConLL-like' format",
+                        action="store_true")
     parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-like' format",
                         action="store_true")
     parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
@@ -36,75 +38,54 @@ def main():
 
     comm = concrete.util.read_communication_from_file(args.communication_file)
 
-    if args.lemmas:
-        print_lemma_tags_for_communication(comm)
+    if args.dependency or args.lemmas or args.ner or args.pos:
+        print_conll_style_tags_for_communication(
+            comm, dependency=args.dependency, lemmas=args.lemmas, ner=args.ner, pos=args.pos)
     elif args.mentions:
         print_tokens_with_entityMentions(comm)
-    elif args.ner:
-        print_ner_tags_for_communication(comm)
-    elif args.pos:
-        print_pos_tags_for_communication(comm)
     elif args.tokens:
         print_tokens_for_communication(comm)
     elif args.treebank:
         print_penn_treebank_for_communication(comm)
 
 
-def print_lemma_tags_for_communication(comm):
-    """Print Lemma token tags in a "ConLL-like" format
+def print_conll_style_tags_for_communication(comm, dependency=False, lemmas=False, ner=False, pos=False):
+    """Print 'ConLL-like' tags for the tokens in a Communication
+
+    Args:
+        comm: A Concrete Communication object
+        dependency: A boolean flag for printing dependency parse HEAD tags
+        lemmas: A boolean flag for printing lemma tags
+        ner: A boolean flag for printing Named Entity Recognition tags
+        pos: A boolean flag for printing Part-of-Speech tags
     """
-    tokenizations = get_tokenizations(comm)
-    for tokenization in tokenizations:
-        if tokenization.tokenList and tokenization.lemmaList:
-            tag_for_tokenIndex = {}
-            for taggedToken in tokenization.lemmaList.taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
-                try:
-                    lemma_tag = tag_for_tokenIndex[i]
-                except IndexError:
-                    lemma_tag = ""
-                print "%d\t%s\t%s" % (i+1, token.text, lemma_tag)
-            print
+    for tokenization in get_tokenizations(comm):
+        token_taggings = []
+        if lemmas and tokenization.lemmaList:
+            token_taggings.append(get_lemma_tags_for_tokenization(tokenization))
+        if pos and tokenization.posTagList:
+            token_taggings.append(get_pos_tags_for_tokenization(tokenization))
+        if ner and tokenization.nerTagList:
+            token_taggings.append(get_ner_tags_for_tokenization(tokenization))
+        if dependency and tokenization.dependencyParseList:
+            token_taggings.append(get_conll_head_tags_for_tokenization(tokenization))
+        print_conll_style_tags_for_tokenization(tokenization, token_taggings)
+        print
 
 
-def print_ner_tags_for_communication(comm):
-    """Print Named Entity Recognition (NER) tags in a "ConLL-like" format
+def print_conll_style_tags_for_tokenization(tokenization, token_taggings):
+    """Print 'ConLL-like' tags for the tokens in a tokenization
+
+    Args:
+        tokenization: A Concrete Tokenization object
+        token_taggings: A list of lists of token tag strings
     """
-    tokenizations = get_tokenizations(comm)
-    for tokenization in tokenizations:
-        if tokenization.tokenList and tokenization.nerTagList:
-            tag_for_tokenIndex = {}
-            for taggedToken in tokenization.nerTagList.taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
-                try:
-                    ner_tag = tag_for_tokenIndex[i]
-                except IndexError:
-                    ner_tag = ""
-                if ner_tag == "NONE":
-                    ner_tag = ""
-                print "%d\t%s\t%s" % (i+1, token.text, ner_tag)
-            print
-
-
-def print_pos_tags_for_communication(comm):
-    """Print Part of Speech (POS) tags in a "ConLL-like" format
-    """
-    tokenizations = get_tokenizations(comm)
-    for tokenization in tokenizations:
-        head_list = get_conll_head_tags_for_tokenization(tokenization)
-        if tokenization.tokenList and tokenization.posTagList:
-            tag_for_tokenIndex = {}
-            for taggedToken in tokenization.posTagList.taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
-                try:
-                    pos_tag = tag_for_tokenIndex[i]
-                except IndexError:
-                    pos_tag = ""
-                print "%d\t%s\t%s\t%s" % (i+1, token.text, pos_tag, head_list[i])
-            print
+    if tokenization.tokenList:
+        for i, token in enumerate(tokenization.tokenList.tokens):
+            token_tags = [str(token_tagging[i]) for token_tagging in token_taggings]
+            fields = [str(i+1), token.text]
+            fields.extend(token_tags)
+            print "\t".join(fields)
 
 
 def print_tokens_with_entityMentions(comm):
@@ -181,6 +162,46 @@ def penn_treebank_for_parse(parse):
     return _traverse_parse(sorted_nodes, 0)
 
 
+def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0):
+    """Get a list of ConLL 'HEAD tags' for a tokenization
+
+    In the ConLL data format:
+
+        http://ufal.mff.cuni.cz/conll2009-st/task-description.html
+
+    the HEAD for a token is the (1-indexed) index of that token's
+    parent token.  The root token of the dependency parse has a HEAD
+    index of 0.
+
+    Args:
+        tokenization: A Concrete Tokenization object
+
+    Returns:
+        A list of ConLL 'HEAD tag' strings, with one HEAD tag for each
+        token in the supplied tokenization.  If a token does not have
+        a HEAD tag (e.g. punctuation tokens), the HEAD tag is an empty
+        string.
+
+        If the tokenization does not have a Dependency Parse, this
+        function returns a list of empty strings for each token in the
+        supplied tokenization.
+    """
+    if tokenization.tokenList:
+        # Tokens that are not part of the dependency parse
+        # (e.g. punctuation) are represented using an empty string
+        head_list = [""]*len(tokenization.tokenList.tokens)
+
+        if tokenization.dependencyParseList:
+            for dependency in tokenization.dependencyParseList[dependency_parse_index].dependencyList:
+                if dependency.gov is None:
+                    head_list[dependency.dep] = 0
+                else:
+                    head_list[dependency.dep] = dependency.gov + 1
+        return head_list
+    else:
+        return []
+
+
 def get_entityMentions_by_tokenizationId(comm):
     """Get entity mentions for a Communication grouped by Tokenization UUID string
 
@@ -224,44 +245,71 @@ def get_entity_number_for_entityMention_uuid(comm):
     return entity_number_for_entityMention_uuid
 
 
-def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0):
-    """Get a list of ConLL 'HEAD tags' for a tokenization
-
-    In the ConLL data format:
-
-        http://ufal.mff.cuni.cz/conll2009-st/task-description.html
-
-    the HEAD for a token is the (1-indexed) index of that token's
-    parent token.  The root token of the dependency parse has a HEAD
-    index of 0.
+def get_lemma_tags_for_tokenization(tokenization):
+    """Get lemma tags for a tokenization
 
     Args:
         tokenization: A Concrete Tokenization object
 
     Returns:
-        A list of ConLL 'HEAD tag' strings, with one HEAD tag for each
-        token in the supplied tokenization.  If a token does not have
-        a HEAD tag (e.g. punctuation tokens), the HEAD tag is an empty
-        string.
-
-        If the tokenization does not have a Dependency Parse, this
-        function returns a list of empty strings for each token in the
-        supplied tokenization.
+        A list of lemma tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        # Tokens that are not part of the dependency parse
-        # (e.g. punctuation) are represented using an empty string
-        head_list = [""]*len(tokenization.tokenList.tokens)
+        lemma_tags = [""]*len(tokenization.tokenList.tokens)
+        if tokenization.lemmaList:
+            tag_for_tokenIndex = {}
+            for taggedToken in tokenization.lemmaList.taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
+            for i, token in enumerate(tokenization.tokenList.tokens):
+                if i in tag_for_tokenIndex:
+                    lemma_tags[i] = tag_for_tokenIndex[i]
+        return lemma_tags
 
-        if tokenization.dependencyParseList:
-            for dependency in tokenization.dependencyParseList[dependency_parse_index].dependencyList:
-                if dependency.gov is None:
-                    head_list[dependency.dep] = 0
-                else:
-                    head_list[dependency.dep] = dependency.gov + 1
-        return head_list
-    else:
-        return []
+
+def get_ner_tags_for_tokenization(tokenization):
+    """Get Named Entity Recognition tags for a tokenization
+
+    Args:
+        tokenization: A Concrete Tokenization object
+
+    Returns:
+        A list of NER tags for each token in the Tokenization
+    """
+    if tokenization.tokenList:
+        ner_tags = [""]*len(tokenization.tokenList.tokens)
+        if tokenization.nerTagList:
+            tag_for_tokenIndex = {}
+            for taggedToken in tokenization.nerTagList.taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
+            for i, token in enumerate(tokenization.tokenList.tokens):
+                try:
+                    ner_tags[i] = tag_for_tokenIndex[i]
+                except IndexError:
+                    ner_tags[i] = ""
+                if ner_tags[i] == "NONE":
+                    ner_tags[i] = ""
+        return ner_tags
+
+
+def get_pos_tags_for_tokenization(tokenization):
+    """Get Part-of-Speech tags for a tokenization
+
+    Args:
+        tokenization: A Concrete Tokenization object
+
+    Returns:
+        A list of POS tags for each token in the Tokenization
+    """
+    if tokenization.tokenList:
+        pos_tags = [""]*len(tokenization.tokenList.tokens)
+        if tokenization.posTagList:
+            tag_for_tokenIndex = {}
+            for taggedToken in tokenization.posTagList.taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
+            for i, token in enumerate(tokenization.tokenList.tokens):
+                if i in tag_for_tokenIndex:
+                    pos_tags[i] = tag_for_tokenIndex[i]
+        return pos_tags
 
 
 def get_tokenizations(comm):

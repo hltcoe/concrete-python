@@ -8,6 +8,7 @@ about a Concrete Communication.
 
 import argparse
 from collections import defaultdict
+from operator import attrgetter
 
 import concrete.util
 
@@ -166,16 +167,17 @@ def penn_treebank_for_parse(parse):
         indent += len(nodes[node_index].tag) + 2
         if nodes[node_index].childList:
             s += "(%s " % nodes[node_index].tag
-            for i, node_index in enumerate(nodes[node_index].childList):
+            for i, child_node_index in enumerate(nodes[node_index].childList):
                 if i > 0:
                     s += "\n" + " "*indent
-                s += _traverse_parse(nodes, node_index, indent)
+                s += _traverse_parse(nodes, child_node_index, indent)
             s += ")"
         else:
             s += nodes[node_index].tag
         return s
 
-    return _traverse_parse(parse.constituentList, 0)
+    sorted_nodes = sorted(parse.constituentList, key=attrgetter('id'))
+    return _traverse_parse(sorted_nodes, 0)
 
 
 def get_entityMentions_by_tokenizationId(comm):

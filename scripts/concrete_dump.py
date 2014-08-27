@@ -20,7 +20,7 @@ def main():
                         action="store_true")
     parser.add_argument("--dependency", help="Print HEAD tags for first dependency parse in 'ConLL-style' format",
                         action="store_true")
-    parser.add_argument("--entities", help="",
+    parser.add_argument("--entities", help="Print info about all Entities and their EntityMentions",
                         action="store_true")
     parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-style' format",
                         action="store_true")
@@ -30,6 +30,8 @@ def main():
     parser.add_argument("--ner", help="Print Named Entity Recognition token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--pos", help="Print Part-Of-Speech token tags in 'ConLL-style' format",
+                        action="store_true")
+    parser.add_argument("--situations", help="Print info about all Situations and their SituationMentions",
                         action="store_true")
     parser.add_argument("--tokens", help="Print whitespace-seperated tokens for *all* Tokenizations in a "
                         "Communication.  Each sentence tokenization is printed on a separate line, and "
@@ -50,6 +52,8 @@ def main():
         print_entities(comm)
     elif args.mentions:
         print_tokens_with_entityMentions(comm)
+    elif args.situations:
+        print_situations(comm)
     elif args.tokens:
         print_tokens_for_communication(comm)
     elif args.treebank:
@@ -130,16 +134,75 @@ def print_entities(comm):
             for entity_index, entity in enumerate(entitySet.entityList):
                 print "  Entity %d-%d:" % (entitySet_index, entity_index)
                 for entityMention_index, entityMention in enumerate(entity.mentionList):
-                    tokens = []
-                    for tokenIndex in entityMention.tokens.tokenIndexList:
-                        tokens.append(entityMention.tokens.tokenization.tokenList.tokens[tokenIndex].text)
-
                     print "      EntityMention %d-%d-%d:" % (entitySet_index, entity_index, entityMention_index)
-                    print "          tokens:     %s" % " ".join(tokens)
+                    print "          tokens:     %s" % " ".join(get_tokens_for_entityMention(entityMention))
                     if entityMention.text:
                         print "          text:       %s" % entityMention.text
                     print "          entityType: %s" % entityMention.entityType
                     print "          phraseType: %s" % entityMention.phraseType
+                print
+            print
+
+
+def print_situations(comm):
+    """Print information for all Situations and their SituationMentions
+
+    Args:
+        comm: A Concrete Communication
+    """
+    def _p(indent_level, justified_width, fieldname, content):
+        """Text alignment helper function"""
+        print " "*indent_level + (fieldname + ":").ljust(justified_width) + content
+
+    if comm.situationSets:
+        for situationSet_index, situationSet in enumerate(comm.situationSets):
+            if situationSet.metadata:
+                print "Situation Set %d (%s):" % (situationSet_index, situationSet.metadata.tool)
+            else:
+                print "Situation Set %d:" % situationSet_index
+            for situation_index, situation in enumerate(situationSet.situationList):
+                print "  Situation %d-%d:" % (situationSet_index, situation_index)
+                _p(6, 18, "situationType", situation.situationType)
+                if situation.eventType:
+                    _p(6, 18, "eventType", situation.eventType)
+                if situation.stateType:
+                    _p(6, 18, "stateType", situation.stateType)
+                if situation.temporalFactType:
+                    _p(6, 18, "temporalFactType", situation.temporalFactType)
+                if situation.mentionList:
+                    for situationMention_index, situationMention in enumerate(situation.mentionList):
+                        print " "*6 + "SituationMention %d-%d-%d:" % (
+                            situationSet_index, situation_index, situationMention_index)
+                        if situationMention.text:
+                            _p(10, 20, "text", situationMention.text)
+                        if situationMention.situationType:
+                            _p(10, 20, "situationType", situationMention.situationType)
+                        if situationMention.situationKindLemma:
+                            _p(10, 20, "situationKindLemma", situationMention.situationKindLemma)
+                        if situationMention.eventType:
+                            _p(10, 20, "eventType", situationMention.eventType)
+                        if situationMention.argumentList:
+                            for argument_index, mentionArgument in enumerate(situationMention.argumentList):
+                                print " "*10 + "Argument %d:" % argument_index
+                                if mentionArgument.role:
+                                    _p(14, 16, "role", mentionArgument.role)
+                                if mentionArgument.entityMentionId:
+                                    _p(14, 16, "entityMention",
+                                        " ".join(get_tokens_for_entityMention(mentionArgument.entityMention)))
+                                # A SituationMention can have an argumentList with a MentionArgument that
+                                # points to another SituationMention - which could conceivably lead to
+                                # loops.  We currently don't traverse the list recursively, instead looking
+                                # at only SituationMentions referenced by top-level SituationMentions
+                                if mentionArgument.situationMentionId:
+                                    print " "*14 + "situationMention:"
+                                    if situationMention.text:
+                                        _p(18, 20, "text", situationMention.text)
+                                    if situationMention.situationType:
+                                        _p(18, 20, "situationType", situationMention.situationType)
+                                    if situationMention.situationKindLemma:
+                                        _p(18, 20, "situationKindLemma", situationMention.situationKindLemma)
+                                    if situationMention.eventType:
+                                        _p(18, 20, "eventType", situationMention.eventType)
                 print
             print
 
@@ -427,6 +490,22 @@ def get_tokenizations_grouped_by_section(comm):
                 tokenizations_by_section.append(tokenizations_in_section)
 
     return tokenizations_by_section
+
+
+def get_tokens_for_entityMention(entityMention):
+    """Get list of token strings for an EntityMention
+
+    Args:
+        entityMention: A Concrete EntityMention argument
+
+    Returns:
+        A list of token strings
+    """
+    tokens = []
+    for tokenIndex in entityMention.tokens.tokenIndexList:
+        tokens.append(entityMention.tokens.tokenization.tokenList.tokens[tokenIndex].text)
+    return tokens
+
 
 
 if __name__ == "__main__":

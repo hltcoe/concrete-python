@@ -12,7 +12,11 @@ import concrete.util
 
 def main():
     parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
+    parser.add_argument("--lemmas", help="",
+                        action="store_true")
     parser.add_argument("--mentions", help="",
+                        action="store_true")
+    parser.add_argument("--ner", help="Print Named Entity Recognition tags in 'pseudo-ConLL' format",
                         action="store_true")
     parser.add_argument("--pos", help="Print Part-Of-Speech tags in 'pseudo-ConLL' format",
                         action="store_true")
@@ -27,21 +31,62 @@ def main():
 
     comm = concrete.util.read_communication_from_file(args.communication_file)
 
-    if args.mentions:
+    if args.lemmas:
+        print_lemma_tags_for_communication(comm)
+    elif args.mentions:
         print_tokens_with_entity_mentions(comm)
-    if args.pos:
+    elif args.ner:
+        print_ner_tags_for_communication(comm)
+    elif args.pos:
         print_pos_tags_for_communication(comm)
-    if args.tokens:
+    elif args.tokens:
         print_tokens_for_communication(comm)
-    if args.treebank:
+    elif args.treebank:
         print_penn_treebank_for_communication(comm)
 
 
-def print_pos_tags_for_communication(comm):
-    """
+def print_lemma_tags_for_communication(comm):
+    """Print Lemma token tags in a "ConLL-like" format
     """
     tokenizations = get_tokenizations(comm)
+    for tokenization in tokenizations:
+        if tokenization.tokenList and tokenization.lemmaList:
+            tag_for_tokenIndex = {}
+            for tagged_token in tokenization.lemmaList.taggedTokenList:
+                tag_for_tokenIndex[tagged_token.tokenIndex] = tagged_token.tag
+            for i, token in enumerate(tokenization.tokenList.tokens):
+                try:
+                    lemma_tag = tag_for_tokenIndex[i]
+                except IndexError:
+                    lemma_tag = ""
+                print "%d\t%s\t%s" % (i+1, token.text, lemma_tag)
+            print
 
+
+def print_ner_tags_for_communication(comm):
+    """Print Named Entity Recognition (NER) tags in a "ConLL-like" format
+    """
+    tokenizations = get_tokenizations(comm)
+    for tokenization in tokenizations:
+        if tokenization.tokenList and tokenization.nerTagList:
+            tag_for_tokenIndex = {}
+            for tagged_token in tokenization.nerTagList.taggedTokenList:
+                tag_for_tokenIndex[tagged_token.tokenIndex] = tagged_token.tag
+            for i, token in enumerate(tokenization.tokenList.tokens):
+                try:
+                    ner_tag = tag_for_tokenIndex[i]
+                except IndexError:
+                    ner_tag = ""
+                if ner_tag == "NONE":
+                    ner_tag = ""
+                print "%d\t%s\t%s" % (i+1, token.text, ner_tag)
+            print
+
+
+def print_pos_tags_for_communication(comm):
+    """Print Part of Speech (POS) tags in a "ConLL-like" format
+    """
+    tokenizations = get_tokenizations(comm)
     for tokenization in tokenizations:
         if tokenization.tokenList and tokenization.posTagList:
             tag_for_tokenIndex = {}

@@ -15,6 +15,9 @@ import concrete.util
 
 def main():
     parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
+    parser.add_argument("--char-offsets", help="Print token text extracted from character offsets "
+                        "(not the text stored in the tokenization) in 'ConLL-like' format",
+                        action="store_true")
     parser.add_argument("--dependency", help="Print HEAD tags for first dependency parse in 'ConLL-like' format",
                         action="store_true")
     parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-like' format",
@@ -38,9 +41,9 @@ def main():
 
     comm = concrete.util.read_communication_from_file(args.communication_file)
 
-    if args.dependency or args.lemmas or args.ner or args.pos:
+    if args.char_offsets or args.dependency or args.lemmas or args.ner or args.pos:
         print_conll_style_tags_for_communication(
-            comm, dependency=args.dependency, lemmas=args.lemmas, ner=args.ner, pos=args.pos)
+            comm, char_offsets=args.char_offsets, dependency=args.dependency, lemmas=args.lemmas, ner=args.ner, pos=args.pos)
     elif args.mentions:
         print_tokens_with_entityMentions(comm)
     elif args.tokens:
@@ -49,7 +52,7 @@ def main():
         print_penn_treebank_for_communication(comm)
 
 
-def print_conll_style_tags_for_communication(comm, dependency=False, lemmas=False, ner=False, pos=False):
+def print_conll_style_tags_for_communication(comm, char_offsets=False, dependency=False, lemmas=False, ner=False, pos=False):
     """Print 'ConLL-like' tags for the tokens in a Communication
 
     Args:
@@ -59,15 +62,33 @@ def print_conll_style_tags_for_communication(comm, dependency=False, lemmas=Fals
         ner: A boolean flag for printing Named Entity Recognition tags
         pos: A boolean flag for printing Part-of-Speech tags
     """
+    header_fields = ["INDEX", "TOKEN"]
+    if char_offsets:
+        header_fields.append("CHAR")
+    if lemmas:
+        header_fields.append("LEMMA")
+    if pos:
+        header_fields.append("POS")
+    if ner:
+        header_fields.append("NER")
+    if dependency:
+        header_fields.append("HEAD")
+    print "\t".join(header_fields)
+    dashes = ["-"*len(fieldname) for fieldname in header_fields]
+    print "\t".join(dashes)
+
     for tokenization in get_tokenizations(comm):
         token_taggings = []
-        if lemmas and tokenization.lemmaList:
+
+        if char_offsets:
+            token_taggings.append(get_char_offset_tags_for_tokenization(comm, tokenization))
+        if lemmas:
             token_taggings.append(get_lemma_tags_for_tokenization(tokenization))
-        if pos and tokenization.posTagList:
+        if pos:
             token_taggings.append(get_pos_tags_for_tokenization(tokenization))
-        if ner and tokenization.nerTagList:
+        if ner:
             token_taggings.append(get_ner_tags_for_tokenization(tokenization))
-        if dependency and tokenization.dependencyParseList:
+        if dependency:
             token_taggings.append(get_conll_head_tags_for_tokenization(tokenization))
         print_conll_style_tags_for_tokenization(tokenization, token_taggings)
         print
@@ -160,6 +181,19 @@ def penn_treebank_for_parse(parse):
 
     sorted_nodes = sorted(parse.constituentList, key=attrgetter('id'))
     return _traverse_parse(sorted_nodes, 0)
+
+
+def get_char_offset_tags_for_tokenization(comm, tokenization):
+    """TODOC:
+    """
+    if tokenization.tokenList:
+        char_offset_tags = [None]*len(tokenization.tokenList.tokens)
+
+        if comm.text:
+            for i, token in enumerate(tokenization.tokenList.tokens):
+                if token.textSpan:
+                    char_offset_tags[i] = comm.text[token.textSpan.start:token.textSpan.ending]
+        return char_offset_tags
 
 
 def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0):

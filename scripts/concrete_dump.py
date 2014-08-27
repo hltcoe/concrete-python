@@ -16,18 +16,18 @@ import concrete.util
 def main():
     parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
     parser.add_argument("--char-offsets", help="Print token text extracted from character offsets "
-                        "(not the text stored in the tokenization) in 'ConLL-like' format",
+                        "(not the text stored in the tokenization) in 'ConLL-style' format",
                         action="store_true")
-    parser.add_argument("--dependency", help="Print HEAD tags for first dependency parse in 'ConLL-like' format",
+    parser.add_argument("--dependency", help="Print HEAD tags for first dependency parse in 'ConLL-style' format",
                         action="store_true")
-    parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-like' format",
+    parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
                         "using <ENTITY ID=x> tags, where 'x' is the (zero-indexed) entity number",
                         action="store_true")
-    parser.add_argument("--ner", help="Print Named Entity Recognition token tags in 'ConLL-like' format",
+    parser.add_argument("--ner", help="Print Named Entity Recognition token tags in 'ConLL-style' format",
                         action="store_true")
-    parser.add_argument("--pos", help="Print Part-Of-Speech token tags in 'ConLL-like' format",
+    parser.add_argument("--pos", help="Print Part-Of-Speech token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--tokens", help="Print whitespace-seperated tokens for *all* Tokenizations in a "
                         "Communication.  Each sentence tokenization is printed on a separate line, and "
@@ -53,10 +53,12 @@ def main():
 
 
 def print_conll_style_tags_for_communication(comm, char_offsets=False, dependency=False, lemmas=False, ner=False, pos=False):
-    """Print 'ConLL-like' tags for the tokens in a Communication
+    """Print 'ConLL-style' tags for the tokens in a Communication
 
     Args:
         comm: A Concrete Communication object
+        char_offsets: A boolean flag for printing token text specified by
+            a Token's (optional) TextSpan
         dependency: A boolean flag for printing dependency parse HEAD tags
         lemmas: A boolean flag for printing lemma tags
         ner: A boolean flag for printing Named Entity Recognition tags
@@ -95,7 +97,7 @@ def print_conll_style_tags_for_communication(comm, char_offsets=False, dependenc
 
 
 def print_conll_style_tags_for_tokenization(tokenization, token_taggings):
-    """Print 'ConLL-like' tags for the tokens in a tokenization
+    """Print 'ConLL-style' tags for the tokens in a tokenization
 
     Args:
         tokenization: A Concrete Tokenization object

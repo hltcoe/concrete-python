@@ -20,6 +20,8 @@ def main():
                         action="store_true")
     parser.add_argument("--dependency", help="Print HEAD tags for first dependency parse in 'ConLL-style' format",
                         action="store_true")
+    parser.add_argument("--entities", help="",
+                        action="store_true")
     parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
@@ -44,6 +46,8 @@ def main():
     if args.char_offsets or args.dependency or args.lemmas or args.ner or args.pos:
         print_conll_style_tags_for_communication(
             comm, char_offsets=args.char_offsets, dependency=args.dependency, lemmas=args.lemmas, ner=args.ner, pos=args.pos)
+    elif args.entities:
+        print_entities(comm)
     elif args.mentions:
         print_tokens_with_entityMentions(comm)
     elif args.tokens:
@@ -109,6 +113,35 @@ def print_conll_style_tags_for_tokenization(tokenization, token_taggings):
             fields = [str(i+1), token.text]
             fields.extend(token_tags)
             print "\t".join(fields)
+
+
+def print_entities(comm):
+    """Print information for all Entities and their EntityMentions
+
+    Args:
+        comm: A Concrete Communication
+    """
+    if comm.entitySets:
+        for entitySet_index, entitySet in enumerate(comm.entitySets):
+            if entitySet.metadata:
+                print "Entity Set %d (%s):" % (entitySet_index, entitySet.metadata.tool)
+            else:
+                print "Entity Set %d:" % entitySet_index
+            for entity_index, entity in enumerate(entitySet.entityList):
+                print "  Entity %d-%d:" % (entitySet_index, entity_index)
+                for entityMention_index, entityMention in enumerate(entity.mentionList):
+                    tokens = []
+                    for tokenIndex in entityMention.tokens.tokenIndexList:
+                        tokens.append(entityMention.tokens.tokenization.tokenList.tokens[tokenIndex].text)
+
+                    print "      EntityMention %d-%d-%d:" % (entitySet_index, entity_index, entityMention_index)
+                    print "          tokens:     %s" % " ".join(tokens)
+                    if entityMention.text:
+                        print "          text:       %s" % entityMention.text
+                    print "          entityType: %s" % entityMention.entityType
+                    print "          phraseType: %s" % entityMention.phraseType
+                print
+            print
 
 
 def print_tokens_with_entityMentions(comm):

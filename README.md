@@ -49,7 +49,12 @@ or by cloning this repository and running setup.py:
 Useful Scripts
 --------------
 
-The Concrete Python package comes with two scripts.
+The Concrete Python package comes with three scripts:
+
+* **concrete_dump.py** reads in a Concrete Communication and prints
+  out human-readable information about the Communication's contents
+  (such as tokens, POS and NER tags, Entities, Situations, etc) to
+  stdout.
 
 * **concrete2json.py** reads in a Concrete Communication and prints a
   JSON version of the Communication to stdout.  The JSON is "pretty

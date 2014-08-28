@@ -4,7 +4,8 @@ def add_references_to_communication(comm):
 
     The Concrete schema uses UUIDs as internal pointers between
     Concrete objects.  This function adds member variables to Concrete
-    objects that link to the Concrete objects pointed to by the UUIDs.
+    objects that are references to the Concrete objects identified by
+    the UUIDs.
 
     For example, each Entity has a 'mentionIdlist' that lists the
     UUIDs of the EntityMentions for that Entity.  This function adds a
@@ -14,13 +15,21 @@ def add_references_to_communication(comm):
 
       entity.mentionList
 
-    This function adds:
-    - a 'tokenization' variable to each TokenRefSequence
-    - a 'mentionList' to each Entity
-    - an 'entityMention' to an Argument if the Argument has an 'entityMentionId'
-    - a 'situationMention' to an Argument if the Argument has a 'situationMentionId'
-    - a 'mentionList' to a Situation if the Situation has a 'mentionIdList'
+    This function adds reference variables for:
+    - a 'tokenization' to each TokenRefSequence
+    - a 'entityMention' to each Argument
 
+    And adds lists of reference variables for:
+    - a 'mentionList' to each Entity
+    - a 'situationMention' to each Argument
+    - a 'mentionList' to each Situation
+
+    For variables that represent optional lists of UUIDs
+    (e.g. situation.mentionIdList), Python Thrift will set the
+    variable to None if the list is not provided.  When this function
+    adds a list-of-references variable (in this case,
+    situation.mentionList) for an *omitted* optional list, it sets the
+    new variable to None - it DOES NOT leave the variable undefined.
     """
 #    comm.dependencyParseForUUID = {}
     comm.entityForUUID = {}
@@ -69,8 +78,12 @@ def add_references_to_communication(comm):
                 for argument in situationMention.argumentList:
                     if argument.entityMentionId:
                         argument.entityMention = comm.entityMentionForUUID[argument.entityMentionId.uuidString]
+                    else:
+                        argument.entityMention = None
                     if argument.situationMentionId:
                         argument.situationMention = comm.situationMentionForUUID[argument.situationMentionId.uuidString]
+                    else:
+                        argument.situationMention = None
                 if situationMention.tokens:
                     situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
 
@@ -82,3 +95,5 @@ def add_references_to_communication(comm):
                     situation.mentionList = []
                     for mentionId in situation.mentionIdList:
                         situation.mentionList.append(comm.situationMentionForUUID[mentionId.uuidString])
+                else:
+                    situation.mentionList = None

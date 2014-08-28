@@ -186,14 +186,14 @@ def print_situations(comm):
                                 print " "*10 + "Argument %d:" % argument_index
                                 if mentionArgument.role:
                                     _p(14, 16, "role", mentionArgument.role)
-                                if mentionArgument.entityMentionId:
+                                if mentionArgument.entityMention:
                                     _p(14, 16, "entityMention",
                                         " ".join(get_tokens_for_entityMention(mentionArgument.entityMention)))
                                 # A SituationMention can have an argumentList with a MentionArgument that
                                 # points to another SituationMention - which could conceivably lead to
                                 # loops.  We currently don't traverse the list recursively, instead looking
                                 # at only SituationMentions referenced by top-level SituationMentions
-                                if mentionArgument.situationMentionId:
+                                if mentionArgument.situationMention:
                                     print " "*14 + "situationMention:"
                                     if situationMention.text:
                                         _p(18, 20, "text", situationMention.text)

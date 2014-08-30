@@ -4,8 +4,8 @@ from thrift.protocol import TBinaryProtocol
 from concrete.structure.ttypes import TokenLattice
 
 
-def load_lattice(path):
-    with open(path, 'rb') as f:
+def load_lattice(input_path):
+    with open(input_path, 'rb') as f:
         transportIn = TTransport.TFileObjectTransport(f)
         protocolIn = TBinaryProtocol.TBinaryProtocol(transportIn)
         lattice = TokenLattice()
@@ -54,6 +54,17 @@ def compute_expected_counts(arcs_by_src):
     return counts
 
 
+def compute_counts(path):
+    counts = dict()
+    for arc in path:
+        token = arc.token
+        if token.text in counts:
+            counts[token.text] += 1
+        else:
+            counts[token.text] = 1
+    return counts
+
+
 def sort_paths(paths):
     paths.sort(key=lambda pair: pair[1], reverse=True)
 
@@ -61,20 +72,26 @@ def sort_paths(paths):
 def main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.set_defaults(all=False)
+    parser.set_defaults(raw=False, best=False)
     parser.add_argument('input_path', type=str,
                         help='path to serialized concrete TokenLattice')
-    parser.add_argument('--all', action='store_true',
+    parser.add_argument('--raw', action='store_true',
                         help='return all paths')
+    parser.add_argument('--best', action='store_true',
+                        help='return counts for best path')
     args = parser.parse_args()
 
     lattice = load_lattice(args.input_path)
     arcs_by_src = group_arcs_by_src(lattice)
-    if args.all:
-        paths = extract_paths(arcs_by_src)
-        sort_paths(paths)
-        for (path, weight) in paths:
+    if args.raw:
+        path_weight_pairs = extract_paths(arcs_by_src)
+        sort_paths(path_weight_pairs)
+        for (path, weight) in path_weight_pairs:
             print (path, weight)
+    elif args.best:
+        path_weight_pairs = extract_paths(arcs_by_src)
+        sort_paths(path_weight_pairs)
+        print compute_counts(path_weight_pairs[0][0])
     else:
         print compute_expected_counts(arcs_by_src)
 

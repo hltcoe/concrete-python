@@ -13,31 +13,22 @@ def load_lattice(path):
         return lattice
 
 
-def extract_best_path(lattice):
-    best_path = lattice.cachedBestPath
-    if best_path is None:
-        return None
-    else:
-        token_list = best_path.tokenList
-        if token_list is None:
-            return None
-        else:
-            return [t.text for t in token_list]
-
-
-def extract_paths(lattice):
-    arcs = dict()
+def group_arcs_by_src(lattice):
+    arcs_by_src = dict()
     if lattice.arcList is not None:
         for arc in lattice.arcList:
-            if arc.src in arcs:
-                arcs[arc.src].append(arc)
+            if arc.src in arcs_by_src:
+                arcs_by_src[arc.src].append(arc)
             else:
-                arcs[arc.src] = [arc]
+                arcs_by_src[arc.src] = [arc]
+    return arcs_by_src
 
-    paths = dict((i, []) for i in xrange(len(arcs)))
-    for i in xrange(len(arcs) - 1, -1, -1):
-        for arc in arcs[i]:
-            if arc.dst < len(arcs):
+
+def extract_paths(arcs_by_src):
+    paths = [[] for src in arcs_by_src]
+    for i in xrange(len(arcs_by_src) - 1, -1, -1): # TODO edge cases?
+        for arc in arcs_by_src[i]:
+            if arc.dst in arcs_by_src:
                 for (tail, weight) in paths[arc.dst]:
                     paths[arc.src].append(([arc] + tail, arc.weight + weight))
             else:
@@ -49,21 +40,43 @@ def extract_paths(lattice):
         return []
 
 
+def compute_expected_counts(arcs_by_src):
+    counts = dict()
+    for (src, arcs) in arcs_by_src.items():
+        normalizer = float(sum(pow(10., arc.weight) for arc in arcs))
+        for arc in arcs:
+            token = arc.token
+            prob = pow(10., arc.weight) / normalizer
+            if token.text in counts:
+                counts[token.text] += prob
+            else:
+                counts[token.text] = prob
+    return counts
+
+
+def sort_paths(paths):
+    paths.sort(key=lambda pair: pair[1], reverse=True)
+
+
 def main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.set_defaults(best=False)
+    parser.set_defaults(all=False)
     parser.add_argument('input_path', type=str,
                         help='path to serialized concrete TokenLattice')
-    parser.add_argument('--best', action='store_true',
-                        help='return counts for best path')
+    parser.add_argument('--all', action='store_true',
+                        help='return all paths')
     args = parser.parse_args()
 
     lattice = load_lattice(args.input_path)
-    if args.best:
-        print extract_best_path(lattice)
+    arcs_by_src = group_arcs_by_src(lattice)
+    if args.all:
+        paths = extract_paths(arcs_by_src)
+        sort_paths(paths)
+        for (path, weight) in paths:
+            print (path, weight)
     else:
-        print dir(lattice)
+        print compute_expected_counts(arcs_by_src)
 
 
 if __name__ == '__main__':

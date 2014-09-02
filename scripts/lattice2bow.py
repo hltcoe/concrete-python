@@ -3,6 +3,8 @@ from thrift.protocol import TBinaryProtocol
 
 from concrete.structure.ttypes import TokenLattice
 
+import math
+
 
 def load_lattice(input_path):
     with open(input_path, 'rb') as f:
@@ -40,17 +42,17 @@ def extract_paths(arcs_by_src):
         return []
 
 
-def compute_expected_counts(arcs_by_src):
+def compute_expected_counts(path_weight_pairs):
+    normalizer = math.log(sum(math.exp(w) for (p, w) in path_weight_pairs))
     counts = dict()
-    for (src, arcs) in arcs_by_src.items():
-        normalizer = float(sum(pow(10., arc.weight) for arc in arcs))
-        for arc in arcs:
+    for (path, weight) in path_weight_pairs:
+        p = math.exp(weight - normalizer)
+        for arc in path:
             token = arc.token
-            prob = pow(10., arc.weight) / normalizer
             if token.text in counts:
-                counts[token.text] += prob
+                counts[token.text] += p
             else:
-                counts[token.text] = prob
+                counts[token.text] = p
     return counts
 
 
@@ -63,10 +65,6 @@ def compute_counts(path):
         else:
             counts[token.text] = 1
     return counts
-
-
-def sort_paths(paths):
-    paths.sort(key=lambda pair: pair[1], reverse=True)
 
 
 def main():
@@ -83,17 +81,23 @@ def main():
 
     lattice = load_lattice(args.input_path)
     arcs_by_src = group_arcs_by_src(lattice)
+    path_weight_pairs = extract_paths(arcs_by_src)
     if args.raw:
-        path_weight_pairs = extract_paths(arcs_by_src)
-        sort_paths(path_weight_pairs)
+        path_weight_pairs.sort(key=lambda pair: pair[1], reverse=True)
         for (path, weight) in path_weight_pairs:
             print (path, weight)
-    elif args.best:
-        path_weight_pairs = extract_paths(arcs_by_src)
-        sort_paths(path_weight_pairs)
-        print compute_counts(path_weight_pairs[0][0])
     else:
-        print compute_expected_counts(arcs_by_src)
+        if args.best:
+            path = reduce(lambda p, q: (p[1] > q[1]) and p or q,
+                          path_weight_pairs)
+            counts = compute_counts(path[0])
+        else:
+            counts = compute_expected_counts(path_weight_pairs)
+
+        counts_items = counts.items()
+        counts_items.sort(key=lambda pair: pair[1], reverse=True)
+        for (w, p) in counts_items:
+            print '%.9f %s' % (p, w)
 
 
 if __name__ == '__main__':

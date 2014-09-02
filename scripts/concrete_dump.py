@@ -7,13 +7,18 @@ about a Concrete Communication.
 """
 
 import argparse
+import codecs
 from collections import defaultdict
 from operator import attrgetter
+import sys
 
 import concrete.util
 
 
 def main():
+    # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors
+    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+
     parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
     parser.add_argument("--char-offsets", help="Print token text extracted from character offsets "
                         "(not the text stored in the tokenization) in 'ConLL-style' format",

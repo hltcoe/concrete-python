@@ -16,6 +16,7 @@ import concrete.email.ttypes
 import concrete.twitter.ttypes
 import concrete.audio.ttypes
 import concrete.nitf.ttypes
+import concrete.metadata.ttypes
 
 
 from thrift.transport import TTransport
@@ -60,19 +61,22 @@ class Communication(object):
   i.e., seconds since January 1, 1970).
    - endTime: The time when this communication ended (in unix time UTC --
   i.e., seconds since January 1, 1970).
-   - processedContent: Text that can be lightly processed - for example, taking an
-  HTML document and removing tags so that NLP tools can better
-  run over it.
-   - lids: Theories about the languages that are present in this
+   - metadata: Metadata to support this particular communication.
+
+  Communications derived from other communications should
+  indicate in this metadata object their dependency
+  to the original communication ID.
+   - keyValueMap: A catch-all store of keys and values. Use sparingly!
+   - lidList: Theories about the languages that are present in this
   communication.
-   - sectionSegmentations: Theories about the block structure of this communication.
-   - entityMentionSets: Theories about which spans of text are used to mention entities
+   - sectionSegmentationList: Theories about the block structure of this communication.
+   - entityMentionSetList: Theories about which spans of text are used to mention entities
   in this communication.
-   - entitySets: Theories about what entities are discussed in this
+   - entitySetList: Theories about what entities are discussed in this
   communication, with pointers to individual mentions.
-   - situationMentionSets: Theories about what situations are explicitly mentioned in this
+   - situationMentionSetList: Theories about what situations are explicitly mentioned in this
   communication.
-   - situationSets: Theories about what situations are asserted in this
+   - situationSetList: Theories about what situations are asserted in this
   communication.
    - sound: The full audio contents of this communication in its original
   form, or in the least-processed form available, if the original
@@ -84,7 +88,6 @@ class Communication(object):
    - emailInfo: Extra information for communications where kind==EMAIL
    - nitfInfo: Extra information that may come from the NITF
   (News Industry Text Format) schema. See 'nitf.thrift'.
-   - keyValueMap: A catch-all store of keys and values. Use sparingly!
   """
 
   thrift_spec = (
@@ -95,15 +98,15 @@ class Communication(object):
     (4, TType.STRING, 'text', None, None, ), # 4
     (5, TType.I64, 'startTime', None, None, ), # 5
     (6, TType.I64, 'endTime', None, None, ), # 6
-    (7, TType.STRING, 'processedContent', None, None, ), # 7
-    None, # 8
-    None, # 9
-    (10, TType.LIST, 'lids', (TType.STRUCT,(concrete.language.ttypes.LanguageIdentification, concrete.language.ttypes.LanguageIdentification.thrift_spec)), None, ), # 10
-    (11, TType.LIST, 'sectionSegmentations', (TType.STRUCT,(concrete.structure.ttypes.SectionSegmentation, concrete.structure.ttypes.SectionSegmentation.thrift_spec)), None, ), # 11
-    (12, TType.LIST, 'entityMentionSets', (TType.STRUCT,(concrete.entities.ttypes.EntityMentionSet, concrete.entities.ttypes.EntityMentionSet.thrift_spec)), None, ), # 12
-    (13, TType.LIST, 'entitySets', (TType.STRUCT,(concrete.entities.ttypes.EntitySet, concrete.entities.ttypes.EntitySet.thrift_spec)), None, ), # 13
-    (14, TType.LIST, 'situationMentionSets', (TType.STRUCT,(concrete.situations.ttypes.SituationMentionSet, concrete.situations.ttypes.SituationMentionSet.thrift_spec)), None, ), # 14
-    (15, TType.LIST, 'situationSets', (TType.STRUCT,(concrete.situations.ttypes.SituationSet, concrete.situations.ttypes.SituationSet.thrift_spec)), None, ), # 15
+    None, # 7
+    (8, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 8
+    (9, TType.MAP, 'keyValueMap', (TType.STRING,None,TType.STRING,None), None, ), # 9
+    (10, TType.LIST, 'lidList', (TType.STRUCT,(concrete.language.ttypes.LanguageIdentification, concrete.language.ttypes.LanguageIdentification.thrift_spec)), None, ), # 10
+    (11, TType.LIST, 'sectionSegmentationList', (TType.STRUCT,(concrete.structure.ttypes.SectionSegmentation, concrete.structure.ttypes.SectionSegmentation.thrift_spec)), None, ), # 11
+    (12, TType.LIST, 'entityMentionSetList', (TType.STRUCT,(concrete.entities.ttypes.EntityMentionSet, concrete.entities.ttypes.EntityMentionSet.thrift_spec)), None, ), # 12
+    (13, TType.LIST, 'entitySetList', (TType.STRUCT,(concrete.entities.ttypes.EntitySet, concrete.entities.ttypes.EntitySet.thrift_spec)), None, ), # 13
+    (14, TType.LIST, 'situationMentionSetList', (TType.STRUCT,(concrete.situations.ttypes.SituationMentionSet, concrete.situations.ttypes.SituationMentionSet.thrift_spec)), None, ), # 14
+    (15, TType.LIST, 'situationSetList', (TType.STRUCT,(concrete.situations.ttypes.SituationSet, concrete.situations.ttypes.SituationSet.thrift_spec)), None, ), # 15
     None, # 16
     None, # 17
     None, # 18
@@ -112,34 +115,27 @@ class Communication(object):
     (21, TType.STRUCT, 'tweetInfo', (concrete.twitter.ttypes.TweetInfo, concrete.twitter.ttypes.TweetInfo.thrift_spec), None, ), # 21
     (22, TType.STRUCT, 'emailInfo', (concrete.email.ttypes.EmailCommunicationInfo, concrete.email.ttypes.EmailCommunicationInfo.thrift_spec), None, ), # 22
     (23, TType.STRUCT, 'nitfInfo', (concrete.nitf.ttypes.NITFInfo, concrete.nitf.ttypes.NITFInfo.thrift_spec), None, ), # 23
-    None, # 24
-    None, # 25
-    None, # 26
-    None, # 27
-    None, # 28
-    None, # 29
-    (30, TType.MAP, 'keyValueMap', (TType.STRING,None,TType.STRING,None), None, ), # 30
   )
 
-  def __init__(self, id=None, uuid=None, type=None, text=None, startTime=None, endTime=None, processedContent=None, lids=None, sectionSegmentations=None, entityMentionSets=None, entitySets=None, situationMentionSets=None, situationSets=None, sound=None, tweetInfo=None, emailInfo=None, nitfInfo=None, keyValueMap=None,):
+  def __init__(self, id=None, uuid=None, type=None, text=None, startTime=None, endTime=None, metadata=None, keyValueMap=None, lidList=None, sectionSegmentationList=None, entityMentionSetList=None, entitySetList=None, situationMentionSetList=None, situationSetList=None, sound=None, tweetInfo=None, emailInfo=None, nitfInfo=None,):
     self.id = id
     self.uuid = uuid
     self.type = type
     self.text = text
     self.startTime = startTime
     self.endTime = endTime
-    self.processedContent = processedContent
-    self.lids = lids
-    self.sectionSegmentations = sectionSegmentations
-    self.entityMentionSets = entityMentionSets
-    self.entitySets = entitySets
-    self.situationMentionSets = situationMentionSets
-    self.situationSets = situationSets
+    self.metadata = metadata
+    self.keyValueMap = keyValueMap
+    self.lidList = lidList
+    self.sectionSegmentationList = sectionSegmentationList
+    self.entityMentionSetList = entityMentionSetList
+    self.entitySetList = entitySetList
+    self.situationMentionSetList = situationMentionSetList
+    self.situationSetList = situationSetList
     self.sound = sound
     self.tweetInfo = tweetInfo
     self.emailInfo = emailInfo
     self.nitfInfo = nitfInfo
-    self.keyValueMap = keyValueMap
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -181,74 +177,86 @@ class Communication(object):
           self.endTime = iprot.readI64();
         else:
           iprot.skip(ftype)
-      elif fid == 7:
-        if ftype == TType.STRING:
-          self.processedContent = iprot.readString().decode('utf-8')
+      elif fid == 8:
+        if ftype == TType.STRUCT:
+          self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
+          self.metadata.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.MAP:
+          self.keyValueMap = {}
+          (_ktype1, _vtype2, _size0 ) = iprot.readMapBegin()
+          for _i4 in xrange(_size0):
+            _key5 = iprot.readString().decode('utf-8')
+            _val6 = iprot.readString().decode('utf-8')
+            self.keyValueMap[_key5] = _val6
+          iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 10:
         if ftype == TType.LIST:
-          self.lids = []
-          (_etype3, _size0) = iprot.readListBegin()
-          for _i4 in xrange(_size0):
-            _elem5 = concrete.language.ttypes.LanguageIdentification()
-            _elem5.read(iprot)
-            self.lids.append(_elem5)
+          self.lidList = []
+          (_etype10, _size7) = iprot.readListBegin()
+          for _i11 in xrange(_size7):
+            _elem12 = concrete.language.ttypes.LanguageIdentification()
+            _elem12.read(iprot)
+            self.lidList.append(_elem12)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 11:
         if ftype == TType.LIST:
-          self.sectionSegmentations = []
-          (_etype9, _size6) = iprot.readListBegin()
-          for _i10 in xrange(_size6):
-            _elem11 = concrete.structure.ttypes.SectionSegmentation()
-            _elem11.read(iprot)
-            self.sectionSegmentations.append(_elem11)
+          self.sectionSegmentationList = []
+          (_etype16, _size13) = iprot.readListBegin()
+          for _i17 in xrange(_size13):
+            _elem18 = concrete.structure.ttypes.SectionSegmentation()
+            _elem18.read(iprot)
+            self.sectionSegmentationList.append(_elem18)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 12:
         if ftype == TType.LIST:
-          self.entityMentionSets = []
-          (_etype15, _size12) = iprot.readListBegin()
-          for _i16 in xrange(_size12):
-            _elem17 = concrete.entities.ttypes.EntityMentionSet()
-            _elem17.read(iprot)
-            self.entityMentionSets.append(_elem17)
+          self.entityMentionSetList = []
+          (_etype22, _size19) = iprot.readListBegin()
+          for _i23 in xrange(_size19):
+            _elem24 = concrete.entities.ttypes.EntityMentionSet()
+            _elem24.read(iprot)
+            self.entityMentionSetList.append(_elem24)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 13:
         if ftype == TType.LIST:
-          self.entitySets = []
-          (_etype21, _size18) = iprot.readListBegin()
-          for _i22 in xrange(_size18):
-            _elem23 = concrete.entities.ttypes.EntitySet()
-            _elem23.read(iprot)
-            self.entitySets.append(_elem23)
+          self.entitySetList = []
+          (_etype28, _size25) = iprot.readListBegin()
+          for _i29 in xrange(_size25):
+            _elem30 = concrete.entities.ttypes.EntitySet()
+            _elem30.read(iprot)
+            self.entitySetList.append(_elem30)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 14:
         if ftype == TType.LIST:
-          self.situationMentionSets = []
-          (_etype27, _size24) = iprot.readListBegin()
-          for _i28 in xrange(_size24):
-            _elem29 = concrete.situations.ttypes.SituationMentionSet()
-            _elem29.read(iprot)
-            self.situationMentionSets.append(_elem29)
+          self.situationMentionSetList = []
+          (_etype34, _size31) = iprot.readListBegin()
+          for _i35 in xrange(_size31):
+            _elem36 = concrete.situations.ttypes.SituationMentionSet()
+            _elem36.read(iprot)
+            self.situationMentionSetList.append(_elem36)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 15:
         if ftype == TType.LIST:
-          self.situationSets = []
-          (_etype33, _size30) = iprot.readListBegin()
-          for _i34 in xrange(_size30):
-            _elem35 = concrete.situations.ttypes.SituationSet()
-            _elem35.read(iprot)
-            self.situationSets.append(_elem35)
+          self.situationSetList = []
+          (_etype40, _size37) = iprot.readListBegin()
+          for _i41 in xrange(_size37):
+            _elem42 = concrete.situations.ttypes.SituationSet()
+            _elem42.read(iprot)
+            self.situationSetList.append(_elem42)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -274,17 +282,6 @@ class Communication(object):
         if ftype == TType.STRUCT:
           self.nitfInfo = concrete.nitf.ttypes.NITFInfo()
           self.nitfInfo.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 30:
-        if ftype == TType.MAP:
-          self.keyValueMap = {}
-          (_ktype37, _vtype38, _size36 ) = iprot.readMapBegin()
-          for _i40 in xrange(_size36):
-            _key41 = iprot.readString().decode('utf-8')
-            _val42 = iprot.readString().decode('utf-8')
-            self.keyValueMap[_key41] = _val42
-          iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -321,50 +318,58 @@ class Communication(object):
       oprot.writeFieldBegin('endTime', TType.I64, 6)
       oprot.writeI64(self.endTime)
       oprot.writeFieldEnd()
-    if self.processedContent is not None:
-      oprot.writeFieldBegin('processedContent', TType.STRING, 7)
-      oprot.writeString(self.processedContent.encode('utf-8'))
+    if self.metadata is not None:
+      oprot.writeFieldBegin('metadata', TType.STRUCT, 8)
+      self.metadata.write(oprot)
       oprot.writeFieldEnd()
-    if self.lids is not None:
-      oprot.writeFieldBegin('lids', TType.LIST, 10)
-      oprot.writeListBegin(TType.STRUCT, len(self.lids))
-      for iter43 in self.lids:
-        iter43.write(oprot)
-      oprot.writeListEnd()
+    if self.keyValueMap is not None:
+      oprot.writeFieldBegin('keyValueMap', TType.MAP, 9)
+      oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.keyValueMap))
+      for kiter43,viter44 in self.keyValueMap.items():
+        oprot.writeString(kiter43.encode('utf-8'))
+        oprot.writeString(viter44.encode('utf-8'))
+      oprot.writeMapEnd()
       oprot.writeFieldEnd()
-    if self.sectionSegmentations is not None:
-      oprot.writeFieldBegin('sectionSegmentations', TType.LIST, 11)
-      oprot.writeListBegin(TType.STRUCT, len(self.sectionSegmentations))
-      for iter44 in self.sectionSegmentations:
-        iter44.write(oprot)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.entityMentionSets is not None:
-      oprot.writeFieldBegin('entityMentionSets', TType.LIST, 12)
-      oprot.writeListBegin(TType.STRUCT, len(self.entityMentionSets))
-      for iter45 in self.entityMentionSets:
+    if self.lidList is not None:
+      oprot.writeFieldBegin('lidList', TType.LIST, 10)
+      oprot.writeListBegin(TType.STRUCT, len(self.lidList))
+      for iter45 in self.lidList:
         iter45.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.entitySets is not None:
-      oprot.writeFieldBegin('entitySets', TType.LIST, 13)
-      oprot.writeListBegin(TType.STRUCT, len(self.entitySets))
-      for iter46 in self.entitySets:
+    if self.sectionSegmentationList is not None:
+      oprot.writeFieldBegin('sectionSegmentationList', TType.LIST, 11)
+      oprot.writeListBegin(TType.STRUCT, len(self.sectionSegmentationList))
+      for iter46 in self.sectionSegmentationList:
         iter46.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.situationMentionSets is not None:
-      oprot.writeFieldBegin('situationMentionSets', TType.LIST, 14)
-      oprot.writeListBegin(TType.STRUCT, len(self.situationMentionSets))
-      for iter47 in self.situationMentionSets:
+    if self.entityMentionSetList is not None:
+      oprot.writeFieldBegin('entityMentionSetList', TType.LIST, 12)
+      oprot.writeListBegin(TType.STRUCT, len(self.entityMentionSetList))
+      for iter47 in self.entityMentionSetList:
         iter47.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.situationSets is not None:
-      oprot.writeFieldBegin('situationSets', TType.LIST, 15)
-      oprot.writeListBegin(TType.STRUCT, len(self.situationSets))
-      for iter48 in self.situationSets:
+    if self.entitySetList is not None:
+      oprot.writeFieldBegin('entitySetList', TType.LIST, 13)
+      oprot.writeListBegin(TType.STRUCT, len(self.entitySetList))
+      for iter48 in self.entitySetList:
         iter48.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.situationMentionSetList is not None:
+      oprot.writeFieldBegin('situationMentionSetList', TType.LIST, 14)
+      oprot.writeListBegin(TType.STRUCT, len(self.situationMentionSetList))
+      for iter49 in self.situationMentionSetList:
+        iter49.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.situationSetList is not None:
+      oprot.writeFieldBegin('situationSetList', TType.LIST, 15)
+      oprot.writeListBegin(TType.STRUCT, len(self.situationSetList))
+      for iter50 in self.situationSetList:
+        iter50.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.sound is not None:
@@ -383,14 +388,6 @@ class Communication(object):
       oprot.writeFieldBegin('nitfInfo', TType.STRUCT, 23)
       self.nitfInfo.write(oprot)
       oprot.writeFieldEnd()
-    if self.keyValueMap is not None:
-      oprot.writeFieldBegin('keyValueMap', TType.MAP, 30)
-      oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.keyValueMap))
-      for kiter49,viter50 in self.keyValueMap.items():
-        oprot.writeString(kiter49.encode('utf-8'))
-        oprot.writeString(viter50.encode('utf-8'))
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -401,6 +398,8 @@ class Communication(object):
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
     if self.type is None:
       raise TProtocol.TProtocolException(message='Required field type is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     return
 
 

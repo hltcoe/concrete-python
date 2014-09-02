@@ -351,18 +351,18 @@ class BoundingBox(object):
   """
   Attributes:
    - type
-   - coordinates
+   - coordinateList
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'type', None, None, ), # 1
-    (2, TType.LIST, 'coordinates', (TType.STRUCT,(TwitterLatLong, TwitterLatLong.thrift_spec)), None, ), # 2
+    (2, TType.LIST, 'coordinateList', (TType.STRUCT,(TwitterLatLong, TwitterLatLong.thrift_spec)), None, ), # 2
   )
 
-  def __init__(self, type=None, coordinates=None,):
+  def __init__(self, type=None, coordinateList=None,):
     self.type = type
-    self.coordinates = coordinates
+    self.coordinateList = coordinateList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -380,12 +380,12 @@ class BoundingBox(object):
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.LIST:
-          self.coordinates = []
+          self.coordinateList = []
           (_etype3, _size0) = iprot.readListBegin()
           for _i4 in xrange(_size0):
             _elem5 = TwitterLatLong()
             _elem5.read(iprot)
-            self.coordinates.append(_elem5)
+            self.coordinateList.append(_elem5)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -403,10 +403,10 @@ class BoundingBox(object):
       oprot.writeFieldBegin('type', TType.STRING, 1)
       oprot.writeString(self.type.encode('utf-8'))
       oprot.writeFieldEnd()
-    if self.coordinates is not None:
-      oprot.writeFieldBegin('coordinates', TType.LIST, 2)
-      oprot.writeListBegin(TType.STRUCT, len(self.coordinates))
-      for iter6 in self.coordinates:
+    if self.coordinateList is not None:
+      oprot.writeFieldBegin('coordinateList', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.coordinateList))
+      for iter6 in self.coordinateList:
         iter6.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -414,8 +414,8 @@ class BoundingBox(object):
     oprot.writeStructEnd()
 
   def validate(self):
-    if self.coordinates is None:
-      raise TProtocol.TProtocolException(message='Required field coordinates is unset!')
+    if self.coordinateList is None:
+      raise TProtocol.TProtocolException(message='Required field coordinateList is unset!')
     return
 
 
@@ -818,22 +818,22 @@ class HashTag(object):
 class TwitterEntities(object):
   """
   Attributes:
-   - hashtags
-   - urls
-   - userMentions
+   - hashtagList
+   - urlList
+   - userMentionList
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.LIST, 'hashtags', (TType.STRUCT,(HashTag, HashTag.thrift_spec)), None, ), # 1
-    (2, TType.LIST, 'urls', (TType.STRUCT,(URL, URL.thrift_spec)), None, ), # 2
-    (3, TType.LIST, 'userMentions', (TType.STRUCT,(UserMention, UserMention.thrift_spec)), None, ), # 3
+    (1, TType.LIST, 'hashtagList', (TType.STRUCT,(HashTag, HashTag.thrift_spec)), None, ), # 1
+    (2, TType.LIST, 'urlList', (TType.STRUCT,(URL, URL.thrift_spec)), None, ), # 2
+    (3, TType.LIST, 'userMentionList', (TType.STRUCT,(UserMention, UserMention.thrift_spec)), None, ), # 3
   )
 
-  def __init__(self, hashtags=None, urls=None, userMentions=None,):
-    self.hashtags = hashtags
-    self.urls = urls
-    self.userMentions = userMentions
+  def __init__(self, hashtagList=None, urlList=None, userMentionList=None,):
+    self.hashtagList = hashtagList
+    self.urlList = urlList
+    self.userMentionList = userMentionList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -846,34 +846,34 @@ class TwitterEntities(object):
         break
       if fid == 1:
         if ftype == TType.LIST:
-          self.hashtags = []
+          self.hashtagList = []
           (_etype10, _size7) = iprot.readListBegin()
           for _i11 in xrange(_size7):
             _elem12 = HashTag()
             _elem12.read(iprot)
-            self.hashtags.append(_elem12)
+            self.hashtagList.append(_elem12)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.LIST:
-          self.urls = []
+          self.urlList = []
           (_etype16, _size13) = iprot.readListBegin()
           for _i17 in xrange(_size13):
             _elem18 = URL()
             _elem18.read(iprot)
-            self.urls.append(_elem18)
+            self.urlList.append(_elem18)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.LIST:
-          self.userMentions = []
+          self.userMentionList = []
           (_etype22, _size19) = iprot.readListBegin()
           for _i23 in xrange(_size19):
             _elem24 = UserMention()
             _elem24.read(iprot)
-            self.userMentions.append(_elem24)
+            self.userMentionList.append(_elem24)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -887,24 +887,24 @@ class TwitterEntities(object):
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('TwitterEntities')
-    if self.hashtags is not None:
-      oprot.writeFieldBegin('hashtags', TType.LIST, 1)
-      oprot.writeListBegin(TType.STRUCT, len(self.hashtags))
-      for iter25 in self.hashtags:
+    if self.hashtagList is not None:
+      oprot.writeFieldBegin('hashtagList', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.hashtagList))
+      for iter25 in self.hashtagList:
         iter25.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.urls is not None:
-      oprot.writeFieldBegin('urls', TType.LIST, 2)
-      oprot.writeListBegin(TType.STRUCT, len(self.urls))
-      for iter26 in self.urls:
+    if self.urlList is not None:
+      oprot.writeFieldBegin('urlList', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.urlList))
+      for iter26 in self.urlList:
         iter26.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.userMentions is not None:
-      oprot.writeFieldBegin('userMentions', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.userMentions))
-      for iter27 in self.userMentions:
+    if self.userMentionList is not None:
+      oprot.writeFieldBegin('userMentionList', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRUCT, len(self.userMentionList))
+      for iter27 in self.userMentionList:
         iter27.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()

@@ -103,13 +103,13 @@ class EmailCommunicationInfo(object):
    - messageId
    - contentType
    - userAgent
-   - inReplyTo
-   - reference
+   - inReplyToList
+   - referenceList
    - senderAddress
    - returnPathAddress
-   - toAddress
-   - ccAddress
-   - bccAddress
+   - toAddressList
+   - ccAddressList
+   - bccAddressList
   """
 
   thrift_spec = (
@@ -117,26 +117,26 @@ class EmailCommunicationInfo(object):
     (1, TType.STRING, 'messageId', None, None, ), # 1
     (2, TType.STRING, 'contentType', None, None, ), # 2
     (3, TType.STRING, 'userAgent', None, None, ), # 3
-    (4, TType.LIST, 'inReplyTo', (TType.STRING,None), None, ), # 4
-    (5, TType.LIST, 'reference', (TType.STRING,None), None, ), # 5
+    (4, TType.LIST, 'inReplyToList', (TType.STRING,None), None, ), # 4
+    (5, TType.LIST, 'referenceList', (TType.STRING,None), None, ), # 5
     (6, TType.STRUCT, 'senderAddress', (EmailAddress, EmailAddress.thrift_spec), None, ), # 6
     (7, TType.STRUCT, 'returnPathAddress', (EmailAddress, EmailAddress.thrift_spec), None, ), # 7
-    (8, TType.LIST, 'toAddress', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 8
-    (9, TType.LIST, 'ccAddress', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 9
-    (10, TType.LIST, 'bccAddress', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 10
+    (8, TType.LIST, 'toAddressList', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 8
+    (9, TType.LIST, 'ccAddressList', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 9
+    (10, TType.LIST, 'bccAddressList', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 10
   )
 
-  def __init__(self, messageId=None, contentType=None, userAgent=None, inReplyTo=None, reference=None, senderAddress=None, returnPathAddress=None, toAddress=None, ccAddress=None, bccAddress=None,):
+  def __init__(self, messageId=None, contentType=None, userAgent=None, inReplyToList=None, referenceList=None, senderAddress=None, returnPathAddress=None, toAddressList=None, ccAddressList=None, bccAddressList=None,):
     self.messageId = messageId
     self.contentType = contentType
     self.userAgent = userAgent
-    self.inReplyTo = inReplyTo
-    self.reference = reference
+    self.inReplyToList = inReplyToList
+    self.referenceList = referenceList
     self.senderAddress = senderAddress
     self.returnPathAddress = returnPathAddress
-    self.toAddress = toAddress
-    self.ccAddress = ccAddress
-    self.bccAddress = bccAddress
+    self.toAddressList = toAddressList
+    self.ccAddressList = ccAddressList
+    self.bccAddressList = bccAddressList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -164,21 +164,21 @@ class EmailCommunicationInfo(object):
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.LIST:
-          self.inReplyTo = []
+          self.inReplyToList = []
           (_etype3, _size0) = iprot.readListBegin()
           for _i4 in xrange(_size0):
             _elem5 = iprot.readString().decode('utf-8')
-            self.inReplyTo.append(_elem5)
+            self.inReplyToList.append(_elem5)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.LIST:
-          self.reference = []
+          self.referenceList = []
           (_etype9, _size6) = iprot.readListBegin()
           for _i10 in xrange(_size6):
             _elem11 = iprot.readString().decode('utf-8')
-            self.reference.append(_elem11)
+            self.referenceList.append(_elem11)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -196,34 +196,34 @@ class EmailCommunicationInfo(object):
           iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.LIST:
-          self.toAddress = []
+          self.toAddressList = []
           (_etype15, _size12) = iprot.readListBegin()
           for _i16 in xrange(_size12):
             _elem17 = EmailAddress()
             _elem17.read(iprot)
-            self.toAddress.append(_elem17)
+            self.toAddressList.append(_elem17)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.LIST:
-          self.ccAddress = []
+          self.ccAddressList = []
           (_etype21, _size18) = iprot.readListBegin()
           for _i22 in xrange(_size18):
             _elem23 = EmailAddress()
             _elem23.read(iprot)
-            self.ccAddress.append(_elem23)
+            self.ccAddressList.append(_elem23)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 10:
         if ftype == TType.LIST:
-          self.bccAddress = []
+          self.bccAddressList = []
           (_etype27, _size24) = iprot.readListBegin()
           for _i28 in xrange(_size24):
             _elem29 = EmailAddress()
             _elem29.read(iprot)
-            self.bccAddress.append(_elem29)
+            self.bccAddressList.append(_elem29)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -249,17 +249,17 @@ class EmailCommunicationInfo(object):
       oprot.writeFieldBegin('userAgent', TType.STRING, 3)
       oprot.writeString(self.userAgent.encode('utf-8'))
       oprot.writeFieldEnd()
-    if self.inReplyTo is not None:
-      oprot.writeFieldBegin('inReplyTo', TType.LIST, 4)
-      oprot.writeListBegin(TType.STRING, len(self.inReplyTo))
-      for iter30 in self.inReplyTo:
+    if self.inReplyToList is not None:
+      oprot.writeFieldBegin('inReplyToList', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.inReplyToList))
+      for iter30 in self.inReplyToList:
         oprot.writeString(iter30.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.reference is not None:
-      oprot.writeFieldBegin('reference', TType.LIST, 5)
-      oprot.writeListBegin(TType.STRING, len(self.reference))
-      for iter31 in self.reference:
+    if self.referenceList is not None:
+      oprot.writeFieldBegin('referenceList', TType.LIST, 5)
+      oprot.writeListBegin(TType.STRING, len(self.referenceList))
+      for iter31 in self.referenceList:
         oprot.writeString(iter31.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -271,24 +271,24 @@ class EmailCommunicationInfo(object):
       oprot.writeFieldBegin('returnPathAddress', TType.STRUCT, 7)
       self.returnPathAddress.write(oprot)
       oprot.writeFieldEnd()
-    if self.toAddress is not None:
-      oprot.writeFieldBegin('toAddress', TType.LIST, 8)
-      oprot.writeListBegin(TType.STRUCT, len(self.toAddress))
-      for iter32 in self.toAddress:
+    if self.toAddressList is not None:
+      oprot.writeFieldBegin('toAddressList', TType.LIST, 8)
+      oprot.writeListBegin(TType.STRUCT, len(self.toAddressList))
+      for iter32 in self.toAddressList:
         iter32.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.ccAddress is not None:
-      oprot.writeFieldBegin('ccAddress', TType.LIST, 9)
-      oprot.writeListBegin(TType.STRUCT, len(self.ccAddress))
-      for iter33 in self.ccAddress:
+    if self.ccAddressList is not None:
+      oprot.writeFieldBegin('ccAddressList', TType.LIST, 9)
+      oprot.writeListBegin(TType.STRUCT, len(self.ccAddressList))
+      for iter33 in self.ccAddressList:
         iter33.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.bccAddress is not None:
-      oprot.writeFieldBegin('bccAddress', TType.LIST, 10)
-      oprot.writeListBegin(TType.STRUCT, len(self.bccAddress))
-      for iter34 in self.bccAddress:
+    if self.bccAddressList is not None:
+      oprot.writeFieldBegin('bccAddressList', TType.LIST, 10)
+      oprot.writeListBegin(TType.STRUCT, len(self.bccAddressList))
+      for iter34 in self.bccAddressList:
         iter34.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()

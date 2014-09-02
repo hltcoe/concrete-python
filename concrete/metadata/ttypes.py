@@ -7,6 +7,8 @@
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
+import concrete.uuid.ttypes
+
 
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol, TProtocol
@@ -16,6 +18,373 @@ except:
   fastbinary = None
 
 
+
+class TheoryDependencies(object):
+  """
+  A struct that holds UUIDs for all theories
+  that a particular annotation was based upon
+  (and presumably requires).
+
+  Attributes:
+   - sectionTheoryList
+   - sentenceTheoryList
+   - tokenizationTheoryList
+   - posTagTheoryList
+   - nerTagTheoryList
+   - lemmaTheoryList
+   - langIdTheoryList
+   - parseTheoryList
+   - dependencyParseTheoryList
+   - tokenAnnotationTheoryList
+   - entityMentionSetTheoryList
+   - entitySetTheoryList
+   - situationMentionSetTheoryList
+   - situationSetTheoryList
+   - communicationsList
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.LIST, 'sectionTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 1
+    (2, TType.LIST, 'sentenceTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 2
+    (3, TType.LIST, 'tokenizationTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 3
+    (4, TType.LIST, 'posTagTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 4
+    (5, TType.LIST, 'nerTagTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 5
+    (6, TType.LIST, 'lemmaTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 6
+    (7, TType.LIST, 'langIdTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 7
+    (8, TType.LIST, 'parseTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 8
+    (9, TType.LIST, 'dependencyParseTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 9
+    (10, TType.LIST, 'tokenAnnotationTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 10
+    (11, TType.LIST, 'entityMentionSetTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 11
+    (12, TType.LIST, 'entitySetTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 12
+    (13, TType.LIST, 'situationMentionSetTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 13
+    (14, TType.LIST, 'situationSetTheoryList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 14
+    (15, TType.LIST, 'communicationsList', (TType.STRUCT,(concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec)), None, ), # 15
+  )
+
+  def __init__(self, sectionTheoryList=None, sentenceTheoryList=None, tokenizationTheoryList=None, posTagTheoryList=None, nerTagTheoryList=None, lemmaTheoryList=None, langIdTheoryList=None, parseTheoryList=None, dependencyParseTheoryList=None, tokenAnnotationTheoryList=None, entityMentionSetTheoryList=None, entitySetTheoryList=None, situationMentionSetTheoryList=None, situationSetTheoryList=None, communicationsList=None,):
+    self.sectionTheoryList = sectionTheoryList
+    self.sentenceTheoryList = sentenceTheoryList
+    self.tokenizationTheoryList = tokenizationTheoryList
+    self.posTagTheoryList = posTagTheoryList
+    self.nerTagTheoryList = nerTagTheoryList
+    self.lemmaTheoryList = lemmaTheoryList
+    self.langIdTheoryList = langIdTheoryList
+    self.parseTheoryList = parseTheoryList
+    self.dependencyParseTheoryList = dependencyParseTheoryList
+    self.tokenAnnotationTheoryList = tokenAnnotationTheoryList
+    self.entityMentionSetTheoryList = entityMentionSetTheoryList
+    self.entitySetTheoryList = entitySetTheoryList
+    self.situationMentionSetTheoryList = situationMentionSetTheoryList
+    self.situationSetTheoryList = situationSetTheoryList
+    self.communicationsList = communicationsList
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.sectionTheoryList = []
+          (_etype3, _size0) = iprot.readListBegin()
+          for _i4 in xrange(_size0):
+            _elem5 = concrete.uuid.ttypes.UUID()
+            _elem5.read(iprot)
+            self.sectionTheoryList.append(_elem5)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.sentenceTheoryList = []
+          (_etype9, _size6) = iprot.readListBegin()
+          for _i10 in xrange(_size6):
+            _elem11 = concrete.uuid.ttypes.UUID()
+            _elem11.read(iprot)
+            self.sentenceTheoryList.append(_elem11)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.LIST:
+          self.tokenizationTheoryList = []
+          (_etype15, _size12) = iprot.readListBegin()
+          for _i16 in xrange(_size12):
+            _elem17 = concrete.uuid.ttypes.UUID()
+            _elem17.read(iprot)
+            self.tokenizationTheoryList.append(_elem17)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.posTagTheoryList = []
+          (_etype21, _size18) = iprot.readListBegin()
+          for _i22 in xrange(_size18):
+            _elem23 = concrete.uuid.ttypes.UUID()
+            _elem23.read(iprot)
+            self.posTagTheoryList.append(_elem23)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.LIST:
+          self.nerTagTheoryList = []
+          (_etype27, _size24) = iprot.readListBegin()
+          for _i28 in xrange(_size24):
+            _elem29 = concrete.uuid.ttypes.UUID()
+            _elem29.read(iprot)
+            self.nerTagTheoryList.append(_elem29)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.LIST:
+          self.lemmaTheoryList = []
+          (_etype33, _size30) = iprot.readListBegin()
+          for _i34 in xrange(_size30):
+            _elem35 = concrete.uuid.ttypes.UUID()
+            _elem35.read(iprot)
+            self.lemmaTheoryList.append(_elem35)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.LIST:
+          self.langIdTheoryList = []
+          (_etype39, _size36) = iprot.readListBegin()
+          for _i40 in xrange(_size36):
+            _elem41 = concrete.uuid.ttypes.UUID()
+            _elem41.read(iprot)
+            self.langIdTheoryList.append(_elem41)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.LIST:
+          self.parseTheoryList = []
+          (_etype45, _size42) = iprot.readListBegin()
+          for _i46 in xrange(_size42):
+            _elem47 = concrete.uuid.ttypes.UUID()
+            _elem47.read(iprot)
+            self.parseTheoryList.append(_elem47)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.LIST:
+          self.dependencyParseTheoryList = []
+          (_etype51, _size48) = iprot.readListBegin()
+          for _i52 in xrange(_size48):
+            _elem53 = concrete.uuid.ttypes.UUID()
+            _elem53.read(iprot)
+            self.dependencyParseTheoryList.append(_elem53)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 10:
+        if ftype == TType.LIST:
+          self.tokenAnnotationTheoryList = []
+          (_etype57, _size54) = iprot.readListBegin()
+          for _i58 in xrange(_size54):
+            _elem59 = concrete.uuid.ttypes.UUID()
+            _elem59.read(iprot)
+            self.tokenAnnotationTheoryList.append(_elem59)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.LIST:
+          self.entityMentionSetTheoryList = []
+          (_etype63, _size60) = iprot.readListBegin()
+          for _i64 in xrange(_size60):
+            _elem65 = concrete.uuid.ttypes.UUID()
+            _elem65.read(iprot)
+            self.entityMentionSetTheoryList.append(_elem65)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.LIST:
+          self.entitySetTheoryList = []
+          (_etype69, _size66) = iprot.readListBegin()
+          for _i70 in xrange(_size66):
+            _elem71 = concrete.uuid.ttypes.UUID()
+            _elem71.read(iprot)
+            self.entitySetTheoryList.append(_elem71)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.LIST:
+          self.situationMentionSetTheoryList = []
+          (_etype75, _size72) = iprot.readListBegin()
+          for _i76 in xrange(_size72):
+            _elem77 = concrete.uuid.ttypes.UUID()
+            _elem77.read(iprot)
+            self.situationMentionSetTheoryList.append(_elem77)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 14:
+        if ftype == TType.LIST:
+          self.situationSetTheoryList = []
+          (_etype81, _size78) = iprot.readListBegin()
+          for _i82 in xrange(_size78):
+            _elem83 = concrete.uuid.ttypes.UUID()
+            _elem83.read(iprot)
+            self.situationSetTheoryList.append(_elem83)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 15:
+        if ftype == TType.LIST:
+          self.communicationsList = []
+          (_etype87, _size84) = iprot.readListBegin()
+          for _i88 in xrange(_size84):
+            _elem89 = concrete.uuid.ttypes.UUID()
+            _elem89.read(iprot)
+            self.communicationsList.append(_elem89)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('TheoryDependencies')
+    if self.sectionTheoryList is not None:
+      oprot.writeFieldBegin('sectionTheoryList', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.sectionTheoryList))
+      for iter90 in self.sectionTheoryList:
+        iter90.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.sentenceTheoryList is not None:
+      oprot.writeFieldBegin('sentenceTheoryList', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.sentenceTheoryList))
+      for iter91 in self.sentenceTheoryList:
+        iter91.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.tokenizationTheoryList is not None:
+      oprot.writeFieldBegin('tokenizationTheoryList', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRUCT, len(self.tokenizationTheoryList))
+      for iter92 in self.tokenizationTheoryList:
+        iter92.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.posTagTheoryList is not None:
+      oprot.writeFieldBegin('posTagTheoryList', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRUCT, len(self.posTagTheoryList))
+      for iter93 in self.posTagTheoryList:
+        iter93.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.nerTagTheoryList is not None:
+      oprot.writeFieldBegin('nerTagTheoryList', TType.LIST, 5)
+      oprot.writeListBegin(TType.STRUCT, len(self.nerTagTheoryList))
+      for iter94 in self.nerTagTheoryList:
+        iter94.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.lemmaTheoryList is not None:
+      oprot.writeFieldBegin('lemmaTheoryList', TType.LIST, 6)
+      oprot.writeListBegin(TType.STRUCT, len(self.lemmaTheoryList))
+      for iter95 in self.lemmaTheoryList:
+        iter95.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.langIdTheoryList is not None:
+      oprot.writeFieldBegin('langIdTheoryList', TType.LIST, 7)
+      oprot.writeListBegin(TType.STRUCT, len(self.langIdTheoryList))
+      for iter96 in self.langIdTheoryList:
+        iter96.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.parseTheoryList is not None:
+      oprot.writeFieldBegin('parseTheoryList', TType.LIST, 8)
+      oprot.writeListBegin(TType.STRUCT, len(self.parseTheoryList))
+      for iter97 in self.parseTheoryList:
+        iter97.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.dependencyParseTheoryList is not None:
+      oprot.writeFieldBegin('dependencyParseTheoryList', TType.LIST, 9)
+      oprot.writeListBegin(TType.STRUCT, len(self.dependencyParseTheoryList))
+      for iter98 in self.dependencyParseTheoryList:
+        iter98.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.tokenAnnotationTheoryList is not None:
+      oprot.writeFieldBegin('tokenAnnotationTheoryList', TType.LIST, 10)
+      oprot.writeListBegin(TType.STRUCT, len(self.tokenAnnotationTheoryList))
+      for iter99 in self.tokenAnnotationTheoryList:
+        iter99.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.entityMentionSetTheoryList is not None:
+      oprot.writeFieldBegin('entityMentionSetTheoryList', TType.LIST, 11)
+      oprot.writeListBegin(TType.STRUCT, len(self.entityMentionSetTheoryList))
+      for iter100 in self.entityMentionSetTheoryList:
+        iter100.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.entitySetTheoryList is not None:
+      oprot.writeFieldBegin('entitySetTheoryList', TType.LIST, 12)
+      oprot.writeListBegin(TType.STRUCT, len(self.entitySetTheoryList))
+      for iter101 in self.entitySetTheoryList:
+        iter101.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.situationMentionSetTheoryList is not None:
+      oprot.writeFieldBegin('situationMentionSetTheoryList', TType.LIST, 13)
+      oprot.writeListBegin(TType.STRUCT, len(self.situationMentionSetTheoryList))
+      for iter102 in self.situationMentionSetTheoryList:
+        iter102.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.situationSetTheoryList is not None:
+      oprot.writeFieldBegin('situationSetTheoryList', TType.LIST, 14)
+      oprot.writeListBegin(TType.STRUCT, len(self.situationSetTheoryList))
+      for iter103 in self.situationSetTheoryList:
+        iter103.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.communicationsList is not None:
+      oprot.writeFieldBegin('communicationsList', TType.LIST, 15)
+      oprot.writeListBegin(TType.STRUCT, len(self.communicationsList))
+      for iter104 in self.communicationsList:
+        iter104.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
 
 class Digest(object):
   """
@@ -90,30 +459,30 @@ class Digest(object):
       elif fid == 5:
         if ftype == TType.LIST:
           self.int64List = []
-          (_etype3, _size0) = iprot.readListBegin()
-          for _i4 in xrange(_size0):
-            _elem5 = iprot.readI64();
-            self.int64List.append(_elem5)
+          (_etype108, _size105) = iprot.readListBegin()
+          for _i109 in xrange(_size105):
+            _elem110 = iprot.readI64();
+            self.int64List.append(_elem110)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.LIST:
           self.doubleList = []
-          (_etype9, _size6) = iprot.readListBegin()
-          for _i10 in xrange(_size6):
-            _elem11 = iprot.readDouble();
-            self.doubleList.append(_elem11)
+          (_etype114, _size111) = iprot.readListBegin()
+          for _i115 in xrange(_size111):
+            _elem116 = iprot.readDouble();
+            self.doubleList.append(_elem116)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.LIST:
           self.stringList = []
-          (_etype15, _size12) = iprot.readListBegin()
-          for _i16 in xrange(_size12):
-            _elem17 = iprot.readString().decode('utf-8')
-            self.stringList.append(_elem17)
+          (_etype120, _size117) = iprot.readListBegin()
+          for _i121 in xrange(_size117):
+            _elem122 = iprot.readString().decode('utf-8')
+            self.stringList.append(_elem122)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -146,22 +515,22 @@ class Digest(object):
     if self.int64List is not None:
       oprot.writeFieldBegin('int64List', TType.LIST, 5)
       oprot.writeListBegin(TType.I64, len(self.int64List))
-      for iter18 in self.int64List:
-        oprot.writeI64(iter18)
+      for iter123 in self.int64List:
+        oprot.writeI64(iter123)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.doubleList is not None:
       oprot.writeFieldBegin('doubleList', TType.LIST, 6)
       oprot.writeListBegin(TType.DOUBLE, len(self.doubleList))
-      for iter19 in self.doubleList:
-        oprot.writeDouble(iter19)
+      for iter124 in self.doubleList:
+        oprot.writeDouble(iter124)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.stringList is not None:
       oprot.writeFieldBegin('stringList', TType.LIST, 7)
       oprot.writeListBegin(TType.STRING, len(self.stringList))
-      for iter20 in self.stringList:
-        oprot.writeString(iter20.encode('utf-8'))
+      for iter125 in self.stringList:
+        oprot.writeString(iter125.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -194,6 +563,15 @@ class AnnotationMetadata(object):
    - confidence: Confidence score. To do: define what this means!
    - digest: A Digest, carrying over any information the annotation metadata
   wishes to carry over.
+   - dependencies: The theories that supported this annotation.
+
+  An empty field indicates that the theory has no
+  dependencies (e.g., an ingester).
+   - kBest: An integer that represents a ranking for systems
+  that output k-best lists.
+
+  For systems that do not output k-best lists,
+  the default value (1) should suffice.
   """
 
   thrift_spec = (
@@ -202,13 +580,17 @@ class AnnotationMetadata(object):
     (2, TType.I64, 'timestamp', None, None, ), # 2
     (3, TType.DOUBLE, 'confidence', None, None, ), # 3
     (4, TType.STRUCT, 'digest', (Digest, Digest.thrift_spec), None, ), # 4
+    (5, TType.STRUCT, 'dependencies', (TheoryDependencies, TheoryDependencies.thrift_spec), None, ), # 5
+    (6, TType.I32, 'kBest', None, 1, ), # 6
   )
 
-  def __init__(self, tool=None, timestamp=None, confidence=None, digest=None,):
+  def __init__(self, tool=None, timestamp=None, confidence=None, digest=None, dependencies=None, kBest=thrift_spec[6][4],):
     self.tool = tool
     self.timestamp = timestamp
     self.confidence = confidence
     self.digest = digest
+    self.dependencies = dependencies
+    self.kBest = kBest
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -240,6 +622,17 @@ class AnnotationMetadata(object):
           self.digest.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRUCT:
+          self.dependencies = TheoryDependencies()
+          self.dependencies.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.I32:
+          self.kBest = iprot.readI32();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -266,12 +659,24 @@ class AnnotationMetadata(object):
       oprot.writeFieldBegin('digest', TType.STRUCT, 4)
       self.digest.write(oprot)
       oprot.writeFieldEnd()
+    if self.dependencies is not None:
+      oprot.writeFieldBegin('dependencies', TType.STRUCT, 5)
+      self.dependencies.write(oprot)
+      oprot.writeFieldEnd()
+    if self.kBest is not None:
+      oprot.writeFieldBegin('kBest', TType.I32, 6)
+      oprot.writeI32(self.kBest)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
   def validate(self):
     if self.tool is None:
       raise TProtocol.TProtocolException(message='Required field tool is unset!')
+    if self.timestamp is None:
+      raise TProtocol.TProtocolException(message='Required field timestamp is unset!')
+    if self.kBest is None:
+      raise TProtocol.TProtocolException(message='Required field kBest is unset!')
     return
 
 

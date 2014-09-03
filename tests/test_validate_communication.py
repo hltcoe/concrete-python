@@ -8,6 +8,7 @@ TODO: Add tests for...
 
 import logging
 import sys
+import time
 import unittest
 
 from testfixtures import LogCapture, StringComparison
@@ -23,7 +24,7 @@ class TestCommunication(unittest.TestCase):
         self.assertTrue(validate_communication(comm))
         self.assertTrue(validate_entity_mention_ids(comm))
 
-        comm.entitySets[0].entityList[0].mentionIdList[0] = concrete.UUID(uuidString='BAD_ENTITY_MENTION_UUID')
+        comm.entitySetList[0].entityList[0].mentionIdList[0] = concrete.UUID(uuidString='BAD_ENTITY_MENTION_UUID')
         
         with LogCapture() as log_capture:
             self.assertFalse(validate_entity_mention_ids(comm))
@@ -34,7 +35,7 @@ class TestCommunication(unittest.TestCase):
         self.assertTrue(validate_communication(comm))
         self.assertTrue(validate_entity_mention_ids(comm))
 
-        comm.entityMentionSets[0].mentionSet[0].tokens.tokenizationId = concrete.UUID(uuidString='BAD_TOKENIZATION_UUID')
+        comm.entityMentionSetList[0].mentionList[0].tokens.tokenizationId = concrete.UUID(uuidString='BAD_TOKENIZATION_UUID')
         
         with LogCapture() as log_capture:
             self.assertFalse(validate_entity_mention_tokenization_ids(comm))
@@ -83,6 +84,8 @@ class TestRequiredThriftFields(unittest.TestCase):
         with LogCapture() as log_capture:
             self.assertFalse(validate_thrift_object_required_fields_recursively(comm))
         log_capture.check(('root', 'ERROR', "Communication 'TEST_UUID': Required Field 'type' is unset!"))
+
+        comm.metadata = concrete.AnnotationMetadata(tool="TEST", timestamp=int(time.time()))
 
         comm.type = "OTHER"
         self.assertTrue(validate_thrift_object_required_fields_recursively(comm))
@@ -140,7 +143,7 @@ class TestTextspanOffsets(unittest.TestCase):
         sentence_segmentation = concrete.structure.ttypes.SentenceSegmentation(sentenceList=[sentence])
         section_textspan = concrete.spans.ttypes.TextSpan(start=section_start, ending=section_ending)
         section = concrete.structure.ttypes.Section(
-            sentenceSegmentation=[sentence_segmentation],
+            sentenceSegmentationList=[sentence_segmentation],
             textSpan=section_textspan,
             uuid='TEST_SECTION')
         return section
@@ -148,7 +151,7 @@ class TestTextspanOffsets(unittest.TestCase):
     def create_sentence_with_token(self, sentence_start, sentence_ending, token_start, token_ending):
         token_textspan = concrete.spans.ttypes.TextSpan(start=token_start, ending=token_ending)
         token = concrete.structure.ttypes.Token(textSpan=token_textspan)
-        tokenization = concrete.structure.ttypes.Tokenization(tokenList=concrete.TokenList(tokens=[token]))
+        tokenization = concrete.structure.ttypes.Tokenization(tokenList=concrete.TokenList(tokenList=[token]))
         sentence_textspan = concrete.spans.ttypes.TextSpan(start=sentence_start, ending=sentence_ending)
         sentence = concrete.structure.ttypes.Sentence(
             tokenizationList=[tokenization],

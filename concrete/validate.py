@@ -2,8 +2,6 @@
 Libary to (partially) validate a Concrete Communication
 
 Current validation checks:
-  - do all sentenceSegmentation.sectionId's match the uuid of the
-    enclosing section?
   - for each constituent parse, do any of the constituent ID's for
     that parse repeat?
   - is each dependency and constituent parse a fully connected graph?
@@ -51,24 +49,20 @@ def validate_communication(comm):
 
     valid &= validate_thrift_object_required_fields_recursively(comm)
 
-    if comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
         logging.debug(ilm(1, "Communication '%s' has %d sectionSegmentations" %
-                          (comm.id, len(comm.sectionSegmentations))))
-        for sectionSegmentation in comm.sectionSegmentations:
+                          (comm.id, len(comm.sectionSegmentationList))))
+        for sectionSegmentation in comm.sectionSegmentationList:
             logging.debug(ilm(2, "sectionSegmentation '%s' has %d sections" %
                               (sectionSegmentation.uuid, len(sectionSegmentation.sectionList))))
             for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
                     valid &= validate_token_offsets_for_section(section)
                     logging.debug(ilm(3, "section '%s' has %d sentenceSegmentations" %
-                                      (section.uuid, len(section.sentenceSegmentation))))
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                                      (section.uuid, len(section.sentenceSegmentationList))))
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         logging.debug(ilm(4, "sentenceSegmentation '%s' has %d sentences" %
                                           (sentenceSegmentation.uuid, len(sentenceSegmentation.sentenceList))))
-                        if sentenceSegmentation.sectionId != section.uuid:
-                            valid = False
-                            logging.error(ilm(5, "sentenceSegmentation.sectionId '%s' does not match section.uuid '%s'" %
-                                              (sentenceSegmentation.sectionId, sentenceSegmentation.uuid)))
                         for sentence in sentenceSegmentation.sentenceList:
                             logging.debug(ilm(5, "sentence '%s' has %d tokenizations" %
                                               (sentence.uuid, len(sentence.tokenizationList))))
@@ -100,8 +94,8 @@ def get_entity_uuidString_set(comm):
       set of strings: uuidStrings for all Entities in the Communication
     """
     entity_uuidString_set = set()
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             if entitySet.entityList:
                 for entity in entitySet.entityList:
                     entity_uuidString_set.add(entity.uuid.uuidString)
@@ -117,10 +111,10 @@ def get_entity_mention_uuidString_set(comm):
       set of strings: uuidStrings for all EntityMentions in the Communication
     """
     entity_mention_uuidString_set = set()
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            if entityMentionSet.mentionSet:
-                for entityMention in entityMentionSet.mentionSet:
+    if comm.entityMentionSetList:
+        for entityMentionSet in comm.entityMentionSetList:
+            if entityMentionSet.mentionList:
+                for entityMention in entityMentionSet.mentionList:
                     entity_mention_uuidString_set.add(entityMention.uuid.uuidString)
     return entity_mention_uuidString_set
 
@@ -134,8 +128,8 @@ def get_situation_uuidString_set(comm):
       set of strings: uuidStrings for all Situations in the Communication
     """
     situation_uuidString_set = set()
-    if comm.situationSets:
-        for situationSet in comm.situationSets:
+    if comm.situationSetList:
+        for situationSet in comm.situationSetList:
             if situationSet.situationList:
                 for situation in situationSet.situationList:
                     situation_uuidString_set.add(situation.uuid.uuidString)
@@ -151,8 +145,8 @@ def get_situation_mention_uuidString_set(comm):
       set of strings: uuidStrings for all SituationMentions in the Communication
     """
     situation_mention_uuidString_set = set()
-    if comm.situationMentionSets:
-        for situationMentionSet in comm.situationMentionSets:
+    if comm.situationMentionSetList:
+        for situationMentionSet in comm.situationMentionSetList:
             if situationMentionSet.mentionList:
                 for situationMention in situationMentionSet.mentionList:
                     situation_mention_uuidString_set.add(situationMention.uuid.uuidString)
@@ -169,11 +163,11 @@ def get_tokenization_uuidString_dict(comm):
     """
     if not hasattr(comm, '_tokenization_uuidString_dict'):
         comm._tokenization_uuidString_dict = {}
-        if comm.sectionSegmentations:
-            for sectionSegmentation in comm.sectionSegmentations:
+        if comm.sectionSegmentationList:
+            for sectionSegmentation in comm.sectionSegmentationList:
                 for section in sectionSegmentation.sectionList:
-                    if section.sentenceSegmentation:
-                        for sentenceSegmentation in section.sentenceSegmentation:
+                    if section.sentenceSegmentationList:
+                        for sentenceSegmentation in section.sentenceSegmentationList:
                             for sentence in sentenceSegmentation.sentenceList:
                                 for tokenization in sentence.tokenizationList:
                                     comm._tokenization_uuidString_dict[tokenization.uuid.uuidString] = tokenization
@@ -189,11 +183,11 @@ def get_tokenization_uuidString_set(comm):
       set of strings: uuidStrings for all Tokenizations in the Communication
     """
     tokenization_uuidString_set = set()
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
+        for sectionSegmentation in comm.sectionSegmentationList:
             for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
                                 tokenization_uuidString_set.add(tokenization.uuid.uuidString)
@@ -324,8 +318,8 @@ def validate_entity_mention_ids(comm):
     valid = True
     entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
 
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             if entitySet.entityList:
                 for entity in entitySet.entityList:
                     for entityMentionId in entity.mentionIdList:
@@ -339,10 +333,10 @@ def validate_entity_mention_tokenization_ids(comm):
     valid = True
     tokenization_uuidString_set = get_tokenization_uuidString_set(comm)
 
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            if entityMentionSet.mentionSet:
-                for entityMention in entityMentionSet.mentionSet:
+    if comm.entityMentionSetList:
+        for entityMentionSet in comm.entityMentionSetList:
+            if entityMentionSet.mentionList:
+                for entityMention in entityMentionSet.mentionList:
                     if entityMention.tokens.tokenizationId.uuidString not in tokenization_uuidString_set:
                         valid = False
                         logging.error(ilm(2, "Mention '%s' has an invalid tokenizationId (%s)" % (entityMention.uuid, entityMention.tokens.tokenizationId)))
@@ -351,10 +345,10 @@ def validate_entity_mention_tokenization_ids(comm):
 
 def validate_entity_mention_token_ref_sequences(comm):
     valid = True
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            if entityMentionSet.mentionSet:
-                for entityMention in entityMentionSet.mentionSet:
+    if comm.entityMentionSetList:
+        for entityMentionSet in comm.entityMentionSetList:
+            if entityMentionSet.mentionList:
+                for entityMention in entityMentionSet.mentionList:
                     valid &= validate_token_ref_sequence(comm, entityMention.tokens)
     return valid
 
@@ -364,8 +358,8 @@ def validate_situation_mentions(comm):
     entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
     situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
 
-    if comm.situationMentionSets:
-        for situationMentionSet in comm.situationMentionSets:
+    if comm.situationMentionSetList:
+        for situationMentionSet in comm.situationMentionSetList:
             if situationMentionSet.mentionList:
                 for situationMention in situationMentionSet.mentionList:
                     if situationMention.tokens:
@@ -391,8 +385,8 @@ def validate_situations(comm):
     situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
     situation_uuidString_set = get_situation_uuidString_set(comm)
 
-    if comm.situationSets:
-        for situationSet in comm.situationSets:
+    if comm.situationSetList:
+        for situationSet in comm.situationSetList:
             if situationSet.situationList:
                 for situation in situationSet.situationList:
                     if situation.argumentList:
@@ -413,8 +407,9 @@ def validate_situations(comm):
                                 valid = False
                                 logging.error(ilm(2, "Justification for Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
                                                   (situation.uuid, justification.mentionId, situationSet.metadata.tool)))
-                            if justification.tokens:
-                                valid &= validate_token_ref_sequence(comm, justification.tokens)
+                            if justification.tokenRefSeqList:
+                                for tokenRefSeq in tokenRefSeqList:
+                                    valid &= validate_token_ref_sequence(comm, tokenRefSeq)
                     if situation.mentionIdList:
                         for mentionId in situation.mentionIdList:
                             if mentionId.uuidString not in situation_mention_uuidString_set:
@@ -439,8 +434,8 @@ def validate_token_offsets_for_section(section):
         logging.error(ilm(2, "Section '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (section.uuid, section.textSpan.start, section.textSpan.ending)))
 
-    if section.sentenceSegmentation:
-        for sentenceSegmentation in section.sentenceSegmentation:
+    if section.sentenceSegmentationList:
+        for sentenceSegmentation in section.sentenceSegmentationList:
             for sentence in sentenceSegmentation.sentenceList:
                 if sentence.textSpan == None:
                     continue
@@ -474,7 +469,7 @@ def validate_token_offsets_for_sentence(sentence):
         logging.error(ilm(7, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
     for tokenization in sentence.tokenizationList:
-        for token in tokenization.tokenList.tokens:
+        for token in tokenization.tokenList.tokenList:
             if token.textSpan == None:
                 continue
             if token.textSpan.start > token.textSpan.ending:
@@ -505,7 +500,7 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
         tokenization = tokenization_mapping[token_ref_sequence.tokenizationId.uuidString]
         for tokenIndex in token_ref_sequence.tokenIndexList:
             try:
-                tokenization.tokenList.tokens[tokenIndex]
+                tokenization.tokenList.tokenList[tokenIndex]
             except IndexError:
                 valid = False
                 logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenIndex (%d)" %

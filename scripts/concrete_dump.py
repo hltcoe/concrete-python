@@ -27,14 +27,14 @@ def main():
                         action="store_true")
     parser.add_argument("--entities", help="Print info about all Entities and their EntityMentions",
                         action="store_true")
-    parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-style' format",
+    parser.add_argument("--lemmas", help="Print first set of lemma token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
                         "using <ENTITY ID=x> tags, where 'x' is the (zero-indexed) entity number",
                         action="store_true")
-    parser.add_argument("--ner", help="Print Named Entity Recognition token tags in 'ConLL-style' format",
+    parser.add_argument("--ner", help="Print first set of Named Entity Recognition token tags in 'ConLL-style' format",
                         action="store_true")
-    parser.add_argument("--pos", help="Print Part-Of-Speech token tags in 'ConLL-style' format",
+    parser.add_argument("--pos", help="Print first set of Part-Of-Speech token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--situations", help="Print info about all Situations and their SituationMentions",
                         action="store_true")
@@ -383,7 +383,7 @@ def get_entity_number_for_entityMention_uuid(comm):
     return entity_number_for_entityMention_uuid
 
 
-def get_lemma_tags_for_tokenization(tokenization):
+def get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0):
     """Get lemma tags for a tokenization
 
     Args:
@@ -394,17 +394,18 @@ def get_lemma_tags_for_tokenization(tokenization):
     """
     if tokenization.tokenList:
         lemma_tags = [""]*len(tokenization.tokenList.tokenList)
-        if tokenization.lemmaList:
+        lemma_tokentaggings = get_tokentaggings_of_type(tokenization, "lemma")
+        if lemma_tokentaggings and len(lemma_tokentaggings) > lemma_tokentagging_index:
             tag_for_tokenIndex = {}
-            for taggedToken in tokenization.lemmaList.taggedTokenList:
+            for taggedToken in lemma_tokentaggings[lemma_tokentagging_index].taggedTokenList:
                 tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 if i in tag_for_tokenIndex:
                     lemma_tags[i] = tag_for_tokenIndex[i]
         return lemma_tags
 
 
-def get_ner_tags_for_tokenization(tokenization):
+def get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0):
     """Get Named Entity Recognition tags for a tokenization
 
     Args:
@@ -414,12 +415,13 @@ def get_ner_tags_for_tokenization(tokenization):
         A list of NER tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        ner_tags = [""]*len(tokenization.tokenList.tokens)
-        if tokenization.nerTagList:
+        ner_tags = [""]*len(tokenization.tokenList.tokenList)
+        ner_tokentaggings = get_tokentaggings_of_type(tokenization, "NER")
+        if ner_tokentaggings and len(ner_tokentaggings) > ner_tokentagging_index:
             tag_for_tokenIndex = {}
-            for taggedToken in tokenization.nerTagList.taggedTokenList:
+            for taggedToken in ner_tokentaggings[ner_tokentagging_index].taggedTokenList:
                 tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 try:
                     ner_tags[i] = tag_for_tokenIndex[i]
                 except IndexError:
@@ -429,7 +431,7 @@ def get_ner_tags_for_tokenization(tokenization):
         return ner_tags
 
 
-def get_pos_tags_for_tokenization(tokenization):
+def get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0):
     """Get Part-of-Speech tags for a tokenization
 
     Args:
@@ -439,12 +441,13 @@ def get_pos_tags_for_tokenization(tokenization):
         A list of POS tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        pos_tags = [""]*len(tokenization.tokenList.tokens)
-        if tokenization.posTagList:
+        pos_tags = [""]*len(tokenization.tokenList.tokenList)
+        pos_tokentaggings = get_tokentaggings_of_type(tokenization, "POS")
+        if pos_tokentaggings and len(pos_tokentaggings) > pos_tokentagging_index:
             tag_for_tokenIndex = {}
-            for taggedToken in tokenization.posTagList.taggedTokenList:
+            for taggedToken in pos_tokentaggings[pos_tokentagging_index].taggedTokenList:
                 tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 if i in tag_for_tokenIndex:
                     pos_tags[i] = tag_for_tokenIndex[i]
         return pos_tags
@@ -512,6 +515,18 @@ def get_tokens_for_entityMention(entityMention):
         tokens.append(entityMention.tokens.tokenization.tokenList.tokenList[tokenIndex].text)
     return tokens
 
+
+def get_tokentaggings_of_type(tokenization, taggingType):
+    """Returns a list of TokenTagging objects with the specified taggingType
+
+    Args:
+        tokenization: A Concrete Tokenizaiton object
+        taggingType: A string value for the specified TokenTagging.taggingType
+
+    Returns:
+        A list of TokenTagging objects
+    """
+    return [tt for tt in tokenization.tokenTaggingList if tt.taggingType == taggingType]
 
 
 if __name__ == "__main__":

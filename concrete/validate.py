@@ -68,7 +68,7 @@ def validate_communication(comm):
                                               (sentence.uuid, len(sentence.tokenizationList))))
                             valid &= validate_token_offsets_for_sentence(sentence)
                             for tokenization in sentence.tokenizationList:
-                                valid &= validate_constituency_parse(comm, tokenization)
+                                valid &= validate_constituency_parses(comm, tokenization)
                                 valid &= validate_dependency_parses(tokenization)
 
     valid &= validate_entity_mention_ids(comm)
@@ -211,7 +211,7 @@ def ilm(indent_level, log_message):
     return "  " * indent_level + log_message
 
 
-def validate_constituency_parse(comm, tokenization):
+def validate_constituency_parses(comm, tokenization):
     """
     Args:
       tokenization (concrete.structure.ttypes.Tokenization)
@@ -221,53 +221,54 @@ def validate_constituency_parse(comm, tokenization):
     """
     valid = True
 
-    if tokenization.parse:
-        total_constituents = len(tokenization.parse.constituentList)
-        logging.debug(ilm(6, "tokenization '%s' has %d constituents" % (tokenization.uuid, total_constituents)))
+    if tokenization.parseList:
+        for parse in tokenization.parseList:
+            total_constituents = len(parse.constituentList)
+            logging.debug(ilm(6, "tokenization '%s' has %d constituents" % (tokenization.uuid, total_constituents)))
 
-        total_uuid_mismatches = 0
-        constituent_id_set = set()
-        constituent_parse_tree = nx.DiGraph()
+            total_uuid_mismatches = 0
+            constituent_id_set = set()
+            constituent_parse_tree = nx.DiGraph()
 
-        for constituent in tokenization.parse.constituentList:
-            # Add nodes to parse tree
-            constituent_parse_tree.add_node(constituent.id)
+            for constituent in parse.constituentList:
+                # Add nodes to parse tree
+                constituent_parse_tree.add_node(constituent.id)
 
-            if constituent.id not in constituent_id_set:
-                constituent_id_set.add(constituent.id)
-            else:
+                if constituent.id not in constituent_id_set:
+                    constituent_id_set.add(constituent.id)
+                else:
+                    valid = False
+                    logging.error(ilm(7, "constituent ID %d has already been used in this sentence's tokenization" % constituent.id))
+
+                # Per the Concrete 'structure.thrift' file, tokenSequence may not be defined:
+                #   "Typically, this field will only be defined for leaf constituents (i.e., constituents with no children)."
+                if constituent.tokenSequence and constituent.tokenSequence.tokenizationId != tokenization.uuid:
+                    total_uuid_mismatches += 1
+
+                if constituent.tokenSequence:
+                    valid &= validate_token_ref_sequence(comm, constituent.tokenSequence)
+
+            if total_uuid_mismatches > 0:
                 valid = False
-                logging.error(ilm(7, "constituent ID %d has already been used in this sentence's tokenization" % constituent.id))
+                logging.error(ilm(6, "tokenization '%s' has UUID mismatch for %d/%d constituents" %
+                                  (tokenization.uuid, total_uuid_mismatches, total_constituents)))
 
-            # Per the Concrete 'structure.thrift' file, tokenSequence may not be defined:
-            #   "Typically, this field will only be defined for leaf constituents (i.e., constituents with no children)."
-            if constituent.tokenSequence and constituent.tokenSequence.tokenizationId != tokenization.uuid:
-                total_uuid_mismatches += 1
+            # Add edges to constituent parse tree
+            for constituent in parse.constituentList:
+                if constituent.childList:
+                    for child_id in constituent.childList:
+                        constituent_parse_tree.add_edge(constituent.id, child_id)
 
-            if constituent.tokenSequence:
-                valid &= validate_token_ref_sequence(comm, constituent.tokenSequence)
-
-        if total_uuid_mismatches > 0:
-            valid = False
-            logging.error(ilm(6, "tokenization '%s' has UUID mismatch for %d/%d constituents" %
-                              (tokenization.uuid, total_uuid_mismatches, total_constituents)))
-
-        # Add edges to constituent parse tree
-        for constituent in tokenization.parse.constituentList:
-            if constituent.childList:
-                for child_id in constituent.childList:
-                    constituent_parse_tree.add_edge(constituent.id, child_id)
-
-        # Check if constituent parse "tree" is actually a tree
-        undirected_graph = constituent_parse_tree.to_undirected()
-        if not nx.is_connected(undirected_graph):
-            valid = False
-            logging.error(ilm(6, "The constituent parse \"tree\" is not a fully connected graph - the graph has %d components" %
-                len(nx.connected_components(undirected_graph))))
-        if nx.number_of_nodes(constituent_parse_tree) != nx.number_of_edges(constituent_parse_tree) + 1:
-            valid = False
-            logging.error(ilm(6, "The constituent parse \"tree\" is not a tree.  |V| != |E|+1  (|V|=%d, |E|=%d)" %
-                (nx.number_of_nodes(constituent_parse_tree), nx.number_of_edges(constituent_parse_tree))))
+            # Check if constituent parse "tree" is actually a tree
+            undirected_graph = constituent_parse_tree.to_undirected()
+            if not nx.is_connected(undirected_graph):
+                valid = False
+                logging.error(ilm(6, "The constituent parse \"tree\" is not a fully connected graph - the graph has %d components" %
+                    len(nx.connected_components(undirected_graph))))
+            if nx.number_of_nodes(constituent_parse_tree) != nx.number_of_edges(constituent_parse_tree) + 1:
+                valid = False
+                logging.error(ilm(6, "The constituent parse \"tree\" is not a tree.  |V| != |E|+1  (|V|=%d, |E|=%d)" %
+                    (nx.number_of_nodes(constituent_parse_tree), nx.number_of_edges(constituent_parse_tree))))
 
     return valid
 

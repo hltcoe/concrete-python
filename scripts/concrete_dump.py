@@ -93,32 +93,32 @@ def print_conll_style_tags_for_communication(comm, char_offsets=False, dependenc
     print "\t".join(dashes)
 
     for tokenization in get_tokenizations(comm):
-        token_taggings = []
+        token_tag_lists = []
 
         if char_offsets:
-            token_taggings.append(get_char_offset_tags_for_tokenization(comm, tokenization))
+            token_tag_lists.append(get_char_offset_tags_for_tokenization(comm, tokenization))
         if lemmas:
-            token_taggings.append(get_lemma_tags_for_tokenization(tokenization))
+            token_tag_lists.append(get_lemma_tags_for_tokenization(tokenization))
         if pos:
-            token_taggings.append(get_pos_tags_for_tokenization(tokenization))
+            token_tag_lists.append(get_pos_tags_for_tokenization(tokenization))
         if ner:
-            token_taggings.append(get_ner_tags_for_tokenization(tokenization))
+            token_tag_lists.append(get_ner_tags_for_tokenization(tokenization))
         if dependency:
-            token_taggings.append(get_conll_head_tags_for_tokenization(tokenization))
-        print_conll_style_tags_for_tokenization(tokenization, token_taggings)
+            token_tag_lists.append(get_conll_head_tags_for_tokenization(tokenization))
+        print_conll_style_tags_for_tokenization(tokenization, token_tag_lists)
         print
 
 
-def print_conll_style_tags_for_tokenization(tokenization, token_taggings):
+def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
     """Print 'ConLL-style' tags for the tokens in a tokenization
 
     Args:
         tokenization: A Concrete Tokenization object
-        token_taggings: A list of lists of token tag strings
+        token_tag_lists: A list of lists of token tag strings
     """
     if tokenization.tokenList:
         for i, token in enumerate(tokenization.tokenList.tokenList):
-            token_tags = [str(token_tagging[i]) for token_tagging in token_taggings]
+            token_tags = [str(token_tag_list[i]) for token_tag_list in token_tag_lists]
             fields = [str(i+1), token.text]
             fields.extend(token_tags)
             print "\t".join(fields)

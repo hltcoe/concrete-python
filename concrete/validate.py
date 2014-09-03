@@ -1,5 +1,4 @@
-"""
-Libary to (partially) validate a Concrete Communication
+"""Library to (partially) validate a Concrete Communication
 
 Current validation checks:
   - do all sentenceSegmentation.sectionId's match the uuid of the
@@ -7,7 +6,7 @@ Current validation checks:
   - for each constituent parse, do any of the constituent ID's for
     that parse repeat?
   - is each dependency and constituent parse a fully connected graph?
-  - is each dependency and constituent parse "tree" really a tree?
+  - is each constituent parse "tree" really a tree?
   - for each dependency parse, are there any nodes with a null
     governer node whose edgeType is not root?
   - for each entityMention, does entityMention.tokens.tokenizationId
@@ -264,12 +263,14 @@ def validate_constituency_parse(comm, tokenization):
                 for child_id in constituent.childList:
                     constituent_parse_tree.add_edge(constituent.id, child_id)
 
-        # Check if constituent parse "tree" is actually a tree
+        # Check if constituent parse "tree" is a fully connected graph
         undirected_graph = constituent_parse_tree.to_undirected()
         if not nx.is_connected(undirected_graph):
             valid = False
             logging.error(ilm(6, "The constituent parse \"tree\" is not a fully connected graph - the graph has %d components" %
                 len(nx.connected_components(undirected_graph))))
+
+        # Check if constituent parse "tree" is actually a tree
         if nx.number_of_nodes(constituent_parse_tree) != nx.number_of_edges(constituent_parse_tree) + 1:
             valid = False
             logging.error(ilm(6, "The constituent parse \"tree\" is not a tree.  |V| != |E|+1  (|V|=%d, |E|=%d)" %
@@ -288,7 +289,6 @@ def validate_dependency_parses(tokenization):
     """
     valid = True
 
-    # Verify that each dependency parse "tree" is actually a tree
     if tokenization.dependencyParseList:
         for dependencyParse in tokenization.dependencyParseList:
             dependency_parse_tree = nx.DiGraph()
@@ -308,7 +308,7 @@ def validate_dependency_parses(tokenization):
                 if dependency.gov is not None:
                     dependency_parse_tree.add_edge(dependency.gov, dependency.dep)
 
-            # Check if dependency parse tree is actually a tree
+            # Check if dependency parse "tree" is a fully connected graph
             undirected_graph = dependency_parse_tree.to_undirected()
             try:
                 if not nx.is_connected(undirected_graph):

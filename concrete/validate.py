@@ -295,7 +295,7 @@ def validate_dependency_parses(tokenization):
 
             # Add nodes to dependency parse tree
             for dependency in dependencyParse.dependencyList:
-                if dependency.gov is None and dependency.edgeType != "root":
+                if dependency.gov is None and dependency.edgeType.lower() != "root":
                     valid = False
                     logging.error(ilm(6, "Found a null dependency parse node with governer whose edgeType is '%s' instead of 'root'" %
                                           dependency.edgeType))

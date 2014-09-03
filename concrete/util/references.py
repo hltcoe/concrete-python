@@ -44,35 +44,35 @@ def add_references_to_communication(comm):
     comm.tokenizationForUUID = {}
 #    comm.tokenTaggingForUUID = {}
 
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
+        for sectionSegmentation in comm.sectionSegmentationList:
             comm.sectionSegmentationForUUID[sectionSegmentation.uuid.uuidString] = sectionSegmentation
             for section in sectionSegmentation.sectionList:
                 comm.sectionForUUID[section.uuid.uuidString] = section
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         comm.sentenceSegmentationForUUID[sentenceSegmentation.uuid.uuidString] = sentenceSegmentation
                         for sentence in sentenceSegmentation.sentenceList:
                             comm.sentenceForUUID[sentence.uuid.uuidString]= sentence
                             for tokenization in sentence.tokenizationList:
                                 comm.tokenizationForUUID[tokenization.uuid.uuidString] = tokenization
 
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            for entityMention in entityMentionSet.mentionSet:
+    if comm.entityMentionSetList:
+        for entityMentionSet in comm.entityMentionSetList:
+            for entityMention in entityMentionSet.mentionList:
                 comm.entityMentionForUUID[entityMention.uuid.uuidString] = entityMention
                 entityMention.tokens.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
 
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             for entity in entitySet.entityList:
                 comm.entityForUUID[entity.uuid.uuidString] = entity
                 entity.mentionList = []
                 for mentionId in entity.mentionIdList:
                     entity.mentionList.append(comm.entityMentionForUUID[mentionId.uuidString])
 
-    if comm.situationMentionSets:
-        for situationMentionSet in comm.situationMentionSets:
+    if comm.situationMentionSetList:
+        for situationMentionSet in comm.situationMentionSetList:
             for situationMention in situationMentionSet.mentionList:
                 comm.situationMentionForUUID[situationMention.uuid.uuidString] = situationMention
                 for argument in situationMention.argumentList:
@@ -87,8 +87,8 @@ def add_references_to_communication(comm):
                 if situationMention.tokens:
                     situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
 
-    if comm.situationSets:
-        for situationSet in comm.situationSets:
+    if comm.situationSetList:
+        for situationSet in comm.situationSetList:
             for situation in situationSet.situationList:
                 comm.situationForUUID[situation.uuid.uuidString] = situation
                 if situation.mentionIdList:

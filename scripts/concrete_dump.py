@@ -117,7 +117,7 @@ def print_conll_style_tags_for_tokenization(tokenization, token_taggings):
         token_taggings: A list of lists of token tag strings
     """
     if tokenization.tokenList:
-        for i, token in enumerate(tokenization.tokenList.tokens):
+        for i, token in enumerate(tokenization.tokenList.tokenList):
             token_tags = [str(token_tagging[i]) for token_tagging in token_taggings]
             fields = [str(i+1), token.text]
             fields.extend(token_tags)
@@ -130,8 +130,8 @@ def print_entities(comm):
     Args:
         comm: A Concrete Communication
     """
-    if comm.entitySets:
-        for entitySet_index, entitySet in enumerate(comm.entitySets):
+    if comm.entitySetList:
+        for entitySet_index, entitySet in enumerate(comm.entitySetList):
             if entitySet.metadata:
                 print "Entity Set %d (%s):" % (entitySet_index, entitySet.metadata.tool)
             else:
@@ -159,8 +159,8 @@ def print_situations(comm):
         """Text alignment helper function"""
         print " "*indent_level + (fieldname + ":").ljust(justified_width) + content
 
-    if comm.situationSets:
-        for situationSet_index, situationSet in enumerate(comm.situationSets):
+    if comm.situationSetList:
+        for situationSet_index, situationSet in enumerate(comm.situationSetList):
             if situationSet.metadata:
                 print "Situation Set %d (%s):" % (situationSet_index, situationSet.metadata.tool)
             else:
@@ -220,7 +220,7 @@ def print_tokens_with_entityMentions(comm):
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
             if tokenization.tokenList:
-                text_tokens = [token.text for token in tokenization.tokenList.tokens]
+                text_tokens = [token.text for token in tokenization.tokenList.tokenList]
                 if tokenization.uuid.uuidString in entityMentions_by_tokenizationId:
                     for entityMention in entityMentions_by_tokenizationId[tokenization.uuid.uuidString]:
                         # TODO: Handle non-contiguous tokens in a tokenIndexLists
@@ -241,7 +241,7 @@ def print_tokens_for_communication(comm):
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
             if tokenization.tokenList:
-                text_tokens = [token.text for token in tokenization.tokenList.tokens]
+                text_tokens = [token.text for token in tokenization.tokenList.tokenList]
                 print " ".join(text_tokens)
         print
 
@@ -255,8 +255,9 @@ def print_penn_treebank_for_communication(comm):
     tokenizations = get_tokenizations(comm)
 
     for tokenization in tokenizations:
-        if tokenization.parse:
-            print penn_treebank_for_parse(tokenization.parse) + "\n\n"
+        if tokenization.parseList:
+            for parse in tokenization.parseList:
+                print penn_treebank_for_parse(parse) + "\n\n"
 
 
 def penn_treebank_for_parse(parse):
@@ -290,10 +291,10 @@ def get_char_offset_tags_for_tokenization(comm, tokenization):
     """TODOC:
     """
     if tokenization.tokenList:
-        char_offset_tags = [None]*len(tokenization.tokenList.tokens)
+        char_offset_tags = [None]*len(tokenization.tokenList.tokenList)
 
         if comm.text:
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 if token.textSpan:
                     char_offset_tags[i] = comm.text[token.textSpan.start:token.textSpan.ending]
         return char_offset_tags
@@ -326,7 +327,7 @@ def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0)
     if tokenization.tokenList:
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
-        head_list = [""]*len(tokenization.tokenList.tokens)
+        head_list = [""]*len(tokenization.tokenList.tokenList)
 
         if tokenization.dependencyParseList:
             for dependency in tokenization.dependencyParseList[dependency_parse_index].dependencyList:
@@ -350,8 +351,8 @@ def get_entityMentions_by_tokenizationId(comm):
         keys are Tokenization UUID strings.
     """
     mentions_by_tokenizationId = defaultdict(list)
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             for entity in entitySet.entityList:
                 for entityMention in entity.mentionList:
                     mentions_by_tokenizationId[entityMention.tokens.tokenizationId.uuidString].append(entityMention)
@@ -373,8 +374,8 @@ def get_entity_number_for_entityMention_uuid(comm):
     entity_number_for_entityMention_uuid = {}
     entity_number_counter = 0
 
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             for entity in entitySet.entityList:
                 for entityMention in entity.mentionList:
                     entity_number_for_entityMention_uuid[entityMention.uuid.uuidString] = entity_number_counter
@@ -392,7 +393,7 @@ def get_lemma_tags_for_tokenization(tokenization):
         A list of lemma tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        lemma_tags = [""]*len(tokenization.tokenList.tokens)
+        lemma_tags = [""]*len(tokenization.tokenList.tokenList)
         if tokenization.lemmaList:
             tag_for_tokenIndex = {}
             for taggedToken in tokenization.lemmaList.taggedTokenList:
@@ -460,11 +461,11 @@ def get_tokenizations(comm):
     """
     tokenizations = []
 
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
+        for sectionSegmentation in comm.sectionSegmentationList:
             for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
                                 tokenizations.append(tokenization)
@@ -483,12 +484,12 @@ def get_tokenizations_grouped_by_section(comm):
     """
     tokenizations_by_section = []
 
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
+        for sectionSegmentation in comm.sectionSegmentationList:
             for section in sectionSegmentation.sectionList:
                 tokenizations_in_section = []
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
                                 tokenizations_in_section.append(tokenization)
@@ -508,7 +509,7 @@ def get_tokens_for_entityMention(entityMention):
     """
     tokens = []
     for tokenIndex in entityMention.tokens.tokenIndexList:
-        tokens.append(entityMention.tokens.tokenization.tokenList.tokens[tokenIndex].text)
+        tokens.append(entityMention.tokens.tokenization.tokenList.tokenList[tokenIndex].text)
     return tokens
 
 

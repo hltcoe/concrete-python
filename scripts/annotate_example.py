@@ -5,6 +5,7 @@
 
 import argparse
 import json
+import time
 
 import concrete
 import concrete.util
@@ -33,6 +34,10 @@ def create_comm_from_tweet(json_tweet_string):
 
     comm = concrete.Communication()
     comm.id = "Annotation_Test_1"
+    comm.metadata = concrete.AnnotationMetadata(
+        tool="Annotation Example script",
+        timestamp=int(time.time())
+    )
     comm.text = tweet_data['text']
     comm.type = "Tweet"
     comm.uuid = concrete.util.generate_UUID()
@@ -96,9 +101,10 @@ def add_dictionary_tagging(comm):
                     for sentenceSegmentation in section.sentenceSegmentation:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
-                                tokenization.posTagList = concrete.TokenTagging()
-                                tokenization.posTagList.uuid = concrete.util.generate_UUID()
-                                tokenization.posTagList.taggedTokenList = []
+                                posTagList = concrete.TokenTagging()
+                                posTagList.taggingType = "POS"
+                                posTagList.uuid = concrete.util.generate_UUID()
+                                posTagList.taggedTokenList = []
                                 if tokenization.tokenList:
                                     for i, token in enumerate(tokenization.tokenList.tokens):
                                         tt = concrete.TaggedToken()
@@ -107,8 +113,9 @@ def add_dictionary_tagging(comm):
                                             tt.tag = "In"
                                         else:
                                             tt.tag = "Out"
-                                        tokenization.posTagList.taggedTokenList.append(tt)
+                                        posTagList.taggedTokenList.append(tt)
                                         print "%d [%s] %s" % (i, token.text, tt.tag)
+                                tokenization.tokenTaggingList = [posTagList]
                             print
 
     if validate_communication(comm):
@@ -117,23 +124,6 @@ def add_dictionary_tagging(comm):
         print "ERROR: Invalid POS tagging Communication"
     return comm
 
-
-def write_communication_to_file(communication, communication_filename):
-    return write_thrift_to_file(communication, communication_filename)
-
-def write_thrift_to_file(thrift_obj, filename):
-    thrift_bytes = TSerialization.serialize(thrift_obj)
-    thrift_file = open(filename, "w")
-    thrift_file.write(thrift_bytes)
-    thrift_file.close()
-
-
-### The functions below are copied from concrete.util, and provided for reference
-
-def generate_UUID():
-    c_uuid = concrete.UUID()
-    c_uuid.uuidString = str(python_uuid.uuid4())
-    return c_uuid
 
 def write_communication_to_file(communication, communication_filename):
     return write_thrift_to_file(communication, communication_filename)

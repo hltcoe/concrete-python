@@ -426,20 +426,20 @@ class EntityMentionSet(object):
   Attributes:
    - uuid: Unique identifier for this set.
    - metadata: Information about where this set came from.
-   - mentionSet: List of mentions in this set.
+   - mentionList: List of mentions in this set.
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
-    (3, TType.LIST, 'mentionSet', (TType.STRUCT,(EntityMention, EntityMention.thrift_spec)), None, ), # 3
+    (3, TType.LIST, 'mentionList', (TType.STRUCT,(EntityMention, EntityMention.thrift_spec)), None, ), # 3
   )
 
-  def __init__(self, uuid=None, metadata=None, mentionSet=None,):
+  def __init__(self, uuid=None, metadata=None, mentionList=None,):
     self.uuid = uuid
     self.metadata = metadata
-    self.mentionSet = mentionSet
+    self.mentionList = mentionList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -464,12 +464,12 @@ class EntityMentionSet(object):
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.LIST:
-          self.mentionSet = []
+          self.mentionList = []
           (_etype17, _size14) = iprot.readListBegin()
           for _i18 in xrange(_size14):
             _elem19 = EntityMention()
             _elem19.read(iprot)
-            self.mentionSet.append(_elem19)
+            self.mentionList.append(_elem19)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -491,10 +491,10 @@ class EntityMentionSet(object):
       oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
       self.metadata.write(oprot)
       oprot.writeFieldEnd()
-    if self.mentionSet is not None:
-      oprot.writeFieldBegin('mentionSet', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.mentionSet))
-      for iter20 in self.mentionSet:
+    if self.mentionList is not None:
+      oprot.writeFieldBegin('mentionList', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRUCT, len(self.mentionList))
+      for iter20 in self.mentionList:
         iter20.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -504,8 +504,8 @@ class EntityMentionSet(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
-    if self.mentionSet is None:
-      raise TProtocol.TProtocolException(message='Required field mentionSet is unset!')
+    if self.mentionList is None:
+      raise TProtocol.TProtocolException(message='Required field mentionList is unset!')
     return
 
 

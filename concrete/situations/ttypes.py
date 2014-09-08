@@ -128,11 +128,7 @@ class Argument(object):
    - entityId: A pointer to the value of this argument, if it is explicitly
   encoded as an Entity.
    - situationId: A pointer to the value of this argument, if it is a situation.
-   - roleLabel: New roles should usually be added to the enum, but for use
-  cases with many varied and possibly dynamic role names, this can be
-  used. Presumably this would only be used in a prototype stage of an
-  analytic, with roles eventually "hardening" and moving to the enum.
-   - properties: For the BinarySRL task, there may be situations
+   - propertyList: For the BinarySRL task, there may be situations
   where more than one property is attached to a single
   participant. A list of these properties can be stored in this field.
   """
@@ -142,16 +138,14 @@ class Argument(object):
     (1, TType.STRING, 'role', None, None, ), # 1
     (2, TType.STRUCT, 'entityId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'situationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
-    (4, TType.STRING, 'roleLabel', None, None, ), # 4
-    (5, TType.LIST, 'properties', (TType.STRUCT,(Property, Property.thrift_spec)), None, ), # 5
+    (4, TType.LIST, 'propertyList', (TType.STRUCT,(Property, Property.thrift_spec)), None, ), # 4
   )
 
-  def __init__(self, role=None, entityId=None, situationId=None, roleLabel=None, properties=None,):
+  def __init__(self, role=None, entityId=None, situationId=None, propertyList=None,):
     self.role = role
     self.entityId = entityId
     self.situationId = situationId
-    self.roleLabel = roleLabel
-    self.properties = properties
+    self.propertyList = propertyList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -180,18 +174,13 @@ class Argument(object):
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.STRING:
-          self.roleLabel = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 5:
         if ftype == TType.LIST:
-          self.properties = []
+          self.propertyList = []
           (_etype3, _size0) = iprot.readListBegin()
           for _i4 in xrange(_size0):
             _elem5 = Property()
             _elem5.read(iprot)
-            self.properties.append(_elem5)
+            self.propertyList.append(_elem5)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -217,14 +206,10 @@ class Argument(object):
       oprot.writeFieldBegin('situationId', TType.STRUCT, 3)
       self.situationId.write(oprot)
       oprot.writeFieldEnd()
-    if self.roleLabel is not None:
-      oprot.writeFieldBegin('roleLabel', TType.STRING, 4)
-      oprot.writeString(self.roleLabel.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.properties is not None:
-      oprot.writeFieldBegin('properties', TType.LIST, 5)
-      oprot.writeListBegin(TType.STRUCT, len(self.properties))
-      for iter6 in self.properties:
+    if self.propertyList is not None:
+      oprot.writeFieldBegin('propertyList', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRUCT, len(self.propertyList))
+      for iter6 in self.propertyList:
         iter6.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -253,7 +238,7 @@ class Justification(object):
   justification's mention provides supporting evidence for the
   situation.
    - mentionId: A pointer to the SituationMention itself.
-   - tokens: An optional list of pointers to tokens that are (especially)
+   - tokenRefSeqList: An optional list of pointers to tokens that are (especially)
   relevant to the way in which this mention provides
   justification for the situation. It is left up to individual
   analytics to decide what tokens (if any) they wish to include
@@ -264,13 +249,13 @@ class Justification(object):
     None, # 0
     (1, TType.STRING, 'justificationType', None, None, ), # 1
     (2, TType.STRUCT, 'mentionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
-    (3, TType.LIST, 'tokens', (TType.STRUCT,(concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec)), None, ), # 3
+    (3, TType.LIST, 'tokenRefSeqList', (TType.STRUCT,(concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec)), None, ), # 3
   )
 
-  def __init__(self, justificationType=None, mentionId=None, tokens=None,):
+  def __init__(self, justificationType=None, mentionId=None, tokenRefSeqList=None,):
     self.justificationType = justificationType
     self.mentionId = mentionId
-    self.tokens = tokens
+    self.tokenRefSeqList = tokenRefSeqList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -294,12 +279,12 @@ class Justification(object):
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.LIST:
-          self.tokens = []
+          self.tokenRefSeqList = []
           (_etype10, _size7) = iprot.readListBegin()
           for _i11 in xrange(_size7):
             _elem12 = concrete.structure.ttypes.TokenRefSequence()
             _elem12.read(iprot)
-            self.tokens.append(_elem12)
+            self.tokenRefSeqList.append(_elem12)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -321,10 +306,10 @@ class Justification(object):
       oprot.writeFieldBegin('mentionId', TType.STRUCT, 2)
       self.mentionId.write(oprot)
       oprot.writeFieldEnd()
-    if self.tokens is not None:
-      oprot.writeFieldBegin('tokens', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.tokens))
-      for iter13 in self.tokens:
+    if self.tokenRefSeqList is not None:
+      oprot.writeFieldBegin('tokenRefSeqList', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRUCT, len(self.tokenRefSeqList))
+      for iter13 in self.tokenRefSeqList:
         iter13.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -997,10 +982,6 @@ class MentionArgument(object):
    - entityMentionId: A pointer to the value of an EntityMention, if this is being used to support
   an EntityMention.
    - situationMentionId: A pointer to the value of this argument, if it is a SituationMention.
-   - roleLabel: New roles should usually be added to the enum, but for use
-  cases with many varied and possibly dynamic role names, this can be
-  used. Presumably this would only be used in a prototype stage of an
-  analytic, with roles eventually "hardening" and moving to the enum.
   """
 
   thrift_spec = (
@@ -1008,14 +989,12 @@ class MentionArgument(object):
     (1, TType.STRING, 'role', None, None, ), # 1
     (2, TType.STRUCT, 'entityMentionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'situationMentionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
-    (4, TType.STRING, 'roleLabel', None, None, ), # 4
   )
 
-  def __init__(self, role=None, entityMentionId=None, situationMentionId=None, roleLabel=None,):
+  def __init__(self, role=None, entityMentionId=None, situationMentionId=None,):
     self.role = role
     self.entityMentionId = entityMentionId
     self.situationMentionId = situationMentionId
-    self.roleLabel = roleLabel
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1043,11 +1022,6 @@ class MentionArgument(object):
           self.situationMentionId.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == 4:
-        if ftype == TType.STRING:
-          self.roleLabel = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1069,10 +1043,6 @@ class MentionArgument(object):
     if self.situationMentionId is not None:
       oprot.writeFieldBegin('situationMentionId', TType.STRUCT, 3)
       self.situationMentionId.write(oprot)
-      oprot.writeFieldEnd()
-    if self.roleLabel is not None:
-      oprot.writeFieldBegin('roleLabel', TType.STRING, 4)
-      oprot.writeString(self.roleLabel.encode('utf-8'))
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

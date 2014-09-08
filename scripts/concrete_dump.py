@@ -27,14 +27,14 @@ def main():
                         action="store_true")
     parser.add_argument("--entities", help="Print info about all Entities and their EntityMentions",
                         action="store_true")
-    parser.add_argument("--lemmas", help="Print lemma token tags in 'ConLL-style' format",
+    parser.add_argument("--lemmas", help="Print first set of lemma token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
                         "using <ENTITY ID=x> tags, where 'x' is the (zero-indexed) entity number",
                         action="store_true")
-    parser.add_argument("--ner", help="Print Named Entity Recognition token tags in 'ConLL-style' format",
+    parser.add_argument("--ner", help="Print first set of Named Entity Recognition token tags in 'ConLL-style' format",
                         action="store_true")
-    parser.add_argument("--pos", help="Print Part-Of-Speech token tags in 'ConLL-style' format",
+    parser.add_argument("--pos", help="Print first set of Part-Of-Speech token tags in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--situations", help="Print info about all Situations and their SituationMentions",
                         action="store_true")
@@ -93,32 +93,32 @@ def print_conll_style_tags_for_communication(comm, char_offsets=False, dependenc
     print "\t".join(dashes)
 
     for tokenization in get_tokenizations(comm):
-        token_taggings = []
+        token_tag_lists = []
 
         if char_offsets:
-            token_taggings.append(get_char_offset_tags_for_tokenization(comm, tokenization))
+            token_tag_lists.append(get_char_offset_tags_for_tokenization(comm, tokenization))
         if lemmas:
-            token_taggings.append(get_lemma_tags_for_tokenization(tokenization))
+            token_tag_lists.append(get_lemma_tags_for_tokenization(tokenization))
         if pos:
-            token_taggings.append(get_pos_tags_for_tokenization(tokenization))
+            token_tag_lists.append(get_pos_tags_for_tokenization(tokenization))
         if ner:
-            token_taggings.append(get_ner_tags_for_tokenization(tokenization))
+            token_tag_lists.append(get_ner_tags_for_tokenization(tokenization))
         if dependency:
-            token_taggings.append(get_conll_head_tags_for_tokenization(tokenization))
-        print_conll_style_tags_for_tokenization(tokenization, token_taggings)
+            token_tag_lists.append(get_conll_head_tags_for_tokenization(tokenization))
+        print_conll_style_tags_for_tokenization(tokenization, token_tag_lists)
         print
 
 
-def print_conll_style_tags_for_tokenization(tokenization, token_taggings):
+def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
     """Print 'ConLL-style' tags for the tokens in a tokenization
 
     Args:
         tokenization: A Concrete Tokenization object
-        token_taggings: A list of lists of token tag strings
+        token_tag_lists: A list of lists of token tag strings
     """
     if tokenization.tokenList:
-        for i, token in enumerate(tokenization.tokenList.tokens):
-            token_tags = [str(token_tagging[i]) for token_tagging in token_taggings]
+        for i, token in enumerate(tokenization.tokenList.tokenList):
+            token_tags = [str(token_tag_list[i]) for token_tag_list in token_tag_lists]
             fields = [str(i+1), token.text]
             fields.extend(token_tags)
             print "\t".join(fields)
@@ -130,8 +130,8 @@ def print_entities(comm):
     Args:
         comm: A Concrete Communication
     """
-    if comm.entitySets:
-        for entitySet_index, entitySet in enumerate(comm.entitySets):
+    if comm.entitySetList:
+        for entitySet_index, entitySet in enumerate(comm.entitySetList):
             if entitySet.metadata:
                 print "Entity Set %d (%s):" % (entitySet_index, entitySet.metadata.tool)
             else:
@@ -159,8 +159,8 @@ def print_situations(comm):
         """Text alignment helper function"""
         print " "*indent_level + (fieldname + ":").ljust(justified_width) + content
 
-    if comm.situationSets:
-        for situationSet_index, situationSet in enumerate(comm.situationSets):
+    if comm.situationSetList:
+        for situationSet_index, situationSet in enumerate(comm.situationSetList):
             if situationSet.metadata:
                 print "Situation Set %d (%s):" % (situationSet_index, situationSet.metadata.tool)
             else:
@@ -220,7 +220,7 @@ def print_tokens_with_entityMentions(comm):
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
             if tokenization.tokenList:
-                text_tokens = [token.text for token in tokenization.tokenList.tokens]
+                text_tokens = [token.text for token in tokenization.tokenList.tokenList]
                 if tokenization.uuid.uuidString in entityMentions_by_tokenizationId:
                     for entityMention in entityMentions_by_tokenizationId[tokenization.uuid.uuidString]:
                         # TODO: Handle non-contiguous tokens in a tokenIndexLists
@@ -241,7 +241,7 @@ def print_tokens_for_communication(comm):
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
             if tokenization.tokenList:
-                text_tokens = [token.text for token in tokenization.tokenList.tokens]
+                text_tokens = [token.text for token in tokenization.tokenList.tokenList]
                 print " ".join(text_tokens)
         print
 
@@ -255,8 +255,9 @@ def print_penn_treebank_for_communication(comm):
     tokenizations = get_tokenizations(comm)
 
     for tokenization in tokenizations:
-        if tokenization.parse:
-            print penn_treebank_for_parse(tokenization.parse) + "\n\n"
+        if tokenization.parseList:
+            for parse in tokenization.parseList:
+                print penn_treebank_for_parse(parse) + "\n\n"
 
 
 def penn_treebank_for_parse(parse):
@@ -290,10 +291,10 @@ def get_char_offset_tags_for_tokenization(comm, tokenization):
     """TODOC:
     """
     if tokenization.tokenList:
-        char_offset_tags = [None]*len(tokenization.tokenList.tokens)
+        char_offset_tags = [None]*len(tokenization.tokenList.tokenList)
 
         if comm.text:
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 if token.textSpan:
                     char_offset_tags[i] = comm.text[token.textSpan.start:token.textSpan.ending]
         return char_offset_tags
@@ -326,7 +327,7 @@ def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0)
     if tokenization.tokenList:
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
-        head_list = [""]*len(tokenization.tokenList.tokens)
+        head_list = [""]*len(tokenization.tokenList.tokenList)
 
         if tokenization.dependencyParseList:
             for dependency in tokenization.dependencyParseList[dependency_parse_index].dependencyList:
@@ -350,8 +351,8 @@ def get_entityMentions_by_tokenizationId(comm):
         keys are Tokenization UUID strings.
     """
     mentions_by_tokenizationId = defaultdict(list)
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             for entity in entitySet.entityList:
                 for entityMention in entity.mentionList:
                     mentions_by_tokenizationId[entityMention.tokens.tokenizationId.uuidString].append(entityMention)
@@ -373,8 +374,8 @@ def get_entity_number_for_entityMention_uuid(comm):
     entity_number_for_entityMention_uuid = {}
     entity_number_counter = 0
 
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
+    if comm.entitySetList:
+        for entitySet in comm.entitySetList:
             for entity in entitySet.entityList:
                 for entityMention in entity.mentionList:
                     entity_number_for_entityMention_uuid[entityMention.uuid.uuidString] = entity_number_counter
@@ -382,7 +383,7 @@ def get_entity_number_for_entityMention_uuid(comm):
     return entity_number_for_entityMention_uuid
 
 
-def get_lemma_tags_for_tokenization(tokenization):
+def get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0):
     """Get lemma tags for a tokenization
 
     Args:
@@ -392,18 +393,19 @@ def get_lemma_tags_for_tokenization(tokenization):
         A list of lemma tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        lemma_tags = [""]*len(tokenization.tokenList.tokens)
-        if tokenization.lemmaList:
+        lemma_tags = [""]*len(tokenization.tokenList.tokenList)
+        lemma_tokentaggings = get_tokentaggings_of_type(tokenization, "lemma")
+        if lemma_tokentaggings and len(lemma_tokentaggings) > lemma_tokentagging_index:
             tag_for_tokenIndex = {}
-            for taggedToken in tokenization.lemmaList.taggedTokenList:
+            for taggedToken in lemma_tokentaggings[lemma_tokentagging_index].taggedTokenList:
                 tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 if i in tag_for_tokenIndex:
                     lemma_tags[i] = tag_for_tokenIndex[i]
         return lemma_tags
 
 
-def get_ner_tags_for_tokenization(tokenization):
+def get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0):
     """Get Named Entity Recognition tags for a tokenization
 
     Args:
@@ -413,12 +415,13 @@ def get_ner_tags_for_tokenization(tokenization):
         A list of NER tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        ner_tags = [""]*len(tokenization.tokenList.tokens)
-        if tokenization.nerTagList:
+        ner_tags = [""]*len(tokenization.tokenList.tokenList)
+        ner_tokentaggings = get_tokentaggings_of_type(tokenization, "NER")
+        if ner_tokentaggings and len(ner_tokentaggings) > ner_tokentagging_index:
             tag_for_tokenIndex = {}
-            for taggedToken in tokenization.nerTagList.taggedTokenList:
+            for taggedToken in ner_tokentaggings[ner_tokentagging_index].taggedTokenList:
                 tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 try:
                     ner_tags[i] = tag_for_tokenIndex[i]
                 except IndexError:
@@ -428,7 +431,7 @@ def get_ner_tags_for_tokenization(tokenization):
         return ner_tags
 
 
-def get_pos_tags_for_tokenization(tokenization):
+def get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0):
     """Get Part-of-Speech tags for a tokenization
 
     Args:
@@ -438,12 +441,13 @@ def get_pos_tags_for_tokenization(tokenization):
         A list of POS tags for each token in the Tokenization
     """
     if tokenization.tokenList:
-        pos_tags = [""]*len(tokenization.tokenList.tokens)
-        if tokenization.posTagList:
+        pos_tags = [""]*len(tokenization.tokenList.tokenList)
+        pos_tokentaggings = get_tokentaggings_of_type(tokenization, "POS")
+        if pos_tokentaggings and len(pos_tokentaggings) > pos_tokentagging_index:
             tag_for_tokenIndex = {}
-            for taggedToken in tokenization.posTagList.taggedTokenList:
+            for taggedToken in pos_tokentaggings[pos_tokentagging_index].taggedTokenList:
                 tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokens):
+            for i, token in enumerate(tokenization.tokenList.tokenList):
                 if i in tag_for_tokenIndex:
                     pos_tags[i] = tag_for_tokenIndex[i]
         return pos_tags
@@ -460,11 +464,11 @@ def get_tokenizations(comm):
     """
     tokenizations = []
 
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
+        for sectionSegmentation in comm.sectionSegmentationList:
             for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
                                 tokenizations.append(tokenization)
@@ -483,12 +487,12 @@ def get_tokenizations_grouped_by_section(comm):
     """
     tokenizations_by_section = []
 
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
+    if comm.sectionSegmentationList:
+        for sectionSegmentation in comm.sectionSegmentationList:
             for section in sectionSegmentation.sectionList:
                 tokenizations_in_section = []
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
+                if section.sentenceSegmentationList:
+                    for sentenceSegmentation in section.sentenceSegmentationList:
                         for sentence in sentenceSegmentation.sentenceList:
                             for tokenization in sentence.tokenizationList:
                                 tokenizations_in_section.append(tokenization)
@@ -508,9 +512,21 @@ def get_tokens_for_entityMention(entityMention):
     """
     tokens = []
     for tokenIndex in entityMention.tokens.tokenIndexList:
-        tokens.append(entityMention.tokens.tokenization.tokenList.tokens[tokenIndex].text)
+        tokens.append(entityMention.tokens.tokenization.tokenList.tokenList[tokenIndex].text)
     return tokens
 
+
+def get_tokentaggings_of_type(tokenization, taggingType):
+    """Returns a list of TokenTagging objects with the specified taggingType
+
+    Args:
+        tokenization: A Concrete Tokenizaiton object
+        taggingType: A string value for the specified TokenTagging.taggingType
+
+    Returns:
+        A list of TokenTagging objects
+    """
+    return [tt for tt in tokenization.tokenTaggingList if tt.taggingType == taggingType]
 
 
 if __name__ == "__main__":

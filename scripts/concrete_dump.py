@@ -36,6 +36,8 @@ def main():
                         action="store_true")
     parser.add_argument("--pos", help="Print first set of Part-Of-Speech token tags in 'ConLL-style' format",
                         action="store_true")
+    parser.add_argument("--situation-mentions", help="Print info about all SituationMentions",
+                        action="store_true")
     parser.add_argument("--situations", help="Print info about all Situations and their SituationMentions",
                         action="store_true")
     parser.add_argument("--tokens", help="Print whitespace-seperated tokens for *all* Tokenizations in a "
@@ -57,6 +59,8 @@ def main():
         print_entities(comm)
     elif args.mentions:
         print_tokens_with_entityMentions(comm)
+    elif args.situation_mentions:
+        print_situation_mentions(comm)
     elif args.situations:
         print_situations(comm)
     elif args.tokens:
@@ -149,15 +153,31 @@ def print_entities(comm):
             print
 
 
+def print_situation_mentions(comm):
+    """Print information for all SituationMentions (which may not have Situations)
+
+    Args:
+        comm: A Concrete Communication
+    """
+    if comm.situationMentionSetList:
+        for situationMentionSet_index, situationMentionSet in enumerate(comm.situationMentionSetList):
+            if situationMentionSet.metadata:
+                print "Situation Set %d (%s):" % (situationMentionSet_index, situationMentionSet.metadata.tool)
+            else:
+                print "Situation Set %d:" % situationMentionSet_index
+            for situationMention_index, situationMention in enumerate(situationMentionSet.mentionList):
+                print "  SituationMention %d-%d:" % (situationMentionSet_index, situationMention_index)
+                _print_situation_mention(situationMention)
+                print
+            print
+
+
 def print_situations(comm):
     """Print information for all Situations and their SituationMentions
 
     Args:
         comm: A Concrete Communication
     """
-    def _p(indent_level, justified_width, fieldname, content):
-        """Text alignment helper function"""
-        print " "*indent_level + (fieldname + ":").ljust(justified_width) + content
 
     if comm.situationSetList:
         for situationSet_index, situationSet in enumerate(comm.situationSetList):
@@ -178,38 +198,50 @@ def print_situations(comm):
                     for situationMention_index, situationMention in enumerate(situation.mentionList):
                         print " "*6 + "SituationMention %d-%d-%d:" % (
                             situationSet_index, situation_index, situationMention_index)
-                        if situationMention.text:
-                            _p(10, 20, "text", situationMention.text)
-                        if situationMention.situationType:
-                            _p(10, 20, "situationType", situationMention.situationType)
-                        if situationMention.situationKindLemma:
-                            _p(10, 20, "situationKindLemma", situationMention.situationKindLemma)
-                        if situationMention.eventType:
-                            _p(10, 20, "eventType", situationMention.eventType)
-                        if situationMention.argumentList:
-                            for argument_index, mentionArgument in enumerate(situationMention.argumentList):
-                                print " "*10 + "Argument %d:" % argument_index
-                                if mentionArgument.role:
-                                    _p(14, 16, "role", mentionArgument.role)
-                                if mentionArgument.entityMention:
-                                    _p(14, 16, "entityMention",
-                                        " ".join(get_tokens_for_entityMention(mentionArgument.entityMention)))
-                                # A SituationMention can have an argumentList with a MentionArgument that
-                                # points to another SituationMention - which could conceivably lead to
-                                # loops.  We currently don't traverse the list recursively, instead looking
-                                # at only SituationMentions referenced by top-level SituationMentions
-                                if mentionArgument.situationMention:
-                                    print " "*14 + "situationMention:"
-                                    if situationMention.text:
-                                        _p(18, 20, "text", situationMention.text)
-                                    if situationMention.situationType:
-                                        _p(18, 20, "situationType", situationMention.situationType)
-                                    if situationMention.situationKindLemma:
-                                        _p(18, 20, "situationKindLemma", situationMention.situationKindLemma)
-                                    if situationMention.eventType:
-                                        _p(18, 20, "eventType", situationMention.eventType)
+                        _print_situation_mention(situationMention)
                 print
             print
+
+
+def _print_situation_mention(situationMention):
+    """Helper function for printing info for a SituationMention"""
+    if situationMention.text:
+        _p(10, 20, "text", situationMention.text)
+    if situationMention.situationType:
+        _p(10, 20, "situationType", situationMention.situationType)
+    if situationMention.situationKindLemma:
+        _p(10, 20, "situationKindLemma", situationMention.situationKindLemma)
+    if situationMention.eventType:
+        _p(10, 20, "eventType", situationMention.eventType)
+    if situationMention.argumentList:
+        for argument_index, mentionArgument in enumerate(situationMention.argumentList):
+            print " "*10 + "Argument %d:" % argument_index
+            if mentionArgument.role:
+                _p(14, 16, "role", mentionArgument.role)
+            if mentionArgument.entityMention:
+                _p(14, 16, "entityMention",
+                    " ".join(get_tokens_for_entityMention(mentionArgument.entityMention)))
+            # A SituationMention can have an argumentList with a MentionArgument that
+            # points to another SituationMention - which could conceivably lead to
+            # loops.  We currently don't traverse the list recursively, instead looking
+            # at only SituationMentions referenced by top-level SituationMentions
+            if mentionArgument.situationMention:
+                print " "*14 + "situationMention:"
+                if situationMention.text:
+                    _p(18, 20, "text", situationMention.text)
+                if situationMention.situationType:
+                    _p(18, 20, "situationType", situationMention.situationType)
+                if situationMention.situationKindLemma:
+                    _p(18, 20, "situationKindLemma", situationMention.situationKindLemma)
+                if situationMention.eventType:
+                    _p(18, 20, "eventType", situationMention.eventType)
+
+
+
+
+def _p(indent_level, justified_width, fieldname, content):
+    """Text alignment helper function"""
+    print " "*indent_level + (fieldname + ":").ljust(justified_width) + content
 
 
 def print_tokens_with_entityMentions(comm):

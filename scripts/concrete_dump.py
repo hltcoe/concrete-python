@@ -207,12 +207,14 @@ def _print_situation_mention(situationMention):
     """Helper function for printing info for a SituationMention"""
     if situationMention.text:
         _p(10, 20, "text", situationMention.text)
+    if situationMention.eventType:
+        _p(10, 20, "eventType", situationMention.eventType)
     if situationMention.situationType:
         _p(10, 20, "situationType", situationMention.situationType)
     if situationMention.situationKindLemma:
         _p(10, 20, "situationKindLemma", situationMention.situationKindLemma)
-    if situationMention.eventType:
-        _p(10, 20, "eventType", situationMention.eventType)
+    if situationMention.stateType:
+        _p(18, 20, "stateType", situationMention.stateType)
     if situationMention.argumentList:
         for argument_index, mentionArgument in enumerate(situationMention.argumentList):
             print " "*10 + "Argument %d:" % argument_index
@@ -229,14 +231,14 @@ def _print_situation_mention(situationMention):
                 print " "*14 + "situationMention:"
                 if situationMention.text:
                     _p(18, 20, "text", situationMention.text)
+                if situationMention.eventType:
+                    _p(18, 20, "eventType", situationMention.eventType)
                 if situationMention.situationType:
                     _p(18, 20, "situationType", situationMention.situationType)
                 if situationMention.situationKindLemma:
                     _p(18, 20, "situationKindLemma", situationMention.situationKindLemma)
-                if situationMention.eventType:
-                    _p(18, 20, "eventType", situationMention.eventType)
-
-
+                if situationMention.stateType:
+                    _p(18, 20, "stateType", situationMention.stateType)
 
 
 def _p(indent_level, justified_width, fieldname, content):

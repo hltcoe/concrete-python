@@ -1,11 +1,9 @@
 import sys
 
-sys.path.append('/home/abenton2/pylibs')
-
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from concrete_thrift.concrete.structure.ttypes import TokenLattice
+from concrete.structure.ttypes import TokenLattice
 
 import math
 

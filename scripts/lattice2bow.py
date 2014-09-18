@@ -1,7 +1,7 @@
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from concrete.structure.ttypes import TokenLattice
+from concrete.structure.ttypes import TokenLattice, TokenList, Token
 
 import math
 
@@ -67,16 +67,27 @@ def compute_counts(path):
     return counts
 
 
+def write_best_path(output_path, lattice, path):
+    lattice.cachedBestPath = TokenList([Token(text=arc.token.text)
+                                        for arc in path])
+    with open(output_path, 'wb') as f:
+        transport = TTransport.TFileObjectTransport(f)
+        protocol = TBinaryProtocol.TBinaryProtocol(transport)
+        lattice.write(protocol)
+
+
 def main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.set_defaults(raw=False, best=False)
+    parser.set_defaults(raw=False, best=False, write=False)
     parser.add_argument('input_path', type=str,
                         help='path to serialized concrete TokenLattice')
     parser.add_argument('--raw', action='store_true',
                         help='return all paths')
     parser.add_argument('--best', action='store_true',
                         help='return counts for best path')
+    parser.add_argument('--write', action='store_true',
+                        help='write back to lattice')
     args = parser.parse_args()
 
     lattice = load_lattice(args.input_path)
@@ -90,6 +101,8 @@ def main():
         if args.best:
             path = reduce(lambda p, q: (p[1] > q[1]) and p or q,
                           path_weight_pairs)
+            if args.write:
+                write_best_path(args.input_path, lattice, path[0])
             counts = compute_counts(path[0])
         else:
             counts = compute_expected_counts(path_weight_pairs)

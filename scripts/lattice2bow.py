@@ -108,10 +108,11 @@ def main():
         else:
             counts = compute_expected_counts(path_weight_pairs)
 
-        counts_items = counts.items()
-        counts_items.sort(key=lambda pair: pair[1], reverse=True)
-        for (w, p) in counts_items:
-            print '%.9f %s' % (p, w)
+        if not args.write:
+            counts_items = counts.items()
+            counts_items.sort(key=lambda pair: pair[1], reverse=True)
+            for (w, p) in counts_items:
+                print '%.9f %s' % (p, w)
 
 
 if __name__ == '__main__':

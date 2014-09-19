@@ -1,7 +1,7 @@
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from concrete.structure.ttypes import TokenLattice, TokenList, Token, LatticePath
+from concrete.structure.ttypes import TokenLattice, Token, LatticePath
 
 import math
 
@@ -68,9 +68,8 @@ def compute_counts(path):
 
 
 def write_best_path(output_path, lattice, path):
-    lattice.cachedBestPath = LatticePath(tokenList=TokenList(
-        [Token(text=arc.token.text) for arc in path]
-    ))
+    lattice.cachedBestPath = LatticePath(tokenList=[Token(text=arc.token.text)
+                                                    for arc in path])
     with open(output_path, 'wb') as f:
         transport = TTransport.TFileObjectTransport(f)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)

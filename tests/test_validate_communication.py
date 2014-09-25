@@ -140,10 +140,9 @@ class TestTextspanOffsets(unittest.TestCase):
     def create_section_with_sentence(self, section_start, section_ending, sentence_start, sentence_ending):
         sentence_textspan = concrete.spans.ttypes.TextSpan(start=sentence_start, ending=sentence_ending)
         sentence = concrete.structure.ttypes.Sentence(textSpan=sentence_textspan, uuid='TEST_SENTENCE')
-        sentence_segmentation = concrete.structure.ttypes.SentenceSegmentation(sentenceList=[sentence])
         section_textspan = concrete.spans.ttypes.TextSpan(start=section_start, ending=section_ending)
         section = concrete.structure.ttypes.Section(
-            sentenceSegmentationList=[sentence_segmentation],
+            sentenceList=[sentence],
             textSpan=section_textspan,
             uuid='TEST_SECTION')
         return section
@@ -154,7 +153,7 @@ class TestTextspanOffsets(unittest.TestCase):
         tokenization = concrete.structure.ttypes.Tokenization(tokenList=concrete.TokenList(tokenList=[token]))
         sentence_textspan = concrete.spans.ttypes.TextSpan(start=sentence_start, ending=sentence_ending)
         sentence = concrete.structure.ttypes.Sentence(
-            tokenizationList=[tokenization],
+            tokenization=tokenization,
             textSpan=sentence_textspan,
             uuid='TEST')
         return sentence

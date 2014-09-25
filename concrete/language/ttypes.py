@@ -118,6 +118,8 @@ class LanguageIdentification(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.languageToProbabilityMap is None:
       raise TProtocol.TProtocolException(message='Required field languageToProbabilityMap is unset!')
     return

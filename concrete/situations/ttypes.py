@@ -101,6 +101,8 @@ class Property(object):
   def validate(self):
     if self.value is None:
       raise TProtocol.TProtocolException(message='Required field value is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     return
 
 
@@ -338,22 +340,22 @@ class TimeML(object):
   A wrapper for various TimeML annotations.
 
   Attributes:
-   - timemlClass: The TimeML class for situations representing TimeML events
-   - timemlTense: The TimeML tense for situations representing TimeML events
-   - timemlAspect: The TimeML aspect for situations representing TimeML events
+   - timeMLClass: The TimeML class for situations representing TimeML events
+   - timeMLTense: The TimeML tense for situations representing TimeML events
+   - timeMLAspect: The TimeML aspect for situations representing TimeML events
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'timemlClass', None, None, ), # 1
-    (2, TType.STRING, 'timemlTense', None, None, ), # 2
-    (3, TType.STRING, 'timemlAspect', None, None, ), # 3
+    (1, TType.STRING, 'timeMLClass', None, None, ), # 1
+    (2, TType.STRING, 'timeMLTense', None, None, ), # 2
+    (3, TType.STRING, 'timeMLAspect', None, None, ), # 3
   )
 
-  def __init__(self, timemlClass=None, timemlTense=None, timemlAspect=None,):
-    self.timemlClass = timemlClass
-    self.timemlTense = timemlTense
-    self.timemlAspect = timemlAspect
+  def __init__(self, timeMLClass=None, timeMLTense=None, timeMLAspect=None,):
+    self.timeMLClass = timeMLClass
+    self.timeMLTense = timeMLTense
+    self.timeMLAspect = timeMLAspect
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -366,17 +368,17 @@ class TimeML(object):
         break
       if fid == 1:
         if ftype == TType.STRING:
-          self.timemlClass = iprot.readString().decode('utf-8')
+          self.timeMLClass = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRING:
-          self.timemlTense = iprot.readString().decode('utf-8')
+          self.timeMLTense = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRING:
-          self.timemlAspect = iprot.readString().decode('utf-8')
+          self.timeMLAspect = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       else:
@@ -389,17 +391,17 @@ class TimeML(object):
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('TimeML')
-    if self.timemlClass is not None:
-      oprot.writeFieldBegin('timemlClass', TType.STRING, 1)
-      oprot.writeString(self.timemlClass.encode('utf-8'))
+    if self.timeMLClass is not None:
+      oprot.writeFieldBegin('timeMLClass', TType.STRING, 1)
+      oprot.writeString(self.timeMLClass.encode('utf-8'))
       oprot.writeFieldEnd()
-    if self.timemlTense is not None:
-      oprot.writeFieldBegin('timemlTense', TType.STRING, 2)
-      oprot.writeString(self.timemlTense.encode('utf-8'))
+    if self.timeMLTense is not None:
+      oprot.writeFieldBegin('timeMLTense', TType.STRING, 2)
+      oprot.writeString(self.timeMLTense.encode('utf-8'))
       oprot.writeFieldEnd()
-    if self.timemlAspect is not None:
-      oprot.writeFieldBegin('timemlAspect', TType.STRING, 3)
-      oprot.writeString(self.timemlAspect.encode('utf-8'))
+    if self.timeMLAspect is not None:
+      oprot.writeFieldBegin('timeMLAspect', TType.STRING, 3)
+      oprot.writeString(self.timeMLAspect.encode('utf-8'))
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -431,6 +433,18 @@ class Situation(object):
   Attributes:
    - uuid: Unique identifier for this situation.
    - situationType: The core type of this situation (eg EVENT or SENTIMENT).
+   - situationKind: A more descriptive field that specifically describes the
+  situation based on situationType above. It allows for more
+  detailed description of the situation.
+
+  Some examples:
+
+  if situationType == EVENT, the event type for the situation
+  if situationType == STATE, the state type
+  if situationType == TEMPORAL_FACT, the temporal fact type
+
+  Different and more varied situationTypes may be added
+  in the future.
    - argumentList: The arguments for this situation. Each argument consists of a
   role and a value. It is possible for an situation to have
   multiple arguments with the same role. Arguments are
@@ -440,15 +454,6 @@ class Situation(object):
    - justificationList: An list of pointers to SituationMentions that provide
   justification for this situation. These mentions may be either
   direct mentions of the situation, or indirect evidence.
-   - eventType: The event type for situations where situation_type=EVENT
-   - stateType: The state type for situations where situation_type=STATE
-   - temporalFactType: The temporal fact type for situations where situation_type=TEMPORAL_FACT
-   - situationKindLemma: This lemma represents a canonical lemma for the situation kind
-  when the situation kind cannot be specified by a situation type subtype
-  (ex, when using arbitrary verbs or nominalizations as events which do
-  not appear in the event_type enumeration).
-  If this kind is grounded in a token sequence from the original text, the
-  appropriate SituationMention should have a reference to the token sequence.
    - timeML: A wrapper for TimeML annotations.
    - intensity: An "intensity" rating for this situation, typically ranging from
   0-1. In the case of SENTIMENT situations, this is used to record
@@ -512,10 +517,10 @@ class Situation(object):
     None, # 47
     None, # 48
     None, # 49
-    (50, TType.STRING, 'eventType', None, None, ), # 50
-    (51, TType.STRING, 'stateType', None, None, ), # 51
-    (52, TType.STRING, 'temporalFactType', None, None, ), # 52
-    (53, TType.STRING, 'situationKindLemma', None, None, ), # 53
+    (50, TType.STRING, 'situationKind', None, None, ), # 50
+    None, # 51
+    None, # 52
+    None, # 53
     (54, TType.STRUCT, 'timeML', (TimeML, TimeML.thrift_spec), None, ), # 54
     None, # 55
     None, # 56
@@ -665,16 +670,13 @@ class Situation(object):
     (200, TType.DOUBLE, 'confidence', None, None, ), # 200
   )
 
-  def __init__(self, uuid=None, situationType=None, argumentList=None, mentionIdList=None, justificationList=None, eventType=None, stateType=None, temporalFactType=None, situationKindLemma=None, timeML=None, intensity=None, polarity=None, confidence=None,):
+  def __init__(self, uuid=None, situationType=None, situationKind=None, argumentList=None, mentionIdList=None, justificationList=None, timeML=None, intensity=None, polarity=None, confidence=None,):
     self.uuid = uuid
     self.situationType = situationType
+    self.situationKind = situationKind
     self.argumentList = argumentList
     self.mentionIdList = mentionIdList
     self.justificationList = justificationList
-    self.eventType = eventType
-    self.stateType = stateType
-    self.temporalFactType = temporalFactType
-    self.situationKindLemma = situationKindLemma
     self.timeML = timeML
     self.intensity = intensity
     self.polarity = polarity
@@ -698,6 +700,11 @@ class Situation(object):
       elif fid == 2:
         if ftype == TType.STRING:
           self.situationType = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 50:
+        if ftype == TType.STRING:
+          self.situationKind = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -731,26 +738,6 @@ class Situation(object):
             _elem31.read(iprot)
             self.justificationList.append(_elem31)
           iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 50:
-        if ftype == TType.STRING:
-          self.eventType = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 51:
-        if ftype == TType.STRING:
-          self.stateType = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 52:
-        if ftype == TType.STRING:
-          self.temporalFactType = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 53:
-        if ftype == TType.STRING:
-          self.situationKindLemma = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 54:
@@ -813,21 +800,9 @@ class Situation(object):
         iter34.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.eventType is not None:
-      oprot.writeFieldBegin('eventType', TType.STRING, 50)
-      oprot.writeString(self.eventType.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.stateType is not None:
-      oprot.writeFieldBegin('stateType', TType.STRING, 51)
-      oprot.writeString(self.stateType.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.temporalFactType is not None:
-      oprot.writeFieldBegin('temporalFactType', TType.STRING, 52)
-      oprot.writeString(self.temporalFactType.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.situationKindLemma is not None:
-      oprot.writeFieldBegin('situationKindLemma', TType.STRING, 53)
-      oprot.writeString(self.situationKindLemma.encode('utf-8'))
+    if self.situationKind is not None:
+      oprot.writeFieldBegin('situationKind', TType.STRING, 50)
+      oprot.writeString(self.situationKind.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.timeML is not None:
       oprot.writeFieldBegin('timeML', TType.STRUCT, 54)
@@ -953,6 +928,8 @@ class SituationSet(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.situationList is None:
       raise TProtocol.TProtocolException(message='Required field situationList is unset!')
     return
@@ -1077,18 +1054,21 @@ class SituationMention(object):
   often redundant with the 'tokens' field, and may not
   be generated by all analytics.
    - situationType: The core type of this situation (eg EVENT or SENTIMENT)
+   - situationKind: A more descriptive field that specifically describes the
+  situation mention based on situationType above. It allows for
+  more detailed description of the situation mention.
+
+  Some examples:
+
+  if situationType == EVENT, the event type for the sit. mention
+  if situationType == STATE, the state type for this sit. mention
+
+  Different and more varied situationTypes may be added
+  in the future.
    - argumentList: The arguments for this situation mention. Each argument
   consists of a role and a value. It is possible for an situation
   to have multiple arguments with the same role. Arguments are
   unordered.
-   - eventType: The event type for situations where situation_type=EVENT
-   - stateType: The state type for situations where situation_type=STATE
-   - situationKindLemma: This lemma represents a canonical lemma for the situation kind
-  when the situation kind cannot be specified by a situation type subtype
-  (ex, when using arbitrary verbs or nominalizations as events which do
-  not appear in the event_type enumeration).
-  If this kind is grounded in a token sequence from the original text, the
-  SituationMention should have a reference to the token sequence.
    - intensity: An "intensity" rating for the situation, typically ranging from
   0-1. In the case of SENTIMENT situations, this is used to record
   the intensity of the sentiment.
@@ -1156,10 +1136,10 @@ class SituationMention(object):
     None, # 47
     None, # 48
     None, # 49
-    (50, TType.STRING, 'eventType', None, None, ), # 50
-    (51, TType.STRING, 'stateType', None, None, ), # 51
+    (50, TType.STRING, 'situationKind', None, None, ), # 50
+    None, # 51
     None, # 52
-    (53, TType.STRING, 'situationKindLemma', None, None, ), # 53
+    None, # 53
     None, # 54
     None, # 55
     None, # 56
@@ -1309,14 +1289,12 @@ class SituationMention(object):
     (200, TType.DOUBLE, 'confidence', None, None, ), # 200
   )
 
-  def __init__(self, uuid=None, text=None, situationType=None, argumentList=None, eventType=None, stateType=None, situationKindLemma=None, intensity=None, polarity=None, tokens=None, confidence=None,):
+  def __init__(self, uuid=None, text=None, situationType=None, situationKind=None, argumentList=None, intensity=None, polarity=None, tokens=None, confidence=None,):
     self.uuid = uuid
     self.text = text
     self.situationType = situationType
+    self.situationKind = situationKind
     self.argumentList = argumentList
-    self.eventType = eventType
-    self.stateType = stateType
-    self.situationKindLemma = situationKindLemma
     self.intensity = intensity
     self.polarity = polarity
     self.tokens = tokens
@@ -1347,6 +1325,11 @@ class SituationMention(object):
           self.situationType = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
+      elif fid == 50:
+        if ftype == TType.STRING:
+          self.situationKind = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.LIST:
           self.argumentList = []
@@ -1356,21 +1339,6 @@ class SituationMention(object):
             _elem47.read(iprot)
             self.argumentList.append(_elem47)
           iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 50:
-        if ftype == TType.STRING:
-          self.eventType = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 51:
-        if ftype == TType.STRING:
-          self.stateType = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 53:
-        if ftype == TType.STRING:
-          self.situationKindLemma = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 100:
@@ -1423,17 +1391,9 @@ class SituationMention(object):
         iter48.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.eventType is not None:
-      oprot.writeFieldBegin('eventType', TType.STRING, 50)
-      oprot.writeString(self.eventType.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.stateType is not None:
-      oprot.writeFieldBegin('stateType', TType.STRING, 51)
-      oprot.writeString(self.stateType.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.situationKindLemma is not None:
-      oprot.writeFieldBegin('situationKindLemma', TType.STRING, 53)
-      oprot.writeString(self.situationKindLemma.encode('utf-8'))
+    if self.situationKind is not None:
+      oprot.writeFieldBegin('situationKind', TType.STRING, 50)
+      oprot.writeString(self.situationKind.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.intensity is not None:
       oprot.writeFieldBegin('intensity', TType.DOUBLE, 100)
@@ -1559,6 +1519,8 @@ class SituationMentionSet(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.mentionList is None:
       raise TProtocol.TProtocolException(message='Required field mentionList is unset!')
     return

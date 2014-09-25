@@ -61,7 +61,7 @@ class Communication(object):
   i.e., seconds since January 1, 1970).
    - endTime: The time when this communication ended (in unix time UTC --
   i.e., seconds since January 1, 1970).
-   - metadata: Metadata to support this particular communication.
+   - metadata: metadata.AnnotationMetadata to support this particular communication.
 
   Communications derived from other communications should
   indicate in this metadata object their dependency
@@ -69,7 +69,7 @@ class Communication(object):
    - keyValueMap: A catch-all store of keys and values. Use sparingly!
    - lidList: Theories about the languages that are present in this
   communication.
-   - sectionSegmentationList: Theories about the block structure of this communication.
+   - sectionList: Theories about the block structure of this communication.
    - entityMentionSetList: Theories about which spans of text are used to mention entities
   in this communication.
    - entitySetList: Theories about what entities are discussed in this
@@ -78,6 +78,14 @@ class Communication(object):
   communication.
    - situationSetList: Theories about what situations are asserted in this
   communication.
+   - originalText: Optional original text field that points back to an original
+  communication.
+
+  This field can be populated for sake of convenience when creating
+  "perspective" communication (communications that are based on
+  highly destructive changes to an original communication [e.g.,
+  via MT]). This allows developers to quickly access the original
+  text that this perspective communication is based off of.
    - sound: The full audio contents of this communication in its original
   form, or in the least-processed form available, if the original
   is not available.
@@ -102,12 +110,12 @@ class Communication(object):
     (8, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 8
     (9, TType.MAP, 'keyValueMap', (TType.STRING,None,TType.STRING,None), None, ), # 9
     (10, TType.LIST, 'lidList', (TType.STRUCT,(concrete.language.ttypes.LanguageIdentification, concrete.language.ttypes.LanguageIdentification.thrift_spec)), None, ), # 10
-    (11, TType.LIST, 'sectionSegmentationList', (TType.STRUCT,(concrete.structure.ttypes.SectionSegmentation, concrete.structure.ttypes.SectionSegmentation.thrift_spec)), None, ), # 11
+    (11, TType.LIST, 'sectionList', (TType.STRUCT,(concrete.structure.ttypes.Section, concrete.structure.ttypes.Section.thrift_spec)), None, ), # 11
     (12, TType.LIST, 'entityMentionSetList', (TType.STRUCT,(concrete.entities.ttypes.EntityMentionSet, concrete.entities.ttypes.EntityMentionSet.thrift_spec)), None, ), # 12
     (13, TType.LIST, 'entitySetList', (TType.STRUCT,(concrete.entities.ttypes.EntitySet, concrete.entities.ttypes.EntitySet.thrift_spec)), None, ), # 13
     (14, TType.LIST, 'situationMentionSetList', (TType.STRUCT,(concrete.situations.ttypes.SituationMentionSet, concrete.situations.ttypes.SituationMentionSet.thrift_spec)), None, ), # 14
     (15, TType.LIST, 'situationSetList', (TType.STRUCT,(concrete.situations.ttypes.SituationSet, concrete.situations.ttypes.SituationSet.thrift_spec)), None, ), # 15
-    None, # 16
+    (16, TType.STRING, 'originalText', None, None, ), # 16
     None, # 17
     None, # 18
     None, # 19
@@ -117,7 +125,7 @@ class Communication(object):
     (23, TType.STRUCT, 'nitfInfo', (concrete.nitf.ttypes.NITFInfo, concrete.nitf.ttypes.NITFInfo.thrift_spec), None, ), # 23
   )
 
-  def __init__(self, id=None, uuid=None, type=None, text=None, startTime=None, endTime=None, metadata=None, keyValueMap=None, lidList=None, sectionSegmentationList=None, entityMentionSetList=None, entitySetList=None, situationMentionSetList=None, situationSetList=None, sound=None, tweetInfo=None, emailInfo=None, nitfInfo=None,):
+  def __init__(self, id=None, uuid=None, type=None, text=None, startTime=None, endTime=None, metadata=None, keyValueMap=None, lidList=None, sectionList=None, entityMentionSetList=None, entitySetList=None, situationMentionSetList=None, situationSetList=None, originalText=None, sound=None, tweetInfo=None, emailInfo=None, nitfInfo=None,):
     self.id = id
     self.uuid = uuid
     self.type = type
@@ -127,11 +135,12 @@ class Communication(object):
     self.metadata = metadata
     self.keyValueMap = keyValueMap
     self.lidList = lidList
-    self.sectionSegmentationList = sectionSegmentationList
+    self.sectionList = sectionList
     self.entityMentionSetList = entityMentionSetList
     self.entitySetList = entitySetList
     self.situationMentionSetList = situationMentionSetList
     self.situationSetList = situationSetList
+    self.originalText = originalText
     self.sound = sound
     self.tweetInfo = tweetInfo
     self.emailInfo = emailInfo
@@ -207,12 +216,12 @@ class Communication(object):
           iprot.skip(ftype)
       elif fid == 11:
         if ftype == TType.LIST:
-          self.sectionSegmentationList = []
+          self.sectionList = []
           (_etype16, _size13) = iprot.readListBegin()
           for _i17 in xrange(_size13):
-            _elem18 = concrete.structure.ttypes.SectionSegmentation()
+            _elem18 = concrete.structure.ttypes.Section()
             _elem18.read(iprot)
-            self.sectionSegmentationList.append(_elem18)
+            self.sectionList.append(_elem18)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -258,6 +267,11 @@ class Communication(object):
             _elem42.read(iprot)
             self.situationSetList.append(_elem42)
           iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 16:
+        if ftype == TType.STRING:
+          self.originalText = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
       elif fid == 20:
@@ -337,10 +351,10 @@ class Communication(object):
         iter45.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.sectionSegmentationList is not None:
-      oprot.writeFieldBegin('sectionSegmentationList', TType.LIST, 11)
-      oprot.writeListBegin(TType.STRUCT, len(self.sectionSegmentationList))
-      for iter46 in self.sectionSegmentationList:
+    if self.sectionList is not None:
+      oprot.writeFieldBegin('sectionList', TType.LIST, 11)
+      oprot.writeListBegin(TType.STRUCT, len(self.sectionList))
+      for iter46 in self.sectionList:
         iter46.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -371,6 +385,10 @@ class Communication(object):
       for iter50 in self.situationSetList:
         iter50.write(oprot)
       oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.originalText is not None:
+      oprot.writeFieldBegin('originalText', TType.STRING, 16)
+      oprot.writeString(self.originalText.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.sound is not None:
       oprot.writeFieldBegin('sound', TType.STRUCT, 20)

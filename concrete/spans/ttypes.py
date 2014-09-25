@@ -20,13 +20,11 @@ except:
 class TextSpan(object):
   """
   A span of text within a single communication, identified by a pair
-  of character offsets. In this context, a "character offset" is a
-  zero-based count of UTF-16 codepoints. I.e., if you are using
-  Java, or are using a Python build where sys.maxunicode==0xffff,
-  then the "character offset" is an offset into the standard
-  (unicode) string data type. If you are using a Python build where
-  sys.maxunicode==0xffffffff, then you would need to encode the
-  unicode string using UTF-16 before using the character offsets.
+  of zero-indexed character offsets into a Thrift string. Thrift strings
+  are encoded using UTF-8:
+    https://thrift.apache.org/docs/types
+  The offsets are character-based, not byte-based - a character with a
+  three-byte UTF-8 representation only counts as one character.
 
   NOTE: This span represents a best guess, or 'provenance':
   it cannot be guaranteed that this text span matches the _exact_

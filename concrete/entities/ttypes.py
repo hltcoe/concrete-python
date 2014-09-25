@@ -143,8 +143,6 @@ class Entity(object):
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
     if self.mentionIdList is None:
       raise TProtocol.TProtocolException(message='Required field mentionIdList is unset!')
-    if self.type is None:
-      raise TProtocol.TProtocolException(message='Required field type is unset!')
     return
 
 
@@ -245,6 +243,8 @@ class EntitySet(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.entityList is None:
       raise TProtocol.TProtocolException(message='Required field entityList is unset!')
     return
@@ -284,7 +284,7 @@ class EntityMention(object):
 
   Attributes:
    - uuid
-   - tokens: List of mentions in this set.
+   - tokens: Pointer to sequence of tokens.
    - entityType: The type of referent that is referred to by this mention.
    - phraseType: The phrase type of the tokens that constitute this mention.
    - confidence: A confidence score for this individual mention.  You can also
@@ -396,10 +396,6 @@ class EntityMention(object):
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
     if self.tokens is None:
       raise TProtocol.TProtocolException(message='Required field tokens is unset!')
-    if self.entityType is None:
-      raise TProtocol.TProtocolException(message='Required field entityType is unset!')
-    if self.phraseType is None:
-      raise TProtocol.TProtocolException(message='Required field phraseType is unset!')
     return
 
 
@@ -504,6 +500,8 @@ class EntityMentionSet(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.mentionList is None:
       raise TProtocol.TProtocolException(message='Required field mentionList is unset!')
     return

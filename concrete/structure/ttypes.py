@@ -47,25 +47,38 @@ class Token(object):
   Usually, each token will include at least a text string.
 
   Attributes:
-   - tokenIndex: A tokenization-relative identifier for this token. Together
-  with the UUID for a Tokenization, this can be used to define
-  pointers to specific tokens. If a Tokenization object contains
-  multiple Token objects with the same id (e.g., in different
-  n-best lists), then all of their other fields *must* be
+   - tokenIndex: A 0-based tokenization-relative identifier for this token that
+  represents the order that this token appears in the
+  sentence. Together with the UUID for a Tokenization, this can be
+  used to define pointers to specific tokens. If a Tokenization
+  object contains multiple Token objects with the same id (e.g., in
+  different n-best lists), then all of their other fields *must* be
   identical as well.
    - text: The text associated with this token.
   Note - we may have a destructive tokenizer (e.g., Stanford rewriting)
   and as a result, we want to maintain this field.
-   - textSpan: Location of this token in the original text. In cases where
-  this token does not correspond directly with any text span in
-  the original text (such as word insertion during MT), this field
-  may be given a value indicating "approximately" where the token
-  comes from. A span covering the entire sentence may be used if
-  no more precise value seems appropriate.
+   - textSpan: Location of this token in this perspective's text (.text field).
+  In cases where this token does not correspond directly with any
+  text span in the text (such as word insertion during MT),
+  this field may be given a value indicating "approximately" where
+  the token comes from. A span covering the entire sentence may be
+  used if no more precise value seems appropriate.
 
   NOTE: This span represents a best guess, or 'provenance':
   it cannot be guaranteed that this text span matches the _exact_
-  text of the original document, but is the annotation's best
+  text of the document, but is the annotation's best
+  effort at such a representation.
+   - rawTextSpan: Location of this token in the original, raw text (.originalText
+  field).  In cases where this token does not correspond directly
+  with any text span in the original text (such as word insertion
+  during MT), this field may be given a value indicating
+  "approximately" where the token comes from. A span covering the
+  entire sentence may be used if no more precise value seems
+  appropriate.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original raw document, but is the annotation's best
   effort at such a representation.
    - audioSpan: Location of this token in the original audio.
 
@@ -80,14 +93,15 @@ class Token(object):
     (1, TType.I32, 'tokenIndex', None, None, ), # 1
     (2, TType.STRING, 'text', None, None, ), # 2
     (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 3
-    None, # 4
+    (4, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 4
     (5, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 5
   )
 
-  def __init__(self, tokenIndex=None, text=None, textSpan=None, audioSpan=None,):
+  def __init__(self, tokenIndex=None, text=None, textSpan=None, rawTextSpan=None, audioSpan=None,):
     self.tokenIndex = tokenIndex
     self.text = text
     self.textSpan = textSpan
+    self.rawTextSpan = rawTextSpan
     self.audioSpan = audioSpan
 
   def read(self, iprot):
@@ -113,6 +127,12 @@ class Token(object):
         if ftype == TType.STRUCT:
           self.textSpan = concrete.spans.ttypes.TextSpan()
           self.textSpan.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.rawTextSpan = concrete.spans.ttypes.TextSpan()
+          self.rawTextSpan.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 5:
@@ -143,6 +163,10 @@ class Token(object):
       oprot.writeFieldBegin('textSpan', TType.STRUCT, 3)
       self.textSpan.write(oprot)
       oprot.writeFieldEnd()
+    if self.rawTextSpan is not None:
+      oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 4)
+      self.rawTextSpan.write(oprot)
+      oprot.writeFieldEnd()
     if self.audioSpan is not None:
       oprot.writeFieldBegin('audioSpan', TType.STRUCT, 5)
       self.audioSpan.write(oprot)
@@ -153,8 +177,6 @@ class Token(object):
   def validate(self):
     if self.tokenIndex is None:
       raise TProtocol.TProtocolException(message='Required field tokenIndex is unset!')
-    if self.text is None:
-      raise TProtocol.TProtocolException(message='Required field text is unset!')
     return
 
 
@@ -184,12 +206,20 @@ class TokenRefSequence(object):
   for instance, it is not easy to map this sequence to a another
   annotation that has a head.
    - tokenizationId: The UUID of the tokenization that contains the tokens.
-   - textSpan: The text span associated with this TokenRefSequence.
+   - textSpan: The text span in the main text (.text field) associated with this
+  TokenRefSequence.
 
-  NOTE: This span represents a best guess, or 'provenance':
-  it cannot be guaranteed that this text span matches the _exact_
-  text of the original document, but is the annotation's best
-  effort at such a representation.
+  NOTE: This span represents a best guess, or 'provenance': it
+  cannot be guaranteed that this text span matches the _exact_ text
+  of the original document, but is the annotation's best effort at
+  such a representation.
+   - rawTextSpan: The text span in the original text (.originalText field)
+  associated with this TokenRefSequence.
+
+  NOTE: This span represents a best guess, or 'provenance': it
+  cannot be guaranteed that this text span matches the _exact_ text
+  of the original raw document, but is the annotation's best effort
+  at such a representation.
    - audioSpan: The audio span associated with this TokenRefSequence.
 
   NOTE: This span represents a best guess, or 'provenance':
@@ -204,14 +234,16 @@ class TokenRefSequence(object):
     (2, TType.I32, 'anchorTokenIndex', None, -1, ), # 2
     (3, TType.STRUCT, 'tokenizationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
     (4, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 4
-    (5, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 5
+    (5, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 5
+    (6, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 6
   )
 
-  def __init__(self, tokenIndexList=None, anchorTokenIndex=thrift_spec[2][4], tokenizationId=None, textSpan=None, audioSpan=None,):
+  def __init__(self, tokenIndexList=None, anchorTokenIndex=thrift_spec[2][4], tokenizationId=None, textSpan=None, rawTextSpan=None, audioSpan=None,):
     self.tokenIndexList = tokenIndexList
     self.anchorTokenIndex = anchorTokenIndex
     self.tokenizationId = tokenizationId
     self.textSpan = textSpan
+    self.rawTextSpan = rawTextSpan
     self.audioSpan = audioSpan
 
   def read(self, iprot):
@@ -252,6 +284,12 @@ class TokenRefSequence(object):
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.STRUCT:
+          self.rawTextSpan = concrete.spans.ttypes.TextSpan()
+          self.rawTextSpan.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRUCT:
           self.audioSpan = concrete.spans.ttypes.AudioSpan()
           self.audioSpan.read(iprot)
         else:
@@ -285,8 +323,12 @@ class TokenRefSequence(object):
       oprot.writeFieldBegin('textSpan', TType.STRUCT, 4)
       self.textSpan.write(oprot)
       oprot.writeFieldEnd()
+    if self.rawTextSpan is not None:
+      oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 5)
+      self.rawTextSpan.write(oprot)
+      oprot.writeFieldEnd()
     if self.audioSpan is not None:
-      oprot.writeFieldBegin('audioSpan', TType.STRUCT, 5)
+      oprot.writeFieldBegin('audioSpan', TType.STRUCT, 6)
       self.audioSpan.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -515,6 +557,8 @@ class TokenTagging(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.taggedTokenList is None:
       raise TProtocol.TProtocolException(message='Required field taggedTokenList is unset!')
     return
@@ -702,6 +746,8 @@ class DependencyParse(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.dependencyList is None:
       raise TProtocol.TProtocolException(message='Required field dependencyList is unset!')
     return
@@ -942,6 +988,8 @@ class Parse(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.constituentList is None:
       raise TProtocol.TProtocolException(message='Required field constituentList is unset!')
     return
@@ -1555,6 +1603,8 @@ class Tokenization(object):
   def validate(self):
     if self.uuid is None:
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+    if self.metadata is None:
+      raise TProtocol.TProtocolException(message='Required field metadata is unset!')
     if self.kind is None:
       raise TProtocol.TProtocolException(message='Required field kind is unset!')
     return
@@ -1577,7 +1627,7 @@ class Sentence(object):
 
   Attributes:
    - uuid
-   - tokenizationList: Theories about the tokens that make up this sentence.  For text
+   - tokenization: Theories about the tokens that make up this sentence.  For text
   communications, these tokenizations will typically be generated
   by a tokenizer.  For audio communications, these tokenizations
   will typically be generated by an automatic speech recognizer.
@@ -1585,7 +1635,13 @@ class Sentence(object):
   The "Tokenization" message type is also used to store the output
   of machine translation systems and text normalization
   systems.
-   - textSpan: Location of this sentence in the original text.
+   - textSpan: Location of this sentence in the communication text.
+
+  NOTE: This span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
+   - rawTextSpan: Location of this sentence in the raw text.
 
   NOTE: This span represents a best guess, or 'provenance':
   it cannot be guaranteed that this text span matches the _exact_
@@ -1602,15 +1658,17 @@ class Sentence(object):
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
-    (2, TType.LIST, 'tokenizationList', (TType.STRUCT,(Tokenization, Tokenization.thrift_spec)), None, ), # 2
+    (2, TType.STRUCT, 'tokenization', (Tokenization, Tokenization.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 3
-    (4, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 4
+    (4, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 4
+    (5, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 5
   )
 
-  def __init__(self, uuid=None, tokenizationList=None, textSpan=None, audioSpan=None,):
+  def __init__(self, uuid=None, tokenization=None, textSpan=None, rawTextSpan=None, audioSpan=None,):
     self.uuid = uuid
-    self.tokenizationList = tokenizationList
+    self.tokenization = tokenization
     self.textSpan = textSpan
+    self.rawTextSpan = rawTextSpan
     self.audioSpan = audioSpan
 
   def read(self, iprot):
@@ -1629,14 +1687,9 @@ class Sentence(object):
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.LIST:
-          self.tokenizationList = []
-          (_etype80, _size77) = iprot.readListBegin()
-          for _i81 in xrange(_size77):
-            _elem82 = Tokenization()
-            _elem82.read(iprot)
-            self.tokenizationList.append(_elem82)
-          iprot.readListEnd()
+        if ftype == TType.STRUCT:
+          self.tokenization = Tokenization()
+          self.tokenization.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -1646,6 +1699,12 @@ class Sentence(object):
         else:
           iprot.skip(ftype)
       elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.rawTextSpan = concrete.spans.ttypes.TextSpan()
+          self.rawTextSpan.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
         if ftype == TType.STRUCT:
           self.audioSpan = concrete.spans.ttypes.AudioSpan()
           self.audioSpan.read(iprot)
@@ -1665,19 +1724,20 @@ class Sentence(object):
       oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
       self.uuid.write(oprot)
       oprot.writeFieldEnd()
-    if self.tokenizationList is not None:
-      oprot.writeFieldBegin('tokenizationList', TType.LIST, 2)
-      oprot.writeListBegin(TType.STRUCT, len(self.tokenizationList))
-      for iter83 in self.tokenizationList:
-        iter83.write(oprot)
-      oprot.writeListEnd()
+    if self.tokenization is not None:
+      oprot.writeFieldBegin('tokenization', TType.STRUCT, 2)
+      self.tokenization.write(oprot)
       oprot.writeFieldEnd()
     if self.textSpan is not None:
       oprot.writeFieldBegin('textSpan', TType.STRUCT, 3)
       self.textSpan.write(oprot)
       oprot.writeFieldEnd()
+    if self.rawTextSpan is not None:
+      oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 4)
+      self.rawTextSpan.write(oprot)
+      oprot.writeFieldEnd()
     if self.audioSpan is not None:
-      oprot.writeFieldBegin('audioSpan', TType.STRUCT, 4)
+      oprot.writeFieldBegin('audioSpan', TType.STRUCT, 5)
       self.audioSpan.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1700,116 +1760,6 @@ class Sentence(object):
   def __ne__(self, other):
     return not (self == other)
 
-class SentenceSegmentation(object):
-  """
-  A theory about how a section of a communication is broken down
-  into sentences (or utterances). The sentences in a
-  SentenceSegmentation should be ordered and non-overlapping.
-
-  Attributes:
-   - uuid
-   - metadata: Information about where this segmentation came from.
-   - sentenceList: Theories about the tokens that make up this sentence.  For text
-  communications, these tokenizations will typically be generated
-  by a tokenizer.  For audio communications, these tokenizations
-  will typically be generated by an automatic speech recognizer.
-
-  The "Tokenization" message type is also used to store the output
-  of machine translation systems and text normalization
-  systems.
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
-    (3, TType.LIST, 'sentenceList', (TType.STRUCT,(Sentence, Sentence.thrift_spec)), None, ), # 3
-  )
-
-  def __init__(self, uuid=None, metadata=None, sentenceList=None,):
-    self.uuid = uuid
-    self.metadata = metadata
-    self.sentenceList = sentenceList
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.uuid = concrete.uuid.ttypes.UUID()
-          self.uuid.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRUCT:
-          self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
-          self.metadata.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.LIST:
-          self.sentenceList = []
-          (_etype87, _size84) = iprot.readListBegin()
-          for _i88 in xrange(_size84):
-            _elem89 = Sentence()
-            _elem89.read(iprot)
-            self.sentenceList.append(_elem89)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('SentenceSegmentation')
-    if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
-      self.uuid.write(oprot)
-      oprot.writeFieldEnd()
-    if self.metadata is not None:
-      oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
-      self.metadata.write(oprot)
-      oprot.writeFieldEnd()
-    if self.sentenceList is not None:
-      oprot.writeFieldBegin('sentenceList', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.sentenceList))
-      for iter90 in self.sentenceList:
-        iter90.write(oprot)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    if self.uuid is None:
-      raise TProtocol.TProtocolException(message='Required field uuid is unset!')
-    if self.sentenceList is None:
-      raise TProtocol.TProtocolException(message='Required field sentenceList is unset!')
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
 class Section(object):
   """
   A single "section" of a communication, such as a paragraph. Each
@@ -1818,8 +1768,14 @@ class Section(object):
 
   Attributes:
    - uuid: The unique identifier for this section.
-   - sentenceSegmentationList: Theories about how this section is divided into sentences.
-   - textSpan: Location of this section in the original text.
+   - sentenceList: Theories about how this section is divided into sentences.
+   - textSpan: Location of this section in the communication text.
+
+  NOTE: This text span represents a best guess, or 'provenance':
+  it cannot be guaranteed that this text span matches the _exact_
+  text of the original document, but is the annotation's best
+  effort at such a representation.
+   - rawTextSpan: Location of this section in the raw text.
 
   NOTE: This text span represents a best guess, or 'provenance':
   it cannot be guaranteed that this text span matches the _exact_
@@ -1846,20 +1802,21 @@ class Section(object):
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
-    (2, TType.LIST, 'sentenceSegmentationList', (TType.STRUCT,(SentenceSegmentation, SentenceSegmentation.thrift_spec)), None, ), # 2
+    (2, TType.LIST, 'sentenceList', (TType.STRUCT,(Sentence, Sentence.thrift_spec)), None, ), # 2
     (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 3
-    (4, TType.STRING, 'kind', None, None, ), # 4
-    (5, TType.STRING, 'label', None, None, ), # 5
-    (6, TType.LIST, 'numberList', (TType.I32,None), None, ), # 6
-    None, # 7
+    (4, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ), # 4
+    (5, TType.STRING, 'kind', None, None, ), # 5
+    (6, TType.STRING, 'label', None, None, ), # 6
+    (7, TType.LIST, 'numberList', (TType.I32,None), None, ), # 7
     None, # 8
     (9, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 9
   )
 
-  def __init__(self, uuid=None, sentenceSegmentationList=None, textSpan=None, audioSpan=None, kind=None, label=None, numberList=None,):
+  def __init__(self, uuid=None, sentenceList=None, textSpan=None, rawTextSpan=None, audioSpan=None, kind=None, label=None, numberList=None,):
     self.uuid = uuid
-    self.sentenceSegmentationList = sentenceSegmentationList
+    self.sentenceList = sentenceList
     self.textSpan = textSpan
+    self.rawTextSpan = rawTextSpan
     self.audioSpan = audioSpan
     self.kind = kind
     self.label = label
@@ -1882,12 +1839,12 @@ class Section(object):
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.LIST:
-          self.sentenceSegmentationList = []
-          (_etype94, _size91) = iprot.readListBegin()
-          for _i95 in xrange(_size91):
-            _elem96 = SentenceSegmentation()
-            _elem96.read(iprot)
-            self.sentenceSegmentationList.append(_elem96)
+          self.sentenceList = []
+          (_etype80, _size77) = iprot.readListBegin()
+          for _i81 in xrange(_size77):
+            _elem82 = Sentence()
+            _elem82.read(iprot)
+            self.sentenceList.append(_elem82)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1897,29 +1854,35 @@ class Section(object):
           self.textSpan.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.rawTextSpan = concrete.spans.ttypes.TextSpan()
+          self.rawTextSpan.read(iprot)
+        else:
+          iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.STRUCT:
           self.audioSpan = concrete.spans.ttypes.AudioSpan()
           self.audioSpan.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == 4:
+      elif fid == 5:
         if ftype == TType.STRING:
           self.kind = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
-      elif fid == 5:
+      elif fid == 6:
         if ftype == TType.STRING:
           self.label = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
-      elif fid == 6:
+      elif fid == 7:
         if ftype == TType.LIST:
           self.numberList = []
-          (_etype100, _size97) = iprot.readListBegin()
-          for _i101 in xrange(_size97):
-            _elem102 = iprot.readI32();
-            self.numberList.append(_elem102)
+          (_etype86, _size83) = iprot.readListBegin()
+          for _i87 in xrange(_size83):
+            _elem88 = iprot.readI32();
+            self.numberList.append(_elem88)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1937,30 +1900,34 @@ class Section(object):
       oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
       self.uuid.write(oprot)
       oprot.writeFieldEnd()
-    if self.sentenceSegmentationList is not None:
-      oprot.writeFieldBegin('sentenceSegmentationList', TType.LIST, 2)
-      oprot.writeListBegin(TType.STRUCT, len(self.sentenceSegmentationList))
-      for iter103 in self.sentenceSegmentationList:
-        iter103.write(oprot)
+    if self.sentenceList is not None:
+      oprot.writeFieldBegin('sentenceList', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.sentenceList))
+      for iter89 in self.sentenceList:
+        iter89.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.textSpan is not None:
       oprot.writeFieldBegin('textSpan', TType.STRUCT, 3)
       self.textSpan.write(oprot)
       oprot.writeFieldEnd()
+    if self.rawTextSpan is not None:
+      oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 4)
+      self.rawTextSpan.write(oprot)
+      oprot.writeFieldEnd()
     if self.kind is not None:
-      oprot.writeFieldBegin('kind', TType.STRING, 4)
+      oprot.writeFieldBegin('kind', TType.STRING, 5)
       oprot.writeString(self.kind.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.label is not None:
-      oprot.writeFieldBegin('label', TType.STRING, 5)
+      oprot.writeFieldBegin('label', TType.STRING, 6)
       oprot.writeString(self.label.encode('utf-8'))
       oprot.writeFieldEnd()
     if self.numberList is not None:
-      oprot.writeFieldBegin('numberList', TType.LIST, 6)
+      oprot.writeFieldBegin('numberList', TType.LIST, 7)
       oprot.writeListBegin(TType.I32, len(self.numberList))
-      for iter104 in self.numberList:
-        oprot.writeI32(iter104)
+      for iter90 in self.numberList:
+        oprot.writeI32(iter90)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.audioSpan is not None:
@@ -1975,109 +1942,6 @@ class Section(object):
       raise TProtocol.TProtocolException(message='Required field uuid is unset!')
     if self.kind is None:
       raise TProtocol.TProtocolException(message='Required field kind is unset!')
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class SectionSegmentation(object):
-  """
-  A theory about how a communication is broken down into smaller
-  sections (such as paragraphs). The sections should be ordered
-  and non-overlapping.
-
-  Attributes:
-   - uuid: Unique identifier for this segmentation.
-   - metadata: Information about where this segmentation came from.
-   - sectionList: Ordered list of sections in this segmentation.
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
-    (3, TType.LIST, 'sectionList', (TType.STRUCT,(Section, Section.thrift_spec)), None, ), # 3
-  )
-
-  def __init__(self, uuid=None, metadata=None, sectionList=None,):
-    self.uuid = uuid
-    self.metadata = metadata
-    self.sectionList = sectionList
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.uuid = concrete.uuid.ttypes.UUID()
-          self.uuid.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRUCT:
-          self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
-          self.metadata.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.LIST:
-          self.sectionList = []
-          (_etype108, _size105) = iprot.readListBegin()
-          for _i109 in xrange(_size105):
-            _elem110 = Section()
-            _elem110.read(iprot)
-            self.sectionList.append(_elem110)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('SectionSegmentation')
-    if self.uuid is not None:
-      oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
-      self.uuid.write(oprot)
-      oprot.writeFieldEnd()
-    if self.metadata is not None:
-      oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
-      self.metadata.write(oprot)
-      oprot.writeFieldEnd()
-    if self.sectionList is not None:
-      oprot.writeFieldBegin('sectionList', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.sectionList))
-      for iter111 in self.sectionList:
-        iter111.write(oprot)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    if self.uuid is None:
-      raise TProtocol.TProtocolException(message='Required field uuid is unset!')
-    if self.sectionList is None:
-      raise TProtocol.TProtocolException(message='Required field sectionList is unset!')
     return
 
 

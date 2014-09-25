@@ -26,51 +26,51 @@ except:
 class NITFInfo(object):
   """
   Attributes:
-   - alternateURL: This field specifies the location on nytimes.com of the article. When
-  present, this URL is preferred to the URL field on articles published on
+   - alternateURL: This field specifies the URL of the article, if published online. In some
+  cases, such as with the New York Times, when this field is present,
+  the URL is preferred to the URL field on articles published on
   or after April 02, 2006, as the linked page will have richer content.
-   - articleAbstract: This field is a summary of the article written by the New York Times
-  Indexing Service.
+   - articleAbstract: This field is a summary of the article, possibly written by
+  and indexing service.
    - authorBiography: This field specifies the biography of the author of the article.
-  Generally, this field is specified for guest authors not for New York
-  Times reporters. When this field is specified for Times reporters, it is
-  usually used to provide the author's email address.
+  Generally, this field is specified for guest authors, and not for
+  regular reporters, except to provide the author's email address.
    - banner: The banner field is used to indicate if there has been additional
   information appended to the articles since its publication. Examples of
   banners include ('Correction Appended' and 'Editor's Note Appended').
    - biographicalCategoryList: When present, the biographical category field generally indicates that a
   document focuses on a particular individual. The value of the field
   indicates the area or category in which this individual is best known.
-  This field is most often defined for Obituaries and Book Reviews. These
-  tags are hand-assigned by a team of library scientists working for the
-  New York Times Indexing service.
+  This field is most often defined for Obituaries and Book Reviews.
 
   <ol>
-  <li>Politics and Government (U.S.) <li>Books and Magazines <li>Royalty
+  <li>Politics and Government (U.S.)</li>
+  <li>Books and Magazines <li>Royalty</li>
   </ol>
    - body: The body field is the text content of the article. Please note that this
   value includes the lead paragraph.
-   - byline: This field specifies the byline of the article as it appeared in the
-  print edition of the New York Times. Please note that not every article
-  in this collection has a byline, as editorials and other types of
-  articles are generally unsigned.
-  <P>
+   - byline: This field specifies the byline of the article as it appeared in its
+  print edition. Please note that not every article in this collection
+  has a byline, as editorials and other types of articles are generally
+  unsigned. A normalized version, of the form (LAST NAME, FIRST NAME),
+  can be stored in the <strong>normalizedByline</strong> field.
+  <br />
   Sample byline:
   <ul>
-  <li>By James Reston
+  <li>By James Reston </li>
   <li>By JAMES GLANZ; William J. Broad contributed reporting for this
-  article.
-  <li>By ADAM NAGOURNEY and JEFF ZELENY
+  article.</li>
+  <li>By ADAM NAGOURNEY and JEFF ZELENY</li>
   </ul>
    - columnName: If the article is part of a regular column, this field specifies the name
   of that column.
-  <p>
+  <br />
   Sample Column Names:
-  <p>
+  <br />
   <ol>
-  <li>World News Briefs
-  <li>WEDDINGS
-  <li>The Accessories Channel
+  <li>World News Briefs</li>
+  <li>WEDDINGS</li>
+  <li>The Accessories Channel</li>
   </ol>
 
    - columnNumber: This field specifies the column in which the article starts in the print
@@ -84,175 +84,167 @@ class NITFInfo(object):
   correction. Generally, if the correction text is specified, the
   correction date will also be specified (and vice versa).
    - credit: This field indicates the entity that produced the editorial content of
-  this document. For this collection, the credit will always be set to 'The
-  New York Times'.
-   - dateline: The �dateline� field is the dateline of the article. Generally a dateline
+  this document.
+   - dateline: The &quot;dateline&quot; field is the dateline of the article. Generally a dateline
   is the name of the geographic location from which the article was filed
   followed by a comma and the month and day of the filing.
-  <p>
+  <br />
   Sample datelines:
   <ul>
-  <li>WASHINGTON, April 30
-  <li>RIYADH, Saudi Arabia, March 29
-  <li>ONTARIO, N.Y., Jan. 26
+  <li>WASHINGTON, April 30</li>
+  <li>RIYADH, Saudi Arabia, March 29</li>
+  <li>ONTARIO, N.Y., Jan. 26</li>
   </ul>
   Please note:
   <ol>
   <li>The dateline location is the location from which the article was
   filed. Often times this location is related to the content of the
-  article, but this is not guaranteed.
+  article, but this is not guaranteed.</li>
   <li>The date specified for the dateline is often but not always the day
-  previous to the publication date.
-  <li>The date is usually but not always specified.
+  previous to the publication date.</li>
+  <li>The date is usually but not always specified.</li>
   </ol>
    - dayOfWeek: This field specifies the day of week on which the article was published.
   <ul>
-  <li>Monday <li>Tuesday <li>Wednesday <li>Thursday <li>Friday <li>Saturday
-  <li>Sunday
+  <li>Monday</li>
+  <li>Tuesday</li>
+  <li>Wednesday</li>
+  <li>Thursday</li>
+  <li>Friday</li>
+  <li>Saturday</li>
+  <li>Sunday</li>
   </ul>
-   - descriptorList: The �descriptors� field specifies a list of descriptive terms drawn from
+   - descriptorList: The &quot;descriptors&quot; field specifies a list of descriptive terms drawn from
   a normalized controlled vocabulary corresponding to subjects mentioned in
-  the article. These tags are hand-assigned by a team of library scientists
-  working in the New York Times Indexing service.
-  <p>
+  the article.
+  <br />
   Examples Include:
   <ol>
-  <li>ECONOMIC CONDITIONS AND TRENDS
-  <li>AIRPLANES
-  <li>VIOLINS
+  <li>ECONOMIC CONDITIONS AND TRENDS</li>
+  <li>AIRPLANES</li>
+  <li>VIOLINS</li>
   </ol>
-   - featurePage: The
-   - generalOnlineDescriptorList: The �general online descriptors� field specifies a list of descriptors
+   - featurePage: The feature page containing this article, such as
+  <ul>
+  <li>Education Page</li>
+  <li>Fashion Page</li>
+  </ul>
+   - generalOnlineDescriptorList: The &quot;general online descriptors&quot; field specifies a list of descriptors
   that are at a higher level of generality than the other tags associated
-  with the article. These tags are algorithmically assigned and manually
-  verified by nytimes.com production staff.
-  <p>
+  with the article.
+  <br />
   Examples Include:
   <ol>
-  <li>Surfing
-  <li>Venice Biennale
-  <li>Ranches
+  <li>Surfing</li>
+  <li>Venice Biennale</li>
+  <li>Ranches</li>
   </ol>
-   - guid: The GUID field specifies a an integer that is guaranteed to be unique for
+   - guid: The GUID field specifies an integer that is guaranteed to be unique for
   every document in the corpus.
-   - headline: This field specifies the headline of the article as it appeared in the
-  print edition of the New York Times.
+   - headline: This field specifies the headline of the article as it appeared in a
+  print edition.
    - kicker: The kicker is an additional piece of information printed as an
   accompaniment to a news headline.
-   - leadParagraph: The �lead Paragraph� field is the lead paragraph of the article.
+   - leadParagraphList: The &quot;lead Paragraph&quot; field is the lead paragraph of the article.
   Generally this field is populated with the first two paragraphs from the
   article.
-   - locationList: The �locations� field specifies a list of geographic descriptors drawn
+   - locationList: The &quot;locations&quot; field specifies a list of geographic descriptors drawn
   from a normalized controlled vocabulary that correspond to places
-  mentioned in the article. These tags are hand-assigned by a team of
-  library scientists working for the New York Times Indexing service.
-  <p>
+  mentioned in the article.
+  <br />
   Examples Include:
   <ol>
-  <li>Wellsboro (Pa)
-  <li>Kansas City (Kan)
-  <li>Park Slope (NYC)
+  <li>Wellsboro (Pa)</li>
+  <li>Kansas City (Kan)</li>
+  <li>Park Slope (NYC)</li>
   </ol>
-   - nameList: The �names� field specifies a list of names mentioned in the article.
-  These tags are hand-assigned by a team of library scientists working for
-  the New York Times Indexing service.
-  <p>
+   - nameList: The &quot;names&quot; field specifies a list of names mentioned in the article.
+  <br />
   Examples Include:
   <ol>
-  <li>Azza Fahmy
-  <li>George C. Izenour
-  <li>Chris Schenkel
+  <li>Azza Fahmy</li>
+  <li>George C. Izenour</li>
+  <li>Chris Schenkel</li>
   </ol>
-   - newsDesk: This field specifies the desk in the New York Times newsroom that
+   - newsDesk: This field specifies the desk in the newsroom that
   produced the article. The desk is related to, but is not the same as the
   section in which the article appears.
    - normalizedByline: The Normalized Byline field is the byline normalized to the form (last
   name, first name).
    - onlineDescriptorList: This field specifies a list of descriptors from a normalized controlled
-  vocabulary that correspond to topics mentioned in the article. These tags
-  are algorithmically assigned and manually verified by nytimes.com
-  production staff.
-  <p>
+  vocabulary that correspond to topics mentioned in the article.
+  <br />
   Examples Include:
   <ol>
-  <li>Marriages
-  <li>Parks and Other Recreation Areas
-  <li>Cooking and Cookbooks
+  <li>Marriages</li>
+  <li>Parks and Other Recreation Areas</li>
+  <li>Cooking and Cookbooks</li>
   </ol>
-   - onlineHeadline: This field specifies the headline displayed with the article on
-  nytimes.com. Often this differs from the headline used in print.
-   - onlineLeadParagraph: This field specifies the lead paragraph as defined by the producers at
-  nytimes.com.
+   - onlineHeadline: This field specifies the headline displayed with the article
+  online. Often this differs from the headline used in print.
+   - onlineLeadParagraph: This field specifies the lead paragraph for the online version.
    - onlineLocationList: This field specifies a list of place names that correspond to geographic
-  locations mentioned in the article. These tags are algorithmically
-  assigned and manually verified by nytimes.com production staff.
-  <p>
+  locations mentioned in the article.
+  <br />
   Examples Include:
   <ol>
-  <li>Hollywood
-  <li>Los Angeles
-  <li>Arcadia
+  <li>Hollywood</li>
+  <li>Los Angeles</li>
+  <li>Arcadia</li>
   </ol>
    - onlineOrganizationList: This field specifies a list of organizations that correspond to
-  organizations mentioned in the article. These tags are algorithmically
-  assigned and manually verified by nytimes.com production staff.
-  <p>
+  organizations mentioned in the article.
+  <br />
   Examples Include:
   <ol>
-  <li>Nintendo Company Limited
-  <li>Yeshiva University
-  <li>Rose Center
+  <li>Nintendo Company Limited</li>
+  <li>Yeshiva University</li>
+  <li>Rose Center</li>
   </ol>
    - onlinePeople: This field specifies a list of people that correspond to individuals
-  mentioned in the article. These tags are algorithmically assigned and
-  manually verified by nytimes.com production staff.
-  <p>
+  mentioned in the article.
+  <br/>
   Examples Include:
   <ol>
-  <li>Lopez, Jennifer
-  <li>Joyce, James
-  <li>Robinson, Jackie
+  <li>Lopez, Jennifer</li>
+  <li>Joyce, James</li>
+  <li>Robinson, Jackie</li>
   </ol>
-   - onlineSection: This field specifies the section(s) on nytimes.com in which the article
-  is placed. If the article is placed in multiple sections, this field will
-  be specified as a �;� delineated list.
+   - onlineSectionList: This field specifies the section(s) in which the online version of the article
+  is placed. This may typically be populated from a semicolon (;) delineated list.
    - onlineTitleList: This field specifies a list of authored works mentioned in the article.
-  These tags are algorithmically assigned and manually verified by
-  nytimes.com production staff.
-  <p>
+  <br/>
   Examples Include:
   <ol>
-  <li>Matchstick Men (Movie)
-  <li>Blades of Glory (Movie)
-  <li>Bridge & Tunnel (Play)
+  <li>Matchstick Men (Movie)</li>
+  <li>Blades of Glory (Movie)</li>
+  <li>Bridge & Tunnel (Play)</li>
   </ol>
    - organizationList: This field specifies a list of organization names drawn from a normalized
   controlled vocabulary that correspond to organizations mentioned in the
-  article. These tags are hand-assigned by a team of library scientists
-  working in the New York Times Indexing service.
-  <p>
+  article.
+  <br />
   Examples Include:
   <ol>
-  <li>Circuit City Stores Inc
-  <li>Delaware County Community College (Pa)
-  <li>CONNECTICUT GRAND OPERA
+  <li>Circuit City Stores Inc</li>
+  <li>Delaware County Community College (Pa)</li>
+  <li>CONNECTICUT GRAND OPERA</li>
   </ol>
    - page: This field specifies the page of the section in the paper in which the
   article appears. This is not an absolute pagination. An article that
   appears on page 3 in section A occurs in the physical paper before an
-  article that occurs on page 1 of section F.
+  article that occurs on page 1 of section F. The section is encoded in
+  the <strong>section</strong> field.
    - peopleList: This field specifies a list of people from a normalized controlled
-  vocabulary that correspond to individuals mentioned in the article. These
-  tags are hand-assigned by a team of library scientists working in the New
-  York Times Indexing service.
-  <p>
+  vocabulary that correspond to individuals mentioned in the article.
+  <br />
   Examples Include:
   <ol>
-  <li>REAGAN, RONALD WILSON (PRES)
-  <li>BEGIN, MENACHEM (PRIME MIN)
-  <li>COLLINS, GLENN
+  <li>REAGAN, RONALD WILSON (PRES)</li>
+  <li>BEGIN, MENACHEM (PRIME MIN)</li>
+  <li>COLLINS, GLENN</li>
   </ol>
-   - publicationDate: This field specifies the date of the article�s publication.
+   - publicationDate: This field specifies the date of the article's publication.
    - publicationDayOfMonth: This field specifies the day of the month on which the article was
   published, always in the range 1-31.
    - publicationMonth: This field specifies the month on which the article was published in the
@@ -268,45 +260,41 @@ class NITFInfo(object):
   other articles published on the same day. Please note, however, that
   different articles on different days may have the same slug.
   <ul>
-  <li>30other <li>12reunion
+  <li>30other</li>
+  <li>12reunion</li>
   </ul>
    - sourceFilePath: The file from which this object was read.
    - taxonomicClassifierList: This field specifies a list of taxonomic classifiers that place this
   article into a hierarchy of articles. The individual terms of each
-  taxonomic classifier are separated with the '/' character. These tags are
-  algorithmically assigned and manually verified by nytimes.com production
-  staff. These tags are algorithmically assigned and manually verified by
-  nytimes.com production staff.
-  <p>
+  taxonomic classifier are separated with the '/' character.
+  <br/>
   Examples Include:
   <ol>
   <li>Top/Features/Travel/Guides/Destinations/North America/United
-  States/Arizona
-  <li>Top/News/U.S./Rockies
-  <li>Top/Opinion
+  States/Arizona</li>
+  <li>Top/News/U.S./Rockies</li>
+  <li>Top/Opinion</li>
   </ol>
    - titleList: This field specifies a list of authored works that correspond to works
-  mentioned in the article. These tags are hand-assigned by a team of
-  library scientists working in the New York Times Indexing service.
-  <p>
+  mentioned in the article.
+  <br/>
   Examples Include:
   <ol>
-  <li>Greystoke: The Legend of Tarzan, Lord of the Apes (Movie)
-  <li>Law & Order (TV Program)
-  <li>BATTLEFIELD EARTH (BOOK)
+  <li>Greystoke: The Legend of Tarzan, Lord of the Apes (Movie)</li>
+  <li>Law & Order (TV Program)</li>
+  <li>BATTLEFIELD EARTH (BOOK)</li>
   </ol>
    - typesOfMaterialList: This field specifies a normalized list of terms describing the general
-  editorial category of the article. These tags are algorithmically
-  assigned and manually verified by nytimes.com production staff.
-  <p>
+  editorial category of the article.
+  <br />
   Examples Include:
   <ol>
-  <li>REVIEW
-  <li>OBITUARY
-  <li>ANALYSIS
+  <li>REVIEW</li>
+  <li>OBITUARY</li>
+  <li>ANALYSIS</li>
   </ol>
-   - url: This field specifies the location on nytimes.com of the article. The
-  �Alternative Url� field is preferred to this field on articles published
+   - url: This field specifies the location of the online version of the article. The
+  &quot;Alternative Url&quot; field is preferred to this field on articles published
   on or after April 02, 2006, as the linked page will have richer content.
    - wordCount: This field specifies the number of words in the body of the article,
   including the lead paragraph.
@@ -334,7 +322,7 @@ class NITFInfo(object):
     (18, TType.I32, 'guid', None, None, ), # 18
     (19, TType.STRING, 'headline', None, None, ), # 19
     (20, TType.STRING, 'kicker', None, None, ), # 20
-    (21, TType.STRING, 'leadParagraph', None, None, ), # 21
+    (21, TType.LIST, 'leadParagraphList', (TType.STRING,None), None, ), # 21
     (22, TType.LIST, 'locationList', (TType.STRING,None), None, ), # 22
     (23, TType.LIST, 'nameList', (TType.STRING,None), None, ), # 23
     (24, TType.STRING, 'newsDesk', None, None, ), # 24
@@ -345,7 +333,7 @@ class NITFInfo(object):
     (29, TType.LIST, 'onlineLocationList', (TType.STRING,None), None, ), # 29
     (30, TType.LIST, 'onlineOrganizationList', (TType.STRING,None), None, ), # 30
     (31, TType.LIST, 'onlinePeople', (TType.STRING,None), None, ), # 31
-    (32, TType.STRING, 'onlineSection', None, None, ), # 32
+    (32, TType.LIST, 'onlineSectionList', (TType.STRING,None), None, ), # 32
     (33, TType.LIST, 'onlineTitleList', (TType.STRING,None), None, ), # 33
     (34, TType.LIST, 'organizationList', (TType.STRING,None), None, ), # 34
     (35, TType.I32, 'page', None, None, ), # 35
@@ -365,7 +353,7 @@ class NITFInfo(object):
     (49, TType.I32, 'wordCount', None, None, ), # 49
   )
 
-  def __init__(self, alternateURL=None, articleAbstract=None, authorBiography=None, banner=None, biographicalCategoryList=None, body=None, byline=None, columnName=None, columnNumber=None, correctionDate=None, correctionText=None, credit=None, dateline=None, dayOfWeek=None, descriptorList=None, featurePage=None, generalOnlineDescriptorList=None, guid=None, headline=None, kicker=None, leadParagraph=None, locationList=None, nameList=None, newsDesk=None, normalizedByline=None, onlineDescriptorList=None, onlineHeadline=None, onlineLeadParagraph=None, onlineLocationList=None, onlineOrganizationList=None, onlinePeople=None, onlineSection=None, onlineTitleList=None, organizationList=None, page=None, peopleList=None, publicationDate=None, publicationDayOfMonth=None, publicationMonth=None, publicationYear=None, section=None, seriesName=None, slug=None, sourceFilePath=None, taxonomicClassifierList=None, titleList=None, typesOfMaterialList=None, url=None, wordCount=None,):
+  def __init__(self, alternateURL=None, articleAbstract=None, authorBiography=None, banner=None, biographicalCategoryList=None, body=None, byline=None, columnName=None, columnNumber=None, correctionDate=None, correctionText=None, credit=None, dateline=None, dayOfWeek=None, descriptorList=None, featurePage=None, generalOnlineDescriptorList=None, guid=None, headline=None, kicker=None, leadParagraphList=None, locationList=None, nameList=None, newsDesk=None, normalizedByline=None, onlineDescriptorList=None, onlineHeadline=None, onlineLeadParagraph=None, onlineLocationList=None, onlineOrganizationList=None, onlinePeople=None, onlineSectionList=None, onlineTitleList=None, organizationList=None, page=None, peopleList=None, publicationDate=None, publicationDayOfMonth=None, publicationMonth=None, publicationYear=None, section=None, seriesName=None, slug=None, sourceFilePath=None, taxonomicClassifierList=None, titleList=None, typesOfMaterialList=None, url=None, wordCount=None,):
     self.alternateURL = alternateURL
     self.articleAbstract = articleAbstract
     self.authorBiography = authorBiography
@@ -386,7 +374,7 @@ class NITFInfo(object):
     self.guid = guid
     self.headline = headline
     self.kicker = kicker
-    self.leadParagraph = leadParagraph
+    self.leadParagraphList = leadParagraphList
     self.locationList = locationList
     self.nameList = nameList
     self.newsDesk = newsDesk
@@ -397,7 +385,7 @@ class NITFInfo(object):
     self.onlineLocationList = onlineLocationList
     self.onlineOrganizationList = onlineOrganizationList
     self.onlinePeople = onlinePeople
-    self.onlineSection = onlineSection
+    self.onlineSectionList = onlineSectionList
     self.onlineTitleList = onlineTitleList
     self.organizationList = organizationList
     self.page = page
@@ -541,27 +529,32 @@ class NITFInfo(object):
         else:
           iprot.skip(ftype)
       elif fid == 21:
-        if ftype == TType.STRING:
-          self.leadParagraph = iprot.readString().decode('utf-8')
+        if ftype == TType.LIST:
+          self.leadParagraphList = []
+          (_etype21, _size18) = iprot.readListBegin()
+          for _i22 in xrange(_size18):
+            _elem23 = iprot.readString().decode('utf-8')
+            self.leadParagraphList.append(_elem23)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 22:
         if ftype == TType.LIST:
           self.locationList = []
-          (_etype21, _size18) = iprot.readListBegin()
-          for _i22 in xrange(_size18):
-            _elem23 = iprot.readString().decode('utf-8')
-            self.locationList.append(_elem23)
+          (_etype27, _size24) = iprot.readListBegin()
+          for _i28 in xrange(_size24):
+            _elem29 = iprot.readString().decode('utf-8')
+            self.locationList.append(_elem29)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 23:
         if ftype == TType.LIST:
           self.nameList = []
-          (_etype27, _size24) = iprot.readListBegin()
-          for _i28 in xrange(_size24):
-            _elem29 = iprot.readString().decode('utf-8')
-            self.nameList.append(_elem29)
+          (_etype33, _size30) = iprot.readListBegin()
+          for _i34 in xrange(_size30):
+            _elem35 = iprot.readString().decode('utf-8')
+            self.nameList.append(_elem35)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -578,10 +571,10 @@ class NITFInfo(object):
       elif fid == 26:
         if ftype == TType.LIST:
           self.onlineDescriptorList = []
-          (_etype33, _size30) = iprot.readListBegin()
-          for _i34 in xrange(_size30):
-            _elem35 = iprot.readString().decode('utf-8')
-            self.onlineDescriptorList.append(_elem35)
+          (_etype39, _size36) = iprot.readListBegin()
+          for _i40 in xrange(_size36):
+            _elem41 = iprot.readString().decode('utf-8')
+            self.onlineDescriptorList.append(_elem41)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -598,55 +591,60 @@ class NITFInfo(object):
       elif fid == 29:
         if ftype == TType.LIST:
           self.onlineLocationList = []
-          (_etype39, _size36) = iprot.readListBegin()
-          for _i40 in xrange(_size36):
-            _elem41 = iprot.readString().decode('utf-8')
-            self.onlineLocationList.append(_elem41)
+          (_etype45, _size42) = iprot.readListBegin()
+          for _i46 in xrange(_size42):
+            _elem47 = iprot.readString().decode('utf-8')
+            self.onlineLocationList.append(_elem47)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 30:
         if ftype == TType.LIST:
           self.onlineOrganizationList = []
-          (_etype45, _size42) = iprot.readListBegin()
-          for _i46 in xrange(_size42):
-            _elem47 = iprot.readString().decode('utf-8')
-            self.onlineOrganizationList.append(_elem47)
+          (_etype51, _size48) = iprot.readListBegin()
+          for _i52 in xrange(_size48):
+            _elem53 = iprot.readString().decode('utf-8')
+            self.onlineOrganizationList.append(_elem53)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 31:
         if ftype == TType.LIST:
           self.onlinePeople = []
-          (_etype51, _size48) = iprot.readListBegin()
-          for _i52 in xrange(_size48):
-            _elem53 = iprot.readString().decode('utf-8')
-            self.onlinePeople.append(_elem53)
+          (_etype57, _size54) = iprot.readListBegin()
+          for _i58 in xrange(_size54):
+            _elem59 = iprot.readString().decode('utf-8')
+            self.onlinePeople.append(_elem59)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 32:
-        if ftype == TType.STRING:
-          self.onlineSection = iprot.readString().decode('utf-8')
+        if ftype == TType.LIST:
+          self.onlineSectionList = []
+          (_etype63, _size60) = iprot.readListBegin()
+          for _i64 in xrange(_size60):
+            _elem65 = iprot.readString().decode('utf-8')
+            self.onlineSectionList.append(_elem65)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 33:
         if ftype == TType.LIST:
           self.onlineTitleList = []
-          (_etype57, _size54) = iprot.readListBegin()
-          for _i58 in xrange(_size54):
-            _elem59 = iprot.readString().decode('utf-8')
-            self.onlineTitleList.append(_elem59)
+          (_etype69, _size66) = iprot.readListBegin()
+          for _i70 in xrange(_size66):
+            _elem71 = iprot.readString().decode('utf-8')
+            self.onlineTitleList.append(_elem71)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 34:
         if ftype == TType.LIST:
           self.organizationList = []
-          (_etype63, _size60) = iprot.readListBegin()
-          for _i64 in xrange(_size60):
-            _elem65 = iprot.readString().decode('utf-8')
-            self.organizationList.append(_elem65)
+          (_etype75, _size72) = iprot.readListBegin()
+          for _i76 in xrange(_size72):
+            _elem77 = iprot.readString().decode('utf-8')
+            self.organizationList.append(_elem77)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -658,10 +656,10 @@ class NITFInfo(object):
       elif fid == 36:
         if ftype == TType.LIST:
           self.peopleList = []
-          (_etype69, _size66) = iprot.readListBegin()
-          for _i70 in xrange(_size66):
-            _elem71 = iprot.readString().decode('utf-8')
-            self.peopleList.append(_elem71)
+          (_etype81, _size78) = iprot.readListBegin()
+          for _i82 in xrange(_size78):
+            _elem83 = iprot.readString().decode('utf-8')
+            self.peopleList.append(_elem83)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -708,30 +706,30 @@ class NITFInfo(object):
       elif fid == 45:
         if ftype == TType.LIST:
           self.taxonomicClassifierList = []
-          (_etype75, _size72) = iprot.readListBegin()
-          for _i76 in xrange(_size72):
-            _elem77 = iprot.readString().decode('utf-8')
-            self.taxonomicClassifierList.append(_elem77)
+          (_etype87, _size84) = iprot.readListBegin()
+          for _i88 in xrange(_size84):
+            _elem89 = iprot.readString().decode('utf-8')
+            self.taxonomicClassifierList.append(_elem89)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 46:
         if ftype == TType.LIST:
           self.titleList = []
-          (_etype81, _size78) = iprot.readListBegin()
-          for _i82 in xrange(_size78):
-            _elem83 = iprot.readString().decode('utf-8')
-            self.titleList.append(_elem83)
+          (_etype93, _size90) = iprot.readListBegin()
+          for _i94 in xrange(_size90):
+            _elem95 = iprot.readString().decode('utf-8')
+            self.titleList.append(_elem95)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 47:
         if ftype == TType.LIST:
           self.typesOfMaterialList = []
-          (_etype87, _size84) = iprot.readListBegin()
-          for _i88 in xrange(_size84):
-            _elem89 = iprot.readString().decode('utf-8')
-            self.typesOfMaterialList.append(_elem89)
+          (_etype99, _size96) = iprot.readListBegin()
+          for _i100 in xrange(_size96):
+            _elem101 = iprot.readString().decode('utf-8')
+            self.typesOfMaterialList.append(_elem101)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -774,8 +772,8 @@ class NITFInfo(object):
     if self.biographicalCategoryList is not None:
       oprot.writeFieldBegin('biographicalCategoryList', TType.LIST, 5)
       oprot.writeListBegin(TType.STRING, len(self.biographicalCategoryList))
-      for iter90 in self.biographicalCategoryList:
-        oprot.writeString(iter90.encode('utf-8'))
+      for iter102 in self.biographicalCategoryList:
+        oprot.writeString(iter102.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.body is not None:
@@ -817,8 +815,8 @@ class NITFInfo(object):
     if self.descriptorList is not None:
       oprot.writeFieldBegin('descriptorList', TType.LIST, 15)
       oprot.writeListBegin(TType.STRING, len(self.descriptorList))
-      for iter91 in self.descriptorList:
-        oprot.writeString(iter91.encode('utf-8'))
+      for iter103 in self.descriptorList:
+        oprot.writeString(iter103.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.featurePage is not None:
@@ -828,8 +826,8 @@ class NITFInfo(object):
     if self.generalOnlineDescriptorList is not None:
       oprot.writeFieldBegin('generalOnlineDescriptorList', TType.LIST, 17)
       oprot.writeListBegin(TType.STRING, len(self.generalOnlineDescriptorList))
-      for iter92 in self.generalOnlineDescriptorList:
-        oprot.writeString(iter92.encode('utf-8'))
+      for iter104 in self.generalOnlineDescriptorList:
+        oprot.writeString(iter104.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.guid is not None:
@@ -844,22 +842,25 @@ class NITFInfo(object):
       oprot.writeFieldBegin('kicker', TType.STRING, 20)
       oprot.writeString(self.kicker.encode('utf-8'))
       oprot.writeFieldEnd()
-    if self.leadParagraph is not None:
-      oprot.writeFieldBegin('leadParagraph', TType.STRING, 21)
-      oprot.writeString(self.leadParagraph.encode('utf-8'))
+    if self.leadParagraphList is not None:
+      oprot.writeFieldBegin('leadParagraphList', TType.LIST, 21)
+      oprot.writeListBegin(TType.STRING, len(self.leadParagraphList))
+      for iter105 in self.leadParagraphList:
+        oprot.writeString(iter105.encode('utf-8'))
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.locationList is not None:
       oprot.writeFieldBegin('locationList', TType.LIST, 22)
       oprot.writeListBegin(TType.STRING, len(self.locationList))
-      for iter93 in self.locationList:
-        oprot.writeString(iter93.encode('utf-8'))
+      for iter106 in self.locationList:
+        oprot.writeString(iter106.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.nameList is not None:
       oprot.writeFieldBegin('nameList', TType.LIST, 23)
       oprot.writeListBegin(TType.STRING, len(self.nameList))
-      for iter94 in self.nameList:
-        oprot.writeString(iter94.encode('utf-8'))
+      for iter107 in self.nameList:
+        oprot.writeString(iter107.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.newsDesk is not None:
@@ -873,8 +874,8 @@ class NITFInfo(object):
     if self.onlineDescriptorList is not None:
       oprot.writeFieldBegin('onlineDescriptorList', TType.LIST, 26)
       oprot.writeListBegin(TType.STRING, len(self.onlineDescriptorList))
-      for iter95 in self.onlineDescriptorList:
-        oprot.writeString(iter95.encode('utf-8'))
+      for iter108 in self.onlineDescriptorList:
+        oprot.writeString(iter108.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.onlineHeadline is not None:
@@ -888,40 +889,43 @@ class NITFInfo(object):
     if self.onlineLocationList is not None:
       oprot.writeFieldBegin('onlineLocationList', TType.LIST, 29)
       oprot.writeListBegin(TType.STRING, len(self.onlineLocationList))
-      for iter96 in self.onlineLocationList:
-        oprot.writeString(iter96.encode('utf-8'))
+      for iter109 in self.onlineLocationList:
+        oprot.writeString(iter109.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.onlineOrganizationList is not None:
       oprot.writeFieldBegin('onlineOrganizationList', TType.LIST, 30)
       oprot.writeListBegin(TType.STRING, len(self.onlineOrganizationList))
-      for iter97 in self.onlineOrganizationList:
-        oprot.writeString(iter97.encode('utf-8'))
+      for iter110 in self.onlineOrganizationList:
+        oprot.writeString(iter110.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.onlinePeople is not None:
       oprot.writeFieldBegin('onlinePeople', TType.LIST, 31)
       oprot.writeListBegin(TType.STRING, len(self.onlinePeople))
-      for iter98 in self.onlinePeople:
-        oprot.writeString(iter98.encode('utf-8'))
+      for iter111 in self.onlinePeople:
+        oprot.writeString(iter111.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.onlineSection is not None:
-      oprot.writeFieldBegin('onlineSection', TType.STRING, 32)
-      oprot.writeString(self.onlineSection.encode('utf-8'))
+    if self.onlineSectionList is not None:
+      oprot.writeFieldBegin('onlineSectionList', TType.LIST, 32)
+      oprot.writeListBegin(TType.STRING, len(self.onlineSectionList))
+      for iter112 in self.onlineSectionList:
+        oprot.writeString(iter112.encode('utf-8'))
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.onlineTitleList is not None:
       oprot.writeFieldBegin('onlineTitleList', TType.LIST, 33)
       oprot.writeListBegin(TType.STRING, len(self.onlineTitleList))
-      for iter99 in self.onlineTitleList:
-        oprot.writeString(iter99.encode('utf-8'))
+      for iter113 in self.onlineTitleList:
+        oprot.writeString(iter113.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.organizationList is not None:
       oprot.writeFieldBegin('organizationList', TType.LIST, 34)
       oprot.writeListBegin(TType.STRING, len(self.organizationList))
-      for iter100 in self.organizationList:
-        oprot.writeString(iter100.encode('utf-8'))
+      for iter114 in self.organizationList:
+        oprot.writeString(iter114.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.page is not None:
@@ -931,8 +935,8 @@ class NITFInfo(object):
     if self.peopleList is not None:
       oprot.writeFieldBegin('peopleList', TType.LIST, 36)
       oprot.writeListBegin(TType.STRING, len(self.peopleList))
-      for iter101 in self.peopleList:
-        oprot.writeString(iter101.encode('utf-8'))
+      for iter115 in self.peopleList:
+        oprot.writeString(iter115.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.publicationDate is not None:
@@ -970,22 +974,22 @@ class NITFInfo(object):
     if self.taxonomicClassifierList is not None:
       oprot.writeFieldBegin('taxonomicClassifierList', TType.LIST, 45)
       oprot.writeListBegin(TType.STRING, len(self.taxonomicClassifierList))
-      for iter102 in self.taxonomicClassifierList:
-        oprot.writeString(iter102.encode('utf-8'))
+      for iter116 in self.taxonomicClassifierList:
+        oprot.writeString(iter116.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.titleList is not None:
       oprot.writeFieldBegin('titleList', TType.LIST, 46)
       oprot.writeListBegin(TType.STRING, len(self.titleList))
-      for iter103 in self.titleList:
-        oprot.writeString(iter103.encode('utf-8'))
+      for iter117 in self.titleList:
+        oprot.writeString(iter117.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.typesOfMaterialList is not None:
       oprot.writeFieldBegin('typesOfMaterialList', TType.LIST, 47)
       oprot.writeListBegin(TType.STRING, len(self.typesOfMaterialList))
-      for iter104 in self.typesOfMaterialList:
-        oprot.writeString(iter104.encode('utf-8'))
+      for iter118 in self.typesOfMaterialList:
+        oprot.writeString(iter118.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.url is not None:

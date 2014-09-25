@@ -21,9 +21,32 @@ except:
 
 class TheoryDependencies(object):
   """
-  A struct that holds UUIDs for all theories
-  that a particular annotation was based upon
-  (and presumably requires).
+  A struct that holds UUIDs for all theories that a particular
+  annotation was based upon (and presumably requires).
+
+  Producers of TheoryDependencies should list all stages that they
+  used in constructing their particular annotation. They do not,
+  however, need to explicitly label *each* stage; they can label
+  only the immediate stage before them.
+
+  Examples:
+
+  If you are producing a Tokenization, and only used the
+  SentenceSegmentation in order to produce that Tokenization, list
+  only the single SentenceSegmentation UUID in sentenceTheoryList.
+
+  In this example, even though the SentenceSegmentation will have
+  a dependency on some SectionSegmentation, it is not necessary
+  for the Tokenization to list the SectionSegmentation UUID as a
+  dependency.
+
+  If you are a producer of EntityMentions, and you use two
+  POSTokenTagging and one NERTokenTagging objects, add the UUIDs for
+  the POSTokenTagging objects to posTagTheoryList, and the UUID of
+  the NER TokenTagging to the nerTagTheoryList.
+
+  In this example, because multiple annotations influenced the
+  new annotation, they should all be listed as dependencies.
 
   Attributes:
    - sectionTheoryList
@@ -560,7 +583,6 @@ class AnnotationMetadata(object):
    - tool: The name of the tool that generated this annotation.
    - timestamp: The time at which this annotation was generated (in unix time
   UTC -- i.e., seconds since January 1, 1970).
-   - confidence: Confidence score. To do: define what this means!
    - digest: A Digest, carrying over any information the annotation metadata
   wishes to carry over.
    - dependencies: The theories that supported this annotation.
@@ -578,16 +600,15 @@ class AnnotationMetadata(object):
     None, # 0
     (1, TType.STRING, 'tool', None, None, ), # 1
     (2, TType.I64, 'timestamp', None, None, ), # 2
-    (3, TType.DOUBLE, 'confidence', None, None, ), # 3
+    None, # 3
     (4, TType.STRUCT, 'digest', (Digest, Digest.thrift_spec), None, ), # 4
     (5, TType.STRUCT, 'dependencies', (TheoryDependencies, TheoryDependencies.thrift_spec), None, ), # 5
     (6, TType.I32, 'kBest', None, 1, ), # 6
   )
 
-  def __init__(self, tool=None, timestamp=None, confidence=None, digest=None, dependencies=None, kBest=thrift_spec[6][4],):
+  def __init__(self, tool=None, timestamp=None, digest=None, dependencies=None, kBest=thrift_spec[6][4],):
     self.tool = tool
     self.timestamp = timestamp
-    self.confidence = confidence
     self.digest = digest
     self.dependencies = dependencies
     self.kBest = kBest
@@ -609,11 +630,6 @@ class AnnotationMetadata(object):
       elif fid == 2:
         if ftype == TType.I64:
           self.timestamp = iprot.readI64();
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.DOUBLE:
-          self.confidence = iprot.readDouble();
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -650,10 +666,6 @@ class AnnotationMetadata(object):
     if self.timestamp is not None:
       oprot.writeFieldBegin('timestamp', TType.I64, 2)
       oprot.writeI64(self.timestamp)
-      oprot.writeFieldEnd()
-    if self.confidence is not None:
-      oprot.writeFieldBegin('confidence', TType.DOUBLE, 3)
-      oprot.writeDouble(self.confidence)
       oprot.writeFieldEnd()
     if self.digest is not None:
       oprot.writeFieldBegin('digest', TType.STRUCT, 4)

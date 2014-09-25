@@ -15,7 +15,14 @@ from testfixtures import LogCapture, StringComparison
 from thrift import TSerialization
 
 import concrete
+from concrete.util import add_references_to_communication
 from concrete.validate import *
+
+
+class TestAddReferences(unittest.TestCase):
+    def test_add_references(self):
+        comm = read_test_comm()
+        add_references_to_communication(comm)
 
 
 class TestCommunication(unittest.TestCase):

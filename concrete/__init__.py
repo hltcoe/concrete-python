@@ -4,6 +4,7 @@ This file is NOT auto-generated
 
 from audio.ttypes import *
 from communication.ttypes import *
+from communication_service.ttypes import *
 from discourse.ttypes import *
 from email.ttypes import *
 from entities.ttypes import *

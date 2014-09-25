@@ -48,27 +48,16 @@ def validate_communication(comm):
 
     valid &= validate_thrift_object_required_fields_recursively(comm)
 
-    if comm.sectionSegmentationList:
-        logging.debug(ilm(1, "Communication '%s' has %d sectionSegmentations" %
-                          (comm.id, len(comm.sectionSegmentationList))))
-        for sectionSegmentation in comm.sectionSegmentationList:
-            logging.debug(ilm(2, "sectionSegmentation '%s' has %d sections" %
-                              (sectionSegmentation.uuid, len(sectionSegmentation.sectionList))))
-            for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentationList:
-                    valid &= validate_token_offsets_for_section(section)
-                    logging.debug(ilm(3, "section '%s' has %d sentenceSegmentations" %
-                                      (section.uuid, len(section.sentenceSegmentationList))))
-                    for sentenceSegmentation in section.sentenceSegmentationList:
-                        logging.debug(ilm(4, "sentenceSegmentation '%s' has %d sentences" %
-                                          (sentenceSegmentation.uuid, len(sentenceSegmentation.sentenceList))))
-                        for sentence in sentenceSegmentation.sentenceList:
-                            logging.debug(ilm(5, "sentence '%s' has %d tokenizations" %
-                                              (sentence.uuid, len(sentence.tokenizationList))))
-                            valid &= validate_token_offsets_for_sentence(sentence)
-                            for tokenization in sentence.tokenizationList:
-                                valid &= validate_constituency_parses(comm, tokenization)
-                                valid &= validate_dependency_parses(tokenization)
+    if comm.sectionList:
+        for section in comm.sectionList:
+            valid &= validate_token_offsets_for_section(section)
+            if section.sentenceList:
+                logging.debug(ilm(4, "section '%s' has %d sentences" %
+                                  (section.uuid, len(section.sentenceList))))
+                for sentence in section.sentenceList:
+                    valid &= validate_token_offsets_for_sentence(sentence)
+                    valid &= validate_constituency_parses(comm, sentence.tokenization)
+                    valid &= validate_dependency_parses(sentence.tokenization)
 
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)
@@ -162,14 +151,11 @@ def get_tokenization_uuidString_dict(comm):
     """
     if not hasattr(comm, '_tokenization_uuidString_dict'):
         comm._tokenization_uuidString_dict = {}
-        if comm.sectionSegmentationList:
-            for sectionSegmentation in comm.sectionSegmentationList:
-                for section in sectionSegmentation.sectionList:
-                    if section.sentenceSegmentationList:
-                        for sentenceSegmentation in section.sentenceSegmentationList:
-                            for sentence in sentenceSegmentation.sentenceList:
-                                for tokenization in sentence.tokenizationList:
-                                    comm._tokenization_uuidString_dict[tokenization.uuid.uuidString] = tokenization
+        if comm.sectionList:
+            for section in comm.sectionList:
+                for sentence in section.sentenceList:
+                    if sentence.tokenization:
+                        comm._tokenization_uuidString_dict[sentence.tokenization.uuid.uuidString] = sentence.tokenization
     return comm._tokenization_uuidString_dict
 
 
@@ -182,14 +168,12 @@ def get_tokenization_uuidString_set(comm):
       set of strings: uuidStrings for all Tokenizations in the Communication
     """
     tokenization_uuidString_set = set()
-    if comm.sectionSegmentationList:
-        for sectionSegmentation in comm.sectionSegmentationList:
-            for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentationList:
-                    for sentenceSegmentation in section.sentenceSegmentationList:
-                        for sentence in sentenceSegmentation.sentenceList:
-                            for tokenization in sentence.tokenizationList:
-                                tokenization_uuidString_set.add(tokenization.uuid.uuidString)
+    if comm.sectionList:
+        for section in comm.sectionList:
+            if section.sentenceList:
+                for sentence in section.sentenceList:
+                    if sentence.tokenization:
+                        tokenization_uuidString_set.add(sentence.tokenization.uuid.uuidString)
     return tokenization_uuidString_set
 
 
@@ -435,22 +419,21 @@ def validate_token_offsets_for_section(section):
         logging.error(ilm(2, "Section '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (section.uuid, section.textSpan.start, section.textSpan.ending)))
 
-    if section.sentenceSegmentationList:
-        for sentenceSegmentation in section.sentenceSegmentationList:
-            for sentence in sentenceSegmentation.sentenceList:
-                if sentence.textSpan == None:
-                    continue
-                if sentence.textSpan.start > sentence.textSpan.ending:
-                    valid = False
-                    logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
-                                      (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
-                elif (sentence.textSpan.start < section.textSpan.start) or \
-                     (sentence.textSpan.start > section.textSpan.ending) or \
-                     (sentence.textSpan.ending < section.textSpan.start) or \
-                     (sentence.textSpan.ending > section.textSpan.ending):
-                    valid = False
-                    logging.error(ilm(2, "Sentence '%s' in Section '%s' has a TextSpan [%d, %d] that does not fit within the Section TextSpan [%d, %d]" %
-                                      (sentence.uuid, section.uuid, sentence.textSpan.start, sentence.textSpan.ending, section.textSpan.start, section.textSpan.ending)))
+    if section.sentenceList:
+        for sentence in section.sentenceList:
+            if sentence.textSpan == None:
+                continue
+            if sentence.textSpan.start > sentence.textSpan.ending:
+                valid = False
+                logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
+                                  (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
+            elif (sentence.textSpan.start < section.textSpan.start) or \
+                 (sentence.textSpan.start > section.textSpan.ending) or \
+                 (sentence.textSpan.ending < section.textSpan.start) or \
+                 (sentence.textSpan.ending > section.textSpan.ending):
+                valid = False
+                logging.error(ilm(2, "Sentence '%s' in Section '%s' has a TextSpan [%d, %d] that does not fit within the Section TextSpan [%d, %d]" %
+                                  (sentence.uuid, section.uuid, sentence.textSpan.start, sentence.textSpan.ending, section.textSpan.start, section.textSpan.ending)))
 
     return valid
 
@@ -469,8 +452,8 @@ def validate_token_offsets_for_sentence(sentence):
         valid = False
         logging.error(ilm(7, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
                           (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
-    for tokenization in sentence.tokenizationList:
-        for token in tokenization.tokenList.tokenList:
+    if sentence.tokenization:
+        for token in sentence.tokenization.tokenList.tokenList:
             if token.textSpan == None:
                 continue
             if token.textSpan.start > token.textSpan.ending:

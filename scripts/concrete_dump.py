@@ -188,12 +188,6 @@ def print_situations(comm):
             for situation_index, situation in enumerate(situationSet.situationList):
                 print "  Situation %d-%d:" % (situationSet_index, situation_index)
                 _p(6, 18, "situationType", situation.situationType)
-                if situation.eventType:
-                    _p(6, 18, "eventType", situation.eventType)
-                if situation.stateType:
-                    _p(6, 18, "stateType", situation.stateType)
-                if situation.temporalFactType:
-                    _p(6, 18, "temporalFactType", situation.temporalFactType)
                 if situation.mentionList:
                     for situationMention_index, situationMention in enumerate(situation.mentionList):
                         print " "*6 + "SituationMention %d-%d-%d:" % (
@@ -207,14 +201,8 @@ def _print_situation_mention(situationMention):
     """Helper function for printing info for a SituationMention"""
     if situationMention.text:
         _p(10, 20, "text", situationMention.text)
-    if situationMention.eventType:
-        _p(10, 20, "eventType", situationMention.eventType)
     if situationMention.situationType:
         _p(10, 20, "situationType", situationMention.situationType)
-    if situationMention.situationKindLemma:
-        _p(10, 20, "situationKindLemma", situationMention.situationKindLemma)
-    if situationMention.stateType:
-        _p(18, 20, "stateType", situationMention.stateType)
     if situationMention.argumentList:
         for argument_index, mentionArgument in enumerate(situationMention.argumentList):
             print " "*10 + "Argument %d:" % argument_index
@@ -231,14 +219,8 @@ def _print_situation_mention(situationMention):
                 print " "*14 + "situationMention:"
                 if situationMention.text:
                     _p(18, 20, "text", situationMention.text)
-                if situationMention.eventType:
-                    _p(18, 20, "eventType", situationMention.eventType)
                 if situationMention.situationType:
                     _p(18, 20, "situationType", situationMention.situationType)
-                if situationMention.situationKindLemma:
-                    _p(18, 20, "situationKindLemma", situationMention.situationKindLemma)
-                if situationMention.stateType:
-                    _p(18, 20, "stateType", situationMention.stateType)
 
 
 def _p(indent_level, justified_width, fieldname, content):
@@ -498,14 +480,11 @@ def get_tokenizations(comm):
     """
     tokenizations = []
 
-    if comm.sectionSegmentationList:
-        for sectionSegmentation in comm.sectionSegmentationList:
-            for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentationList:
-                    for sentenceSegmentation in section.sentenceSegmentationList:
-                        for sentence in sentenceSegmentation.sentenceList:
-                            for tokenization in sentence.tokenizationList:
-                                tokenizations.append(tokenization)
+    if comm.sectionList:
+        for section in comm.sectionList:
+            for sentence in section.sentenceList:
+                if sentence.tokenization:
+                    tokenizations.append(sentence.tokenization)
     return tokenizations
 
 
@@ -521,16 +500,14 @@ def get_tokenizations_grouped_by_section(comm):
     """
     tokenizations_by_section = []
 
-    if comm.sectionSegmentationList:
-        for sectionSegmentation in comm.sectionSegmentationList:
-            for section in sectionSegmentation.sectionList:
-                tokenizations_in_section = []
-                if section.sentenceSegmentationList:
-                    for sentenceSegmentation in section.sentenceSegmentationList:
-                        for sentence in sentenceSegmentation.sentenceList:
-                            for tokenization in sentence.tokenizationList:
-                                tokenizations_in_section.append(tokenization)
-                tokenizations_by_section.append(tokenizations_in_section)
+    if comm.sectionList:
+        for section in comm.sectionList:
+            tokenizations_in_section = []
+            if section.sentenceList:
+                for sentence in section.sentenceList:
+                    if sentence.tokenization:
+                        tokenizations_in_section.append(sentence.tokenization)
+            tokenizations_by_section.append(tokenizations_in_section)
 
     return tokenizations_by_section
 

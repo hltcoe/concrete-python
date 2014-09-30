@@ -153,9 +153,10 @@ def get_tokenization_uuidString_dict(comm):
         comm._tokenization_uuidString_dict = {}
         if comm.sectionList:
             for section in comm.sectionList:
-                for sentence in section.sentenceList:
-                    if sentence.tokenization:
-                        comm._tokenization_uuidString_dict[sentence.tokenization.uuid.uuidString] = sentence.tokenization
+                if section.sentenceList:
+                    for sentence in section.sentenceList:
+                        if sentence.tokenization:
+                            comm._tokenization_uuidString_dict[sentence.tokenization.uuid.uuidString] = sentence.tokenization
     return comm._tokenization_uuidString_dict
 
 

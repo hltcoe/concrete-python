@@ -538,7 +538,7 @@ def get_tokentaggings_of_type(tokenization, taggingType):
     Returns:
         A list of TokenTagging objects
     """
-    return [tt for tt in tokenization.tokenTaggingList if tt.taggingType == taggingType]
+    return [tt for tt in tokenization.tokenTaggingList if tt.taggingType.lower() == taggingType.lower()]
 
 
 if __name__ == "__main__":

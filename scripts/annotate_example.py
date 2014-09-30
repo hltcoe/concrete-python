@@ -92,23 +92,24 @@ def add_dictionary_tagging(comm):
 
     if comm.sectionList:
         for section in comm.sectionList:
-            for sentence in section.sentenceList:
-                posTagList = concrete.TokenTagging()
-                posTagList.metadata = concrete.AnnotationMetadata(tool="POS Tagger", timestamp=int(time.time()))
-                posTagList.taggingType = "POS"
-                posTagList.taggedTokenList = []
-                posTagList.uuid = concrete.util.generate_UUID()
-                if sentence.tokenization.tokenList:
-                    for i, token in enumerate(sentence.tokenization.tokenList.tokenList):
-                        tt = concrete.TaggedToken()
-                        tt.tokenIndex = i
-                        if token.text.lower() in dictionary:
-                            tt.tag = "In"
-                        else:
-                            tt.tag = "Out"
-                        posTagList.taggedTokenList.append(tt)
-                        print "%d [%s] %s" % (i, token.text, tt.tag)
-                sentence.tokenization.tokenTaggingList = [posTagList]
+            if section.sentenceList:
+                for sentence in section.sentenceList:
+                    posTagList = concrete.TokenTagging()
+                    posTagList.metadata = concrete.AnnotationMetadata(tool="POS Tagger", timestamp=int(time.time()))
+                    posTagList.taggingType = "POS"
+                    posTagList.taggedTokenList = []
+                    posTagList.uuid = concrete.util.generate_UUID()
+                    if sentence.tokenization.tokenList:
+                        for i, token in enumerate(sentence.tokenization.tokenList.tokenList):
+                            tt = concrete.TaggedToken()
+                            tt.tokenIndex = i
+                            if token.text.lower() in dictionary:
+                                tt.tag = "In"
+                            else:
+                                tt.tag = "Out"
+                            posTagList.taggedTokenList.append(tt)
+                            print "%d [%s] %s" % (i, token.text, tt.tag)
+                    sentence.tokenization.tokenTaggingList = [posTagList]
             print
 
     if validate_communication(comm):

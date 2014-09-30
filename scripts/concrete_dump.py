@@ -482,9 +482,10 @@ def get_tokenizations(comm):
 
     if comm.sectionList:
         for section in comm.sectionList:
-            for sentence in section.sentenceList:
-                if sentence.tokenization:
-                    tokenizations.append(sentence.tokenization)
+            if section.sentenceList:
+                for sentence in section.sentenceList:
+                    if sentence.tokenization:
+                        tokenizations.append(sentence.tokenization)
     return tokenizations
 
 

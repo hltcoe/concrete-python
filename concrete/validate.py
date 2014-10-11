@@ -107,6 +107,25 @@ def get_entity_mention_uuidString_set(comm):
     return entity_mention_uuidString_set
 
 
+def get_sentence_for_tokenization_uuidString_dict(comm):
+    """
+    Args:
+      comm (concrete.structure.ttypes.Communication)
+
+    Returns:
+      dictionary mapping of Tokenization uuidStrings to Sentences
+    """
+    if not hasattr(comm, 'sentence_for_tokenization_uuidString_dict'):
+        comm.sentence_for_tokenization_uuidString_dict = {}
+        if comm.sectionList:
+            for section in comm.sectionList:
+                if section.sentenceList:
+                    for sentence in section.sentenceList:
+                        if sentence.tokenization:
+                            comm.sentence_for_tokenization_uuidString_dict[sentence.tokenization.uuid.uuidString] = sentence
+    return comm.sentence_for_tokenization_uuidString_dict
+
+
 def get_situation_uuidString_set(comm):
     """
     Args:
@@ -476,6 +495,7 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
     valid = True
 
     tokenization_mapping = get_tokenization_uuidString_dict(comm)
+    sentence_for_tokenization_mapping = get_sentence_for_tokenization_uuidString_dict(comm)
 
     if token_ref_sequence.tokenizationId.uuidString not in tokenization_mapping:
         valid = False
@@ -490,6 +510,16 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
                 valid = False
                 logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenIndex (%d)" %
                                   (token_ref_sequence.tokenizationId.uuidString, tokenIndex)))
+    if token_ref_sequence.tokenizationId.uuidString in sentence_for_tokenization_mapping:
+        sentence = sentence_for_tokenization_mapping[token_ref_sequence.tokenizationId.uuidString]
+        if sentence.textSpan and token_ref_sequence.textSpan:
+            if (token_ref_sequence.textSpan.start < sentence.textSpan.start) or \
+               (token_ref_sequence.textSpan.start > sentence.textSpan.ending) or \
+               (token_ref_sequence.textSpan.ending < sentence.textSpan.start) or \
+               (token_ref_sequence.textSpan.ending > sentence.textSpan.ending):
+                valid = False
+                logging.error(ilm(2, "TokenRefSequence has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
+                                  (token_ref_sequence.uuid.uuidString, token_ref_sequence.textSpan.start, token_ref_sequence.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
     return valid
 
 

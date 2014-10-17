@@ -577,20 +577,22 @@ class TokenTagging(object):
 
 class Dependency(object):
   """
+  A syntactic edge between two tokens in a tokenized sentence.
+
   Attributes:
-   - gov
-   - dep
-   - edgeType
+   - gov: The governor or the head token. 0 indexed.
+   - dep: The dependent token. 0 indexed.
+   - edgeType: The relation that holds between gov and dep.
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.I32, 'gov', None, None, ), # 1
+    (1, TType.I32, 'gov', None, -1, ), # 1
     (2, TType.I32, 'dep', None, None, ), # 2
     (3, TType.STRING, 'edgeType', None, None, ), # 3
   )
 
-  def __init__(self, gov=None, dep=None, edgeType=None,):
+  def __init__(self, gov=thrift_spec[1][4], dep=None, edgeType=None,):
     self.gov = gov
     self.dep = dep
     self.edgeType = edgeType
@@ -1326,18 +1328,15 @@ class TokenList(object):
 
   Attributes:
    - tokenList
-   - reconstructedText
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.LIST, 'tokenList', (TType.STRUCT,(Token, Token.thrift_spec)), None, ), # 1
-    (2, TType.STRING, 'reconstructedText', None, None, ), # 2
   )
 
-  def __init__(self, tokenList=None, reconstructedText=None,):
+  def __init__(self, tokenList=None,):
     self.tokenList = tokenList
-    self.reconstructedText = reconstructedText
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1359,11 +1358,6 @@ class TokenList(object):
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.reconstructedText = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1380,10 +1374,6 @@ class TokenList(object):
       for iter55 in self.tokenList:
         iter55.write(oprot)
       oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.reconstructedText is not None:
-      oprot.writeFieldBegin('reconstructedText', TType.STRING, 2)
-      oprot.writeString(self.reconstructedText.encode('utf-8'))
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

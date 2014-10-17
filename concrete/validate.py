@@ -499,8 +499,8 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
 
     if token_ref_sequence.tokenizationId.uuidString not in tokenization_mapping:
         valid = False
-        logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenizationId (%s)" %
-                          (token_ref_sequence.uuid.uuidString, token_ref_sequence.tokenizationId.uuidString)))
+        logging.error(ilm(3, "TokenRefSequence has an invalid tokenizationId (%s)" %
+                          token_ref_sequence.tokenizationId.uuidString))
     else:
         tokenization = tokenization_mapping[token_ref_sequence.tokenizationId.uuidString]
         for tokenIndex in token_ref_sequence.tokenIndexList:
@@ -519,7 +519,7 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
                (token_ref_sequence.textSpan.ending > sentence.textSpan.ending):
                 valid = False
                 logging.error(ilm(2, "TokenRefSequence has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
-                                  (token_ref_sequence.uuid.uuidString, token_ref_sequence.textSpan.start, token_ref_sequence.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
+                                  (token_ref_sequence.textSpan.start, token_ref_sequence.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
     return valid
 
 

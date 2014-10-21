@@ -526,7 +526,7 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
 
 def validate_token_taggings(tokenization):
     """
-    Test of a Tokenization has any TokenTaggings with invalid token indices
+    Test if a Tokenization has any TokenTaggings with invalid token indices
     """
     valid = True
     if tokenization and tokenization.tokenTaggingList:

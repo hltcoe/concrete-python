@@ -58,6 +58,7 @@ def validate_communication(comm):
                     valid &= validate_token_offsets_for_sentence(sentence)
                     valid &= validate_constituency_parses(comm, sentence.tokenization)
                     valid &= validate_dependency_parses(sentence.tokenization)
+                    valid &= validate_token_taggings(sentence.tokenization)
 
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)
@@ -520,6 +521,22 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
                 valid = False
                 logging.error(ilm(2, "TokenRefSequence has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
                                   (token_ref_sequence.textSpan.start, token_ref_sequence.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
+    return valid
+
+
+def validate_token_taggings(tokenization):
+    """
+    Test of a Tokenization has any TokenTaggings with invalid token indices
+    """
+    valid = True
+    if tokenization and tokenization.tokenTaggingList:
+        total_tokens = len(tokenization.tokenList.tokenList)
+        for token_tagging in tokenization.tokenTaggingList:
+            for tagged_token in token_tagging.taggedTokenList:
+                if tagged_token.tokenIndex >= total_tokens or tagged_token.tokenIndex < 0:
+                    valid = False
+                    logging.error(ilm(7, "TokenTagging '%s' has a tokenIndex '%d' that is out of bounds." %
+                                      (token_tagging.uuid.uuidString, tagged_token.tokenIndex)))
     return valid
 
 

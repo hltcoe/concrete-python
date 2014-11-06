@@ -51,7 +51,7 @@ Useful Scripts
 
 The Concrete Python package comes with three scripts:
 
-* **concrete_dump.py** reads in a Concrete Communication and prints
+* **concrete_inspect.py** reads in a Concrete Communication and prints
   out human-readable information about the Communication's contents
   (such as tokens, POS and NER tags, Entities, Situations, etc) to
   stdout.

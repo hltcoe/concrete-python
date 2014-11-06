@@ -2,7 +2,7 @@
 
 """Print human-readable information about a Communication to stdout
 
-concrete_dump.py is a command-line script for printing out information
+concrete_inspect.py is a command-line script for printing out information
 about a Concrete Communication.
 """
 

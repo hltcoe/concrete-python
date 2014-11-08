@@ -56,9 +56,10 @@ def validate_communication(comm):
                                   (section.uuid, len(section.sentenceList))))
                 for sentence in section.sentenceList:
                     valid &= validate_token_offsets_for_sentence(sentence)
-                    valid &= validate_constituency_parses(comm, sentence.tokenization)
-                    valid &= validate_dependency_parses(sentence.tokenization)
-                    valid &= validate_token_taggings(sentence.tokenization)
+                    if sentence.tokenization:
+                        valid &= validate_constituency_parses(comm, sentence.tokenization)
+                        valid &= validate_dependency_parses(sentence.tokenization)
+                        valid &= validate_token_taggings(sentence.tokenization)
 
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)

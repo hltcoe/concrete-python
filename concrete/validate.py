@@ -23,14 +23,13 @@ from thrift.protocol import TProtocol
 from thrift.Thrift import TType
 
 from concrete import Communication
+from concrete.util import read_communication_from_file
 
 
 
 def validate_communication_file(communication_filename):
     logging.info(ilm(0, "Opening Concrete Communication with filename '%s'" % communication_filename))
-    comm = Communication()
-    comm_bytestring = open(communication_filename).read()
-    TSerialization.deserialize(comm, comm_bytestring)
+    comm = read_communication_from_file(communication_filename)
     validate_communication(comm)
 
 

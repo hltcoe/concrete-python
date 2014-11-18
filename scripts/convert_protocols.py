@@ -15,6 +15,13 @@
 # <known conversion> must currently be either
 #   * binary-to-compact: Convert the TBinaryProtocol encoded input file to a TCompactProtocol encoded output file
 #   * compact-to-binary: Convert the TCompactProtocol encoded input file to a TBinaryProtocol encoded output file
+#
+# The known conversions are stored in a dictionary KNOWN_CONVERSIONS:
+#   * keys are the conversion name, e.g., 'binary-to-compact'
+#   * values are pairs of callable factory methods (callable-input-factory, callable-output-factory), e.g.,
+#        (TBinaryProtocol.TBinaryProtocolFactory, TCompactProtocol.TCompactProtocolFactory)
+#
+# Therefore, adding to the conversions is simple: just add to the KNOWN_CONVERSIONS mapping.
 
 import argparse
 from thrift import TSerialization
@@ -26,12 +33,14 @@ KNOWN_CONVERSIONS = {
     'compact-to-binary':(TCompactProtocol.TCompactProtocolFactory, TBinaryProtocol.TBinaryProtocolFactory)
 }
 
-parser = argparse.ArgumentParser(description='Convert communications between protocols')
-parser.add_argument('--input-file', type=str, required=True,
-                    help='input file path')
-parser.add_argument('--output-file', type=str, required=True,
-                    help='output file path')
-parser.add_argument('--direction', choices = KNOWN_CONVERSIONS.keys(), required=True)
+def make_parser():
+    parser = argparse.ArgumentParser(description='Convert communications between protocols')
+    parser.add_argument('--input-file', type=str, required=True,
+                        help='input file path')
+    parser.add_argument('--output-file', type=str, required=True,
+                        help='output file path')
+    parser.add_argument('--direction', choices = KNOWN_CONVERSIONS.keys(), required=True)
+    return parser
 
 def convert(input_file_path, output_file_path, input_protocol_factory, output_protocol_factory):
     """
@@ -54,6 +63,7 @@ def convert(input_file_path, output_file_path, input_protocol_factory, output_pr
     output_file.close()
 
 if __name__ == '__main__':
+    parser = make_parser()
     args = parser.parse_args()
     convert(input_file_path  = args.input_file,
             output_file_path = args.output_file,

@@ -9,23 +9,24 @@ from concrete.util.references import add_references_to_communication
 
 
 def read_thrift_from_file(thrift_obj, filename):
-    """
-    Pass in a new thrift object and a filename. Read in bytes from disk that
-    match that thrift object.
+    """Instantiate Thrift object from contents of named file
 
-    Return the deserialized thrift object.
+    The Thrift file is assumed to be encoded using TCompactProtocol
+
+    WARNING - Thrift deserialization tends to fail silently.  For
+    example, the Thrift libraries will not complain if you try to
+    deserialize data from the file '/dev/urandom'.
+
+    Args:
+        thrift_obj: A Thrift object (e.g. a Communication object)
+        filename:  A filename string
+
+    Returns:
+        The Thrift object that was passed in as an argument
     """
     thrift_file = open(filename)
     thrift_bytes = thrift_file.read()
     TSerialization.deserialize(thrift_obj, thrift_bytes, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-    # TODO: Implement something more elegant than this kludge
-    # If we try to use TCompactProtocol to read a TBinaryProtocol Thrift object,
-    # TSerializationdeserialize() will not give any indication that something
-    # has gone wrong.  We currently check if the required field 'id' is empty,
-    # and if so, we then try to read the Thrift object using the (default)
-    # TBinaryProtocol protocol.
-    if thrift_obj.id == None:
-        TSerialization.deserialize(thrift_obj, thrift_bytes)
     thrift_file.close()
     return thrift_obj
 

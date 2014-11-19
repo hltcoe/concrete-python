@@ -357,10 +357,22 @@ class TaggedToken(object):
   """
   Attributes:
    - tokenIndex: A pointer to the token being tagged.
+
+  Token indices are 0-based. These indices are also 0-based.
    - tag: A string containing the annotation.
   If the tag set you are using is not case sensitive,
   then all part of speech tags should be normalized to upper case.
    - confidence: Confidence of the annotation.
+   - tagList: A list of strings that represent a distribution of possible
+  tags for this token.
+
+  If populated, the 'tag' field should also be populated
+  with the "best" value from this list.
+   - confidenceList: A list of doubles that represent confidences associated with
+  the tags in the 'tagList' field.
+
+  If populated, the 'confidence' field should also be populated
+  with the confidence associated with the "best" tag in 'tagList'.
   """
 
   thrift_spec = (
@@ -368,12 +380,16 @@ class TaggedToken(object):
     (1, TType.I32, 'tokenIndex', None, None, ), # 1
     (2, TType.STRING, 'tag', None, None, ), # 2
     (3, TType.DOUBLE, 'confidence', None, None, ), # 3
+    (4, TType.LIST, 'tagList', (TType.STRING,None), None, ), # 4
+    (5, TType.LIST, 'confidenceList', (TType.DOUBLE,None), None, ), # 5
   )
 
-  def __init__(self, tokenIndex=None, tag=None, confidence=None,):
+  def __init__(self, tokenIndex=None, tag=None, confidence=None, tagList=None, confidenceList=None,):
     self.tokenIndex = tokenIndex
     self.tag = tag
     self.confidence = confidence
+    self.tagList = tagList
+    self.confidenceList = confidenceList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -399,6 +415,26 @@ class TaggedToken(object):
           self.confidence = iprot.readDouble();
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.tagList = []
+          (_etype10, _size7) = iprot.readListBegin()
+          for _i11 in xrange(_size7):
+            _elem12 = iprot.readString().decode('utf-8')
+            self.tagList.append(_elem12)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.LIST:
+          self.confidenceList = []
+          (_etype16, _size13) = iprot.readListBegin()
+          for _i17 in xrange(_size13):
+            _elem18 = iprot.readDouble();
+            self.confidenceList.append(_elem18)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -420,6 +456,20 @@ class TaggedToken(object):
     if self.confidence is not None:
       oprot.writeFieldBegin('confidence', TType.DOUBLE, 3)
       oprot.writeDouble(self.confidence)
+      oprot.writeFieldEnd()
+    if self.tagList is not None:
+      oprot.writeFieldBegin('tagList', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.tagList))
+      for iter19 in self.tagList:
+        oprot.writeString(iter19.encode('utf-8'))
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.confidenceList is not None:
+      oprot.writeFieldBegin('confidenceList', TType.LIST, 5)
+      oprot.writeListBegin(TType.DOUBLE, len(self.confidenceList))
+      for iter20 in self.confidenceList:
+        oprot.writeDouble(iter20)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -509,11 +559,11 @@ class TokenTagging(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.taggedTokenList = []
-          (_etype10, _size7) = iprot.readListBegin()
-          for _i11 in xrange(_size7):
-            _elem12 = TaggedToken()
-            _elem12.read(iprot)
-            self.taggedTokenList.append(_elem12)
+          (_etype24, _size21) = iprot.readListBegin()
+          for _i25 in xrange(_size21):
+            _elem26 = TaggedToken()
+            _elem26.read(iprot)
+            self.taggedTokenList.append(_elem26)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -543,8 +593,8 @@ class TokenTagging(object):
     if self.taggedTokenList is not None:
       oprot.writeFieldBegin('taggedTokenList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.taggedTokenList))
-      for iter13 in self.taggedTokenList:
-        iter13.write(oprot)
+      for iter27 in self.taggedTokenList:
+        iter27.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.taggingType is not None:
@@ -709,11 +759,11 @@ class DependencyParse(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.dependencyList = []
-          (_etype17, _size14) = iprot.readListBegin()
-          for _i18 in xrange(_size14):
-            _elem19 = Dependency()
-            _elem19.read(iprot)
-            self.dependencyList.append(_elem19)
+          (_etype31, _size28) = iprot.readListBegin()
+          for _i32 in xrange(_size28):
+            _elem33 = Dependency()
+            _elem33.read(iprot)
+            self.dependencyList.append(_elem33)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -738,8 +788,8 @@ class DependencyParse(object):
     if self.dependencyList is not None:
       oprot.writeFieldBegin('dependencyList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.dependencyList))
-      for iter20 in self.dependencyList:
-        iter20.write(oprot)
+      for iter34 in self.dependencyList:
+        iter34.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -825,10 +875,10 @@ class Constituent(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.childList = []
-          (_etype24, _size21) = iprot.readListBegin()
-          for _i25 in xrange(_size21):
-            _elem26 = iprot.readI32();
-            self.childList.append(_elem26)
+          (_etype38, _size35) = iprot.readListBegin()
+          for _i39 in xrange(_size35):
+            _elem40 = iprot.readI32();
+            self.childList.append(_elem40)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -864,8 +914,8 @@ class Constituent(object):
     if self.childList is not None:
       oprot.writeFieldBegin('childList', TType.LIST, 3)
       oprot.writeListBegin(TType.I32, len(self.childList))
-      for iter27 in self.childList:
-        oprot.writeI32(iter27)
+      for iter41 in self.childList:
+        oprot.writeI32(iter41)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.tokenSequence is not None:
@@ -951,11 +1001,11 @@ class Parse(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.constituentList = []
-          (_etype31, _size28) = iprot.readListBegin()
-          for _i32 in xrange(_size28):
-            _elem33 = Constituent()
-            _elem33.read(iprot)
-            self.constituentList.append(_elem33)
+          (_etype45, _size42) = iprot.readListBegin()
+          for _i46 in xrange(_size42):
+            _elem47 = Constituent()
+            _elem47.read(iprot)
+            self.constituentList.append(_elem47)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -980,8 +1030,8 @@ class Parse(object):
     if self.constituentList is not None:
       oprot.writeFieldBegin('constituentList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.constituentList))
-      for iter34 in self.constituentList:
-        iter34.write(oprot)
+      for iter48 in self.constituentList:
+        iter48.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1042,11 +1092,11 @@ class LatticePath(object):
       elif fid == 2:
         if ftype == TType.LIST:
           self.tokenList = []
-          (_etype38, _size35) = iprot.readListBegin()
-          for _i39 in xrange(_size35):
-            _elem40 = Token()
-            _elem40.read(iprot)
-            self.tokenList.append(_elem40)
+          (_etype52, _size49) = iprot.readListBegin()
+          for _i53 in xrange(_size49):
+            _elem54 = Token()
+            _elem54.read(iprot)
+            self.tokenList.append(_elem54)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1067,8 +1117,8 @@ class LatticePath(object):
     if self.tokenList is not None:
       oprot.writeFieldBegin('tokenList', TType.LIST, 2)
       oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
-      for iter41 in self.tokenList:
-        iter41.write(oprot)
+      for iter55 in self.tokenList:
+        iter55.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1259,11 +1309,11 @@ class TokenLattice(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.arcList = []
-          (_etype45, _size42) = iprot.readListBegin()
-          for _i46 in xrange(_size42):
-            _elem47 = Arc()
-            _elem47.read(iprot)
-            self.arcList.append(_elem47)
+          (_etype59, _size56) = iprot.readListBegin()
+          for _i60 in xrange(_size56):
+            _elem61 = Arc()
+            _elem61.read(iprot)
+            self.arcList.append(_elem61)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1294,8 +1344,8 @@ class TokenLattice(object):
     if self.arcList is not None:
       oprot.writeFieldBegin('arcList', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.arcList))
-      for iter48 in self.arcList:
-        iter48.write(oprot)
+      for iter62 in self.arcList:
+        iter62.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.cachedBestPath is not None:
@@ -1350,11 +1400,11 @@ class TokenList(object):
       if fid == 1:
         if ftype == TType.LIST:
           self.tokenList = []
-          (_etype52, _size49) = iprot.readListBegin()
-          for _i53 in xrange(_size49):
-            _elem54 = Token()
-            _elem54.read(iprot)
-            self.tokenList.append(_elem54)
+          (_etype66, _size63) = iprot.readListBegin()
+          for _i67 in xrange(_size63):
+            _elem68 = Token()
+            _elem68.read(iprot)
+            self.tokenList.append(_elem68)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1371,8 +1421,8 @@ class TokenList(object):
     if self.tokenList is not None:
       oprot.writeFieldBegin('tokenList', TType.LIST, 1)
       oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
-      for iter55 in self.tokenList:
-        iter55.write(oprot)
+      for iter69 in self.tokenList:
+        iter69.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1506,33 +1556,33 @@ class Tokenization(object):
       elif fid == 6:
         if ftype == TType.LIST:
           self.tokenTaggingList = []
-          (_etype59, _size56) = iprot.readListBegin()
-          for _i60 in xrange(_size56):
-            _elem61 = TokenTagging()
-            _elem61.read(iprot)
-            self.tokenTaggingList.append(_elem61)
+          (_etype73, _size70) = iprot.readListBegin()
+          for _i74 in xrange(_size70):
+            _elem75 = TokenTagging()
+            _elem75.read(iprot)
+            self.tokenTaggingList.append(_elem75)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.LIST:
           self.parseList = []
-          (_etype65, _size62) = iprot.readListBegin()
-          for _i66 in xrange(_size62):
-            _elem67 = Parse()
-            _elem67.read(iprot)
-            self.parseList.append(_elem67)
+          (_etype79, _size76) = iprot.readListBegin()
+          for _i80 in xrange(_size76):
+            _elem81 = Parse()
+            _elem81.read(iprot)
+            self.parseList.append(_elem81)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.LIST:
           self.dependencyParseList = []
-          (_etype71, _size68) = iprot.readListBegin()
-          for _i72 in xrange(_size68):
-            _elem73 = DependencyParse()
-            _elem73.read(iprot)
-            self.dependencyParseList.append(_elem73)
+          (_etype85, _size82) = iprot.readListBegin()
+          for _i86 in xrange(_size82):
+            _elem87 = DependencyParse()
+            _elem87.read(iprot)
+            self.dependencyParseList.append(_elem87)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1569,22 +1619,22 @@ class Tokenization(object):
     if self.tokenTaggingList is not None:
       oprot.writeFieldBegin('tokenTaggingList', TType.LIST, 6)
       oprot.writeListBegin(TType.STRUCT, len(self.tokenTaggingList))
-      for iter74 in self.tokenTaggingList:
-        iter74.write(oprot)
+      for iter88 in self.tokenTaggingList:
+        iter88.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.parseList is not None:
       oprot.writeFieldBegin('parseList', TType.LIST, 7)
       oprot.writeListBegin(TType.STRUCT, len(self.parseList))
-      for iter75 in self.parseList:
-        iter75.write(oprot)
+      for iter89 in self.parseList:
+        iter89.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.dependencyParseList is not None:
       oprot.writeFieldBegin('dependencyParseList', TType.LIST, 8)
       oprot.writeListBegin(TType.STRUCT, len(self.dependencyParseList))
-      for iter76 in self.dependencyParseList:
-        iter76.write(oprot)
+      for iter90 in self.dependencyParseList:
+        iter90.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1830,11 +1880,11 @@ class Section(object):
       elif fid == 2:
         if ftype == TType.LIST:
           self.sentenceList = []
-          (_etype80, _size77) = iprot.readListBegin()
-          for _i81 in xrange(_size77):
-            _elem82 = Sentence()
-            _elem82.read(iprot)
-            self.sentenceList.append(_elem82)
+          (_etype94, _size91) = iprot.readListBegin()
+          for _i95 in xrange(_size91):
+            _elem96 = Sentence()
+            _elem96.read(iprot)
+            self.sentenceList.append(_elem96)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1869,10 +1919,10 @@ class Section(object):
       elif fid == 7:
         if ftype == TType.LIST:
           self.numberList = []
-          (_etype86, _size83) = iprot.readListBegin()
-          for _i87 in xrange(_size83):
-            _elem88 = iprot.readI32();
-            self.numberList.append(_elem88)
+          (_etype100, _size97) = iprot.readListBegin()
+          for _i101 in xrange(_size97):
+            _elem102 = iprot.readI32();
+            self.numberList.append(_elem102)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1893,8 +1943,8 @@ class Section(object):
     if self.sentenceList is not None:
       oprot.writeFieldBegin('sentenceList', TType.LIST, 2)
       oprot.writeListBegin(TType.STRUCT, len(self.sentenceList))
-      for iter89 in self.sentenceList:
-        iter89.write(oprot)
+      for iter103 in self.sentenceList:
+        iter103.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.textSpan is not None:
@@ -1916,8 +1966,8 @@ class Section(object):
     if self.numberList is not None:
       oprot.writeFieldBegin('numberList', TType.LIST, 7)
       oprot.writeListBegin(TType.I32, len(self.numberList))
-      for iter90 in self.numberList:
-        oprot.writeI32(iter90)
+      for iter104 in self.numberList:
+        oprot.writeI32(iter104)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.audioSpan is not None:

@@ -959,6 +959,11 @@ class MentionArgument(object):
    - entityMentionId: A pointer to the value of an EntityMention, if this is being used to support
   an EntityMention.
    - situationMentionId: A pointer to the value of this argument, if it is a SituationMention.
+   - tokens: The location of this MentionArgument in the Communication.
+  If this MentionArgument can be identified in a document using an
+  EntityMention or SituationMention, then UUID references to those
+  types should be preferred and this field left as null.
+   - confidence: Confidence of this argument belonging to its SituationMention
   """
 
   thrift_spec = (
@@ -966,12 +971,16 @@ class MentionArgument(object):
     (1, TType.STRING, 'role', None, None, ), # 1
     (2, TType.STRUCT, 'entityMentionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'situationMentionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
+    (4, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ), # 4
+    (5, TType.DOUBLE, 'confidence', None, None, ), # 5
   )
 
-  def __init__(self, role=None, entityMentionId=None, situationMentionId=None,):
+  def __init__(self, role=None, entityMentionId=None, situationMentionId=None, tokens=None, confidence=None,):
     self.role = role
     self.entityMentionId = entityMentionId
     self.situationMentionId = situationMentionId
+    self.tokens = tokens
+    self.confidence = confidence
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -999,6 +1008,17 @@ class MentionArgument(object):
           self.situationMentionId.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.tokens = concrete.structure.ttypes.TokenRefSequence()
+          self.tokens.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.DOUBLE:
+          self.confidence = iprot.readDouble();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1020,6 +1040,14 @@ class MentionArgument(object):
     if self.situationMentionId is not None:
       oprot.writeFieldBegin('situationMentionId', TType.STRUCT, 3)
       self.situationMentionId.write(oprot)
+      oprot.writeFieldEnd()
+    if self.tokens is not None:
+      oprot.writeFieldBegin('tokens', TType.STRUCT, 4)
+      self.tokens.write(oprot)
+      oprot.writeFieldEnd()
+    if self.confidence is not None:
+      oprot.writeFieldBegin('confidence', TType.DOUBLE, 5)
+      oprot.writeDouble(self.confidence)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

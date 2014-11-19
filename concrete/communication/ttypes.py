@@ -69,7 +69,7 @@ class Communication(object):
    - keyValueMap: A catch-all store of keys and values. Use sparingly!
    - lidList: Theories about the languages that are present in this
   communication.
-   - sectionList: Theories about the block structure of this communication.
+   - sectionList: Theory about the block structure of this communication.
    - entityMentionSetList: Theories about which spans of text are used to mention entities
   in this communication.
    - entitySetList: Theories about what entities are discussed in this

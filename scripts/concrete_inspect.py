@@ -40,6 +40,8 @@ def main():
                         action="store_true")
     parser.add_argument("--situations", help="Print info about all Situations and their SituationMentions",
                         action="store_true")
+    parser.add_argument("--text", help="Print .text field",
+                        action="store_true")
     parser.add_argument("--tokens", help="Print whitespace-seperated tokens for *all* Tokenizations in a "
                         "Communication.  Each sentence tokenization is printed on a separate line, and "
                         "empty lines indicate a section break",
@@ -63,6 +65,8 @@ def main():
         print_situation_mentions(comm)
     elif args.situations:
         print_situations(comm)
+    elif args.text:
+        print_text_for_communication(comm)
     elif args.tokens:
         print_tokens_for_communication(comm)
     elif args.treebank:
@@ -226,6 +230,10 @@ def _print_situation_mention(situationMention):
 def _p(indent_level, justified_width, fieldname, content):
     """Text alignment helper function"""
     print " "*indent_level + (fieldname + ":").ljust(justified_width) + content
+
+
+def print_text_for_communication(comm):
+    print comm.text
 
 
 def print_tokens_with_entityMentions(comm):

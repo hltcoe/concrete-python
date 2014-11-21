@@ -13,6 +13,7 @@ import unittest
 
 from testfixtures import LogCapture, StringComparison
 from thrift import TSerialization
+from thrift.protocol import TCompactProtocol
 
 import concrete
 from concrete.util import add_references_to_communication
@@ -170,7 +171,7 @@ def read_test_comm():
     communication_filename = "tests/testdata/serif_dog-bites-man.concrete"
     comm = concrete.Communication()
     comm_bytestring = open(communication_filename).read()
-    TSerialization.deserialize(comm, comm_bytestring)
+    TSerialization.deserialize(comm, comm_bytestring, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
     return comm
 
 

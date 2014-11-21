@@ -314,7 +314,7 @@ def validate_dependency_parses(tokenization):
                 if not nx.is_connected(undirected_graph):
                     valid = False
                     logging.error(ilm(6, "The dependency parse \"tree\" is not a fully connected graph - the graph has %d components" %
-                                      len(nx.connected_components(undirected_graph))))
+                                      nx.number_connected_components(undirected_graph)))
             except nx.exception.NetworkXPointlessConcept:
                 logging.warning(ilm(6, "The dependency parse \"tree\" does not have any nodes"))
     return valid

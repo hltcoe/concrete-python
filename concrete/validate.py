@@ -268,7 +268,7 @@ def validate_constituency_parses(comm, tokenization):
             if not nx.is_connected(undirected_graph):
                 valid = False
                 logging.error(ilm(6, "The constituent parse \"tree\" is not a fully connected graph - the graph has %d components" %
-                    len(nx.connected_components(undirected_graph))))
+                    nx.number_connected_components(undirected_graph)))
 
             # Check if constituent parse "tree" is actually a tree
             if nx.number_of_nodes(constituent_parse_tree) != nx.number_of_edges(constituent_parse_tree) + 1:

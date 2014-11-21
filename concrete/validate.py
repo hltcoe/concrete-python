@@ -290,6 +290,7 @@ def validate_dependency_parses(tokenization):
     valid = True
 
     if tokenization.dependencyParseList:
+        total_tokens = len(tokenization.tokenList.tokenList)
         for dependencyParse in tokenization.dependencyParseList:
             dependency_parse_tree = nx.DiGraph()
 
@@ -297,9 +298,13 @@ def validate_dependency_parses(tokenization):
             for dependency in dependencyParse.dependencyList:
                 if dependency.gov is None and dependency.edgeType.lower() != "root":
                     valid = False
-                    logging.error(ilm(6, "Found a null dependency parse node with governer whose edgeType is '%s' instead of 'root'" %
+                    logging.error(ilm(7, "Found a null dependency parse node with governer whose edgeType is '%s' instead of 'root'" %
                                           dependency.edgeType))
                 if dependency.gov is not None:
+                    if dependency.gov < -1 or dependency.gov > total_tokens:
+                        valid = False
+                        logging.error(ilm(7, "Found a null dependency parse node with invalid governer of '%d'" %
+                                          dependency.gov))
                     dependency_parse_tree.add_node(dependency.gov)
                 dependency_parse_tree.add_node(dependency.dep)
 
@@ -313,10 +318,10 @@ def validate_dependency_parses(tokenization):
             try:
                 if not nx.is_connected(undirected_graph):
                     valid = False
-                    logging.error(ilm(6, "The dependency parse \"tree\" is not a fully connected graph - the graph has %d components" %
+                    logging.error(ilm(7, "The dependency parse \"tree\" is not a fully connected graph - the graph has %d components" %
                                       nx.number_connected_components(undirected_graph)))
             except nx.exception.NetworkXPointlessConcept:
-                logging.warning(ilm(6, "The dependency parse \"tree\" does not have any nodes"))
+                logging.warning(ilm(7, "The dependency parse \"tree\" does not have any nodes"))
     return valid
 
 

@@ -24,9 +24,12 @@
 # Therefore, adding to the conversions is simple: just add to the KNOWN_CONVERSIONS mapping.
 
 import argparse
+import gzip
 from thrift import TSerialization
 from thrift.protocol import TCompactProtocol, TBinaryProtocol
+from thrift.transport import TTransport
 from concrete import Communication
+import mimetypes
 
 KNOWN_CONVERSIONS = {
     'binary-to-compact':(TBinaryProtocol.TBinaryProtocolFactory, TCompactProtocol.TCompactProtocolFactory),
@@ -77,7 +80,31 @@ def convert_communication(input_bytes, input_protocol_factory, output_protocol_f
 if __name__ == '__main__':
     parser = make_parser()
     args = parser.parse_args()
-    convert(input_file_path  = args.input_file,
-            output_file_path = args.output_file,
-            input_protocol_factory  = KNOWN_CONVERSIONS[args.direction][0],
-            output_protocol_factory = KNOWN_CONVERSIONS[args.direction][1])
+    mimetypes.init()
+    (ifile_type, ifile_encoding) = mimetypes.guess_type(args.input_file)
+    (ofile_type, ofile_encoding) = mimetypes.guess_type(args.output_file)
+    out_writer = None
+    if ofile_encoding == "gzip":
+        out_writer = gzip.GzipFile(args.output_file, 'wb')
+    else:
+        out_writer = open(args.output_file, 'w')
+    if ifile_encoding == 'gzip':
+        f = gzip.GzipFile(args.input_file)
+        transportIn = TTransport.TFileObjectTransport(f)
+        protocolIn = KNOWN_CONVERSIONS[args.direction][0]().getProtocol(transportIn)
+        while True:
+            try:
+                comm = Communication()
+                comm.read(protocolIn)
+                output_bytes = TSerialization.serialize(comm, protocol_factory = KNOWN_CONVERSIONS[args.direction][1]())
+                out_writer.write(output_bytes)
+            except EOFError:
+                break
+        f.close()
+    else:
+        convert(input_file_path  = args.input_file,
+                output_file_path = args.output_file,
+                input_protocol_factory  = KNOWN_CONVERSIONS[args.direction][0],
+                output_protocol_factory = KNOWN_CONVERSIONS[args.direction][1])
+    out_writer.close()
+

@@ -24,9 +24,12 @@
 # Therefore, adding to the conversions is simple: just add to the KNOWN_CONVERSIONS mapping.
 
 import argparse
+import gzip
 from thrift import TSerialization
 from thrift.protocol import TCompactProtocol, TBinaryProtocol
+from thrift.transport import TTransport
 from concrete import Communication
+import mimetypes
 
 KNOWN_CONVERSIONS = {
     'binary-to-compact':(TBinaryProtocol.TBinaryProtocolFactory, TCompactProtocol.TCompactProtocolFactory),
@@ -54,18 +57,54 @@ def convert(input_file_path, output_file_path, input_protocol_factory, output_pr
     """
     input_file = open(input_file_path,'r')
     input_bytes = input_file.read()
-    comm = Communication()
-    TSerialization.deserialize(comm, input_bytes, protocol_factory = KNOWN_CONVERSIONS[args.direction][0]())
+    output_bytes = convert_communication(input_bytes, input_protocol_factory, output_protocol_factory)
     input_file.close()
-    output_bytes = TSerialization.serialize(comm, protocol_factory = KNOWN_CONVERSIONS[args.direction][1]())
     output_file = open(output_file_path,'w')
     output_file.write(output_bytes)
     output_file.close()
 
+def convert_communication(input_bytes, input_protocol_factory, output_protocol_factory):
+    """
+    Convert an input byte stream (to be read in as an input_protocol_factory type)
+    to an output byte stream (with encoding output_protocol_factory type).
+    
+    * input_bytes: Input file byte stream
+    * input_protocol_factory: Callable factory function for input encoding, e.g., TBinaryProtocol.TBinaryProtocolFactory.
+    * output_protocol_factory: Callable factory function for output encoding, e.g., TCompactProtocol.TCompactProtocolFactory.
+    """
+    comm = Communication()
+    TSerialization.deserialize(comm, input_bytes, protocol_factory = KNOWN_CONVERSIONS[args.direction][0]())
+    output_bytes = TSerialization.serialize(comm, protocol_factory = KNOWN_CONVERSIONS[args.direction][1]())
+    return output_bytes
+    
 if __name__ == '__main__':
     parser = make_parser()
     args = parser.parse_args()
-    convert(input_file_path  = args.input_file,
-            output_file_path = args.output_file,
-            input_protocol_factory  = KNOWN_CONVERSIONS[args.direction][0],
-            output_protocol_factory = KNOWN_CONVERSIONS[args.direction][1])
+    mimetypes.init()
+    (ifile_type, ifile_encoding) = mimetypes.guess_type(args.input_file)
+    (ofile_type, ofile_encoding) = mimetypes.guess_type(args.output_file)
+    out_writer = None
+    if ofile_encoding == "gzip":
+        out_writer = gzip.GzipFile(args.output_file, 'wb')
+    else:
+        out_writer = open(args.output_file, 'w')
+    if ifile_encoding == 'gzip':
+        f = gzip.GzipFile(args.input_file)
+        transportIn = TTransport.TFileObjectTransport(f)
+        protocolIn = KNOWN_CONVERSIONS[args.direction][0]().getProtocol(transportIn)
+        while True:
+            try:
+                comm = Communication()
+                comm.read(protocolIn)
+                output_bytes = TSerialization.serialize(comm, protocol_factory = KNOWN_CONVERSIONS[args.direction][1]())
+                out_writer.write(output_bytes)
+            except EOFError:
+                break
+        f.close()
+    else:
+        convert(input_file_path  = args.input_file,
+                output_file_path = args.output_file,
+                input_protocol_factory  = KNOWN_CONVERSIONS[args.direction][0],
+                output_protocol_factory = KNOWN_CONVERSIONS[args.direction][1])
+    out_writer.close()
+

@@ -713,6 +713,116 @@ class Dependency(object):
   def __ne__(self, other):
     return not (self == other)
 
+class DependencyParseStructure(object):
+  """
+  Information about the structure of a dependency parse.
+  This information is computable from the list of dependencies,
+  but this allows the consumer to make (verified) assumptions
+  about the dependencies being processed.
+
+  Attributes:
+   - isAcyclic: True iff there are no cycles in the dependency graph.
+   - isConnected: True iff the dependency graph forms a single connected component.
+   - isSingleHeaded: True iff every node in the dependency parse has at most
+  one head/parent/governor.
+   - isProjective: True iff there are no crossing edges in the dependency parse.
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.BOOL, 'isAcyclic', None, None, ), # 1
+    (2, TType.BOOL, 'isConnected', None, None, ), # 2
+    (3, TType.BOOL, 'isSingleHeaded', None, None, ), # 3
+    (4, TType.BOOL, 'isProjective', None, None, ), # 4
+  )
+
+  def __init__(self, isAcyclic=None, isConnected=None, isSingleHeaded=None, isProjective=None,):
+    self.isAcyclic = isAcyclic
+    self.isConnected = isConnected
+    self.isSingleHeaded = isSingleHeaded
+    self.isProjective = isProjective
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.BOOL:
+          self.isAcyclic = iprot.readBool();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.isConnected = iprot.readBool();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.BOOL:
+          self.isSingleHeaded = iprot.readBool();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.BOOL:
+          self.isProjective = iprot.readBool();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('DependencyParseStructure')
+    if self.isAcyclic is not None:
+      oprot.writeFieldBegin('isAcyclic', TType.BOOL, 1)
+      oprot.writeBool(self.isAcyclic)
+      oprot.writeFieldEnd()
+    if self.isConnected is not None:
+      oprot.writeFieldBegin('isConnected', TType.BOOL, 2)
+      oprot.writeBool(self.isConnected)
+      oprot.writeFieldEnd()
+    if self.isSingleHeaded is not None:
+      oprot.writeFieldBegin('isSingleHeaded', TType.BOOL, 3)
+      oprot.writeBool(self.isSingleHeaded)
+      oprot.writeFieldEnd()
+    if self.isProjective is not None:
+      oprot.writeFieldBegin('isProjective', TType.BOOL, 4)
+      oprot.writeBool(self.isProjective)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.isAcyclic is None:
+      raise TProtocol.TProtocolException(message='Required field isAcyclic is unset!')
+    if self.isConnected is None:
+      raise TProtocol.TProtocolException(message='Required field isConnected is unset!')
+    if self.isSingleHeaded is None:
+      raise TProtocol.TProtocolException(message='Required field isSingleHeaded is unset!')
+    if self.isProjective is None:
+      raise TProtocol.TProtocolException(message='Required field isProjective is unset!')
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class DependencyParse(object):
   """
   Represents a dependency parse with typed edges.
@@ -721,6 +831,7 @@ class DependencyParse(object):
    - uuid
    - metadata
    - dependencyList
+   - structureInformation
   """
 
   thrift_spec = (
@@ -728,12 +839,14 @@ class DependencyParse(object):
     (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 2
     (3, TType.LIST, 'dependencyList', (TType.STRUCT,(Dependency, Dependency.thrift_spec)), None, ), # 3
+    (4, TType.STRUCT, 'structureInformation', (DependencyParseStructure, DependencyParseStructure.thrift_spec), None, ), # 4
   )
 
-  def __init__(self, uuid=None, metadata=None, dependencyList=None,):
+  def __init__(self, uuid=None, metadata=None, dependencyList=None, structureInformation=None,):
     self.uuid = uuid
     self.metadata = metadata
     self.dependencyList = dependencyList
+    self.structureInformation = structureInformation
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -767,6 +880,12 @@ class DependencyParse(object):
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.structureInformation = DependencyParseStructure()
+          self.structureInformation.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -791,6 +910,10 @@ class DependencyParse(object):
       for iter34 in self.dependencyList:
         iter34.write(oprot)
       oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.structureInformation is not None:
+      oprot.writeFieldBegin('structureInformation', TType.STRUCT, 4)
+      self.structureInformation.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

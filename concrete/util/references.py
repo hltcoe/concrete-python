@@ -19,11 +19,13 @@ def add_references_to_communication(comm):
     - a 'tokenization' to each TokenRefSequence
     - a 'entityMention' to each Argument
     - a 'sentence' backpointer to each Tokenization
+    - a 'parentMention' backpointer to appropriate EntityMention
 
     And adds lists of reference variables for:
     - a 'mentionList' to each Entity
     - a 'situationMention' to each Argument
     - a 'mentionList' to each Situation
+    - a 'childMentionList' to each EntityMention
 
     For variables that represent optional lists of UUIDs
     (e.g. situation.mentionIdList), Python Thrift will set the
@@ -58,6 +60,13 @@ def add_references_to_communication(comm):
             for entityMention in entityMentionSet.mentionList:
                 comm.entityMentionForUUID[entityMention.uuid.uuidString] = entityMention
                 entityMention.tokens.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
+            for entityMention in entityMentionSet.mentionList:
+                if entityMention.childMentionIdList:
+                    entityMention.childMentionList = []
+                    for childMentionId in entityMention.childMentionIdList:
+                        childMention = comm.entityMentionForUUID[childMentionId.uuidString]
+                        childMention.parentMention = entityMention
+                        entityMention.childMentionList.append(childMention)
 
     if comm.entitySetList:
         for entitySet in comm.entitySetList:

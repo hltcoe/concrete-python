@@ -18,6 +18,7 @@ def add_references_to_communication(comm):
     This function adds reference variables for:
     - a 'tokenization' to each TokenRefSequence
     - a 'entityMention' to each Argument
+    - a 'sentence' backpointer to each Tokenization
 
     And adds lists of reference variables for:
     - a 'mentionList' to each Entity
@@ -50,6 +51,7 @@ def add_references_to_communication(comm):
                     comm.sentenceForUUID[sentence.uuid.uuidString]= sentence
                     if sentence.tokenization:
                         comm.tokenizationForUUID[sentence.tokenization.uuid.uuidString] = sentence.tokenization
+                        sentence.tokenization.sentence = sentence
 
     if comm.entityMentionSetList:
         for entityMentionSet in comm.entityMentionSetList:

@@ -24,7 +24,7 @@ def read_thrift_from_file(thrift_obj, filename):
     Returns:
         The Thrift object that was passed in as an argument
     """
-    thrift_file = open(filename)
+    thrift_file = open(filename, "rb")
     thrift_bytes = thrift_file.read()
     TSerialization.deserialize(thrift_obj, thrift_bytes, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
     thrift_file.close()
@@ -53,6 +53,6 @@ def write_communication_to_file(communication, communication_filename):
 
 def write_thrift_to_file(thrift_obj, filename):
     thrift_bytes = TSerialization.serialize(thrift_obj, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-    thrift_file = open(filename, "w")
+    thrift_file = open(filename, "wb")
     thrift_file.write(thrift_bytes)
     thrift_file.close()

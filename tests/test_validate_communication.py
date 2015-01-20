@@ -36,7 +36,7 @@ class TestCommunication(unittest.TestCase):
         
         with LogCapture() as log_capture:
             self.assertFalse(validate_entity_mention_ids(comm))
-        log_capture.check(('root', 'ERROR', StringComparison(r'.*invalid entityMentionId \(BAD_ENTITY_MENTION_UUID\)')))
+        log_capture.check(('root', 'ERROR', StringComparison(r'.*invalid entityMentionId.*BAD_ENTITY_MENTION_UUID')))
 
     def test_entity_mention_tokenization(self):
         comm = read_test_comm()
@@ -47,7 +47,7 @@ class TestCommunication(unittest.TestCase):
         
         with LogCapture() as log_capture:
             self.assertFalse(validate_entity_mention_tokenization_ids(comm))
-        log_capture.check(('root', 'ERROR', StringComparison(r'.*invalid tokenizationId \(BAD_TOKENIZATION_UUID\)')))
+        log_capture.check(('root', 'ERROR', StringComparison(r'.*invalid tokenizationId.*BAD_TOKENIZATION_UUID')))
 
 
 class TestRequiredThriftFields(unittest.TestCase):
@@ -91,7 +91,7 @@ class TestRequiredThriftFields(unittest.TestCase):
         comm.uuid = concrete.UUID(uuidString="TEST_UUID")
         with LogCapture() as log_capture:
             self.assertFalse(validate_thrift_object_required_fields_recursively(comm))
-        log_capture.check(('root', 'ERROR', "Communication 'TEST_UUID': Required Field 'type' is unset!"))
+        log_capture.check(('root', 'ERROR', StringComparison(r".*TEST_UUID.*Required Field 'type' is unset!")))
 
         comm.metadata = concrete.AnnotationMetadata(tool="TEST", timestamp=int(time.time()))
 

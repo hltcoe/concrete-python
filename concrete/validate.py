@@ -230,7 +230,6 @@ def validate_constituency_parses(comm, tokenization):
             total_constituents = len(parse.constituentList)
             logging.debug(ilm(6, "tokenization '%s' has %d constituents" % (tokenization.uuid, total_constituents)))
 
-            total_uuid_mismatches = 0
             constituent_id_set = set()
             constituent_parse_tree = nx.DiGraph()
 
@@ -243,19 +242,6 @@ def validate_constituency_parses(comm, tokenization):
                 else:
                     valid = False
                     logging.error(ilm(7, "constituent ID %d has already been used in this sentence's tokenization" % constituent.id))
-
-                # Per the Concrete 'structure.thrift' file, tokenSequence may not be defined:
-                #   "Typically, this field will only be defined for leaf constituents (i.e., constituents with no children)."
-                if constituent.tokenSequence and constituent.tokenSequence.tokenizationId != tokenization.uuid:
-                    total_uuid_mismatches += 1
-
-                if constituent.tokenSequence:
-                    valid &= validate_token_ref_sequence(comm, constituent.tokenSequence)
-
-            if total_uuid_mismatches > 0:
-                valid = False
-                logging.error(ilm(6, "tokenization '%s' has UUID mismatch for %d/%d constituents" %
-                                  (tokenization.uuid, total_uuid_mismatches, total_constituents)))
 
             # Add edges to constituent parse tree
             for constituent in parse.constituentList:

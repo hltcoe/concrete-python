@@ -24,6 +24,7 @@ def main():
     json_one_filename = os.path.join(tmp_path, os.path.basename(args.file_one))
     json_two_filename = os.path.join(tmp_path, os.path.basename(args.file_two))
 
+    # Prevent filename collision
     if json_one_filename == json_two_filename:
         json_two_filename += ".1"
 
@@ -34,7 +35,14 @@ def main():
     codecs.open(json_two_filename, "w", encoding="utf-8").write(json_comm_two)
 
     diff_command = "git diff --no-index %s %s" % (json_one_filename, json_two_filename)
-    print subprocess.Popen(diff_command, shell=True, stdout=subprocess.PIPE).stdout.read()
+    diff_output = subprocess.Popen(diff_command, shell=True, stdout=subprocess.PIPE).stdout.read()
+
+    # Clean up temporary files
+    os.remove(json_one_filename)
+    os.remove(json_two_filename)
+    os.rmdir(tmp_path)
+
+    print diff_output
 
 
 if __name__ == "__main__":

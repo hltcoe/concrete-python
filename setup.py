@@ -35,6 +35,7 @@ setup(
 
     scripts = [
         'scripts/concrete2json.py',
+        'scripts/concrete_diff.py',
         'scripts/concrete_inspect.py',
         'scripts/validate_communication.py',
         ],

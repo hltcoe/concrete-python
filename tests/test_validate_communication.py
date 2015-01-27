@@ -18,6 +18,7 @@ from thrift.protocol import TCompactProtocol
 import concrete
 from concrete.util import add_references_to_communication, read_communication_from_file
 from concrete.validate import *
+from test_helper import read_test_comm
 
 
 class TestAddReferences(unittest.TestCase):
@@ -165,11 +166,6 @@ class TestTextspanOffsets(unittest.TestCase):
             textSpan=sentence_textspan,
             uuid='TEST')
         return sentence
-
-
-def read_test_comm():
-    communication_filename = "tests/testdata/serif_dog-bites-man.concrete"
-    return read_communication_from_file(communication_filename)
 
 
 if __name__ == '__main__':

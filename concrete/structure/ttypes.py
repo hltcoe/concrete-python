@@ -1896,8 +1896,12 @@ class Tokenization(object):
     return value
 
   def __repr__(self):
+    # The implementation of this function is NOT auto-generated
+    # Prevent infinite recursion caused by backpointer
+    dict_without_backpointer = self.__dict__.copy()
+    dict_without_backpointer.pop('sentence')
     L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
+      for key, value in dict_without_backpointer.iteritems()]
     return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
   def __eq__(self, other):

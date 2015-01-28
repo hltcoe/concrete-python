@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = "concrete",
-    version = "4.2.2",
+    version = "4.2.3pre",
     description = "Python modules and scripts for working with Concrete",
 
     packages = [

@@ -59,7 +59,10 @@ def add_references_to_communication(comm):
         for entityMentionSet in comm.entityMentionSetList:
             for entityMention in entityMentionSet.mentionList:
                 comm.entityMentionForUUID[entityMention.uuid.uuidString] = entityMention
-                entityMention.tokens.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
+                try:
+                    entityMention.tokens.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
+                except KeyError:
+                    entityMention.tokens.tokenization = None
                 # childMentionList and parentMention are in-memory references, and not part of the Concrete schema
                 entityMention.childMentionList = []
                 entityMention.parentMention = None
@@ -92,7 +95,10 @@ def add_references_to_communication(comm):
                     else:
                         argument.situationMention = None
                 if situationMention.tokens:
-                    situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
+                    try:
+                        situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
+                    except KeyError:
+                        situationMention.tokens.tokenization = None
 
     if comm.situationSetList:
         for situationSet in comm.situationSetList:

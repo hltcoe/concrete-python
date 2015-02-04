@@ -1,8 +1,15 @@
 """
 """
 
+import gzip
+import mimetypes
+import os.path
+import tarfile
+import zipfile
+
 from thrift import TSerialization
 from thrift.protocol import TCompactProtocol
+from thrift.transport import TTransport
 
 from concrete import Communication, TokenLattice
 from concrete.util.references import add_references_to_communication
@@ -56,3 +63,82 @@ def write_thrift_to_file(thrift_obj, filename):
     thrift_file = open(filename, "wb")
     thrift_file.write(thrift_bytes)
     thrift_file.close()
+
+
+class CommunicationReader:
+    """Class for reading one or more Communications from a file
+
+    Support filetypes are:
+    - a file with a single Communication
+    - a file with multiple Communications concatenated together
+    - a gzipped file with a single Communication
+    - a gzipped file with multiple Communications concatenated together
+    - a .tar.gz file with one or more Communications
+    - a .zip file with one or more Communications
+    """
+    def __init__(self, filename):
+        if tarfile.is_tarfile(filename):
+            # File is either a '.tar' or '.tar.gz' file
+            self.filetype = 'tar'
+            self.tar = tarfile.open(filename)
+        elif zipfile.is_zipfile(filename):
+            self.filetype = 'zip'
+            self.zip = zipfile.ZipFile(filename, 'r')
+            self.zip_infolist = self.zip.infolist()
+            self.zip_infolist_index = 0
+        elif mimetypes.guess_type(filename)[1] == 'gzip':
+            self.filetype = 'stream'
+            f = gzip.open(filename, 'rb')
+        else:
+            self.filetype = 'stream'
+            f = open(filename, 'rb')
+
+        if self.filetype is 'stream':
+            self.transport = TTransport.TFileObjectTransport(f)
+            self.protocol = TCompactProtocol.TCompactProtocol(self.transport)
+            self.transport.open()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        while True:
+            if self.filetype is 'stream':
+                try:
+                    comm = Communication()
+                    comm.read(self.protocol)
+                    add_references_to_communication(comm)
+                    return comm
+                except EOFError:
+                    self.transport.close()
+                    raise StopIteration
+
+            elif self.filetype is 'tar':
+                tarinfo = self.tar.next()
+                if tarinfo is None:
+                    raise StopIteration
+                if not tarinfo.isfile():
+                    # Ignore directories
+                    continue
+                filename = os.path.split(tarinfo.name)[-1]
+                if filename[0] is '.' and filename[1] is '_':
+                    # Ignore attribute files created by OS X tar
+                    continue
+                comm = TSerialization.deserialize(
+                    Communication(),
+                    self.tar.extractfile(tarinfo).read(),
+                    protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+                add_references_to_communication(comm)
+                return comm
+
+            elif self.filetype is 'zip':
+                if self.zip_infolist_index >= len(self.zip_infolist):
+                    raise StopIteration
+                zipinfo = self.zip_infolist[self.zip_infolist_index]
+                self.zip_infolist_index += 1
+                comm = TSerialization.deserialize(
+                    Communication(),
+                    self.zip.open(zipinfo).read(),
+                    protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+                add_references_to_communication(comm)
+                return comm

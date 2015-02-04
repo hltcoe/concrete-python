@@ -1897,9 +1897,11 @@ class Tokenization(object):
 
   def __repr__(self):
     # The implementation of this function is NOT auto-generated
-    # Prevent infinite recursion caused by backpointer
+    # Prevent infinite recursion caused by backpointer added by
+    #   concrete.util.references.add_references_to_communication()
     dict_without_backpointer = self.__dict__.copy()
-    dict_without_backpointer.pop('sentence')
+    if 'sentence' in dict_without_backpointer:
+      dict_without_backpointer.pop('sentence')
     L = ['%s=%r' % (key, value)
       for key, value in dict_without_backpointer.iteritems()]
     return '%s(%s)' % (self.__class__.__name__, ', '.join(L))

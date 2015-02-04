@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
-"""Test conversion of Communication object to string
+"""Test conversion of Concrete objects to strings
 """
 
+import time
 import unittest
 
+from concrete import AnnotationMetadata, Tokenization
+from concrete.util import generate_UUID
 from test_helper import read_test_comm
 
 
 class TestRepr(unittest.TestCase):
-    def test_repr(self):
+    def test_repr_on_comm(self):
         """Verify that Communications can be converted to strings.
 
         Checks for the issue addressed in this commit:
@@ -28,6 +31,14 @@ class TestRepr(unittest.TestCase):
         """
         comm = read_test_comm()
         s = comm.__repr__()
+
+    def test_repr_on_tokenization(self):
+        """
+        """
+        tokenization = Tokenization(
+            metadata=AnnotationMetadata(tool="test", timestamp=int(time.time())),
+            uuid=generate_UUID())
+        s = tokenization.__repr__()
 
 
 if __name__ == '__main__':

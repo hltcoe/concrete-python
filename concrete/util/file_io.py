@@ -103,42 +103,49 @@ class CommunicationReader:
 
     def next(self):
         if self.filetype is 'stream':
-            try:
-                comm = Communication()
-                comm.read(self.protocol)
-                add_references_to_communication(comm)
-                return comm
-            except EOFError:
-                self.transport.close()
-                raise StopIteration
-
+            return self.next_from_stream()
         elif self.filetype is 'tar':
-            while True:
-                tarinfo = self.tar.next()
-                if tarinfo is None:
-                    raise StopIteration
-                if not tarinfo.isfile():
-                    # Ignore directories
-                    continue
-                filename = os.path.split(tarinfo.name)[-1]
-                if filename[0] is '.' and filename[1] is '_':
-                    # Ignore attribute files created by OS X tar
-                    continue
-                comm = TSerialization.deserialize(
-                    Communication(),
-                    self.tar.extractfile(tarinfo).read(),
-                    protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-                add_references_to_communication(comm)
-                return comm
-
+            return self.next_from_tar()
         elif self.filetype is 'zip':
-            if self.zip_infolist_index >= len(self.zip_infolist):
+            return self.next_from_zip()
+
+    def next_from_stream(self):
+        try:
+            comm = Communication()
+            comm.read(self.protocol)
+            add_references_to_communication(comm)
+            return comm
+        except EOFError:
+            self.transport.close()
+            raise StopIteration
+
+    def next_from_tar(self):
+        while True:
+            tarinfo = self.tar.next()
+            if tarinfo is None:
                 raise StopIteration
-            zipinfo = self.zip_infolist[self.zip_infolist_index]
-            self.zip_infolist_index += 1
+            if not tarinfo.isfile():
+                # Ignore directories
+                continue
+            filename = os.path.split(tarinfo.name)[-1]
+            if filename[0] is '.' and filename[1] is '_':
+                # Ignore attribute files created by OS X tar
+                continue
             comm = TSerialization.deserialize(
                 Communication(),
-                self.zip.open(zipinfo).read(),
+                self.tar.extractfile(tarinfo).read(),
                 protocol_factory=TCompactProtocol.TCompactProtocolFactory())
             add_references_to_communication(comm)
             return comm
+
+    def next_from_zip(self):
+        if self.zip_infolist_index >= len(self.zip_infolist):
+            raise StopIteration
+        zipinfo = self.zip_infolist[self.zip_infolist_index]
+        self.zip_infolist_index += 1
+        comm = TSerialization.deserialize(
+            Communication(),
+            self.zip.open(zipinfo).read(),
+            protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+        add_references_to_communication(comm)
+        return comm

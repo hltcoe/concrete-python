@@ -102,18 +102,18 @@ class CommunicationReader:
         return self
 
     def next(self):
-        while True:
-            if self.filetype is 'stream':
-                try:
-                    comm = Communication()
-                    comm.read(self.protocol)
-                    add_references_to_communication(comm)
-                    return comm
-                except EOFError:
-                    self.transport.close()
-                    raise StopIteration
+        if self.filetype is 'stream':
+            try:
+                comm = Communication()
+                comm.read(self.protocol)
+                add_references_to_communication(comm)
+                return comm
+            except EOFError:
+                self.transport.close()
+                raise StopIteration
 
-            elif self.filetype is 'tar':
+        elif self.filetype is 'tar':
+            while True:
                 tarinfo = self.tar.next()
                 if tarinfo is None:
                     raise StopIteration
@@ -131,14 +131,14 @@ class CommunicationReader:
                 add_references_to_communication(comm)
                 return comm
 
-            elif self.filetype is 'zip':
-                if self.zip_infolist_index >= len(self.zip_infolist):
-                    raise StopIteration
-                zipinfo = self.zip_infolist[self.zip_infolist_index]
-                self.zip_infolist_index += 1
-                comm = TSerialization.deserialize(
-                    Communication(),
-                    self.zip.open(zipinfo).read(),
-                    protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-                add_references_to_communication(comm)
-                return comm
+        elif self.filetype is 'zip':
+            if self.zip_infolist_index >= len(self.zip_infolist):
+                raise StopIteration
+            zipinfo = self.zip_infolist[self.zip_infolist_index]
+            self.zip_infolist_index += 1
+            comm = TSerialization.deserialize(
+                Communication(),
+                self.zip.open(zipinfo).read(),
+                protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+            add_references_to_communication(comm)
+            return comm

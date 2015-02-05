@@ -2,9 +2,11 @@ from ez_setup import use_setuptools
 use_setuptools()
 from setuptools import setup
 
+execfile('concrete/version.py')
+
 setup(
     name = "concrete",
-    version = "4.2.3pre",
+    version = __version__,
     description = "Python modules and scripts for working with Concrete",
 
     packages = [

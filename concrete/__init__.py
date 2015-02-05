@@ -18,3 +18,5 @@ from spans.ttypes import *
 from structure.ttypes import *
 from twitter.ttypes import *
 from uuid.ttypes import *
+
+from version import __version__

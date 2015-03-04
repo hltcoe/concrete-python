@@ -1,6 +1,7 @@
 """
 """
 
+import cStringIO
 import gzip
 import mimetypes
 import os.path
@@ -149,3 +150,38 @@ class CommunicationReader:
             protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         add_references_to_communication(comm)
         return comm
+
+
+class CommunicationWriter:
+    """Class for writing one or more Communications to a file
+    """
+    def close(self):
+        self.file.close()
+
+    def open(self, filename):
+        self.file = open(filename, 'wb')
+
+    def write(self, comm):
+        thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+        self.file.write(thrift_bytes)
+
+
+class CommunicationWriterTGZ:
+    """Class for writing one or more Communications to a .TAR.GZ archive
+    """
+    def close(self):
+        self.tarfile.close()
+
+    def open(self, tar_filename):
+        self.tarfile = tarfile.open(tar_filename, 'w:gz')
+
+    def write(self, comm, comm_filename):
+        thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+
+        file_like_obj = cStringIO.StringIO(thrift_bytes)
+
+        comm_tarinfo = tarfile.TarInfo()
+        comm_tarinfo.name = comm_filename
+        comm_tarinfo.size = len(thrift_bytes)
+
+        self.tarfile.addfile(comm_tarinfo, file_like_obj)

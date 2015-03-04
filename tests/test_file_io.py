@@ -3,9 +3,17 @@
 """
 """
 
+import os
+import tarfile
+import tempfile
 import unittest
 
-from concrete.util import CommunicationReader
+from concrete.util import (
+    CommunicationReader,
+    CommunicationWriter,
+    CommunicationWriterTGZ,
+    read_communication_from_file
+)
 from concrete.validate import validate_communication
 
 class TestCommunicationReader(unittest.TestCase):
@@ -53,6 +61,31 @@ class TestCommunicationReader(unittest.TestCase):
         self.assertEqual(u'one', comms[0].id)
         self.assertEqual(u'two', comms[1].id)
         self.assertEqual(u'three', comms[2].id)
+
+
+class TestCommunicationWriter(unittest.TestCase):
+    def test_single_file(self):
+        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+        writer = CommunicationWriter()
+        (file_handle, filename) = tempfile.mkstemp()
+        writer.open(filename)
+        writer.write(comm)
+        writer.close()
+
+        os.remove(filename)
+
+
+class TestCommunicationWriterTGZ(unittest.TestCase):
+    def test_single_file(self):
+        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+        writer = CommunicationWriterTGZ()
+        (file_handle, filename) = tempfile.mkstemp()
+        writer.open(filename)
+        writer.write(comm, "simple_1.concrete")
+        writer.close()
+
+        self.assertTrue(tarfile.is_tarfile(filename))
+        os.remove(filename)
 
 
 if __name__ == '__main__':

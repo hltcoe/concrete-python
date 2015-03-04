@@ -94,6 +94,8 @@ def add_references_to_communication(comm):
                         argument.situationMention = comm.situationMentionForUUID[argument.situationMentionId.uuidString]
                     else:
                         argument.situationMention = None
+                    if argument.tokens:
+                        argument.tokens.tokenization = comm.tokenizationForUUID[argument.tokens.tokenizationId.uuidString]
                 if situationMention.tokens:
                     try:
                         situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]

@@ -76,8 +76,20 @@ class CommunicationReader:
     - a gzipped file with multiple Communications concatenated together
     - a .tar.gz file with one or more Communications
     - a .zip file with one or more Communications
+
+    CommunicationReader adds a "filename" field to each Communication.
+    If the CommunicationReader is reading from an archive, then
+    "filename" will be set to the name of the Communication file in
+    the archive (e.g. "foo.concrete"), and not the name of the archive
+    file (e.g. "bar.zip").  If the CommunicationReader is reading from
+    a concatenated file (instead of an archive), then all
+    Communications extracted from the concatenated file will have the
+    same value for the "filename" field.  The "filename" field is not
+    part of the Thrift schema, and thus will not be serialized when a
+    Communication is saved.
     """
     def __init__(self, filename):
+        self._source_filename = filename
         if tarfile.is_tarfile(filename):
             # File is either a '.tar' or '.tar.gz' file
             self.filetype = 'tar'
@@ -115,6 +127,7 @@ class CommunicationReader:
             comm = Communication()
             comm.read(self.protocol)
             add_references_to_communication(comm)
+            comm.filename = self._source_filename
             return comm
         except EOFError:
             self.transport.close()
@@ -137,6 +150,7 @@ class CommunicationReader:
                 self.tar.extractfile(tarinfo).read(),
                 protocol_factory=TCompactProtocol.TCompactProtocolFactory())
             add_references_to_communication(comm)
+            comm.filename = filename
             return comm
 
     def next_from_zip(self):
@@ -149,6 +163,7 @@ class CommunicationReader:
             self.zip.open(zipinfo).read(),
             protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         add_references_to_communication(comm)
+        comm.filename = zipinfo.filename
         return comm
 
 

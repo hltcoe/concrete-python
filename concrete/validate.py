@@ -13,6 +13,9 @@ Current validation checks:
     valid entityMention uuid?
   - for each TokenRefSequence, are the token indices valid indices
     into the corresponding tokenization?
+  - for each MentionArgument, there are fields that can point to an
+    EntityMention, SituationMention or TokenRefSequence, but the
+    MentionArgument should point to exactly one of these objects
 """
 
 import logging

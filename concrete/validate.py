@@ -361,17 +361,22 @@ def validate_situation_mentions(comm):
                 for situationMention in situationMentionSet.mentionList:
                     if situationMention.tokens:
                         valid &= validate_token_ref_sequence(comm, situationMention.tokens)
-                    for mentionArgument in situationMention.argumentList:
+                    for mention_index, mentionArgument in enumerate(situationMention.argumentList):
                         if mentionArgument.entityMentionId and \
                            mentionArgument.entityMentionId.uuidString not in entity_mention_uuidString_set:
                             valid = False
                             logging.error(ilm(2, "MentionArgument for SituationMention '%s' has an invalid entityMentionId (%s). Tool='%s'" %
-                                              (situationMention.uuid, mentionArgument.entityMentionId, situationMentionSet.metadata.tool)))
+                                              (situationMention.uuid.uuidString, mentionArgument.entityMentionId, situationMentionSet.metadata.tool)))
                         if mentionArgument.situationMentionId and \
                            mentionArgument.situationMentionId.uuidString not in situation_mention_uuidString_set:
                             valid = False
-                            logging.error(ilm(2, "SituationArgument for SituationMention '%s' has an invalid situationMentionId (%s). Tool='%s'" %
+                            logging.error(ilm(2, "MentionArgument for SituationMention '%s' has an invalid situationMentionId (%s). Tool='%s'" %
                                               (situationMention.uuid, mentionArgument.situationMentionId, situationMentionSet.metadata.tool)))
+                        total_args = bool(mentionArgument.tokens) + bool(mentionArgument.entityMentionId) + bool(mentionArgument.situationMentionId)
+                        if total_args != 1:
+                            valid = False
+                            logging.error(ilm(2, "MentionArgument #%d for SituationMention '%s' should have exactly one EntityMention|SituationMention|TokenRefSequence, but found %d" %
+                                              (mention_index, situationMention.uuid.uuidString, total_args)))
     return valid
 
 

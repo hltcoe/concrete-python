@@ -304,6 +304,7 @@ class EntitySet(object):
     value = (value * 31) ^ hash(self.metadata)
     value = (value * 31) ^ hash(self.entityList)
     value = (value * 31) ^ hash(self.linkingList)
+    value = (value * 31) ^ hash(self.mentionSetId)
     return value
 
   def __repr__(self):

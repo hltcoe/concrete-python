@@ -158,6 +158,15 @@ class CommunicationTagging(object):
     return
 
 
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.uuid)
+    value = (value * 31) ^ hash(self.metadata)
+    value = (value * 31) ^ hash(self.taggingType)
+    value = (value * 31) ^ hash(self.tagList)
+    value = (value * 31) ^ hash(self.confidenceList)
+    return value
+
   def __repr__(self):
     L = ['%s=%r' % (key, value)
       for key, value in self.__dict__.iteritems()]
@@ -564,6 +573,7 @@ class Communication(object):
     value = (value * 31) ^ hash(self.text)
     value = (value * 31) ^ hash(self.startTime)
     value = (value * 31) ^ hash(self.endTime)
+    value = (value * 31) ^ hash(self.communicationTaggingList)
     value = (value * 31) ^ hash(self.metadata)
     value = (value * 31) ^ hash(self.keyValueMap)
     value = (value * 31) ^ hash(self.lidList)

@@ -74,6 +74,8 @@ def main():
         concrete.inspect.print_tokens_for_communication(comm)
     elif args.treebank:
         concrete.inspect.print_penn_treebank_for_communication(comm)
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":

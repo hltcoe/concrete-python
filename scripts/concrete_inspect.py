@@ -28,6 +28,8 @@ def main():
                         action="store_true")
     parser.add_argument("--lemmas", help="Print first set of lemma token tags in 'ConLL-style' format",
                         action="store_true")
+    parser.add_argument("--metadata", help="Print metadata for tools used to annotate Communication",
+                        action="store_true")
     parser.add_argument("--mentions", help="Print whitespace-separated tokens, with entity mentions wrapped "
                         "using <ENTITY ID=x> tags, where 'x' is the (zero-indexed) entity number",
                         action="store_true")
@@ -60,6 +62,8 @@ def main():
         concrete.inspect.print_entities(comm)
     elif args.mentions:
         concrete.inspect.print_tokens_with_entityMentions(comm)
+    elif args.metadata:
+        concrete.inspect.print_metadata(comm)
     elif args.situation_mentions:
         concrete.inspect.print_situation_mentions(comm)
     elif args.situations:

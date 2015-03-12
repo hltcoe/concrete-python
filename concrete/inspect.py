@@ -89,6 +89,73 @@ def print_entities(comm):
             print
 
 
+
+def print_metadata(comm):
+    """Print metadata for tools used to annotate Communication
+    """
+    def _get_tokenizations(comm):
+        tokenizations = []
+        if comm.sectionList:
+            for section in comm.sectionList:
+                if section.sentenceList:
+                    for sentence in section.sentenceList:
+                        if sentence.tokenization:
+                            tokenizations.append(sentence.tokenization)
+        return tokenizations
+
+    print "Communication:  %s\n" % comm.metadata.tool
+
+    dependency_parse_tools = set()
+    parse_tools = set()
+    tokenization_tools = set()
+    token_tagging_tools = set()
+    for tokenization in _get_tokenizations(comm):
+        tokenization_tools.add(tokenization.metadata.tool)
+        if tokenization.tokenTaggingList:
+            for tokenTagging in tokenization.tokenTaggingList:
+                token_tagging_tools.add(tokenTagging.metadata.tool)
+        if tokenization.dependencyParseList:
+            for dependencyParse in tokenization.dependencyParseList:
+                dependency_parse_tools.add(dependencyParse.metadata.tool)
+        if tokenization.parseList:
+            for parse in tokenization.parseList:
+                parse_tools.add(parse.metadata.tool)
+
+    if tokenization_tools:
+        for toolname in sorted(tokenization_tools):
+            print "  Tokenization:  %s" % toolname
+        print
+    if dependency_parse_tools:
+        for toolname in sorted(dependency_parse_tools):
+            print "    Dependency Parse:  %s" % toolname
+        print
+    if parse_tools:
+        for toolname in sorted(parse_tools):
+            print "    Parse:  %s" % toolname
+        print
+    if token_tagging_tools:
+        for toolname in sorted(token_tagging_tools):
+            print "    TokenTagging:  %s" % toolname
+        print
+
+    if comm.entityMentionSetList:
+        for i, entityMentionSet in enumerate(comm.entityMentionSetList):
+            print "  EntityMentionSet #%d:  %s" % (i, entityMentionSet.metadata.tool)
+        print
+    if comm.entitySetList:
+        for i, entitySet in enumerate(comm.entitySetList):
+            print "  EntitySet #%d:  %s" % (i, entitySet.metadata.tool)
+        print
+    if comm.situationMentionSetList:
+        for i, situationMentionSet in enumerate(comm.situationMentionSetList):
+            print "  SituationMentionSet #%d:  %s" % (i, situationMentionSet.metadata.tool)
+        print
+    if comm.situationSetList:
+        for i, situationSet in enumerate(comm.situationSetList):
+            print "  SituationSet #%d:  %s" % (i, situationSet.metadata.tool)
+        print
+
+
 def print_situation_mentions(comm):
     """Print information for all SituationMentions (which may not have Situations)
 

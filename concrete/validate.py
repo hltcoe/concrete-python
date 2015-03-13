@@ -598,44 +598,38 @@ def validate_thrift_object_required_fields(thrift_object, indent_level=0):
 
 
 ########################################################################################################
-# The Python version of Thrift 0.9.1 does not support deep (recursive)
-# validation, and none of the Thrift serialization/deserialization
-# code calls even the shallow validation functions provided by Thrift.
-#
-# The code below implements deep validation.  The code is adapted from:
-#
-#   https://raw.githubusercontent.com/flamholz/py-thrift-validation-example/master/util/validation.py
-#
-# See this blog post for more information:
-#
-#   http://techblog.ridewithvia.com/post/38231652492/recursive-validation-of-python-thrift-structures
-#
-# A patch to implement deep validation was submitted to the Thrift
-# repository in February of 2013:
-#
-#   https://issues.apache.org/jira/browse/THRIFT-1732
-#
-# but Thrift 0.9.1 - which was released on 2013-08-21 - does not
-# include this functionality.
 
-_RECURSE_ON = frozenset([TType.STRUCT,
-                         TType.LIST,
-                         TType.MAP,
-                         TType.SET])
-
-def _ShouldRecurse(ttype):
-    """Returns True if this ttype is one we recurse on for validation."""
-    return ttype in _RECURSE_ON
-
-def validate_thrift_object_required_fields_recursively(msg, indent_level=0, valid=True):
+def validate_thrift_object_required_fields_recursively(msg, valid=True):
     """Deep validation of thrift messages.
 
     Args:
 
     -   `msg`: a Thrift message
+
+    -----
+
+    The Python version of Thrift 0.9.1 does not support deep (recursive)
+    validation, and none of the Thrift serialization/deserialization
+    code calls even the shallow validation functions provided by Thrift.
+
+    This function implements deep validation.  The code is adapted from:
+
+      https://raw.githubusercontent.com/flamholz/py-thrift-validation-example/master/util/validation.py
+
+    See this blog post for more information:
+
+      http://techblog.ridewithvia.com/post/38231652492/recursive-validation-of-python-thrift-structures
+
+    A patch to implement deep validation was submitted to the Thrift
+    repository in February of 2013:
+
+      https://issues.apache.org/jira/browse/THRIFT-1732
+
+    but Thrift 0.9.1 - which was released on 2013-08-21 - does not
+    include this functionality.
     """
     assert msg is not None
-    valid &= validate_thrift_object_required_fields(msg, indent_level)
+    valid &= validate_thrift_object_required_fields(msg)
 
     # Introspect the structure specification.
     # For each field, check type and decide whether to recurse.
@@ -657,21 +651,30 @@ def validate_thrift_object_required_fields_recursively(msg, indent_level=0, vali
 
         # Field is set and it's a message or collection, so we validate.
         if mtype == TType.STRUCT:
-            valid &= validate_thrift_object_required_fields_recursively(attr, indent_level+1, valid)
+            valid &= validate_thrift_object_required_fields_recursively(attr, valid)
         elif mtype in (TType.LIST, TType.SET):
             subtype = spec_tuple[3][0]
             if _ShouldRecurse(subtype):
                 for submsg in attr:
-                    valid &= validate_thrift_object_required_fields_recursively(submsg, indent_level+1, valid)
+                    valid &= validate_thrift_object_required_fields_recursively(submsg, valid)
         elif mtype == TType.MAP:
             subtype = spec_tuple[3]
             key_type = subtype[0]
             val_type = subtype[2]
             for key, val in attr.iteritems():
                 if _ShouldRecurse(key_type):
-                    valid &= validate_thrift_object_required_fields_recursively(key, indent_level+1, valid)
+                    valid &= validate_thrift_object_required_fields_recursively(key, valid)
                 if _ShouldRecurse(val_type):
-                    valid &= validate_thrift_object_required_fields_recursively(val, indent_level+1, valid)
+                    valid &= validate_thrift_object_required_fields_recursively(val, valid)
 
     return valid
-########################################################################################################
+
+
+_RECURSE_ON = frozenset([TType.STRUCT,
+                         TType.LIST,
+                         TType.MAP,
+                         TType.SET])
+
+def _ShouldRecurse(ttype):
+    """Returns True if this ttype is one we recurse on for validation."""
+    return ttype in _RECURSE_ON

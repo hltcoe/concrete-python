@@ -1,4 +1,7 @@
-"""
+"""Functions used by `concrete_inspect.py` to print data in a Communication.
+
+The function implementations provide useful examples of how to
+interact with may different Concrete datastructures.
 """
 
 from collections import defaultdict
@@ -9,13 +12,14 @@ def print_conll_style_tags_for_communication(comm, char_offsets=False, dependenc
     """Print 'ConLL-style' tags for the tokens in a Communication
 
     Args:
-        comm: A Concrete Communication object
-        char_offsets: A boolean flag for printing token text specified by
-            a Token's (optional) TextSpan
-        dependency: A boolean flag for printing dependency parse HEAD tags
-        lemmas: A boolean flag for printing lemma tags
-        ner: A boolean flag for printing Named Entity Recognition tags
-        pos: A boolean flag for printing Part-of-Speech tags
+
+    - `comm`: A Concrete Communication object
+    - `char_offsets`: A boolean flag for printing token text specified by
+          a Token's (optional) TextSpan
+    - `dependency`: A boolean flag for printing dependency parse HEAD tags
+    - `lemmas`: A boolean flag for printing lemma tags
+    - `ner`: A boolean flag for printing Named Entity Recognition tags
+    - `pos`: A boolean flag for printing Part-of-Speech tags
     """
     header_fields = ["INDEX", "TOKEN"]
     if char_offsets:
@@ -53,8 +57,9 @@ def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
     """Print 'ConLL-style' tags for the tokens in a tokenization
 
     Args:
-        tokenization: A Concrete Tokenization object
-        token_tag_lists: A list of lists of token tag strings
+
+    - `tokenization`: A Concrete Tokenization object
+    - `token_tag_lists`: A list of lists of token tag strings
     """
     if tokenization.tokenList:
         for i, token in enumerate(tokenization.tokenList.tokenList):
@@ -68,7 +73,8 @@ def print_entities(comm):
     """Print information for all Entities and their EntityMentions
 
     Args:
-        comm: A Concrete Communication
+
+    - `comm`: A Concrete Communication object
     """
     if comm.entitySetList:
         for entitySet_index, entitySet in enumerate(comm.entitySetList):
@@ -157,10 +163,11 @@ def print_metadata(comm):
 
 
 def print_situation_mentions(comm):
-    """Print information for all SituationMentions (which may not have Situations)
+    """Print information for all SituationMentions (some of which may not have Situations)
 
     Args:
-        comm: A Concrete Communication
+
+    - `comm`: A Concrete Communication
     """
     if comm.situationMentionSetList:
         for situationMentionSet_index, situationMentionSet in enumerate(comm.situationMentionSetList):
@@ -179,9 +186,9 @@ def print_situations(comm):
     """Print information for all Situations and their SituationMentions
 
     Args:
-        comm: A Concrete Communication
-    """
 
+    - `comm`: A Concrete Communication
+    """
     if comm.situationSetList:
         for situationSet_index, situationSet in enumerate(comm.situationSetList):
             if situationSet.metadata:
@@ -273,7 +280,8 @@ def print_penn_treebank_for_communication(comm):
     """Print Penn-Treebank parse trees for all tokenizations
 
     Args:
-        comm: A Concrete Communication object
+
+    - `comm`: A Concrete Communication object
     """
     tokenizations = get_tokenizations(comm)
 
@@ -287,10 +295,12 @@ def penn_treebank_for_parse(parse):
     """Get a Penn-Treebank style string for a Concrete Parse object
 
     Args:
-        parse: A Concrete Parse object
+
+    - `parse`: A Concrete Parse object
 
     Returns:
-        A string containing a Penn Treebank style parse tree representation
+
+    - A string containing a Penn Treebank style parse tree representation
     """
     def _traverse_parse(nodes, node_index, indent=0):
         s = ""
@@ -311,8 +321,7 @@ def penn_treebank_for_parse(parse):
 
 
 def get_char_offset_tags_for_tokenization(comm, tokenization):
-    """TODOC:
-    """
+    # TODOC
     if tokenization.tokenList:
         char_offset_tags = [None]*len(tokenization.tokenList.tokenList)
 
@@ -335,17 +344,19 @@ def get_conll_head_tags_for_tokenization(tokenization, dependency_parse_index=0)
     index of 0.
 
     Args:
-        tokenization: A Concrete Tokenization object
+
+    - `tokenization`: A Concrete Tokenization object
 
     Returns:
-        A list of ConLL 'HEAD tag' strings, with one HEAD tag for each
-        token in the supplied tokenization.  If a token does not have
-        a HEAD tag (e.g. punctuation tokens), the HEAD tag is an empty
-        string.
 
-        If the tokenization does not have a Dependency Parse, this
-        function returns a list of empty strings for each token in the
-        supplied tokenization.
+    - A list of ConLL 'HEAD tag' strings, with one HEAD tag for each
+      token in the supplied tokenization.  If a token does not have
+      a HEAD tag (e.g. punctuation tokens), the HEAD tag is an empty
+      string.
+
+      If the tokenization does not have a Dependency Parse, this
+      function returns a list of empty strings for each token in the
+      supplied tokenization.
     """
     if tokenization.tokenList:
         # Tokens that are not part of the dependency parse
@@ -367,11 +378,13 @@ def get_entityMentions_by_tokenizationId(comm):
     """Get entity mentions for a Communication grouped by Tokenization UUID string
 
     Args:
-        comm: A Concrete Communication object
+
+    - `comm`: A Concrete Communication object
 
     Returns:
-        A dictionary of lists of EntityMentions, where the dictionary
-        keys are Tokenization UUID strings.
+
+    - A dictionary of lists of EntityMentions, where the dictionary
+      keys are Tokenization UUID strings.
     """
     mentions_by_tokenizationId = defaultdict(list)
     if comm.entitySetList:
@@ -386,13 +399,15 @@ def get_entity_number_for_entityMention_uuid(comm):
     """Create mapping from EntityMention UUID to (zero-indexed) 'Entity Number'
 
     Args:
-        comm: A Concrete Communication object
+
+    - `comm`: A Concrete Communication object
 
     Returns:
-        A dictionary where the keys are EntityMention UUID strings,
-        and the values are "Entity Numbers", where the first Entity is
-        assigned number 0, the second Entity is assigned number 1,
-        etc.
+
+    - A dictionary where the keys are EntityMention UUID strings,
+      and the values are "Entity Numbers", where the first Entity is
+      assigned number 0, the second Entity is assigned number 1,
+      etc.
     """
     entity_number_for_entityMention_uuid = {}
     entity_number_counter = 0
@@ -410,10 +425,12 @@ def get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0):
     """Get lemma tags for a tokenization
 
     Args:
-        tokenization: A Concrete Tokenization object
+
+    - `tokenization`: A Concrete Tokenization object
 
     Returns:
-        A list of lemma tags for each token in the Tokenization
+
+    - A list of lemma tags for each token in the Tokenization
     """
     if tokenization.tokenList:
         lemma_tags = [""]*len(tokenization.tokenList.tokenList)
@@ -432,10 +449,12 @@ def get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0):
     """Get Named Entity Recognition tags for a tokenization
 
     Args:
-        tokenization: A Concrete Tokenization object
+
+    - `tokenization`: A Concrete Tokenization object
 
     Returns:
-        A list of NER tags for each token in the Tokenization
+
+    - A list of NER tags for each token in the Tokenization
     """
     if tokenization.tokenList:
         ner_tags = [""]*len(tokenization.tokenList.tokenList)
@@ -458,10 +477,12 @@ def get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0):
     """Get Part-of-Speech tags for a tokenization
 
     Args:
-        tokenization: A Concrete Tokenization object
+
+    - tokenization: A Concrete Tokenization object
 
     Returns:
-        A list of POS tags for each token in the Tokenization
+
+    - A list of POS tags for each token in the Tokenization
     """
     if tokenization.tokenList:
         pos_tags = [""]*len(tokenization.tokenList.tokenList)
@@ -480,10 +501,12 @@ def get_tokenizations(comm):
     """Returns a flat list of all Tokenization objects in a Communication
 
     Args:
-        comm: A Concrete Communication
+
+    - `comm`: A Concrete Communication
 
     Returns:
-        A list of all Tokenization objects within the Communication
+
+    - A list of all Tokenization objects within the Communication
     """
     tokenizations = []
 
@@ -500,11 +523,13 @@ def get_tokenizations_grouped_by_section(comm):
     """Returns a list of lists of Tokenization objects in a Communication
 
     Args:
-        comm: A Concrete Communication
+
+    - `comm`: A Concrete Communication
 
     Returns:
-        Returns a list of lists of Tokenization objects, where the
-        Tokenization objects are grouped by Section
+
+    - Returns a list of lists of Tokenization objects, where the
+      Tokenization objects are grouped by Section
     """
     tokenizations_by_section = []
 
@@ -524,10 +549,12 @@ def get_tokens_for_entityMention(entityMention):
     """Get list of token strings for an EntityMention
 
     Args:
-        entityMention: A Concrete EntityMention argument
+
+    - `entityMention`: A Concrete EntityMention argument
 
     Returns:
-        A list of token strings
+
+    - A list of token strings
     """
     tokens = []
     for tokenIndex in entityMention.tokens.tokenIndexList:
@@ -539,10 +566,12 @@ def get_tokentaggings_of_type(tokenization, taggingType):
     """Returns a list of TokenTagging objects with the specified taggingType
 
     Args:
-        tokenization: A Concrete Tokenizaiton object
-        taggingType: A string value for the specified TokenTagging.taggingType
+
+    - `tokenization`: A Concrete Tokenizaiton object
+    - `taggingType`: A string value for the specified TokenTagging.taggingType
 
     Returns:
-        A list of TokenTagging objects
+
+    - A list of TokenTagging objects
     """
     return [tt for tt in tokenization.tokenTaggingList if tt.taggingType.lower() == taggingType.lower()]

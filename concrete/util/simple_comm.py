@@ -1,4 +1,4 @@
-"""
+"""Create a simple (valid) Communication suitable for testing purposes
 """
 
 import time
@@ -18,6 +18,21 @@ from concrete.util import generate_UUID
 
 
 def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
+    """Create a simple (valid) Communication suitable for testing purposes
+
+    The Communication will have a single Section containing a single
+    Sentence.
+
+    Args:
+
+    - `comm_id`: A string specifying a Communication ID
+    - `sentence_string`: A string to be used for the sentence text.
+       The string will be whitespace-tokenized.
+
+    Returns:
+
+    - A Concrete Communication object
+    """
     toolname="TEST"
     timestamp = int(time.time())
 

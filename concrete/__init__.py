@@ -1,6 +1,11 @@
+# This file is NOT auto-generated
+
 """
-This file is NOT auto-generated
+Python modules and scripts for working with
+[Concrete](https://github.com/hltcoe/concrete), an HLT data
+specification defined using [Thrift](http://thrift.apache.org).
 """
+
 
 from audio.ttypes import *
 from clustering.ttypes import *

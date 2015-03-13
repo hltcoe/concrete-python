@@ -41,11 +41,11 @@ def validate_communication(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
-    - bool: True if Communication is valid, False otherwise
+    - `True` if Communication is valid, `False` otherwise
     """
     valid = True
 
@@ -80,11 +80,11 @@ def validate_communication(comm):
     return valid
 
 
-def get_entity_uuidString_set(comm):
+def _get_entity_uuidString_set(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -99,11 +99,11 @@ def get_entity_uuidString_set(comm):
     return entity_uuidString_set
 
 
-def get_entity_mention_uuidString_set(comm):
+def _get_entity_mention_uuidString_set(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -118,11 +118,11 @@ def get_entity_mention_uuidString_set(comm):
     return entity_mention_uuidString_set
 
 
-def get_sentence_for_tokenization_uuidString_dict(comm):
+def _get_sentence_for_tokenization_uuidString_dict(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -139,11 +139,11 @@ def get_sentence_for_tokenization_uuidString_dict(comm):
     return comm.sentence_for_tokenization_uuidString_dict
 
 
-def get_situation_uuidString_set(comm):
+def _get_situation_uuidString_set(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -158,11 +158,11 @@ def get_situation_uuidString_set(comm):
     return situation_uuidString_set
 
 
-def get_situation_mention_uuidString_set(comm):
+def _get_situation_mention_uuidString_set(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -177,11 +177,11 @@ def get_situation_mention_uuidString_set(comm):
     return situation_mention_uuidString_set
 
 
-def get_tokenization_uuidString_dict(comm):
+def _get_tokenization_uuidString_dict(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -198,11 +198,11 @@ def get_tokenization_uuidString_dict(comm):
     return comm._tokenization_uuidString_dict
 
 
-def get_tokenization_uuidString_set(comm):
+def _get_tokenization_uuidString_set(comm):
     """
     Args:
 
-    - `comm` (`concrete.structure.ttypes.Communication`)
+    - `comm` (`Communication`)
 
     Returns:
 
@@ -241,11 +241,12 @@ def validate_constituency_parses(comm, tokenization):
     """
     Args:
 
-    - `tokenization` (`concrete.structure.ttypes.Tokenization`)
+    - `comm` (`Communication`)
+    - `tokenization` (`Tokenization`)
 
     Returns:
 
-    - bool: True if tokenization's constituency parse is valid, False otherwise
+    - `True` if tokenization's constituency parse is valid, `False` otherwise
     """
     valid = True
 
@@ -293,11 +294,11 @@ def validate_dependency_parses(tokenization):
     """
     Args:
 
-    - `tokenization` (`concrete.structure.ttypes.Tokenization`)
+    - `tokenization` (`Tokenization`)
 
     Returns:
 
-    -  bool: True if all of a tokenization's dependency parses are valid, False otherwise
+    -  `True` if all of a tokenization's dependency parses are valid, `False` otherwise
     """
     valid = True
 
@@ -339,7 +340,7 @@ def validate_dependency_parses(tokenization):
 
 def validate_entity_mention_ids(comm):
     valid = True
-    entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
+    entity_mention_uuidString_set = _get_entity_mention_uuidString_set(comm)
 
     if comm.entitySetList:
         for entitySet in comm.entitySetList:
@@ -354,7 +355,7 @@ def validate_entity_mention_ids(comm):
 
 def validate_entity_mention_tokenization_ids(comm):
     valid = True
-    tokenization_uuidString_set = get_tokenization_uuidString_set(comm)
+    tokenization_uuidString_set = _get_tokenization_uuidString_set(comm)
 
     if comm.entityMentionSetList:
         for entityMentionSet in comm.entityMentionSetList:
@@ -378,8 +379,8 @@ def validate_entity_mention_token_ref_sequences(comm):
 
 def validate_situation_mentions(comm):
     valid = True
-    entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
-    situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
+    entity_mention_uuidString_set = _get_entity_mention_uuidString_set(comm)
+    situation_mention_uuidString_set = _get_situation_mention_uuidString_set(comm)
 
     if comm.situationMentionSetList:
         for situationMentionSet in comm.situationMentionSetList:
@@ -409,9 +410,9 @@ def validate_situation_mentions(comm):
 def validate_situations(comm):
     valid = True
 
-    entity_uuidString_set = get_entity_uuidString_set(comm)
-    situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
-    situation_uuidString_set = get_situation_uuidString_set(comm)
+    entity_uuidString_set = _get_entity_uuidString_set(comm)
+    situation_mention_uuidString_set = _get_situation_mention_uuidString_set(comm)
+    situation_uuidString_set = _get_situation_uuidString_set(comm)
 
     if comm.situationSetList:
         for situationSet in comm.situationSetList:
@@ -517,8 +518,8 @@ def validate_token_offsets_for_sentence(sentence):
 def validate_token_ref_sequence(comm, token_ref_sequence):
     valid = True
 
-    tokenization_mapping = get_tokenization_uuidString_dict(comm)
-    sentence_for_tokenization_mapping = get_sentence_for_tokenization_uuidString_dict(comm)
+    tokenization_mapping = _get_tokenization_uuidString_dict(comm)
+    sentence_for_tokenization_mapping = _get_sentence_for_tokenization_uuidString_dict(comm)
 
     if token_ref_sequence.tokenizationId.uuidString not in tokenization_mapping:
         valid = False
@@ -566,18 +567,19 @@ def validate_thrift_object_required_fields(thrift_object, indent_level=0):
     """
     Test if a thrift object has all required fields.
 
-    This function calls the thrift object's `validate()` function, and
-    if an exception is raised because of missing required fields, the
-    function catches the exception and logs the exception error
-    message.
+    This function calls the thrift object's `validate()` function. 
+    If an exception is raised because of missing required fields, the
+    function catches the exception and logs the exception's error
+    message using the Python standard library's `logging` module.
 
     Args:
 
     - `thrift_object`
+    - `indent_level`: Indentation level for logging error message
 
     Returns:
 
-    - bool: True if the thrift object has all required fields, False otherwise
+    - `True` if the Thrift object has all required fields, `False` otherwise
     """
     try:
         thrift_object.validate()

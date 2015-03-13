@@ -1,38 +1,48 @@
+"""Add reference variables for each UUID "pointer" in a Communication
+"""
 
 def add_references_to_communication(comm):
     """Create references for each UUID 'pointer'
+
+    Args:
+
+    - `comm`: A Concrete Communication object
+
+    -----
 
     The Concrete schema uses UUIDs as internal pointers between
     Concrete objects.  This function adds member variables to Concrete
     objects that are references to the Concrete objects identified by
     the UUIDs.
 
-    For example, each Entity has a 'mentionIdlist' that lists the
+    For example, each Entity has a `mentionIdlist` that lists the
     UUIDs of the EntityMentions for that Entity.  This function adds a
-    'mentionList' variable to the Entity that is a list of references
+    `mentionList` variable to the Entity that is a list of references
     to the actual EntityMention objects.  This allows you to access
     the EntityMentions using:
 
-      entity.mentionList
+        entity.mentionList
 
-    This function adds reference variables for:
-    - a 'tokenization' to each TokenRefSequence
-    - a 'entityMention' to each Argument
-    - a 'sentence' backpointer to each Tokenization
-    - a 'parentMention' backpointer to appropriate EntityMention
+    This function adds these reference variables:
 
-    And adds lists of reference variables for:
-    - a 'mentionList' to each Entity
-    - a 'situationMention' to each Argument
-    - a 'mentionList' to each Situation
-    - a 'childMentionList' to each EntityMention
+    - `tokenization` to each TokenRefSequence
+    - `entityMention` to each Argument
+    - `sentence` backpointer to each Tokenization
+    - `parentMention` backpointer to appropriate EntityMention
+
+    And adds these lists of reference variables:
+
+    - `mentionList` to each Entity
+    - `situationMention` to each Argument
+    - `mentionList` to each Situation
+    - `childMentionList` to each EntityMention
 
     For variables that represent optional lists of UUIDs
-    (e.g. situation.mentionIdList), Python Thrift will set the
-    variable to None if the list is not provided.  When this function
+    (e.g. `situation.mentionIdList`), Python Thrift will set the
+    variable to `None` if the list is not provided.  When this function
     adds a list-of-references variable (in this case,
-    situation.mentionList) for an *omitted* optional list, it sets the
-    new variable to None - it DOES NOT leave the variable undefined.
+    `situation.mentionList`) for an *omitted* optional list, it sets the
+    new variable to `None` - it **DOES NOT** leave the variable undefined.
     """
 #    comm.dependencyParseForUUID = {}
     comm.entityForUUID = {}

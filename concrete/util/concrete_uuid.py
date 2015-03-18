@@ -1,4 +1,4 @@
-"""
+"""Helper function for generating a Concrete UUID object
 """
 
 # Force 'import uuid' to import the Python standard library module
@@ -10,6 +10,8 @@ import uuid as python_uuid
 import concrete
 
 def generate_UUID():
+    """Helper function for generating a Concrete UUID object
+    """
     c_uuid = concrete.UUID()
     c_uuid.uuidString = str(python_uuid.uuid4())
     return c_uuid

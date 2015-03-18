@@ -1,4 +1,4 @@
-"""
+"""Code for reading and writing Concrete Communications
 """
 
 import cStringIO
@@ -21,16 +21,18 @@ def read_thrift_from_file(thrift_obj, filename):
 
     The Thrift file is assumed to be encoded using TCompactProtocol
 
-    WARNING - Thrift deserialization tends to fail silently.  For
+    **WARNING** - Thrift deserialization tends to fail silently.  For
     example, the Thrift libraries will not complain if you try to
-    deserialize data from the file '/dev/urandom'.
+    deserialize data from the file `/dev/urandom`.
 
     Args:
-        thrift_obj: A Thrift object (e.g. a Communication object)
-        filename:  A filename string
+
+    - `thrift_obj`: A Thrift object (e.g. a Communication object)
+    - `filename`:  A filename string
 
     Returns:
-        The Thrift object that was passed in as an argument
+
+    -  The Thrift object that was passed in as an argument
     """
     thrift_file = open(filename, "rb")
     thrift_bytes = thrift_file.read()
@@ -39,10 +41,15 @@ def read_thrift_from_file(thrift_obj, filename):
     return thrift_obj
 
 def read_communication_from_file(communication_filename):
-    """
-    Takes the filename of a serialized Concrete Communication file,
-    reads the Communication from the file and returns an instantiated
-    Communication instance.
+    """Read a Communication from the file specified by filename
+
+    Args:
+
+    - `communication_filename`: String with filename
+
+    Returns:
+
+    - A Concrete `Communication` object
     """
     comm = read_thrift_from_file(Communication(), communication_filename)
     add_references_to_communication(comm)
@@ -69,7 +76,8 @@ def write_thrift_to_file(thrift_obj, filename):
 class CommunicationReader:
     """Class for reading one or more Communications from a file
 
-    Support filetypes are:
+    Supported filetypes are:
+
     - a file with a single Communication
     - a file with multiple Communications concatenated together
     - a gzipped file with a single Communication
@@ -77,16 +85,23 @@ class CommunicationReader:
     - a .tar.gz file with one or more Communications
     - a .zip file with one or more Communications
 
-    CommunicationReader adds a "filename" field to each Communication.
+    CommunicationReader adds a `filename` field to each Communication.
     If the CommunicationReader is reading from an archive, then
-    "filename" will be set to the name of the Communication file in
-    the archive (e.g. "foo.concrete"), and not the name of the archive
-    file (e.g. "bar.zip").  If the CommunicationReader is reading from
+    `filename` will be set to the name of the Communication file in
+    the archive (e.g. `foo.concrete`), and not the name of the archive
+    file (e.g. `bar.zip`).  If the CommunicationReader is reading from
     a concatenated file (instead of an archive), then all
     Communications extracted from the concatenated file will have the
-    same value for the "filename" field.  The "filename" field is not
+    same value for the `filename` field.  The `filename` field is not
     part of the Thrift schema, and thus will not be serialized when a
     Communication is saved.
+
+    -----
+
+    Sample usage:
+
+        for comm in CommunicationReader('multiple_comms.tar.gz'):
+            do_something(comm)
     """
     def __init__(self, filename):
         self._source_filename = filename
@@ -116,13 +131,13 @@ class CommunicationReader:
 
     def next(self):
         if self.filetype is 'stream':
-            return self.next_from_stream()
+            return self._next_from_stream()
         elif self.filetype is 'tar':
-            return self.next_from_tar()
+            return self._next_from_tar()
         elif self.filetype is 'zip':
-            return self.next_from_zip()
+            return self._next_from_zip()
 
-    def next_from_stream(self):
+    def _next_from_stream(self):
         try:
             comm = Communication()
             comm.read(self.protocol)
@@ -133,7 +148,7 @@ class CommunicationReader:
             self.transport.close()
             raise StopIteration
 
-    def next_from_tar(self):
+    def _next_from_tar(self):
         while True:
             tarinfo = self.tar.next()
             if tarinfo is None:
@@ -153,7 +168,7 @@ class CommunicationReader:
             comm.filename = filename
             return comm
 
-    def next_from_zip(self):
+    def _next_from_zip(self):
         if self.zip_infolist_index >= len(self.zip_infolist):
             raise StopIteration
         zipinfo = self.zip_infolist[self.zip_infolist_index]
@@ -169,6 +184,14 @@ class CommunicationReader:
 
 class CommunicationWriter:
     """Class for writing one or more Communications to a file
+
+    -----
+
+    Sample usage:
+
+        writer = CommunicationWriter('foo.concrete')
+        writer.write(existing_comm_object)
+        writer.close()
     """
     def close(self):
         self.file.close()
@@ -183,6 +206,16 @@ class CommunicationWriter:
 
 class CommunicationWriterTGZ:
     """Class for writing one or more Communications to a .TAR.GZ archive
+
+    -----
+
+    Sample usage:
+
+        writer = CommunicationWriterTGZ('multiple_comms.tgz')
+        writer.write(comm_object_one, 'comm_one.concrete')
+        writer.write(comm_object_two, 'comm_two.concrete')
+        writer.write(comm_object_three, 'comm_three.concrete')
+        writer.close()
     """
     def close(self):
         self.tarfile.close()

@@ -1,7 +1,7 @@
 """Functions used by `concrete_inspect.py` to print data in a Communication.
 
 The function implementations provide useful examples of how to
-interact with may different Concrete datastructures.
+interact with many different Concrete datastructures.
 """
 
 from collections import defaultdict

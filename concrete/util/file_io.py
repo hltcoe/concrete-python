@@ -74,7 +74,9 @@ def write_thrift_to_file(thrift_obj, filename):
 
 
 class CommunicationReader:
-    """Class for reading one or more Communications from a file
+    """Iterator/generator class for reading one or more Communications from a file
+
+    The iterator returns a `(Communication, filename)` tuple
 
     Supported filetypes are:
 
@@ -85,22 +87,11 @@ class CommunicationReader:
     - a .tar.gz file with one or more Communications
     - a .zip file with one or more Communications
 
-    CommunicationReader adds a `filename` field to each Communication.
-    If the CommunicationReader is reading from an archive, then
-    `filename` will be set to the name of the Communication file in
-    the archive (e.g. `foo.concrete`), and not the name of the archive
-    file (e.g. `bar.zip`).  If the CommunicationReader is reading from
-    a concatenated file (instead of an archive), then all
-    Communications extracted from the concatenated file will have the
-    same value for the `filename` field.  The `filename` field is not
-    part of the Thrift schema, and thus will not be serialized when a
-    Communication is saved.
-
     -----
 
     Sample usage:
 
-        for comm in CommunicationReader('multiple_comms.tar.gz'):
+        for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
     """
     def __init__(self, filename):
@@ -130,6 +121,16 @@ class CommunicationReader:
         return self
 
     def next(self):
+        """Returns a `(Communication, filename)` tuple
+
+        If the CommunicationReader is reading from an archive, then
+        `filename` will be set to the name of the Communication file in
+        the archive (e.g. `foo.concrete`), and not the name of the archive
+        file (e.g. `bar.zip`).  If the CommunicationReader is reading from
+        a concatenated file (instead of an archive), then all
+        Communications extracted from the concatenated file will have the
+        same value for the `filename` field.
+        """
         if self.filetype is 'stream':
             return self._next_from_stream()
         elif self.filetype is 'tar':
@@ -142,8 +143,7 @@ class CommunicationReader:
             comm = Communication()
             comm.read(self.protocol)
             add_references_to_communication(comm)
-            comm.filename = self._source_filename
-            return comm
+            return (comm, self._source_filename)
         except EOFError:
             self.transport.close()
             raise StopIteration
@@ -165,8 +165,7 @@ class CommunicationReader:
                 self.tar.extractfile(tarinfo).read(),
                 protocol_factory=TCompactProtocol.TCompactProtocolFactory())
             add_references_to_communication(comm)
-            comm.filename = filename
-            return comm
+            return (comm, filename)
 
     def _next_from_zip(self):
         if self.zip_infolist_index >= len(self.zip_infolist):
@@ -178,8 +177,7 @@ class CommunicationReader:
             self.zip.open(zipinfo).read(),
             protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         add_references_to_communication(comm)
-        comm.filename = zipinfo.filename
-        return comm
+        return (comm, zipinfo.filename)
 
 
 class CommunicationWriter:

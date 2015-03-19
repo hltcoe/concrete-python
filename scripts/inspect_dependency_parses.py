@@ -22,7 +22,7 @@ def main():
 
     logging.basicConfig(format='%(levelname)7s:  %(message)s', level=logging.INFO)
 
-    for comm in CommunicationReader(args.communication_file):
+    for (comm, filename) in CommunicationReader(args.communication_file):
         logging.info(u"Inspecting Communication with ID '%s" % comm.id)
         for tokenization in concrete.inspect.get_tokenizations(comm):
             inspect_dependency_parses(tokenization)

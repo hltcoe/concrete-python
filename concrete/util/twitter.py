@@ -85,6 +85,27 @@ def json_tweet_object_to_TweetInfo(tweet):
                 twitter_entities.userMentionList.append(user_mention)
         tweet_info.entities = twitter_entities
 
+        if tweet[u'coordinates']:
+            tweet_coordinates = TwitterCoordinates()
+            tweet_coordinates.type = tweet[u'coordinates']['type']
+            tweet_coordinates.coordinates = TwitterLatLong(
+                latitude=tweet[u'coordinates'][u'coordinates'][0],
+                longitude=tweet[u'coordinates'][u'coordinates'][1])
+            tweet_info.coordinates = tweet_coordinates
+
+        if tweet[u'place']:
+            twitter_place = TwitterPlace()
+            set_flat_fields(twitter_place, tweet[u'place'])
+            if tweet[u'place'][u'bounding_box']:
+                bounding_box = BoundingBox()
+                set_flat_fields(bounding_box, tweet[u'place'][u'bounding_box'])
+                twitter_place.boundingBox = bounding_box
+            if tweet[u'place'][u'attributes']:
+                place_attributes = PlaceAttributes()
+                set_flat_fields(place_attributes, tweet[u'place'][u'attributes'])
+                twitter_place.attributes = place_attributes
+            tweet_info.place = twitter_place
+
     return tweet_info
 
 

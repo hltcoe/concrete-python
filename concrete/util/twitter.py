@@ -6,6 +6,7 @@ The fields used by the Twitter API are documented at:
 """
 
 import json
+import logging
 import re
 
 from concrete import (
@@ -48,7 +49,12 @@ def json_tweet_object_to_TweetInfo(tweet):
         """
         for key in twitter_dict.keys():
             if type(twitter_dict[key]) != dict:
-                setattr(concrete_object, snake_case_to_camelcase(key), twitter_dict[key])
+                camelcased_key = snake_case_to_camelcase(key)
+                if hasattr(concrete_object, camelcased_key):
+                    setattr(concrete_object, camelcased_key, twitter_dict[key])
+                else:
+                    logging.warn("Concrete schema for '%s' missing field for Twitter API field '%s'" %
+                                 (type(concrete_object), key))
 
     twitter_user = TwitterUser()
     set_flat_fields(twitter_user, tweet[u'user'])

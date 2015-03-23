@@ -21,7 +21,7 @@ Concrete-Python requires the following:
 
 * Python >= 2.7.x
 * 'networkx' Python package
-* 'thrift' Python package >= 0.9.1
+* 'thrift' Python package >= 0.9.2
 
 You do not need to install the Thrift compiler to use this library.
 

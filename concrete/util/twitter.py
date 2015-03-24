@@ -8,9 +8,13 @@ The fields used by the Twitter API are documented at:
 import json
 import logging
 import re
+import time
 
 from concrete import (
+    AnnotationMetadata,
     BoundingBox,
+    Communication,
+    CommunicationMetadata,
     HashTag,
     PlaceAttributes,
     TweetInfo,
@@ -23,9 +27,35 @@ from concrete import (
     UserMention
 )
 
+from concrete.util import generate_UUID
+
+
+TOOL_NAME = "Python module concrete.util.twitter"
+TWEET_TYPE = "Tweet"
+
+def json_tweet_object_to_Communication(tweet):
+    """
+    """
+    tweet_info = json_tweet_object_to_TweetInfo(tweet)
+
+    comm = Communication(
+        communicationMetadata=CommunicationMetadata(
+            tweetInfo=tweet_info),
+        metadata=AnnotationMetadata(
+            tool=TOOL_NAME,
+            timestamp=int(time.time())),
+        originalText=tweet_info.text,
+        type=TWEET_TYPE,
+        uuid=generate_UUID()
+    )
+    return comm
+
 
 def json_tweet_object_to_TweetInfo(tweet):
     """
+    Args:
+
+    Returns:
     """
     def snake_case_to_camelcase(value):
         """Implementation copied from:
@@ -109,6 +139,11 @@ def json_tweet_object_to_TweetInfo(tweet):
     return tweet_info
 
 
-def json_tweet_string_to_TweetInfo(tweet_json_string):
-    tweet = json.loads(tweet_json_string)
+def json_tweet_string_to_Communication(json_tweet_string):
+    tweet = json.loads(json_tweet_string)
+    return json_tweet_object_to_Communication(tweet)
+
+
+def json_tweet_string_to_TweetInfo(json_tweet_string):
+    tweet = json.loads(json_tweet_string)
     return json_tweet_object_to_TweetInfo(tweet)

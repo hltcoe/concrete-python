@@ -53,7 +53,8 @@ def get_json_object_without_uuids(json_object):
     - A copy of the input data structure with all UUID objects removed
     """
     if type(json_object) is list:
-        new_json_object = [get_json_object_without_uuids(obj) for obj in json_object]
+        new_json_object = [get_json_object_without_uuids(obj) for obj in json_object
+                           if type(obj) is not dict or 'uuidString' not in obj]
     elif type(json_object) is dict:
         new_json_object = {}
         for k, v in json_object.iteritems():

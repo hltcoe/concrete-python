@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-"""
+"""Convert Tweet file to Concrete Communications file
 """
 
 import argparse
 import codecs
+import gzip
 import logging
 import mimetypes
 
@@ -20,13 +21,12 @@ def main():
     parser.add_argument('concrete_file')
     args = parser.parse_args()
 
-#    if mimetypes.guess_type(args.tweet_file)[1] == 'gzip':
-#        gz_file = gzip.open(args.tweet_file, 'r')
-#        utf8_reader = codecs.getreader("utf-8")
-#        tweet_reader = utf8_reader(gz_file)
-#    else:
-
-    tweet_reader = codecs.open(args.tweet_file, 'r', encoding='utf-8')
+    if mimetypes.guess_type(args.tweet_file)[1] == 'gzip':
+        gz_file = gzip.open(args.tweet_file, 'r')
+        utf8_reader = codecs.getreader("utf-8")
+        tweet_reader = utf8_reader(gz_file)
+    else:
+        tweet_reader = codecs.open(args.tweet_file, 'r', encoding='utf-8')
 
     comm_writer = CommunicationWriter()
     comm_writer.open(args.concrete_file)

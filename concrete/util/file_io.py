@@ -165,6 +165,9 @@ class CommunicationReader:
                 self.tar.extractfile(tarinfo).read(),
                 protocol_factory=TCompactProtocol.TCompactProtocolFactory())
             add_references_to_communication(comm)
+            # hack to keep memory usage O(1)
+            # (...but the real hack is tarfile)
+            self.tar.members = []
             return (comm, filename)
 
     def _next_from_zip(self):

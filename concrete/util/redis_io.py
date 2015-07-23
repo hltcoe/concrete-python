@@ -81,10 +81,13 @@ class CommunicationReader(object):
             if self.key_type == 'set':
                 num_comms = self.redis_db.scard(self.key)
                 scan = self.redis_db.sscan
-                sadd =
+                # batch is an iterable of buffers
+                get_comm = lambda k, batch: self._load_from_buffer(k)
             else:
                 num_comms = self.redis_db.hlen(self.key)
                 scan = self.redis_db.hscan
+                # batch is a dict of uuid-buffer key-value pairs
+                get_comm = lambda k, batch: self._load_from_buffer(batch[k])
 
             temp_key = self._make_temp_key()
 
@@ -92,17 +95,13 @@ class CommunicationReader(object):
             cursor = 0
             while i < num_comms:
                 (cursor, batch) = scan(self.key, cursor)
-                for elt in batch:
+                for k in batch:
                     if i == num_comms:
                         break
-                    if self.redis_db.sadd(temp_key, buf) > 0:
+                    if self.redis_db.sadd(temp_key, k) > 0:
                         i += 1
-                        yield self._load_from_buffer(buf)
+                        yield get_comm(k, batch)
                     self.redis_db.expire(temp_key, self.temp_key_ttl)
-
-                for (uuid, buf) in buf_map.items():
-
-                    if self.redis_db.sadd(temp_key, uuid) > 0:
 
         else:
             raise Exception('not implemented')

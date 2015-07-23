@@ -19,12 +19,13 @@ class CommunicationReader(object):
     - a string containing a Communication
     - a set containing zero or more Communications
     - a list containing zero or more Communications
+    - a hash containing zero or more UUID-Communication key-value pairs
 
     For list and set types, the reader can optionally pop (consume) its
     input; for lists only, the reader can moreover block on the input.
 
-    Note that iteration over a set will create a temporary key in the
-    redis database to maintain a set of items seen so far.
+    Note that iteration over a set or hash will create a temporary key
+    in the redis database to maintain a set of elements seen so far.
 
     -----
 
@@ -34,6 +35,7 @@ class CommunicationReader(object):
             do_something(comm)
     '''
     def __init__(self, redis_db, key, key_type=None, pop=False, block=False,
+                 timeout=0,
                  temp_key_ttl=3600, temp_key_leaf_len=32, add_references=True):
         self.redis_db = redis_db
         self.key = key
@@ -45,7 +47,7 @@ class CommunicationReader(object):
             else:
                 raise ValueError('can only guess type of key that exists')
 
-        if key_type not in ('set', 'string', 'list'):
+        if key_type not in ('set', 'hash', 'string', 'list'):
             raise ValueError('unrecognized key type %s' % key_type)
 
         self.key_type = key_type
@@ -57,6 +59,7 @@ class CommunicationReader(object):
 
         self.pop = pop
         self.block = block
+        self.timeout = timeout
 
         self.temp_key_ttl = temp_key_ttl
         self.temp_key_leaf_len = temp_key_leaf_len
@@ -64,48 +67,91 @@ class CommunicationReader(object):
         self.add_references = add_references
 
     def __iter__(self):
-        if self.key_type == 'list' and self.pop and self.block:
-            buf = self.redis_db.brpop(self.key)[1]
+        if self.key_type in ('list', 'set') and self.pop:
+            buf = self._pop_buf()
             while buf is not None:
                 yield self._load_from_buffer(buf)
-                buf = self.redis_db.brpop(self.key)[1]
-        elif self.key_type == 'set' and not self.pop:
-            num_comms = self.redis_db.scard(self.key)
+                buf = self._pop_buf()
+
+        elif self.key_type == 'list' and not self.pop:
+            for i in xrange(self.redis_db.llen(self.key)):
+                yield self._load_from_buffer(self.redis_db.lindex(i))
+
+        elif self.key_type in ('set', 'hash') and not self.pop:
+            if self.key_type == 'set':
+                num_comms = self.redis_db.scard(self.key)
+                scan = self.redis_db.sscan
+                sadd =
+            else:
+                num_comms = self.redis_db.hlen(self.key)
+                scan = self.redis_db.hscan
+
             temp_key = self._make_temp_key()
 
             i = 0
             cursor = 0
             while i < num_comms:
-                (cursor, bufs) = self.redis_db.sscan(self.key,
-                                                          cursor)
-                for buf in bufs:
+                (cursor, batch) = scan(self.key, cursor)
+                for elt in batch:
                     if i == num_comms:
                         break
                     if self.redis_db.sadd(temp_key, buf) > 0:
                         i += 1
                         yield self._load_from_buffer(buf)
                     self.redis_db.expire(temp_key, self.temp_key_ttl)
+
+                for (uuid, buf) in buf_map.items():
+
+                    if self.redis_db.sadd(temp_key, uuid) > 0:
+
         else:
             raise Exception('not implemented')
 
-    def sample(self, n):
-        if self.key_type == 'list' and self.pop and self.block:
-            return (
+    def get(self, k):
+        if self.key_type in ('list', 'hash'):
+            if self.key_type == 'list':
+                buf = self.redis_db.lindex(self.key, k)
+            else:
+                buf = self.redis_db.hget(self.key, k)
+            return None if buf is None else self._load_from_buffer(buf)
+
+        else:
+            raise Exception('not implemented')
+
+    def sample(self, n=1):
+        if self.key_type in ('list', 'set') and self.pop:
+            return [
                 self._load_from_buffer(buf)
                 for buf
                 in (
-                    self.redis_db.brpop(self.key)[1]
+                    self._pop_buf()
                     for i
                     in xrange(n)
                 )
                 if buf is not None
-            )
+            ]
+
         elif self.key_type == 'set' and not self.pop:
-            return (
+            return [
                 self._load_from_buffer(buf)
                 for buf
                 in self.redis_db.srandmember(self.key, n)
-            )
+            ]
+
+        else:
+            raise Exception('not implemented')
+
+    def _pop_buf():
+        if self.key_type == 'list':
+            if self.block:
+                val = self.redis_db.brpop(self.key, timeout=self.timeout)
+                return None if val is None else val[1]
+            else:
+                return self.redis_db.rpop(self.key)
+
+        elif self.key_type == 'set' and not self.block:
+            return self.redis_db.spop(self.key)
+
         else:
             raise Exception('not implemented')
 

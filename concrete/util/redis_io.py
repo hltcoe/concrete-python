@@ -1,8 +1,6 @@
-"""Code for reading and writing Concrete Communications
-"""
-
 import string
 import random
+import time
 
 from thrift.protocol.TCompactProtocol import TCompactProtocol
 from thrift.transport.TTransport import TMemoryBuffer
@@ -34,6 +32,9 @@ class CommunicationReader(object):
         for comm in CommunicationReader(Redis(), 'my_comm_set'):
             do_something(comm)
     '''
+
+    BGET_INTERVAL = 0.2
+
     def __init__(self, redis_db, key, key_type=None, pop=False, block=False,
                  timeout=0,
                  temp_key_ttl=3600, temp_key_leaf_len=32, add_references=True):
@@ -66,8 +67,32 @@ class CommunicationReader(object):
 
         self.add_references = add_references
 
+    def _string_get(self):
+        if self.block:
+            elapsed = 0
+            buf = self.redis_db.get(self.key)
+            while buf is None and elapsed < self.timeout:
+                time.sleep(self.BGET_INTERVAL) # close enough
+                elapsed += self.BGET_INTERVAL
+                buf = self.redis_db.get(self.key)
+            return buf
+        else:
+            return self.redis_db.get(self.key)
+
     def __iter__(self):
-        if self.key_type in ('list', 'set') and self.pop:
+        if self.key_type == 'string' and self.pop:
+            buf = self._string_get()
+            if buf is None:
+                yield None
+            else:
+                self.redis_db.delete(self.key)
+                yield self._load_from_buffer(buf)
+
+        elif self.key_type == 'string' and not self.pop:
+            buf = self._string_get()
+            yield None if buf is None else self._load_from_buffer(buf)
+
+        elif self.key_type in ('list', 'set') and self.pop:
             buf = self._pop_buf()
             while buf is not None:
                 yield self._load_from_buffer(buf)

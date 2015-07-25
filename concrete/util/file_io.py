@@ -210,7 +210,8 @@ class CommunicationWriterTGZ:
 
     Sample usage:
 
-        writer = CommunicationWriterTGZ('multiple_comms.tgz')
+        writer = CommunicationWriterTGZ()
+        writer.open('multiple_comms.tgz')
         writer.write(comm_object_one, 'comm_one.concrete')
         writer.write(comm_object_two, 'comm_two.concrete')
         writer.write(comm_object_three, 'comm_three.concrete')

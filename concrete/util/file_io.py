@@ -187,7 +187,8 @@ class CommunicationWriter:
 
     Sample usage:
 
-        writer = CommunicationWriter('foo.concrete')
+        writer = CommunicationWriter()
+        writer.open('foo.concrete')
         writer.write(existing_comm_object)
         writer.close()
     """

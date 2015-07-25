@@ -40,7 +40,7 @@ def read_thrift_from_file(thrift_obj, filename):
     thrift_file.close()
     return thrift_obj
 
-def read_communication_from_file(communication_filename):
+def read_communication_from_file(communication_filename, add_references=True):
     """Read a Communication from the file specified by filename
 
     Args:
@@ -52,7 +52,8 @@ def read_communication_from_file(communication_filename):
     - A Concrete `Communication` object
     """
     comm = read_thrift_from_file(Communication(), communication_filename)
-    add_references_to_communication(comm)
+    if add_references:
+        add_references_to_communication(comm)
     return comm
 
 def read_tokenlattice_from_file(tokenlattice_filename):
@@ -94,7 +95,9 @@ class CommunicationReader:
         for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
     """
-    def __init__(self, filename):
+    def __init__(self, filename, add_references=True):
+        self._add_references = add_references
+
         self._source_filename = filename
         if tarfile.is_tarfile(filename):
             # File is either a '.tar' or '.tar.gz' file
@@ -142,7 +145,8 @@ class CommunicationReader:
         try:
             comm = Communication()
             comm.read(self.protocol)
-            add_references_to_communication(comm)
+            if self._add_references:
+                add_references_to_communication(comm)
             return (comm, self._source_filename)
         except EOFError:
             self.transport.close()
@@ -164,7 +168,8 @@ class CommunicationReader:
                 Communication(),
                 self.tar.extractfile(tarinfo).read(),
                 protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-            add_references_to_communication(comm)
+            if self._add_references:
+                add_references_to_communication(comm)
             return (comm, filename)
 
     def _next_from_zip(self):
@@ -176,7 +181,8 @@ class CommunicationReader:
             Communication(),
             self.zip.open(zipinfo).read(),
             protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-        add_references_to_communication(comm)
+        if self._add_references:
+            add_references_to_communication(comm)
         return (comm, zipinfo.filename)
 
 
@@ -210,7 +216,8 @@ class CommunicationWriterTGZ:
 
     Sample usage:
 
-        writer = CommunicationWriterTGZ('multiple_comms.tgz')
+        writer = CommunicationWriterTGZ()
+        writer.open('multiple_comms.tgz')
         writer.write(comm_object_one, 'comm_one.concrete')
         writer.write(comm_object_two, 'comm_two.concrete')
         writer.write(comm_object_three, 'comm_three.concrete')

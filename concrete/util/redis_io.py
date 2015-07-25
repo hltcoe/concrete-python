@@ -141,7 +141,8 @@ class RedisCommunicationReader(object):
         elif self.key_type == 'list' and not self.pop:
             for i in xrange(self.redis_db.llen(self.key)):
                 idx = -(i+1) if self.right_to_left else i
-                yield self._load_from_buffer(self.redis_db.lindex(idx))
+                buf = self.redis_db.lindex(self.key, idx)
+                yield self._load_from_buffer(buf)
 
         elif self.key_type in ('set', 'hash') and not self.pop:
             if self.key_type == 'set':
@@ -278,6 +279,13 @@ def write_communication_to_buffer(comm):
     protocol = TCompactProtocol(transport)
     comm.write(protocol)
     return transport.getvalue()
+
+
+def write_communication_to_redis_key(redis_db, key, comm):
+    '''
+    Serialize communication and store result in redis key.
+    '''
+    redis_db.set(key, write_communication_to_buffer(comm))
 
 
 class RedisCommunicationWriter(object):

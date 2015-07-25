@@ -73,7 +73,7 @@ class RedisCommunicationReader(object):
     '''
 
     def __init__(self, redis_db, key, key_type=None, pop=False, block=False,
-                 add_references=True,
+                 right_to_left=False, add_references=True,
                  block_timeout=0, temp_key_ttl=3600, temp_key_leaf_len=32):
         '''
         Create communication reader for specified key in specified
@@ -90,6 +90,9 @@ class RedisCommunicationReader(object):
             block:    boolean, True to block for data (i.e., wait for
                       something to be added to the list if it is empty),
                       False to end iteration when there is no more data
+            right_to_left: boolean, True to iterate over and index in
+                      lists from right to left, False to iterate/index
+                      from left to right
             add_references: boolean, True to fill in members in the
                       communication according to UUID relationships (see
                       concrete.util.add_references), False to return
@@ -125,6 +128,7 @@ class RedisCommunicationReader(object):
         self.temp_key_ttl = temp_key_ttl
         self.temp_key_leaf_len = temp_key_leaf_len
 
+        self.right_to_left = right_to_left
         self.add_references = add_references
 
     def __iter__(self):
@@ -136,7 +140,8 @@ class RedisCommunicationReader(object):
 
         elif self.key_type == 'list' and not self.pop:
             for i in xrange(self.redis_db.llen(self.key)):
-                yield self._load_from_buffer(self.redis_db.lindex(i))
+                idx = -(i+1) if self.right_to_left else i
+                yield self._load_from_buffer(self.redis_db.lindex(idx))
 
         elif self.key_type in ('set', 'hash') and not self.pop:
             if self.key_type == 'set':
@@ -187,7 +192,8 @@ class RedisCommunicationReader(object):
         '''
         if self.key_type in ('list', 'hash'):
             if self.key_type == 'list':
-                buf = self.redis_db.lindex(self.key, k)
+                idx = -(k+1) if self.right_to_left else k
+                buf = self.redis_db.lindex(self.key, idx)
             else:
                 buf = self.redis_db.hget(self.key, k)
             return None if buf is None else self._load_from_buffer(buf)
@@ -220,10 +226,20 @@ class RedisCommunicationReader(object):
         '''
         if self.key_type == 'list':
             if self.block:
-                val = self.redis_db.brpop(self.key, timeout=self.block_timeout)
+                _pop = (
+                    self.redis_db.brpop
+                    if self.right_to_left
+                    else self.redis_db.blpop
+                )
+                val = _pop(self.key, timeout=self.block_timeout)
                 return None if val is None else val[1]
             else:
-                return self.redis_db.rpop(self.key)
+                _pop = (
+                    self.redis_db.rpop
+                    if self.right_to_left
+                    else self.redis_db.lpop
+                )
+                return _pop(self.key)
 
         elif self.key_type == 'set' and not self.block:
             return self.redis_db.spop(self.key)

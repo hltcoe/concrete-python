@@ -177,6 +177,14 @@ class TestCommunicationWriter(unittest.TestCase):
 
         os.remove(filename)
 
+    def test_single_file_ctx_mgr(self):
+        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+        (file_handle, filename) = tempfile.mkstemp()
+        with CommunicationWriter(filename) as writer:
+            writer.write(comm)
+
+        os.remove(filename)
+
 
 class TestCommunicationWriterTGZ(unittest.TestCase):
     def test_single_file(self):
@@ -186,6 +194,15 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         writer.open(filename)
         writer.write(comm, "simple_1.concrete")
         writer.close()
+
+        self.assertTrue(tarfile.is_tarfile(filename))
+        os.remove(filename)
+
+    def test_single_file_ctx_mgr(self):
+        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+        (file_handle, filename) = tempfile.mkstemp()
+        with CommunicationWriterTGZ(filename) as writer:
+            writer.write(comm, "simple_1.concrete")
 
         self.assertTrue(tarfile.is_tarfile(filename))
         os.remove(filename)

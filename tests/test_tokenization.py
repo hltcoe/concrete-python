@@ -4,7 +4,7 @@ import unittest
 
 from concrete import TokenizationKind, TokenLattice, LatticePath, Token
 
-from concrete.util.tokenization import get_tokens
+from concrete.util import get_tokens
 from concrete.util.simple_comm import create_simple_comm
 
 class TestGetTokenList(unittest.TestCase):

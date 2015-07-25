@@ -50,6 +50,9 @@ def main():
     parser.add_argument("--treebank", help="Print Penn-Treebank style parse trees for *all* Constituent "
                         "Parses in the Communication",
                         action="store_true")
+    parser.add_argument("--version", action="version",
+                        version="Concrete schema version: %s, concrete python library version: %s" %
+                        (concrete_schema_version(), concrete_library_version()))
     parser.add_argument("communication_file")
     args = parser.parse_args()
 
@@ -76,6 +79,14 @@ def main():
         concrete.inspect.print_penn_treebank_for_communication(comm)
     else:
         parser.print_help()
+
+
+def concrete_library_version():
+    return concrete.__version__
+
+
+def concrete_schema_version():
+    return ".".join(concrete.__version__.split(".")[0:2])
 
 
 if __name__ == "__main__":

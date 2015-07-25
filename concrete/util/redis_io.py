@@ -9,6 +9,41 @@ from concrete import Communication
 from concrete.util.references import add_references_to_communication
 
 
+def read_communication_from_buffer(buf, add_references=True):
+    '''
+    Deserialize buf and return resulting communication.
+    Add references if requested.
+    '''
+    transport_in = TMemoryBuffer(buf)
+    protocol_in = TCompactProtocol(transport_in)
+    comm = Communication()
+    comm.read(protocol_in)
+    if add_references:
+        add_references_to_communication(comm)
+    return comm
+
+
+def read_communication_from_redis_key(redis_db, key, block=False,
+                                      interval=0.2, timeout=0):
+    '''
+    Return a serialized communication from a string key.  If block
+    is True, poll server until key appears at specified interval
+    or until specified timeout (indefinitely if timeout is zero).
+    Return None if block is False and key does not exist or if
+    block is True and key does not exist after specified timeout.
+    '''
+    if block:
+        elapsed = 0
+        buf = redis_db.get(key)
+        while buf is None and (timeout == 0 or elapsed < timeout):
+            time.sleep(interval) # close enough
+            elapsed += interval
+            buf = redis_db.get(key)
+        return buf
+    else:
+        return redis_db.get(key)
+
+
 class RedisCommunicationReader(object):
     '''
     Iterable class for reading one or more Communications from redis.
@@ -33,7 +68,7 @@ class RedisCommunicationReader(object):
 
         from redis import Redis
         redis_db = Redis(port=12345)
-        for comm in CommunicationReader(redis_db, 'my_comm_set_key'):
+        for comm in RedisCommunicationReader(redis_db, 'my_comm_set_key'):
             do_something(comm)
     '''
 
@@ -47,7 +82,7 @@ class RedisCommunicationReader(object):
             redis_db: object of class redis.Redis
             key:      name of redis key containing your communication(s)
             key_type: 'set', 'list', 'hash', or None; if None, look up
-                      type in redis (only works if the key is set, so
+                      type in redis (only works if the key exists, so
                       probably not suitable for block and/or pop modes)
             pop:      boolean, True to remove communications from redis
                       as we iterate over them, and False to leave redis
@@ -219,36 +254,80 @@ class RedisCommunicationReader(object):
                                    self.key, self.key_type)
 
 
-def read_communication_from_buffer(buf, add_references=True):
+def write_communication_to_buffer(comm):
     '''
-    Deserialize buf and return resulting communication.
-    Add references if requested.
+    Serialize communication and return result.
     '''
-    transport_in = TMemoryBuffer(buf)
-    protocol_in = TCompactProtocol(transport_in)
-    comm = Communication()
-    comm.read(protocol_in)
-    if add_references:
-        add_references_to_communication(comm)
-    return comm
+    transport = TMemoryBuffer()
+    protocol = TCompactProtocol(transport)
+    comm.write(protocol)
+    return transport.getvalue()
 
 
-def read_communication_from_redis_key(redis_db, key, block=False,
-                                      interval=0.2, timeout=0):
+class RedisCommunicationWriter(object):
     '''
-    Return a serialized communication from a string key.  If block
-    is True, poll server until key appears at specified interval
-    or until specified timeout (indefinitely if timeout is zero).
-    Return None if block is False and key does not exist or if
-    block is True and key does not exist after specified timeout.
+    Class for writing one or more Communications to redis.
+
+    Supported input types are:
+
+    - a set of Communications
+    - a list of Communications
+    - a hash of UUID-Communication key-value pairs
+
+    Example usage:
+
+        from redis import Redis
+        redis_db = Redis(port=12345)
+        w = RedisCommunicationWriter(redis_db, 'my_comm_set_key')
+        w.write(comm)
     '''
-    if block:
-        elapsed = 0
-        buf = redis_db.get(key)
-        while buf is None and (timeout == 0 or elapsed < timeout):
-            time.sleep(interval) # close enough
-            elapsed += interval
-            buf = redis_db.get(key)
-        return buf
-    else:
-        return redis_db.get(key)
+
+    def __init__(self, redis_db, key, key_type=None):
+        '''
+        Create communication writer for specified key in specified
+        redis_db.
+
+            redis_db: object of class redis.Redis
+            key:      name of redis key containing your communication(s)
+            key_type: 'set', 'list', 'hash', or None; if None, look up
+                      type in redis (only works if the key exists)
+        '''
+        self.redis_db = redis_db
+        self.key = key
+
+        if key_type is None:
+            # try to guess type
+            if redis_db.exists(key):
+                key_type = redis_db.type(key)
+            else:
+                raise ValueError('can only guess type of key that exists')
+
+        if key_type not in ('set', 'hash', 'list'):
+            raise ValueError('unrecognized key type %s' % key_type)
+
+        self.key_type = key_type
+
+    def clear(self):
+        self.redis_db.delete(self.key)
+
+    def write(self, comm):
+        buf = self._write_to_buffer(comm)
+
+        if self.key_type == 'list':
+            return self.redis_db.lpush(self.key, buf)
+
+        elif self.key_type == 'set':
+            return self.redis_db.sadd(self.key, buf)
+
+        elif self.key_type == 'hash':
+            return self.redis_db.hset(self.key, comm.uuid.uuidString, buf)
+
+        else:
+            raise Exception('not implemented')
+
+    def _write_to_buffer(self, comm):
+        return write_communication_to_buffer(buf)
+
+    def __str__(self):
+        return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,
+                                   self.key, self.key_type)

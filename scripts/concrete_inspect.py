@@ -24,7 +24,7 @@ def main():
                            [--lemmas] [--metadata] [--mentions] [--ner]
                            [--pos] [--situation-mentions] [--situations]
                            [--text] [--tokens] [--treebank] [--version]
-                           [communication_filename]
+                           [--no-add-references] [communication_filename]
 ''',
     )
     parser.add_argument("--char-offsets", help="Print token text extracted from character offsets "
@@ -58,10 +58,15 @@ def main():
     parser.add_argument("--treebank", help="Print Penn-Treebank style parse trees for *all* Constituent "
                         "Parses in the Communication",
                         action="store_true")
+    parser.add_argument("--no-references", help="Don't add references to communication (may prevent "
+                        "'NoneType' errors)",
+                        action="store_true")
     parser.add_argument("--version", action="version",
                         version="Concrete schema version: %s, concrete python library version: %s" %
                         (concrete_schema_version(), concrete_library_version()))
     (args, passthru_args) = parser.parse_known_args()
+
+    add_references = not args.no_references
 
     if passthru_args:
         if len(passthru_args) > 1:
@@ -69,9 +74,9 @@ def main():
             sys.stderr.write(parser.format_help())
             sys.exit(1)
         communication_filename = passthru_args[0]
-        comm = concrete.util.read_communication_from_file(communication_filename)
+        comm = concrete.util.read_communication_from_file(communication_filename, add_references=add_references)
     else:
-        comm = concrete.util.read_communication_from_buffer(sys.stdin.read())
+        comm = concrete.util.read_communication_from_buffer(sys.stdin.read(), add_references=add_references)
 
     if args.char_offsets or args.dependency or args.lemmas or args.ner or args.pos:
         concrete.inspect.print_conll_style_tags_for_communication(

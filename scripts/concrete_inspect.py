@@ -18,7 +18,15 @@ def main():
     # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-    parser = argparse.ArgumentParser(description="Print information about a Concrete Communication to stdout")
+    parser = argparse.ArgumentParser(
+        description="Print information about a Concrete Communication to stdout.  If communication_filename is specified, read communication from file; otherwise, read from standard input.",
+        usage='''concrete_inspect.py [-h] [--char-offsets] [--dependency] [--entities]
+                           [--lemmas] [--metadata] [--mentions] [--ner]
+                           [--pos] [--situation-mentions] [--situations]
+                           [--text] [--tokens] [--treebank] [--version]
+                           [communication_filename]
+''',
+    )
     parser.add_argument("--char-offsets", help="Print token text extracted from character offsets "
                         "(not the text stored in the tokenization) in 'ConLL-style' format",
                         action="store_true")
@@ -53,10 +61,17 @@ def main():
     parser.add_argument("--version", action="version",
                         version="Concrete schema version: %s, concrete python library version: %s" %
                         (concrete_schema_version(), concrete_library_version()))
-    parser.add_argument("communication_file")
-    args = parser.parse_args()
+    (args, passthru_args) = parser.parse_known_args()
 
-    comm = concrete.util.read_communication_from_file(args.communication_file)
+    if passthru_args:
+        if len(passthru_args) > 1:
+            sys.stderr.write('Error: unexpected arguments: %s\n\n' % ' '.join(passthru_args[1:]))
+            sys.stderr.write(parser.format_help())
+            sys.exit(1)
+        communication_filename = passthru_args[0]
+        comm = concrete.util.read_communication_from_file(communication_filename)
+    else:
+        comm = concrete.util.read_communication_from_buffer(sys.stdin.read())
 
     if args.char_offsets or args.dependency or args.lemmas or args.ner or args.pos:
         concrete.inspect.print_conll_style_tags_for_communication(

@@ -23,8 +23,7 @@ def read_communication_from_buffer(buf, add_references=True):
     return comm
 
 
-def read_communication_from_redis_key(redis_db, key, block=False,
-                                      interval=0.2, timeout=0):
+def read_communication_from_redis_key(redis_db, key, add_references=True):
     '''
     Return a serialized communication from a string key.  If block
     is True, poll server until key appears at specified interval
@@ -32,16 +31,12 @@ def read_communication_from_redis_key(redis_db, key, block=False,
     Return None if block is False and key does not exist or if
     block is True and key does not exist after specified timeout.
     '''
-    if block:
-        elapsed = 0
-        buf = redis_db.get(key)
-        while buf is None and (timeout == 0 or elapsed < timeout):
-            time.sleep(interval) # close enough
-            elapsed += interval
-            buf = redis_db.get(key)
-        return buf
+    buf = redis_db.get(key)
+    if buf is None:
+        return None
     else:
-        return redis_db.get(key)
+        return read_communication_from_buffer(buf,
+                                              add_references=add_references)
 
 
 class RedisCommunicationReader(object):
@@ -178,11 +173,11 @@ class RedisCommunicationReader(object):
         Return instantaneous length of dataset.
         '''
         if self.key_type == 'list':
-            self.redis_db.llen(self.key)
+            return self.redis_db.llen(self.key)
         elif self.key_type == 'set':
-            self.redis_db.scard(self.key)
+            return self.redis_db.scard(self.key)
         elif self.key_type == 'hash':
-            self.redis_db.hlen(self.key)
+            return self.redis_db.hlen(self.key)
         else:
             raise Exception('not implemented')
 
@@ -306,7 +301,7 @@ class RedisCommunicationWriter(object):
         w.write(comm)
     '''
 
-    def __init__(self, redis_db, key, key_type=None):
+    def __init__(self, redis_db, key, key_type=None, right_to_left=False):
         '''
         Create communication writer for specified key in specified
         redis_db.
@@ -315,6 +310,8 @@ class RedisCommunicationWriter(object):
             key:      name of redis key containing your communication(s)
             key_type: 'set', 'list', 'hash', or None; if None, look up
                       type in redis (only works if the key exists)
+            right_to_left: boolean, True to write elements to the left
+                      end of lists, False to write to the right end
         '''
         self.redis_db = redis_db
         self.key = key
@@ -330,6 +327,7 @@ class RedisCommunicationWriter(object):
             raise ValueError('unrecognized key type %s' % key_type)
 
         self.key_type = key_type
+        self.right_to_left = right_to_left
 
     def clear(self):
         self.redis_db.delete(self.key)
@@ -338,7 +336,12 @@ class RedisCommunicationWriter(object):
         buf = self._write_to_buffer(comm)
 
         if self.key_type == 'list':
-            return self.redis_db.lpush(self.key, buf)
+            _push = (
+                self.redis_db.lpush
+                if self.right_to_left
+                else self.redis_db.rpush
+            )
+            return _push(self.key, buf)
 
         elif self.key_type == 'set':
             return self.redis_db.sadd(self.key, buf)
@@ -350,7 +353,7 @@ class RedisCommunicationWriter(object):
             raise Exception('not implemented')
 
     def _write_to_buffer(self, comm):
-        return write_communication_to_buffer(buf)
+        return write_communication_to_buffer(comm)
 
     def __str__(self):
         return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,

@@ -14,7 +14,7 @@ from concrete.util import (
     RedisCommunicationWriter,
 )
 from concrete.util.simple_comm import create_simple_comm
-from concrete.util.redis_server import RedisServer
+from redis_server import RedisServer
 
 
 # So I haven't looked up how to do fixtures with unittest...

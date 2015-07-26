@@ -44,3 +44,7 @@ RUN cd /root && \
     make install && \
     cd deps/hiredis && \
     make install
+
+
+# add source
+ADD . /root/concrete-python/

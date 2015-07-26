@@ -99,7 +99,8 @@ class SimpleCommTempFile(object):
     True
     '''
 
-    def __init__(self, n=10, id_fmt='temp-%d', sentence_fmt='Mambo no. %d',
+    def __init__(self, n=10, id_fmt='temp-%d',
+                 sentence_fmt='Super simple sentence %d .',
                  writer_class=CommunicationWriter, suffix='.concrete'):
         '''
         Create temp file and write communications.

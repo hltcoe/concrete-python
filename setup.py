@@ -48,6 +48,7 @@ setup(
         'networkx',
         'testfixtures',
         'thrift>=0.9.2',
+        'redis>=2.10.0',
         ],
 
     url = "https://github.com/hltcoe/concrete-python",

@@ -196,11 +196,14 @@ class CommunicationWriter:
 
     Sample usage:
 
-        writer = CommunicationWriter()
-        writer.open('foo.concrete')
+        writer = CommunicationWriter('foo.concrete')
         writer.write(existing_comm_object)
         writer.close()
     """
+    def __init__(self, filename=None):
+        if filename is not None:
+            self.open(filename)
+
     def close(self):
         self.file.close()
 
@@ -211,6 +214,13 @@ class CommunicationWriter:
         thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         self.file.write(thrift_bytes)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if hasattr(self, 'tarfile'):
+            self.file.close()
+
 
 class CommunicationWriterTGZ:
     """Class for writing one or more Communications to a .TAR.GZ archive
@@ -219,13 +229,16 @@ class CommunicationWriterTGZ:
 
     Sample usage:
 
-        writer = CommunicationWriterTGZ()
-        writer.open('multiple_comms.tgz')
+        writer = CommunicationWriterTGZ('multiple_comms.tgz')
         writer.write(comm_object_one, 'comm_one.concrete')
         writer.write(comm_object_two, 'comm_two.concrete')
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
     """
+    def __init__(self, tar_filename=None):
+        if tar_filename is not None:
+            self.open(tar_filename)
+
     def close(self):
         self.tarfile.close()
 
@@ -242,3 +255,10 @@ class CommunicationWriterTGZ:
         comm_tarinfo.size = len(thrift_bytes)
 
         self.tarfile.addfile(comm_tarinfo, file_like_obj)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if hasattr(self, 'tarfile'):
+            self.tarfile.close()

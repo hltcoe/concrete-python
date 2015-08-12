@@ -218,8 +218,7 @@ class CommunicationWriter:
         return self
 
     def __exit__(self, type, value, traceback):
-        if hasattr(self, 'tarfile'):
-            self.file.close()
+        self.close()
 
 
 class CommunicationWriterTGZ:
@@ -260,5 +259,4 @@ class CommunicationWriterTGZ:
         return self
 
     def __exit__(self, type, value, traceback):
-        if hasattr(self, 'tarfile'):
-            self.tarfile.close()
+        self.close()

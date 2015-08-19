@@ -24,6 +24,7 @@ setup(
         'concrete.linking',
         'concrete.metadata',
         'concrete.nitf',
+        'concrete.services',
         'concrete.situations',
         'concrete.spans',
         'concrete.structure',

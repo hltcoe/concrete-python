@@ -116,6 +116,12 @@ class EmailCommunicationInfo(object):
    - toAddressList
    - ccAddressList
    - bccAddressList
+   - emailFolder
+   - subject
+   - quotedAddresses
+   - attachmentPaths
+   - salutation
+   - signature
   """
 
   thrift_spec = (
@@ -130,9 +136,15 @@ class EmailCommunicationInfo(object):
     (8, TType.LIST, 'toAddressList', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 8
     (9, TType.LIST, 'ccAddressList', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 9
     (10, TType.LIST, 'bccAddressList', (TType.STRUCT,(EmailAddress, EmailAddress.thrift_spec)), None, ), # 10
+    (11, TType.STRING, 'emailFolder', None, None, ), # 11
+    (12, TType.STRING, 'subject', None, None, ), # 12
+    (13, TType.LIST, 'quotedAddresses', (TType.STRING,None), None, ), # 13
+    (14, TType.LIST, 'attachmentPaths', (TType.STRING,None), None, ), # 14
+    (15, TType.STRING, 'salutation', None, None, ), # 15
+    (16, TType.STRING, 'signature', None, None, ), # 16
   )
 
-  def __init__(self, messageId=None, contentType=None, userAgent=None, inReplyToList=None, referenceList=None, senderAddress=None, returnPathAddress=None, toAddressList=None, ccAddressList=None, bccAddressList=None,):
+  def __init__(self, messageId=None, contentType=None, userAgent=None, inReplyToList=None, referenceList=None, senderAddress=None, returnPathAddress=None, toAddressList=None, ccAddressList=None, bccAddressList=None, emailFolder=None, subject=None, quotedAddresses=None, attachmentPaths=None, salutation=None, signature=None,):
     self.messageId = messageId
     self.contentType = contentType
     self.userAgent = userAgent
@@ -143,6 +155,12 @@ class EmailCommunicationInfo(object):
     self.toAddressList = toAddressList
     self.ccAddressList = ccAddressList
     self.bccAddressList = bccAddressList
+    self.emailFolder = emailFolder
+    self.subject = subject
+    self.quotedAddresses = quotedAddresses
+    self.attachmentPaths = attachmentPaths
+    self.salutation = salutation
+    self.signature = signature
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -233,6 +251,46 @@ class EmailCommunicationInfo(object):
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.STRING:
+          self.emailFolder = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.STRING:
+          self.subject = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.LIST:
+          self.quotedAddresses = []
+          (_etype33, _size30) = iprot.readListBegin()
+          for _i34 in xrange(_size30):
+            _elem35 = iprot.readString().decode('utf-8')
+            self.quotedAddresses.append(_elem35)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 14:
+        if ftype == TType.LIST:
+          self.attachmentPaths = []
+          (_etype39, _size36) = iprot.readListBegin()
+          for _i40 in xrange(_size36):
+            _elem41 = iprot.readString().decode('utf-8')
+            self.attachmentPaths.append(_elem41)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 15:
+        if ftype == TType.STRING:
+          self.salutation = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 16:
+        if ftype == TType.STRING:
+          self.signature = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -258,15 +316,15 @@ class EmailCommunicationInfo(object):
     if self.inReplyToList is not None:
       oprot.writeFieldBegin('inReplyToList', TType.LIST, 4)
       oprot.writeListBegin(TType.STRING, len(self.inReplyToList))
-      for iter30 in self.inReplyToList:
-        oprot.writeString(iter30.encode('utf-8'))
+      for iter42 in self.inReplyToList:
+        oprot.writeString(iter42.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.referenceList is not None:
       oprot.writeFieldBegin('referenceList', TType.LIST, 5)
       oprot.writeListBegin(TType.STRING, len(self.referenceList))
-      for iter31 in self.referenceList:
-        oprot.writeString(iter31.encode('utf-8'))
+      for iter43 in self.referenceList:
+        oprot.writeString(iter43.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.senderAddress is not None:
@@ -280,23 +338,53 @@ class EmailCommunicationInfo(object):
     if self.toAddressList is not None:
       oprot.writeFieldBegin('toAddressList', TType.LIST, 8)
       oprot.writeListBegin(TType.STRUCT, len(self.toAddressList))
-      for iter32 in self.toAddressList:
-        iter32.write(oprot)
+      for iter44 in self.toAddressList:
+        iter44.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.ccAddressList is not None:
       oprot.writeFieldBegin('ccAddressList', TType.LIST, 9)
       oprot.writeListBegin(TType.STRUCT, len(self.ccAddressList))
-      for iter33 in self.ccAddressList:
-        iter33.write(oprot)
+      for iter45 in self.ccAddressList:
+        iter45.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.bccAddressList is not None:
       oprot.writeFieldBegin('bccAddressList', TType.LIST, 10)
       oprot.writeListBegin(TType.STRUCT, len(self.bccAddressList))
-      for iter34 in self.bccAddressList:
-        iter34.write(oprot)
+      for iter46 in self.bccAddressList:
+        iter46.write(oprot)
       oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.emailFolder is not None:
+      oprot.writeFieldBegin('emailFolder', TType.STRING, 11)
+      oprot.writeString(self.emailFolder.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.subject is not None:
+      oprot.writeFieldBegin('subject', TType.STRING, 12)
+      oprot.writeString(self.subject.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.quotedAddresses is not None:
+      oprot.writeFieldBegin('quotedAddresses', TType.LIST, 13)
+      oprot.writeListBegin(TType.STRING, len(self.quotedAddresses))
+      for iter47 in self.quotedAddresses:
+        oprot.writeString(iter47.encode('utf-8'))
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.attachmentPaths is not None:
+      oprot.writeFieldBegin('attachmentPaths', TType.LIST, 14)
+      oprot.writeListBegin(TType.STRING, len(self.attachmentPaths))
+      for iter48 in self.attachmentPaths:
+        oprot.writeString(iter48.encode('utf-8'))
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.salutation is not None:
+      oprot.writeFieldBegin('salutation', TType.STRING, 15)
+      oprot.writeString(self.salutation.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.signature is not None:
+      oprot.writeFieldBegin('signature', TType.STRING, 16)
+      oprot.writeString(self.signature.encode('utf-8'))
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -317,6 +405,12 @@ class EmailCommunicationInfo(object):
     value = (value * 31) ^ hash(self.toAddressList)
     value = (value * 31) ^ hash(self.ccAddressList)
     value = (value * 31) ^ hash(self.bccAddressList)
+    value = (value * 31) ^ hash(self.emailFolder)
+    value = (value * 31) ^ hash(self.subject)
+    value = (value * 31) ^ hash(self.quotedAddresses)
+    value = (value * 31) ^ hash(self.attachmentPaths)
+    value = (value * 31) ^ hash(self.salutation)
+    value = (value * 31) ^ hash(self.signature)
     return value
 
   def __repr__(self):

@@ -10,6 +10,7 @@ from thrift.Thrift import TType, TMessageType, TException, TApplicationException
 import concrete.metadata.ttypes
 import concrete.spans.ttypes
 import concrete.uuid.ttypes
+import concrete.language.ttypes
 
 
 from thrift.transport import TTransport
@@ -200,6 +201,91 @@ class Token(object):
   def __ne__(self, other):
     return not (self == other)
 
+class ConstituentRef(object):
+  """
+  A reference to a Constituent within a Parse.
+
+  Attributes:
+   - parseId: The UUID of the Parse that this Constituent belongs to.
+   - constituentIndex: The index in the constituent list of this Constituent.
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'parseId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
+    (2, TType.I32, 'constituentIndex', None, None, ), # 2
+  )
+
+  def __init__(self, parseId=None, constituentIndex=None,):
+    self.parseId = parseId
+    self.constituentIndex = constituentIndex
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.parseId = concrete.uuid.ttypes.UUID()
+          self.parseId.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.constituentIndex = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('ConstituentRef')
+    if self.parseId is not None:
+      oprot.writeFieldBegin('parseId', TType.STRUCT, 1)
+      self.parseId.write(oprot)
+      oprot.writeFieldEnd()
+    if self.constituentIndex is not None:
+      oprot.writeFieldBegin('constituentIndex', TType.I32, 2)
+      oprot.writeI32(self.constituentIndex)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.parseId is None:
+      raise TProtocol.TProtocolException(message='Required field parseId is unset!')
+    if self.constituentIndex is None:
+      raise TProtocol.TProtocolException(message='Required field constituentIndex is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.parseId)
+    value = (value * 31) ^ hash(self.constituentIndex)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class TokenRefSequence(object):
   """
   A list of pointers to tokens that all belong to the same
@@ -214,6 +300,9 @@ class TokenRefSequence(object):
   or some other form of "canonical" token in this sequence if,
   for instance, it is not easy to map this sequence to a another
   annotation that has a head.
+
+  This field is defined with respect to the Tokenization given
+  by tokenizationId, and not to this object's tokenIndexList.
    - tokenizationId: The UUID of the tokenization that contains the tokens.
    - textSpan: The text span in the main text (.text field) associated with this
   TokenRefSequence.
@@ -1006,14 +1095,18 @@ class Constituent(object):
    - id: A parse-relative identifier for this consistuent. Together
   with the UUID for a Parse, this can be used to define
   pointers to specific constituents.
-   - tag
+   - tag: A description of this constituency node, e.g. the category "NP".
+  For leaf nodes, this should be a word and for pre-terminal nodes
+  this should be a POS tag.
    - childList
    - headChildIndex: The index of the head child of this constituent. I.e., the
   head child of constituent <tt>c</tt> is
   <tt>c.children[c.head_child_index]</tt>. A value of -1
   indicates that no child head was identified.
-   - start: The token index that marks the beginning of this constituent.
-   - ending: The token index that marks the end of this constituent.
+   - start: The first token (inclusive) of this constituent in the
+  parent Tokenization. Almost certainly should be populated.
+   - ending: The last token (exclusive) of this constituent in the
+  parent Tokenization. Almost certainly should be populated.
   """
 
   thrift_spec = (
@@ -1678,6 +1771,122 @@ class TokenList(object):
   def __ne__(self, other):
     return not (self == other)
 
+class SpanLink(object):
+  """
+  A collection of tokens that represent a link to another resource.
+  This resource might be another Concrete object (e.g., another
+  Concrete Communication), represented with the 'concreteTarget'
+  field, or it could link to a resource outside of Concrete via the
+  'externalTarget' field.
+
+  Attributes:
+   - tokens: The tokens that make up this SpanLink object.
+   - concreteTarget
+   - externalTarget
+   - linkType
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'tokens', (TokenRefSequence, TokenRefSequence.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'concreteTarget', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 2
+    (3, TType.STRING, 'externalTarget', None, None, ), # 3
+    (4, TType.STRING, 'linkType', None, None, ), # 4
+  )
+
+  def __init__(self, tokens=None, concreteTarget=None, externalTarget=None, linkType=None,):
+    self.tokens = tokens
+    self.concreteTarget = concreteTarget
+    self.externalTarget = externalTarget
+    self.linkType = linkType
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.tokens = TokenRefSequence()
+          self.tokens.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.concreteTarget = concrete.uuid.ttypes.UUID()
+          self.concreteTarget.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.externalTarget = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRING:
+          self.linkType = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('SpanLink')
+    if self.tokens is not None:
+      oprot.writeFieldBegin('tokens', TType.STRUCT, 1)
+      self.tokens.write(oprot)
+      oprot.writeFieldEnd()
+    if self.concreteTarget is not None:
+      oprot.writeFieldBegin('concreteTarget', TType.STRUCT, 2)
+      self.concreteTarget.write(oprot)
+      oprot.writeFieldEnd()
+    if self.externalTarget is not None:
+      oprot.writeFieldBegin('externalTarget', TType.STRING, 3)
+      oprot.writeString(self.externalTarget.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.linkType is not None:
+      oprot.writeFieldBegin('linkType', TType.STRING, 4)
+      oprot.writeString(self.linkType.encode('utf-8'))
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.tokens is None:
+      raise TProtocol.TProtocolException(message='Required field tokens is unset!')
+    if self.linkType is None:
+      raise TProtocol.TProtocolException(message='Required field linkType is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.tokens)
+    value = (value * 31) ^ hash(self.concreteTarget)
+    value = (value * 31) ^ hash(self.externalTarget)
+    value = (value * 31) ^ hash(self.linkType)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class Tokenization(object):
   """
   A theory (or set of alternative theories) about the sequence of
@@ -1724,6 +1933,7 @@ class Tokenization(object):
    - tokenTaggingList
    - parseList
    - dependencyParseList
+   - spanLinkList
   """
 
   thrift_spec = (
@@ -1736,9 +1946,10 @@ class Tokenization(object):
     (6, TType.LIST, 'tokenTaggingList', (TType.STRUCT,(TokenTagging, TokenTagging.thrift_spec)), None, ), # 6
     (7, TType.LIST, 'parseList', (TType.STRUCT,(Parse, Parse.thrift_spec)), None, ), # 7
     (8, TType.LIST, 'dependencyParseList', (TType.STRUCT,(DependencyParse, DependencyParse.thrift_spec)), None, ), # 8
+    (9, TType.LIST, 'spanLinkList', (TType.STRUCT,(SpanLink, SpanLink.thrift_spec)), None, ), # 9
   )
 
-  def __init__(self, uuid=None, metadata=None, tokenList=None, lattice=None, kind=None, tokenTaggingList=None, parseList=None, dependencyParseList=None,):
+  def __init__(self, uuid=None, metadata=None, tokenList=None, lattice=None, kind=None, tokenTaggingList=None, parseList=None, dependencyParseList=None, spanLinkList=None,):
     self.uuid = uuid
     self.metadata = metadata
     self.tokenList = tokenList
@@ -1747,6 +1958,7 @@ class Tokenization(object):
     self.tokenTaggingList = tokenTaggingList
     self.parseList = parseList
     self.dependencyParseList = dependencyParseList
+    self.spanLinkList = spanLinkList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -1819,6 +2031,17 @@ class Tokenization(object):
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.LIST:
+          self.spanLinkList = []
+          (_etype91, _size88) = iprot.readListBegin()
+          for _i92 in xrange(_size88):
+            _elem93 = SpanLink()
+            _elem93.read(iprot)
+            self.spanLinkList.append(_elem93)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1852,22 +2075,29 @@ class Tokenization(object):
     if self.tokenTaggingList is not None:
       oprot.writeFieldBegin('tokenTaggingList', TType.LIST, 6)
       oprot.writeListBegin(TType.STRUCT, len(self.tokenTaggingList))
-      for iter88 in self.tokenTaggingList:
-        iter88.write(oprot)
+      for iter94 in self.tokenTaggingList:
+        iter94.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.parseList is not None:
       oprot.writeFieldBegin('parseList', TType.LIST, 7)
       oprot.writeListBegin(TType.STRUCT, len(self.parseList))
-      for iter89 in self.parseList:
-        iter89.write(oprot)
+      for iter95 in self.parseList:
+        iter95.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.dependencyParseList is not None:
       oprot.writeFieldBegin('dependencyParseList', TType.LIST, 8)
       oprot.writeListBegin(TType.STRUCT, len(self.dependencyParseList))
-      for iter90 in self.dependencyParseList:
-        iter90.write(oprot)
+      for iter96 in self.dependencyParseList:
+        iter96.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.spanLinkList is not None:
+      oprot.writeFieldBegin('spanLinkList', TType.LIST, 9)
+      oprot.writeListBegin(TType.STRUCT, len(self.spanLinkList))
+      for iter97 in self.spanLinkList:
+        iter97.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1893,6 +2123,7 @@ class Tokenization(object):
     value = (value * 31) ^ hash(self.tokenTaggingList)
     value = (value * 31) ^ hash(self.parseList)
     value = (value * 31) ^ hash(self.dependencyParseList)
+    value = (value * 31) ^ hash(self.spanLinkList)
     return value
 
   def __repr__(self):
@@ -1918,7 +2149,7 @@ class Sentence(object):
 
   Attributes:
    - uuid
-   - tokenization: Theories about the tokens that make up this sentence.  For text
+   - tokenization: Theory about the tokens that make up this sentence.  For text
   communications, these tokenizations will typically be generated
   by a tokenizer.  For audio communications, these tokenizations
   will typically be generated by an automatic speech recognizer.
@@ -2097,6 +2328,16 @@ class Section(object):
   dense Wikipedia page with subsections. Sections should still be
   arranged linearly, where reading these numbers should not be required
   to get a start-to-finish enumeration of the Communication's content.
+   - lidList: An optional field to be used for multi-language documents.
+
+  This field should be populated when a section is inside of
+  a document that contains multiple languages.
+
+  Minimally, each block of text in one language should be it's own
+  section. For example, if a paragraph is in English and the
+  paragraph afterwards is in French, these should be separated into
+  two different sections, allowing language-specific analytics to
+  run on appropriate sections.
   """
 
   thrift_spec = (
@@ -2108,11 +2349,11 @@ class Section(object):
     (5, TType.STRING, 'kind', None, None, ), # 5
     (6, TType.STRING, 'label', None, None, ), # 6
     (7, TType.LIST, 'numberList', (TType.I32,None), None, ), # 7
-    None, # 8
+    (8, TType.LIST, 'lidList', (TType.STRUCT,(concrete.language.ttypes.LanguageIdentification, concrete.language.ttypes.LanguageIdentification.thrift_spec)), None, ), # 8
     (9, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ), # 9
   )
 
-  def __init__(self, uuid=None, sentenceList=None, textSpan=None, rawTextSpan=None, audioSpan=None, kind=None, label=None, numberList=None,):
+  def __init__(self, uuid=None, sentenceList=None, textSpan=None, rawTextSpan=None, audioSpan=None, kind=None, label=None, numberList=None, lidList=None,):
     self.uuid = uuid
     self.sentenceList = sentenceList
     self.textSpan = textSpan
@@ -2121,6 +2362,7 @@ class Section(object):
     self.kind = kind
     self.label = label
     self.numberList = numberList
+    self.lidList = lidList
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -2140,11 +2382,11 @@ class Section(object):
       elif fid == 2:
         if ftype == TType.LIST:
           self.sentenceList = []
-          (_etype94, _size91) = iprot.readListBegin()
-          for _i95 in xrange(_size91):
-            _elem96 = Sentence()
-            _elem96.read(iprot)
-            self.sentenceList.append(_elem96)
+          (_etype101, _size98) = iprot.readListBegin()
+          for _i102 in xrange(_size98):
+            _elem103 = Sentence()
+            _elem103.read(iprot)
+            self.sentenceList.append(_elem103)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2179,10 +2421,21 @@ class Section(object):
       elif fid == 7:
         if ftype == TType.LIST:
           self.numberList = []
-          (_etype100, _size97) = iprot.readListBegin()
-          for _i101 in xrange(_size97):
-            _elem102 = iprot.readI32();
-            self.numberList.append(_elem102)
+          (_etype107, _size104) = iprot.readListBegin()
+          for _i108 in xrange(_size104):
+            _elem109 = iprot.readI32();
+            self.numberList.append(_elem109)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.LIST:
+          self.lidList = []
+          (_etype113, _size110) = iprot.readListBegin()
+          for _i114 in xrange(_size110):
+            _elem115 = concrete.language.ttypes.LanguageIdentification()
+            _elem115.read(iprot)
+            self.lidList.append(_elem115)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2203,8 +2456,8 @@ class Section(object):
     if self.sentenceList is not None:
       oprot.writeFieldBegin('sentenceList', TType.LIST, 2)
       oprot.writeListBegin(TType.STRUCT, len(self.sentenceList))
-      for iter103 in self.sentenceList:
-        iter103.write(oprot)
+      for iter116 in self.sentenceList:
+        iter116.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.textSpan is not None:
@@ -2226,8 +2479,15 @@ class Section(object):
     if self.numberList is not None:
       oprot.writeFieldBegin('numberList', TType.LIST, 7)
       oprot.writeListBegin(TType.I32, len(self.numberList))
-      for iter104 in self.numberList:
-        oprot.writeI32(iter104)
+      for iter117 in self.numberList:
+        oprot.writeI32(iter117)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.lidList is not None:
+      oprot.writeFieldBegin('lidList', TType.LIST, 8)
+      oprot.writeListBegin(TType.STRUCT, len(self.lidList))
+      for iter118 in self.lidList:
+        iter118.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.audioSpan is not None:
@@ -2255,6 +2515,7 @@ class Section(object):
     value = (value * 31) ^ hash(self.kind)
     value = (value * 31) ^ hash(self.label)
     value = (value * 31) ^ hash(self.numberList)
+    value = (value * 31) ^ hash(self.lidList)
     return value
 
   def __repr__(self):

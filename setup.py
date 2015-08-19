@@ -20,6 +20,7 @@ setup(
         'concrete.discourse',
         'concrete.email',
         'concrete.entities',
+        'concrete.exceptions',
         'concrete.language',
         'concrete.linking',
         'concrete.metadata',

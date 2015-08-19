@@ -221,7 +221,7 @@ class Processor(Iface, TProcessor):
     result = annotate_result()
     try:
       result.success = self._handler.annotate(args.original)
-    except concrete.services.ttypes.ConcreteThriftException, ex:
+    except concrete.exceptions.ttypes.ConcreteThriftException, ex:
       result.ex = ex
     oprot.writeMessageBegin("annotate", TMessageType.REPLY, seqid)
     result.write(oprot)
@@ -335,7 +335,7 @@ class annotate_result(object):
 
   thrift_spec = (
     (0, TType.STRUCT, 'success', (concrete.communication.ttypes.Communication, concrete.communication.ttypes.Communication.thrift_spec), None, ), # 0
-    (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ConcreteThriftException, concrete.services.ttypes.ConcreteThriftException.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'ex', (concrete.exceptions.ttypes.ConcreteThriftException, concrete.exceptions.ttypes.ConcreteThriftException.thrift_spec), None, ), # 1
   )
 
   def __init__(self, success=None, ex=None,):
@@ -359,7 +359,7 @@ class annotate_result(object):
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ex = concrete.services.ttypes.ConcreteThriftException()
+          self.ex = concrete.exceptions.ttypes.ConcreteThriftException()
           self.ex.read(iprot)
         else:
           iprot.skip(ftype)

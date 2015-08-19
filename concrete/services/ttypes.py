@@ -12,7 +12,7 @@ import concrete.language.ttypes
 import concrete.structure.ttypes
 import concrete.entities.ttypes
 import concrete.situations.ttypes
-import concrete.services.ttypes
+import concrete.exceptions.ttypes
 import concrete.email.ttypes
 import concrete.twitter.ttypes
 import concrete.audio.ttypes

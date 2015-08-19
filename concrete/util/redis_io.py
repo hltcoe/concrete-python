@@ -68,7 +68,7 @@ class RedisCommunicationReader(object):
     '''
 
     def __init__(self, redis_db, key, key_type=None, pop=False, block=False,
-                 right_to_left=False, add_references=True,
+                 right_to_left=True, add_references=True,
                  block_timeout=0, temp_key_ttl=3600, temp_key_leaf_len=32):
         '''
         Create communication reader for specified key in specified
@@ -301,7 +301,7 @@ class RedisCommunicationWriter(object):
         w.write(comm)
     '''
 
-    def __init__(self, redis_db, key, key_type=None, right_to_left=False):
+    def __init__(self, redis_db, key, key_type=None, right_to_left=True):
         '''
         Create communication writer for specified key in specified
         redis_db.

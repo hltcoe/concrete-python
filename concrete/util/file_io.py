@@ -40,7 +40,7 @@ def read_thrift_from_file(thrift_obj, filename):
     thrift_file.close()
     return thrift_obj
 
-def read_communication_from_file(communication_filename):
+def read_communication_from_file(communication_filename, add_references=True):
     """Read a Communication from the file specified by filename
 
     Args:
@@ -52,7 +52,8 @@ def read_communication_from_file(communication_filename):
     - A Concrete `Communication` object
     """
     comm = read_thrift_from_file(Communication(), communication_filename)
-    add_references_to_communication(comm)
+    if add_references:
+        add_references_to_communication(comm)
     return comm
 
 def read_tokenlattice_from_file(tokenlattice_filename):
@@ -94,7 +95,9 @@ class CommunicationReader:
         for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
     """
-    def __init__(self, filename):
+    def __init__(self, filename, add_references=True):
+        self._add_references = add_references
+
         self._source_filename = filename
         if tarfile.is_tarfile(filename):
             # File is either a '.tar' or '.tar.gz' file
@@ -142,7 +145,8 @@ class CommunicationReader:
         try:
             comm = Communication()
             comm.read(self.protocol)
-            add_references_to_communication(comm)
+            if self._add_references:
+                add_references_to_communication(comm)
             return (comm, self._source_filename)
         except EOFError:
             self.transport.close()
@@ -164,7 +168,11 @@ class CommunicationReader:
                 Communication(),
                 self.tar.extractfile(tarinfo).read(),
                 protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-            add_references_to_communication(comm)
+            if self._add_references:
+                add_references_to_communication(comm)
+            # hack to keep memory usage O(1)
+            # (...but the real hack is tarfile :)
+            self.tar.members = []
             return (comm, filename)
 
     def _next_from_zip(self):
@@ -176,7 +184,8 @@ class CommunicationReader:
             Communication(),
             self.zip.open(zipinfo).read(),
             protocol_factory=TCompactProtocol.TCompactProtocolFactory())
-        add_references_to_communication(comm)
+        if self._add_references:
+            add_references_to_communication(comm)
         return (comm, zipinfo.filename)
 
 
@@ -191,6 +200,10 @@ class CommunicationWriter:
         writer.write(existing_comm_object)
         writer.close()
     """
+    def __init__(self, filename=None):
+        if filename is not None:
+            self.open(filename)
+
     def close(self):
         self.file.close()
 
@@ -200,6 +213,12 @@ class CommunicationWriter:
     def write(self, comm):
         thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         self.file.write(thrift_bytes)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
 
 class CommunicationWriterTGZ:
@@ -215,6 +234,10 @@ class CommunicationWriterTGZ:
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
     """
+    def __init__(self, tar_filename=None):
+        if tar_filename is not None:
+            self.open(tar_filename)
+
     def close(self):
         self.tarfile.close()
 
@@ -231,3 +254,9 @@ class CommunicationWriterTGZ:
         comm_tarinfo.size = len(thrift_bytes)
 
         self.tarfile.addfile(comm_tarinfo, file_like_obj)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()

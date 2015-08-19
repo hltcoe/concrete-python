@@ -24,7 +24,7 @@ def main():
                            [--lemmas] [--metadata] [--mentions] [--ner]
                            [--pos] [--situation-mentions] [--situations]
                            [--text] [--tokens] [--treebank] [--version]
-                           [--no-add-references] [communication_filename]
+                           [--no-references] [communication_filename]
 ''',
     )
     parser.add_argument("--char-offsets", help="Print token text extracted from character offsets "

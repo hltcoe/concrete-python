@@ -23,7 +23,7 @@ class AnnotatorClientWrapper:
         self.sock = TSocket.TSocket(self.host, self.port)
         self.transport = TTransport.TFramedTransport(self.sock)
         self.protocol = TCompactProtocol.TCompactProtocol(self.transport)
-        self.cli = Annotator.Client(protocol)
+        self.cli = Annotator.Client(self.protocol)
 
         self.transport.open()
 
@@ -46,6 +46,7 @@ class AnnotatorServiceImpl:
     """
     Example implementation of the Concrete Annotator service.
     """
+
     def annotate(this, comm):
         comm.text = "haha"
         return comm
@@ -60,7 +61,6 @@ class AnnotatorServiceImpl:
         return "nothing"
 
     def shutdown(this):
-        # no-op
         pass
 
 class AnnotatorServiceWrapper:
@@ -69,7 +69,8 @@ class AnnotatorServiceWrapper:
     service, providing an easy way to wrap an implementation
     of the Annotator service.
     """
-    def __init__(self, impl, host, port):
+
+    def __init__(self, impl, host='localhost', port=33222):
         self.proc = Annotator.Processor(impl)
         self.sock = TSocket.TServerSocket(host, port)
         self.trans = TTransport.TFramedTransport(sock)

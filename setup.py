@@ -1,6 +1,7 @@
 from ez_setup import use_setuptools
 use_setuptools()
 from setuptools import setup
+import glob
 
 execfile('concrete/version.py')
 
@@ -37,12 +38,7 @@ setup(
         'tests',
         ],
 
-    scripts = [
-        'scripts/concrete2json.py',
-        'scripts/concrete_diff.py',
-        'scripts/concrete_inspect.py',
-        'scripts/validate_communication.py',
-        ],
+    scripts = glob.glob('scripts/*'),
 
     test_suite = "tests",
 

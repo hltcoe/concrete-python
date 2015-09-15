@@ -40,7 +40,7 @@ def main():
     codecs.open(json_one_filename, "w", encoding="utf-8").write(json_comm_one)
     codecs.open(json_two_filename, "w", encoding="utf-8").write(json_comm_two)
 
-    diff_command = "git diff --no-index %s %s" % (json_one_filename, json_two_filename)
+    diff_command = "diff --unified %s %s" % (json_one_filename, json_two_filename)
     diff_output = subprocess.Popen(diff_command, shell=True, stdout=subprocess.PIPE).stdout.read()
 
     # Clean up temporary files

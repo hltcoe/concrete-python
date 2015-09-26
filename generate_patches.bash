@@ -1,12 +1,40 @@
 #!/bin/bash
 
+
+if [ $# -ne 1 ]
+then
+    echo "Usage: $0 CONCRETE-THRIFT-PATH" >&2
+    exit 1
+fi
+
+concrete_thrift_path="$1"
+
+
 set -e
 
+
+if [ -e b ]
+then
+    echo 'Backing up b...'
+    mv b b.`date +%Y%m%d%H%M%S`
+fi
 echo 'Copying current concrete to b...'
 cp -a concrete b
+echo
+echo
 
+if [ -e a ]
+then
+    echo 'Backing up a...'
+    mv a a.`date +%Y%m%d%H%M%S`
+fi
 echo 'Building raw classes in a...'
-bash build.bash --output a --raw ../concrete/thrift
+mkdir a
+echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
+bash build.bash --output-dir a --raw "$concrete_thrift_path"
+echo '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+echo
+echo
 
 echo 'Generating patches from a to b...'
 rm -rf patches
@@ -16,12 +44,18 @@ do
     if [ -d "$path" ]
     then
         bn=`basename "$path"`
-        diff -ruN -x '*.pyc' a/$bn b/$bn > patches/${bn}.patch
+        diff -ruN -x '*.pyc' a/$bn b/$bn > patches/${bn}.patch || true
     fi
 done
+echo
+echo
 
 echo 'Verifying build...'
-bash build.bash ../concrete/thrift
+echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
+bash build.bash "$concrete_thrift_path"
+echo '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+echo
+echo
 
 echo 'Done.'
 echo

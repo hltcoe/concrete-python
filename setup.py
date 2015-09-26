@@ -37,10 +37,7 @@ setup(
         'tests',
         ],
 
-    scripts = glob.glob('scripts/*') + [
-        'concrete/communication/CommunicationService-remote',
-        'concrete/services/Annotator-remote',
-    ],
+    scripts = glob.glob('scripts/*') + glob.glob('concrete/services/*-remote'),
 
     test_suite = "tests",
 

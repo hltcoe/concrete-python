@@ -17,7 +17,6 @@ setup(
         'concrete.audio',
         'concrete.clustering',
         'concrete.communication',
-        'concrete.discourse',
         'concrete.email',
         'concrete.entities',
         'concrete.exceptions',

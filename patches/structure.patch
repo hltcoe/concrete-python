@@ -1,0 +1,291 @@
+diff -ruN -x '*.pyc' a/structure/ttypes.py b/structure/ttypes.py
+--- a/structure/ttypes.py	2015-09-26 07:29:59.171664000 -0400
++++ b/structure/ttypes.py	2015-09-26 07:59:50.967554000 -0400
+@@ -181,6 +181,15 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.tokenIndex)
++    value = (value * 31) ^ hash(self.text)
++    value = (value * 31) ^ hash(self.textSpan)
++    value = (value * 31) ^ hash(self.rawTextSpan)
++    value = (value * 31) ^ hash(self.audioSpan)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -260,6 +269,12 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.parseId)
++    value = (value * 31) ^ hash(self.constituentIndex)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -425,6 +440,16 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.tokenIndexList)
++    value = (value * 31) ^ hash(self.anchorTokenIndex)
++    value = (value * 31) ^ hash(self.tokenizationId)
++    value = (value * 31) ^ hash(self.textSpan)
++    value = (value * 31) ^ hash(self.rawTextSpan)
++    value = (value * 31) ^ hash(self.audioSpan)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -561,6 +586,15 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.tokenIndex)
++    value = (value * 31) ^ hash(self.tag)
++    value = (value * 31) ^ hash(self.confidence)
++    value = (value * 31) ^ hash(self.tagList)
++    value = (value * 31) ^ hash(self.confidenceList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -697,6 +731,14 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.taggedTokenList)
++    value = (value * 31) ^ hash(self.taggingType)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -785,6 +827,13 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.gov)
++    value = (value * 31) ^ hash(self.dep)
++    value = (value * 31) ^ hash(self.edgeType)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -895,6 +944,14 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.isAcyclic)
++    value = (value * 31) ^ hash(self.isConnected)
++    value = (value * 31) ^ hash(self.isSingleHeaded)
++    value = (value * 31) ^ hash(self.isProjective)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1011,6 +1068,14 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.dependencyList)
++    value = (value * 31) ^ hash(self.structureInformation)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1154,6 +1219,16 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.id)
++    value = (value * 31) ^ hash(self.tag)
++    value = (value * 31) ^ hash(self.childList)
++    value = (value * 31) ^ hash(self.headChildIndex)
++    value = (value * 31) ^ hash(self.start)
++    value = (value * 31) ^ hash(self.ending)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1264,6 +1339,13 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.constituentList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1347,6 +1429,12 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.weight)
++    value = (value * 31) ^ hash(self.tokenList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1446,6 +1534,14 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.src)
++    value = (value * 31) ^ hash(self.dst)
++    value = (value * 31) ^ hash(self.token)
++    value = (value * 31) ^ hash(self.weight)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1578,6 +1674,14 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.startState)
++    value = (value * 31) ^ hash(self.endState)
++    value = (value * 31) ^ hash(self.arcList)
++    value = (value * 31) ^ hash(self.cachedBestPath)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1651,6 +1755,11 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.tokenList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1759,6 +1868,14 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.tokens)
++    value = (value * 31) ^ hash(self.concreteTarget)
++    value = (value * 31) ^ hash(self.externalTarget)
++    value = (value * 31) ^ hash(self.linkType)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -1996,9 +2113,28 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.tokenList)
++    value = (value * 31) ^ hash(self.lattice)
++    value = (value * 31) ^ hash(self.kind)
++    value = (value * 31) ^ hash(self.tokenTaggingList)
++    value = (value * 31) ^ hash(self.parseList)
++    value = (value * 31) ^ hash(self.dependencyParseList)
++    value = (value * 31) ^ hash(self.spanLinkList)
++    return value
++
+   def __repr__(self):
++    # The implementation of this function is NOT auto-generated
++    # Prevent infinite recursion caused by backpointer added by
++    #   concrete.util.references.add_references_to_communication()
++    dict_without_backpointer = self.__dict__.copy()
++    if 'sentence' in dict_without_backpointer:
++      dict_without_backpointer.pop('sentence')
+     L = ['%s=%r' % (key, value)
+-      for key, value in self.__dict__.iteritems()]
++      for key, value in dict_without_backpointer.iteritems()]
+     return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+ 
+   def __eq__(self, other):
+@@ -2135,6 +2271,15 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.tokenization)
++    value = (value * 31) ^ hash(self.textSpan)
++    value = (value * 31) ^ hash(self.rawTextSpan)
++    value = (value * 31) ^ hash(self.audioSpan)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -2360,6 +2505,19 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.sentenceList)
++    value = (value * 31) ^ hash(self.textSpan)
++    value = (value * 31) ^ hash(self.rawTextSpan)
++    value = (value * 31) ^ hash(self.audioSpan)
++    value = (value * 31) ^ hash(self.kind)
++    value = (value * 31) ^ hash(self.label)
++    value = (value * 31) ^ hash(self.numberList)
++    value = (value * 31) ^ hash(self.lidList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]

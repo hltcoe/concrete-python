@@ -1,0 +1,65 @@
+diff -ruN -x '*.pyc' a/communication/ttypes.py b/communication/ttypes.py
+--- a/communication/ttypes.py	2015-09-26 07:29:58.708399000 -0400
++++ b/communication/ttypes.py	2015-09-26 07:59:51.034863000 -0400
+@@ -158,6 +158,15 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.taggingType)
++    value = (value * 31) ^ hash(self.tagList)
++    value = (value * 31) ^ hash(self.confidenceList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -556,6 +565,28 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.id)
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.type)
++    value = (value * 31) ^ hash(self.text)
++    value = (value * 31) ^ hash(self.startTime)
++    value = (value * 31) ^ hash(self.endTime)
++    value = (value * 31) ^ hash(self.communicationTaggingList)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.keyValueMap)
++    value = (value * 31) ^ hash(self.lidList)
++    value = (value * 31) ^ hash(self.sectionList)
++    value = (value * 31) ^ hash(self.entityMentionSetList)
++    value = (value * 31) ^ hash(self.entitySetList)
++    value = (value * 31) ^ hash(self.situationMentionSetList)
++    value = (value * 31) ^ hash(self.situationSetList)
++    value = (value * 31) ^ hash(self.originalText)
++    value = (value * 31) ^ hash(self.sound)
++    value = (value * 31) ^ hash(self.communicationMetadata)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -738,6 +769,16 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.communicationIdList)
++    value = (value * 31) ^ hash(self.corpus)
++    value = (value * 31) ^ hash(self.entityMentionClusterList)
++    value = (value * 31) ^ hash(self.entityClusterList)
++    value = (value * 31) ^ hash(self.situationMentionClusterList)
++    value = (value * 31) ^ hash(self.situationClusterList)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]

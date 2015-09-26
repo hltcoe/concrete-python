@@ -1,0 +1,52 @@
+diff -ruN -x '*.pyc' a/services/Annotator.py b/services/Annotator.py
+--- a/services/Annotator.py	2015-09-26 07:29:59.480645000 -0400
++++ b/services/Annotator.py	2015-09-26 07:59:51.320941000 -0400
+@@ -310,6 +310,11 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.original)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -383,6 +388,12 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.success)
++    value = (value * 31) ^ hash(self.ex)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -485,6 +496,11 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.success)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -586,6 +602,11 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.success)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]

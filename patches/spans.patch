@@ -1,0 +1,29 @@
+diff -ruN -x '*.pyc' a/spans/ttypes.py b/spans/ttypes.py
+--- a/spans/ttypes.py	2015-09-26 07:29:59.097448000 -0400
++++ b/spans/ttypes.py	2015-09-26 07:59:51.145118000 -0400
+@@ -94,6 +94,12 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.start)
++    value = (value * 31) ^ hash(self.ending)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -178,6 +184,12 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.start)
++    value = (value * 31) ^ hash(self.ending)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]

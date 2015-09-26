@@ -1,0 +1,17 @@
+diff -ruN -x '*.pyc' a/language/ttypes.py b/language/ttypes.py
+--- a/language/ttypes.py	2015-09-26 07:29:58.838555000 -0400
++++ b/language/ttypes.py	2015-09-26 07:59:51.061919000 -0400
+@@ -125,6 +125,13 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.uuid)
++    value = (value * 31) ^ hash(self.metadata)
++    value = (value * 31) ^ hash(self.languageToProbabilityMap)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]

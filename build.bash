@@ -33,11 +33,11 @@
 DEFAULT_OUTPUT_DIR=concrete
 
 print_usage() {
-    echo "Usage: $0 [--raw] CONCRETE_THRIFT_PATH"
+    echo "Usage: $0 [--raw] CONCRETE-THRIFT-PATH"
     echo "  --raw:  Just generate classes from thrift definitions"
     echo "          (do not apply our modifications)"
-    echo "  --output OUTPUT_DIR:  Write output to OUTPUT_DIR instead of"
-    echo "                        $DEFAULT_OUTPUT_DIR"
+    echo "  --output-dir OUTPUT-DIR:  Write output to OUTPUT_DIR instead of"
+    echo "                            $DEFAULT_OUTPUT_DIR"
 }
 
 
@@ -46,7 +46,7 @@ print_usage() {
 #
 
 raw=false
-output="$DEFAULT_OUTPUT_DIR"
+output_dir="$DEFAULT_OUTPUT_DIR"
 
 while [ $# -gt 0 ]
 do
@@ -54,7 +54,7 @@ do
         --raw)
             raw=true
             ;;
-        --output)
+        --output-dir)
             shift
             output_dir="$1"
             ;;
@@ -67,9 +67,9 @@ do
             exit 0
             ;;
         *)
-            if [ -z "$thrift_path" ]
+            if [ -z "$concrete_thrift_path" ]
             then
-                thrift_path="$1"
+                concrete_thrift_path="$1"
             else
                 print_usage >&2
                 exit 1
@@ -79,7 +79,7 @@ do
     shift
 done
 
-if [ -z "$thrift_path" ]
+if [ -z "$concrete_thrift_path" ]
 then
     print_usage >&2
     exit 1
@@ -89,7 +89,7 @@ fi
 set -e
 
 echo 'Generating Python classes from thrift definitions...'
-for P in `find $1 -name '*.thrift'`
+for P in `find $concrete_thrift_path -name '*.thrift'`
 do
     thrift --gen py:new_style,utf8strings $P
 done
@@ -97,15 +97,15 @@ done
 echo 'Deleting generated files we do not want...'
 rm -f gen-py/concrete/__init__.py
 
-echo "Copying newly-generated classes to $output/..."
-cp -a gen-py/concrete/* "$output/"
+echo "Copying newly-generated classes to $output_dir/..."
+cp -a gen-py/concrete/* "$output_dir/"
 
 if ! $raw
 then
     echo 'Applying our modifications to generated classes...'
     for P in patches/*.patch
     do
-        patch -d "$output" -p1 < $P
+        patch -d "$output_dir" -p1 < $P
     done
 fi
 

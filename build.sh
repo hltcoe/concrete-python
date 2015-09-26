@@ -32,7 +32,7 @@
 
 if [ $# != 1 ]
 then
-    echo "Usage: $0 /absolute/path/to/concrete/thrift"
+    echo "Usage: $0 /path/to/concrete/thrift"
     exit 1
 fi
 

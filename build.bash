@@ -85,8 +85,8 @@ do
     thrift --gen py:new_style,utf8strings $P
 done
 
-echo 'Deleting extraneous generated files...'
-rm -f gen-py/__init__.py
+echo 'Deleting generated files we do not want...'
+rm -f gen-py/concrete/__init__.py
 
 echo 'Copying newly-generated classes to concrete/...'
 cp -a gen-py/concrete/* concrete/

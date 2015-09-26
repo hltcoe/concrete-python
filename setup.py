@@ -17,7 +17,6 @@ setup(
         'concrete.audio',
         'concrete.clustering',
         'concrete.communication',
-        'concrete.communication_service',
         'concrete.discourse',
         'concrete.email',
         'concrete.entities',
@@ -40,7 +39,6 @@ setup(
 
     scripts = glob.glob('scripts/*') + [
         'concrete/communication/CommunicationService-remote',
-        'concrete/communication_service/CommunicationService-remote',
         'concrete/services/Annotator-remote',
     ],
 

@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/clustering/ttypes.py b/clustering/ttypes.py
---- a/clustering/ttypes.py	2015-09-26 07:29:58.611563000 -0400
-+++ b/clustering/ttypes.py	2015-09-26 07:59:51.214061000 -0400
+--- a/clustering/ttypes.py	2015-09-27 09:07:16.485582000 -0400
++++ b/clustering/ttypes.py	2015-09-27 09:00:42.237661000 -0400
 @@ -110,6 +110,13 @@
      return
  

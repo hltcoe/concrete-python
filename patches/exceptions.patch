@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/exceptions/ttypes.py b/exceptions/ttypes.py
---- a/exceptions/ttypes.py	2015-09-26 07:29:59.304051000 -0400
-+++ b/exceptions/ttypes.py	2015-09-26 07:59:51.396064000 -0400
+--- a/exceptions/ttypes.py	2015-09-27 09:07:16.785195000 -0400
++++ b/exceptions/ttypes.py	2015-09-27 09:00:42.269118000 -0400
 @@ -83,6 +83,12 @@
      return
  

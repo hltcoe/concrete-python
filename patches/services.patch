@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/services/Annotator.py b/services/Annotator.py
---- a/services/Annotator.py	2015-09-26 07:29:59.480645000 -0400
-+++ b/services/Annotator.py	2015-09-26 07:59:51.320941000 -0400
+--- a/services/Annotator.py	2015-09-27 09:07:16.910193000 -0400
++++ b/services/Annotator.py	2015-09-27 09:00:42.315670000 -0400
 @@ -310,6 +310,11 @@
      return
  
@@ -45,6 +45,33 @@ diff -ruN -x '*.pyc' a/services/Annotator.py b/services/Annotator.py
 +  def __hash__(self):
 +    value = 17
 +    value = (value * 31) ^ hash(self.success)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+diff -ruN -x '*.pyc' a/services/CommunicationService.py b/services/CommunicationService.py
+--- a/services/CommunicationService.py	2015-09-27 09:07:16.917314000 -0400
++++ b/services/CommunicationService.py	2015-09-27 09:06:38.757244000 -0400
+@@ -228,6 +228,11 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.success)
++    return value
++
+   def __repr__(self):
+     L = ['%s=%r' % (key, value)
+       for key, value in self.__dict__.iteritems()]
+@@ -289,6 +294,11 @@
+     return
+ 
+ 
++  def __hash__(self):
++    value = 17
++    value = (value * 31) ^ hash(self.comm)
 +    return value
 +
    def __repr__(self):

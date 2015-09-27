@@ -228,6 +228,11 @@ class readComm_result(object):
     return
 
 
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    return value
+
   def __repr__(self):
     L = ['%s=%r' % (key, value)
       for key, value in self.__dict__.iteritems()]
@@ -288,6 +293,11 @@ class writeComm_args(object):
   def validate(self):
     return
 
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.comm)
+    return value
 
   def __repr__(self):
     L = ['%s=%r' % (key, value)

@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/uuid/ttypes.py b/uuid/ttypes.py
---- a/uuid/ttypes.py	2015-09-26 07:29:59.271810000 -0400
-+++ b/uuid/ttypes.py	2015-09-26 07:59:50.693904000 -0400
+--- a/uuid/ttypes.py	2015-09-27 09:07:16.776548000 -0400
++++ b/uuid/ttypes.py	2015-09-27 09:00:42.372255000 -0400
 @@ -71,6 +71,11 @@
      return
  

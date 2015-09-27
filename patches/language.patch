@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/language/ttypes.py b/language/ttypes.py
---- a/language/ttypes.py	2015-09-26 07:29:58.838555000 -0400
-+++ b/language/ttypes.py	2015-09-26 07:59:51.061919000 -0400
+--- a/language/ttypes.py	2015-09-27 09:07:16.632380000 -0400
++++ b/language/ttypes.py	2015-09-27 09:00:42.282058000 -0400
 @@ -125,6 +125,13 @@
      return
  

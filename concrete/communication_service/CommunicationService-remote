@@ -15,8 +15,8 @@ from thrift.transport import TSocket
 from thrift.transport import THttpClient
 from thrift.protocol import TBinaryProtocol
 
-from concrete.services import CommunicationService
-from concrete.services.ttypes import *
+from concrete.communication_service import CommunicationService
+from concrete.communication_service.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print ''

@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/twitter/ttypes.py b/twitter/ttypes.py
---- a/twitter/ttypes.py	2015-09-27 09:07:16.767483000 -0400
-+++ b/twitter/ttypes.py	2015-09-27 09:00:42.364587000 -0400
+--- a/twitter/ttypes.py	2015-09-28 14:13:02.933693000 -0400
++++ b/twitter/ttypes.py	2015-09-27 09:07:18.529591000 -0400
 @@ -262,6 +262,27 @@
      return
  

@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/linking/ttypes.py b/linking/ttypes.py
---- a/linking/ttypes.py	2015-09-27 09:07:16.645779000 -0400
-+++ b/linking/ttypes.py	2015-09-27 09:00:42.290235000 -0400
+--- a/linking/ttypes.py	2015-09-28 14:13:02.812357000 -0400
++++ b/linking/ttypes.py	2015-09-27 09:07:18.440355000 -0400
 @@ -121,6 +121,14 @@
      return
  

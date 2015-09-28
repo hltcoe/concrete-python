@@ -168,6 +168,10 @@ class readComm_args(object):
     return
 
 
+  def __hash__(self):
+    value = 17
+    return value
+
   def __repr__(self):
     L = ['%s=%r' % (key, value)
       for key, value in self.__dict__.iteritems()]
@@ -340,6 +344,10 @@ class writeComm_result(object):
   def validate(self):
     return
 
+
+  def __hash__(self):
+    value = 17
+    return value
 
   def __repr__(self):
     L = ['%s=%r' % (key, value)

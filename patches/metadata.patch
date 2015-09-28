@@ -1,6 +1,6 @@
 diff -ruN -x '*.pyc' a/metadata/ttypes.py b/metadata/ttypes.py
---- a/metadata/ttypes.py	2015-09-27 09:07:16.660065000 -0400
-+++ b/metadata/ttypes.py	2015-09-27 09:00:42.300164000 -0400
+--- a/metadata/ttypes.py	2015-09-28 14:13:02.826598000 -0400
++++ b/metadata/ttypes.py	2015-09-27 09:07:18.451590000 -0400
 @@ -401,6 +401,25 @@
      return
  

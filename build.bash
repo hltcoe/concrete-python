@@ -89,6 +89,7 @@ fi
 set -e
 
 echo 'Generating Python classes from thrift definitions...'
+rm -rf gen-py
 for P in `find $concrete_thrift_path -name '*.thrift'`
 do
     thrift --gen py:new_style,utf8strings $P

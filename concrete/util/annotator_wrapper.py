@@ -1,13 +1,14 @@
-from thrift import Thrift, TSerialization
+import time
+
+from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TCompactProtocol
 from thrift.server import TServer
 
-from concrete.services import *
-from concrete.services.ttypes import *
+from concrete.metadata.ttypes import AnnotationMetadata
+from concrete.services import Annotator
 
-import time
 
 class AnnotatorClientWrapper:
     """

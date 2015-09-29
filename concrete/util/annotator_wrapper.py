@@ -74,15 +74,17 @@ class AnnotatorServiceWrapper(object):
     of the Annotator service.
     """
 
-    def __init__(self, impl, host='localhost', port=33222):
-        processor = Annotator.Processor(impl)
-        sock = TSocket.TServerSocket(host, port)
-        trans = TTransport.TFramedTransportFactory()
-        proto = TCompactProtocol.TCompactProtocolFactory()
-        self.srv = TServer.TThreadedServer(processor, sock, trans, proto)
+    def __init__(self, implementation):
+        self.processor = Annotator.Processor(implementation)
 
-        print "Server starting."
-        self.srv.serve()
+    def serve(self, host='localhost', port=33222):
+        socket = TSocket.TServerSocket(host, port)
+        transportFactory = TTransport.TFramedTransportFactory()
+        protocolFactory = TCompactProtocol.TCompactProtocolFactory()
+        server = TServer.TThreadedServer(self.processor, socket,
+                                         transportFactory, protocolFactory)
 
-    def close(self):
-        self.srv.stop()
+        # NOTE: Thrift's servers run indefinitely. This server implementation
+        # may be killed by a KeyboardInterrupt (Control-C); otherwise, the
+        # process must be killed to terminate the server.
+        server.serve()

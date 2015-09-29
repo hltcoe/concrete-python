@@ -41,7 +41,9 @@ class AnnotatorClientWrapper:
         try:
             return self.cli.annotate(comm)
         except Thrift.TException, tx:
-            print "Got an error: %s : perhaps the server isn't running there?" % (tx.message)
+            print ("Got an error: %s"
+                   ": perhaps the server isn't running there?") % (tx.message)
+
 
 class AnnotatorServiceImpl:
     """
@@ -64,6 +66,7 @@ class AnnotatorServiceImpl:
     def shutdown(self):
         pass
 
+
 class AnnotatorServiceWrapper:
     """
     A sample wrapper around the Concrete annotator
@@ -82,4 +85,4 @@ class AnnotatorServiceWrapper:
         self.srv.serve()
 
     def close(self):
-        self.srv.stop();
+        self.srv.stop()

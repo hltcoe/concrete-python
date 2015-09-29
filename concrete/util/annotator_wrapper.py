@@ -48,20 +48,20 @@ class AnnotatorServiceImpl:
     Example implementation of the Concrete Annotator service.
     """
 
-    def annotate(this, comm):
+    def annotate(self, comm):
         comm.text = "haha"
         return comm
 
-    def getMetadata(this):
+    def getMetadata(self):
         md = AnnotationMetadata()
         md.tool = "Sample service impl"
         md.timestamp = int(time.time())
         return md
 
-    def getDocumentation(this):
+    def getDocumentation(self):
         return "nothing"
 
-    def shutdown(this):
+    def shutdown(self):
         pass
 
 class AnnotatorServiceWrapper:

@@ -10,7 +10,7 @@ from concrete.metadata.ttypes import AnnotationMetadata
 from concrete.services import Annotator
 
 
-class AnnotatorClientWrapper:
+class AnnotatorClientWrapper(object):
     """
     A sample client implementation of the Concrete Annotator service.
 
@@ -45,7 +45,7 @@ class AnnotatorClientWrapper:
                    ": perhaps the server isn't running there?") % (tx.message)
 
 
-class AnnotatorServiceImpl:
+class AnnotatorServiceImpl(object):
     """
     Example implementation of the Concrete Annotator service.
     """
@@ -67,7 +67,7 @@ class AnnotatorServiceImpl:
         pass
 
 
-class AnnotatorServiceWrapper:
+class AnnotatorServiceWrapper(object):
     """
     A sample wrapper around the Concrete annotator
     service, providing an easy way to wrap an implementation

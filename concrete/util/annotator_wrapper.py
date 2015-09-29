@@ -72,14 +72,14 @@ class AnnotatorServiceWrapper:
     """
 
     def __init__(self, impl, host='localhost', port=33222):
-        self.proc = Annotator.Processor(impl)
-        self.sock = TSocket.TServerSocket(host, port)
-        self.trans = TTransport.TFramedTransport(sock)
-        self.proto = TCompactProtocol.TCompactProtocol(trans)
+        processor = Annotator.Processor(impl)
+        sock = TSocket.TServerSocket(host, port)
+        trans = TTransport.TFramedTransport(sock)
+        proto = TCompactProtocol.TCompactProtocol(trans)
         self.srv = TServer.TThreadedServer(processor, sock, trans, proto)
 
         print "Server starting."
-        srv.serve()
+        self.srv.serve()
 
     def close(self):
-        srv.stop();
+        self.srv.stop();

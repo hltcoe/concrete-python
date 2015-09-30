@@ -72,28 +72,6 @@ class AnnotatorClientWrapper(object):
         self.transport.close()
 
 
-class AnnotatorServiceImpl(object):
-    """
-    Example implementation of the Concrete Annotator service.
-    """
-
-    def annotate(self, comm):
-        comm.text = "haha"
-        return comm
-
-    def getMetadata(self):
-        md = AnnotationMetadata()
-        md.tool = "Sample service impl"
-        md.timestamp = int(time.time())
-        return md
-
-    def getDocumentation(self):
-        return "nothing"
-
-    def shutdown(self):
-        pass
-
-
 class AnnotatorServiceWrapper(object):
     """
     A sample wrapper around the Concrete annotator

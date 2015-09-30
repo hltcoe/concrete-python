@@ -17,12 +17,8 @@ class ThriftFactory(object):
         self.transportFactory = transportFactory
         self.protocolFactory = protocolFactory
 
-    def createSocket(self, host, port, server):
-        if server:
-          socket = TSocket.TServerSocket(host, port)
-        else:
-          socket = TSocket.TSocket(host, port)
-
+    def createSocket(self, host, port):
+        socket = TSocket.TSocket(host, port)
         return socket
 
     def createTransport(self, socket):
@@ -59,7 +55,7 @@ class AnnotatorClientWrapper(object):
         self.port = port
 
     def __enter__(self):
-        socket = thriftFactory.createSocket(self.host, self.port, False)
+        socket = thriftFactory.createSocket(self.host, self.port)
         self.transport = thriftFactory.createTransport(socket)
         protocol = thriftFactory.createProtocol(self.transport)
 
@@ -83,10 +79,7 @@ class AnnotatorServiceWrapper(object):
         self.processor = Annotator.Processor(implementation)
 
     def serve(self, host='localhost', port=33222):
-        socket = thriftFactory.createSocket(host, port, True)
-        server = TServer.TThreadedServer(self.processor, socket,
-                                         thriftFactory.transportFactory,
-                                         thriftFactory.protocolFactory)
+        server = thriftFactory.createServer(self.processor, host, port)
 
         # NOTE: Thrift's servers run indefinitely. This server implementation
         # may be killed by a KeyboardInterrupt (Control-C); otherwise, the

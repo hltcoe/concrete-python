@@ -8,7 +8,7 @@ import sys
 from thrift import TSerialization
 from thrift.protocol import TCompactProtocol
 
-from concrete import Communication
+import concrete
 from concrete.util import CommunicationWriter
 from concrete.util import read_communication_from_file
 from concrete.util.annotator_wrapper import AnnotatorClientWrapper
@@ -30,7 +30,7 @@ def main():
         handle = os.fdopen(sys.stdin.fileno(), 'rb')
         try:
             bytez = handle.read()
-            comm = Communication()
+            comm = concrete.Communication()
             TSerialization.deserialize(comm, bytez, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         finally:
             handle.close()

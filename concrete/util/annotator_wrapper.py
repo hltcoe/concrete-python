@@ -26,9 +26,8 @@ class AnnotatorClientWrapper(object):
         self.protocol = TCompactProtocol.TCompactProtocol(self.transport)
         self.cli = Annotator.Client(self.protocol)
 
-        self.transport.open()
-
     def __enter__(self):
+        self.transport.open()
         return self
 
     def __exit__(self, type, value, traceback):

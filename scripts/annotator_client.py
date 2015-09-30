@@ -40,8 +40,8 @@ def main():
     else:
         comm = read_communication_from_file(args.input)
 
-    cli = AnnotatorClientWrapper(args.host, args.port)
-    new_comm = cli.annotate(comm)
+    with AnnotatorClientWrapper(args.host, args.port) as client:
+        new_comm = client.annotate(comm)
 
     if args.output == '-':
         new_bytes = TSerialization.serialize(new_comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())

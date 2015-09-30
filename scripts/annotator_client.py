@@ -1,21 +1,17 @@
-from thrift import Thrift, TSerialization
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TCompactProtocol
-from thrift.server import TServer
-
-from concrete.services import *
-from concrete.services.ttypes import *
-
-from concrete.communication import *
-from concrete.communication.ttypes import *
 
 import argparse
 import codecs
-import sys, os
+import os
+import sys
 
+from thrift import TSerialization
+from thrift.protocol import TCompactProtocol
+
+from concrete import Communication
+from concrete.util import CommunicationWriter
+from concrete.util import read_communication_from_file
 from concrete.util.annotator_wrapper import AnnotatorClientWrapper
-from concrete.util import (read_communication_from_file, CommunicationWriter)
+
 
 def main():
     # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors

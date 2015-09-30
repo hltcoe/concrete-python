@@ -21,28 +21,19 @@ class AnnotatorClientWrapper(object):
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.sock = TSocket.TSocket(self.host, self.port)
-        self.transport = TTransport.TFramedTransport(self.sock)
-        self.protocol = TCompactProtocol.TCompactProtocol(self.transport)
-        self.cli = Annotator.Client(self.protocol)
-
-        self.transport.open()
 
     def __enter__(self):
-        return self
+        sock = TSocket.TSocket(self.host, self.port)
+        self.transport = TTransport.TFramedTransport(sock)
+        protocol = TCompactProtocol.TCompactProtocol(self.transport)
+
+        cli = Annotator.Client(protocol)
+
+        self.transport.open()
+        return cli
 
     def __exit__(self, type, value, traceback):
         self.transport.close()
-
-    def annotate(self, comm):
-        """
-        Tiny wrapper around Annotator.annotate(Communication).
-        """
-        try:
-            return self.cli.annotate(comm)
-        except Thrift.TException, tx:
-            print ("Got an error: %s"
-                   ": perhaps the server isn't running there?") % (tx.message)
 
 
 class AnnotatorServiceImpl(object):

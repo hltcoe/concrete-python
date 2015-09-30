@@ -1,12 +1,8 @@
-import time
-
-from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TCompactProtocol
 from thrift.server import TServer
 
-from concrete.metadata.ttypes import AnnotationMetadata
 from concrete.services import Annotator
 
 

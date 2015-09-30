@@ -28,6 +28,8 @@ def main():
     parser = argparse.ArgumentParser(description='Annotation service for '
                                                  'testing')
 
+    parser.add_argument('--host', dest='host', action='store', type=str,
+                        default='localhost', help='Host on which to listen')
     parser.add_argument('-p', '--port', dest='port', action='store', type=str,
                         default=33222, help='Port on which to listen')
     args = parser.parse_args()
@@ -35,7 +37,7 @@ def main():
     handler = FakeAnnotator()
 
     server = annotator_wrapper.AnnotatorServiceWrapper(handler)
-    server.serve('localhost', args.port)
+    server.serve(args.host, args.port)
 
 
 if __name__ == '__main__':

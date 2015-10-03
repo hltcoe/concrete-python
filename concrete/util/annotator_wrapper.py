@@ -3,7 +3,30 @@ from thrift.transport import TTransport
 from thrift.protocol import TCompactProtocol
 from thrift.server import TServer
 
+from multiprocessing import Process
+from time import sleep, time
+from socket import create_connection
+
 from concrete.services import Annotator
+from concrete.metadata.ttypes import AnnotationMetadata
+
+
+class NoopAnnotator(Annotator.Iface):
+    METADATA_TOOL = 'No-op Annotator'
+
+    def annotate(self, communication):
+        return communication
+
+    def getMetadata(self,):
+        metadata = AnnotationMetadata(tool=self.METADATA_TOOL,
+                                      timestamp=int(time()))
+        return metadata
+
+    def getDocumentation(self):
+        return 'Annotator that returns communication unmodified'
+
+    def shutdown(self):
+        pass
 
 
 class ThriftFactory(object):
@@ -74,10 +97,52 @@ class AnnotatorServiceWrapper(object):
     def __init__(self, implementation):
         self.processor = Annotator.Processor(implementation)
 
-    def serve(self, host='localhost', port=33222):
+    def serve(self, host, port):
         server = thriftFactory.createServer(self.processor, host, port)
 
         # NOTE: Thrift's servers run indefinitely. This server implementation
         # may be killed by a KeyboardInterrupt (Control-C); otherwise, the
         # process must be killed to terminate the server.
         server.serve()
+
+
+class SubprocessAnnotatorServiceWrapper(object):
+    '''
+    Annotator service wrapper that runs server in a subprocess via a
+    context manager interface.
+    '''
+
+    SLEEP_INTERVAL = 0.1
+
+    def __init__(self, implementation, host, port, timeout=None):
+        self.proc = None
+        self.server = AnnotatorServiceWrapper(implementation)
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+
+    def __enter__(self):
+        self.proc = Process(target=self.server.serve,
+                            args=(self.host, self.port))
+        self.proc.start()
+
+        s = None
+        elapsed = 0.
+
+        # Loop until successful connect or timeout
+        while s is None and (self.timeout is None or elapsed < self.timeout):
+            try:
+                s = create_connection((self.host, self.port))
+                s.close()
+            except:
+                s = None
+
+                # this is not precise... not important
+                sleep(self.SLEEP_INTERVAL)
+                elapsed += self.SLEEP_INTERVAL
+
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.proc.terminate()
+        self.proc.join()

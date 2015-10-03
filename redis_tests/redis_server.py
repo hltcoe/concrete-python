@@ -1,22 +1,9 @@
 import subprocess
 import redis
-import socket
 import time
 
+from concrete.util.net import find_port
 
-def find_port():
-    '''
-    Find and return an available TCP port.
-
-    >>> find_port() > 1023
-    True
-    '''
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('', 0))
-    addr = s.getsockname()
-    port = addr[1]
-    s.close()
-    return port
 
 def start_redis(*args, **kwargs):
     '''

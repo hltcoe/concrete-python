@@ -8,6 +8,11 @@ import os.path
 import tarfile
 import zipfile
 
+import os
+import pwd
+import grp
+import time
+
 from thrift import TSerialization
 from thrift.protocol import TCompactProtocol
 from thrift.transport import TTransport
@@ -250,8 +255,15 @@ class CommunicationWriterTGZ:
         file_like_obj = cStringIO.StringIO(thrift_bytes)
 
         comm_tarinfo = tarfile.TarInfo()
+        comm_tarinfo.type = tarfile.REGTYPE
         comm_tarinfo.name = comm_filename
         comm_tarinfo.size = len(thrift_bytes)
+        comm_tarinfo.mode = 0644
+        comm_tarinfo.mtime = time.time()
+        comm_tarinfo.uid = os.getuid()
+        comm_tarinfo.uname = pwd.getpwuid(os.getuid()).pw_name
+        comm_tarinfo.gid = os.getgid()
+        comm_tarinfo.gname = grp.getgrgid(os.getgid()).gr_name
 
         self.tarfile.addfile(comm_tarinfo, file_like_obj)
 

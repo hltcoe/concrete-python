@@ -17,7 +17,6 @@ setup(
         'concrete.audio',
         'concrete.clustering',
         'concrete.communication',
-        'concrete.communication_service',
         'concrete.email',
         'concrete.entities',
         'concrete.exceptions',
@@ -38,8 +37,7 @@ setup(
         ],
 
     scripts = glob.glob('scripts/*')
-              + glob.glob('concrete/services/*-remote')
-              + glob.glob('concrete/communication_service/*-remote'),
+              + glob.glob('concrete/services/*-remote'),
 
     test_suite = "tests",
 

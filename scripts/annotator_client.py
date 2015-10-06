@@ -1,21 +1,18 @@
-from thrift import Thrift, TSerialization
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TCompactProtocol
-from thrift.server import TServer
-
-from concrete.services import *
-from concrete.services.ttypes import *
-
-from concrete.communication import *
-from concrete.communication.ttypes import *
+#!/usr/bin/env python
 
 import argparse
 import codecs
-import sys, os
+import os
+import sys
 
+from thrift import TSerialization
+from thrift.protocol import TCompactProtocol
+
+import concrete
+from concrete.util import CommunicationWriter
+from concrete.util import read_communication_from_file
 from concrete.util.annotator_wrapper import AnnotatorClientWrapper
-from concrete.util import (read_communication_from_file, CommunicationWriter)
+
 
 def main():
     # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors
@@ -33,15 +30,15 @@ def main():
         handle = os.fdopen(sys.stdin.fileno(), 'rb')
         try:
             bytez = handle.read()
-            comm = Communication()
+            comm = concrete.Communication()
             TSerialization.deserialize(comm, bytez, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         finally:
             handle.close()
     else:
         comm = read_communication_from_file(args.input)
 
-    cli = AnnotatorClientWrapper(args.host, args.port)
-    new_comm = cli.annotate(comm)
+    with AnnotatorClientWrapper(args.host, args.port) as client:
+        new_comm = client.annotate(comm)
 
     if args.output == '-':
         new_bytes = TSerialization.serialize(new_comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())

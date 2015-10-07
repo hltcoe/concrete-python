@@ -5,10 +5,29 @@ import argparse
 from concrete.util.annotator_wrapper import AnnotatorServiceWrapper
 from concrete.util.net import find_port
 
-# NOTE: must be run from repository root for this import to work
-# (this is not an absolute import because tests may be removed from the
-#  package index, i.e., installed modules)
-from tests.annotators import NoopAnnotator
+
+from time import time
+
+from concrete.services import Annotator
+from concrete.metadata.ttypes import AnnotationMetadata
+
+
+class NoopAnnotator(Annotator.Iface):
+    METADATA_TOOL = 'No-op Annotator'
+
+    def annotate(self, communication):
+        return communication
+
+    def getMetadata(self,):
+        metadata = AnnotationMetadata(tool=self.METADATA_TOOL,
+                                      timestamp=int(time()))
+        return metadata
+
+    def getDocumentation(self):
+        return 'Annotator that returns communication unmodified'
+
+    def shutdown(self):
+        pass
 
 
 def main():

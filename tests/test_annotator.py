@@ -12,7 +12,29 @@ from concrete.util.annotator_wrapper import SubprocessAnnotatorServiceWrapper
 from concrete.util.net import find_port
 from concrete.util.simple_comm import create_simple_comm
 
-from .annotators import NoopAnnotator
+
+from time import time
+
+from concrete.services import Annotator
+from concrete.metadata.ttypes import AnnotationMetadata
+
+
+class NoopAnnotator(Annotator.Iface):
+    METADATA_TOOL = 'No-op Annotator'
+
+    def annotate(self, communication):
+        return communication
+
+    def getMetadata(self,):
+        metadata = AnnotationMetadata(tool=self.METADATA_TOOL,
+                                      timestamp=int(time()))
+        return metadata
+
+    def getDocumentation(self):
+        return 'Annotator that returns communication unmodified'
+
+    def shutdown(self):
+        pass
 
 
 class TestAnnotator(unittest.TestCase):

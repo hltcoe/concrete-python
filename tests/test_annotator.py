@@ -8,9 +8,11 @@ import unittest
 
 from concrete.services import Annotator
 
-from concrete.util.annotator_wrapper import SubprocessAnnotatorServiceWrapper, NoopAnnotator
+from concrete.util.annotator_wrapper import SubprocessAnnotatorServiceWrapper
 from concrete.util.net import find_port
 from concrete.util.simple_comm import create_simple_comm
+
+from .annotators import NoopAnnotator
 
 
 class TestAnnotator(unittest.TestCase):

@@ -19,10 +19,10 @@ def main():
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
     parser = argparse.ArgumentParser(description="Interface with a Concrete Annotator service")
-    parser.add_argument('--port', required=True, default=33221, type=int, help="Port to use. [Default: 33221]")
-    parser.add_argument('--host', required=True, help="Hostname to use.")
-    parser.add_argument('--input', required=True, default='-', help="Input source to use. '-' for stdin; otherwise takes a path to a file. [Default: stdin]")
-    parser.add_argument('--output', required=True, default='-', help="Output source to use. '-' for stdout; otherwise takes a path to a file. [Default: stdout]")
+    parser.add_argument('--port', required=True, type=int, help="Port to use.")
+    parser.add_argument('--host', required=True, default='localhost', help="Hostname to use.")
+    parser.add_argument('--input', default='-', help="Input source to use. '-' for stdin; otherwise takes a path to a file. [Default: stdin]")
+    parser.add_argument('--output', default='-', help="Output source to use. '-' for stdout; otherwise takes a path to a file. [Default: stdout]")
     args = parser.parse_args()
 
     if args.input == '-':

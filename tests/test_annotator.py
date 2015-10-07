@@ -25,6 +25,10 @@ class TestAnnotator(unittest.TestCase):
         comm_id = '1-2-3-4'
         comm = create_simple_comm(comm_id)
 
+        comm_uuid_uuidString = comm.uuid.uuidString
+        comm_metadata_tool = comm.metadata.tool
+        comm_metadata_timestamp = comm.metadata.timestamp
+
         with SubprocessAnnotatorServiceWrapper(impl, host, port, timeout=timeout) as w:
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
@@ -35,10 +39,10 @@ class TestAnnotator(unittest.TestCase):
             res = cli.annotate(comm)
             transport.close()
 
-            self.assertEqual(res.id, comm.id)
-            self.assertEqual(res.uuid.uuidString, comm.uuid.uuidString)
-            self.assertEqual(res.metadata.tool, comm.metadata.tool)
-            self.assertEqual(res.metadata.timestamp, comm.metadata.timestamp)
+            self.assertEqual(res.id, comm_id)
+            self.assertEqual(res.uuid.uuidString, comm_uuid_uuidString)
+            self.assertEqual(res.metadata.tool, comm_metadata_tool)
+            self.assertEqual(res.metadata.timestamp, comm_metadata_timestamp)
 
     def test_get_metadata(self):
         impl = NoopAnnotator()

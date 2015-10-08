@@ -7,6 +7,9 @@ import os
 import tarfile
 import tempfile
 import unittest
+import time
+import pwd
+import grp
 
 from concrete.util import (
     CommunicationReader,
@@ -186,6 +189,9 @@ class TestCommunicationWriter(unittest.TestCase):
         os.remove(filename)
 
 
+TIME_MARGIN = 60 * 60 * 24
+
+
 class TestCommunicationWriterTGZ(unittest.TestCase):
     def test_single_file(self):
         comm = read_communication_from_file("tests/testdata/simple_1.concrete")
@@ -196,6 +202,27 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         writer.close()
 
         self.assertTrue(tarfile.is_tarfile(filename))
+
+        f = tarfile.open(filename)
+
+        tarinfo = f.next()
+        self.assertIsNotNone(tarinfo)
+
+        self.assertEquals("simple_1.concrete", tarinfo.name)
+        self.assertTrue(tarinfo.isreg())
+        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
+        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(0644, tarinfo.mode)
+        self.assertEquals(os.getuid(), tarinfo.uid)
+        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
+        self.assertEquals(os.getgid(), tarinfo.gid)
+        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
+
+        tarinfo = f.next()
+        self.assertIsNone(tarinfo)
+
+        f.close()
+
         os.remove(filename)
 
     def test_single_file_ctx_mgr(self):
@@ -205,6 +232,27 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
             writer.write(comm, "simple_1.concrete")
 
         self.assertTrue(tarfile.is_tarfile(filename))
+
+        f = tarfile.open(filename)
+
+        tarinfo = f.next()
+        self.assertIsNotNone(tarinfo)
+
+        self.assertEquals("simple_1.concrete", tarinfo.name)
+        self.assertTrue(tarinfo.isreg())
+        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
+        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(0644, tarinfo.mode)
+        self.assertEquals(os.getuid(), tarinfo.uid)
+        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
+        self.assertEquals(os.getgid(), tarinfo.gid)
+        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
+
+        tarinfo = f.next()
+        self.assertIsNone(tarinfo)
+
+        f.close()
+
         os.remove(filename)
 
 

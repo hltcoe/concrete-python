@@ -26,14 +26,22 @@
 import argparse
 import gzip
 from thrift import TSerialization
-from thrift.protocol import TCompactProtocol, TBinaryProtocol
+from thrift.protocol import TCompactProtocol, TBinaryProtocol, TJSONProtocol
 from thrift.transport import TTransport
 from concrete import Communication
 import mimetypes
 
+PROTOCOLS = {
+    "binary"  : TBinaryProtocol.TBinaryProtocolFactory,
+    "compact" : TCompactProtocol.TCompactProtocolFactory,
+    "json"    : TJSONProtocol.TJSONProtocolFactory
+    }
+
 KNOWN_CONVERSIONS = {
-    'binary-to-compact':(TBinaryProtocol.TBinaryProtocolFactory, TCompactProtocol.TCompactProtocolFactory),
-    'compact-to-binary':(TCompactProtocol.TCompactProtocolFactory, TBinaryProtocol.TBinaryProtocolFactory)
+    'binary-to-compact':( PROTOCOLS["binary"], PROTOCOLS["compact"]),
+    'compact-to-binary':( PROTOCOLS["compact"], PROTOCOLS["binary"]),
+    'compact-to-json':( PROTOCOLS["compact"], PROTOCOLS["json"]),
+    'json-to-compact':( PROTOCOLS["json"], PROTOCOLS["compact"])
 }
 
 def make_parser():
@@ -42,7 +50,9 @@ def make_parser():
                         help='input file path')
     parser.add_argument('--output-file', type=str, required=True,
                         help='output file path')
-    parser.add_argument('--direction', choices = KNOWN_CONVERSIONS.keys(), required=True)
+    parser.add_argument('--direction', choices = KNOWN_CONVERSIONS.keys(), required=False)
+    parser.add_argument('--iprotocol', choices = sorted(PROTOCOLS.keys()), required=False)
+    parser.add_argument('--oprotocol', choices = sorted(PROTOCOLS.keys()), required=False)
     return parser
 
 def convert(input_file_path, output_file_path, input_protocol_factory, output_protocol_factory):
@@ -84,6 +94,16 @@ if __name__ == '__main__':
     (ifile_type, ifile_encoding) = mimetypes.guess_type(args.input_file)
     (ofile_type, ofile_encoding) = mimetypes.guess_type(args.output_file)
     out_writer = None
+    if args.direction is None:
+        if args.iprotocol is None or args.oprotocol is None:
+            print "Either --direction, or both --iprotocol and --oprotocol, must be provided"
+            exit(1)
+    else:
+        if (not args.iprotocol is None) or (not args.oprotocol is None):
+            print "Not both --direction, and either --iprotocol or --oprotocol, can be provided"
+            exit(1)
+    encoding_input = KNOWN_CONVERSIONS[args.direction][0] if args.iprotocol is None else PROTOCOLS[args.iprotocol]
+    encoding_output = KNOWN_CONVERSIONS[args.direction][1] if args.oprotocol is None else PROTOCOLS[args.oprotocol]
     if ofile_encoding == "gzip":
         out_writer = gzip.GzipFile(args.output_file, 'wb')
     else:
@@ -91,12 +111,12 @@ if __name__ == '__main__':
     if ifile_encoding == 'gzip':
         f = gzip.GzipFile(args.input_file)
         transportIn = TTransport.TFileObjectTransport(f)
-        protocolIn = KNOWN_CONVERSIONS[args.direction][0]().getProtocol(transportIn)
+        protocolIn = encoding_input().getProtocol(transportIn)
         while True:
             try:
                 comm = Communication()
                 comm.read(protocolIn)
-                output_bytes = TSerialization.serialize(comm, protocol_factory = KNOWN_CONVERSIONS[args.direction][1]())
+                output_bytes = TSerialization.serialize(comm, protocol_factory = encoding_output())
                 out_writer.write(output_bytes)
             except EOFError:
                 break
@@ -104,7 +124,7 @@ if __name__ == '__main__':
     else:
         convert(input_file_path  = args.input_file,
                 output_file_path = args.output_file,
-                input_protocol_factory  = KNOWN_CONVERSIONS[args.direction][0],
-                output_protocol_factory = KNOWN_CONVERSIONS[args.direction][1])
+                input_protocol_factory  = encoding_input,
+                output_protocol_factory = encoding_output)
     out_writer.close()
 

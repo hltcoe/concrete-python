@@ -83,8 +83,10 @@ def convert_communication(input_bytes, input_protocol_factory, output_protocol_f
     * output_protocol_factory: Callable factory function for output encoding, e.g., TCompactProtocol.TCompactProtocolFactory.
     """
     comm = Communication()
-    TSerialization.deserialize(comm, input_bytes, protocol_factory = KNOWN_CONVERSIONS[args.direction][0]())
-    output_bytes = TSerialization.serialize(comm, protocol_factory = KNOWN_CONVERSIONS[args.direction][1]())
+    TSerialization.deserialize(comm,
+                               input_bytes,
+                               protocol_factory = input_protocol_factory())
+    output_bytes = TSerialization.serialize(comm, protocol_factory = output_protocol_factory())
     return output_bytes
     
 if __name__ == '__main__':

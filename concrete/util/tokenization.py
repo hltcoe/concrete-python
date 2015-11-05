@@ -36,3 +36,23 @@ def get_tokens(tokenization, suppress_warnings=False):
         raise ValueError('Unrecognized TokenizationKind %d' % tokenization.kind)
 
     return None
+
+
+plus = lambda x, y: x + y
+
+flatten = lambda a: reduce(plus, a, [])
+
+def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
+    '''
+    Return list of Tokens in communication, delegating to get_tokens
+    for each sentence.
+    '''
+    return flatten(map(
+        lambda sect: flatten(map(
+            lambda sent: get_tokens(sent.tokenization, suppress_warnings),
+            sect.sentenceList
+        )),
+        filter(sect_pred, comm.sectionList)
+            if (sect_pred is not None)
+            else comm.sectionList
+    ))

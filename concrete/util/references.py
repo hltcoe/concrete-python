@@ -61,7 +61,7 @@ def add_references_to_communication(comm):
             comm.sectionForUUID[section.uuid.uuidString] = section
             if section.sentenceList:
                 for sentence in section.sentenceList:
-                    comm.sentenceForUUID[sentence.uuid.uuidString]= sentence
+                    comm.sentenceForUUID[sentence.uuid.uuidString] = sentence
                     if sentence.tokenization:
                         comm.tokenizationForUUID[sentence.tokenization.uuid.uuidString] = sentence.tokenization
                         sentence.tokenization.sentence = sentence

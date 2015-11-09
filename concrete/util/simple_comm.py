@@ -36,7 +36,7 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
 
     - A Concrete Communication object
     """
-    toolname="TEST"
+    toolname = "TEST"
     timestamp = int(time.time())
 
     comm = Communication(
@@ -66,7 +66,7 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
         textSpan=TextSpan(0, len(sentence_string)),
         uuid=generate_UUID())
 
-    comm.sectionList=[section]
+    comm.sectionList = [section]
 
     return comm
 

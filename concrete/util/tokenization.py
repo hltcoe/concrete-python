@@ -67,6 +67,7 @@ plus = lambda x, y: x + y
 
 flatten = lambda a: reduce(plus, a, [])
 
+
 def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
     '''
     Return list of Tokens in communication, delegating to get_tokens

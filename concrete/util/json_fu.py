@@ -24,6 +24,7 @@ def communication_file_to_json(communication_filename, remove_timestamps=False, 
     comm = read_communication_from_file(communication_filename)
     return thrift_to_json(comm, remove_timestamps=remove_timestamps, remove_uuids=remove_uuids)
 
+
 def tokenlattice_file_to_json(toklat_filename):
     """Get a "pretty-printed" JSON string representation for a TokenLattice
 

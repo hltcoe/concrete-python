@@ -45,6 +45,7 @@ def read_thrift_from_file(thrift_obj, filename):
     thrift_file.close()
     return thrift_obj
 
+
 def read_communication_from_file(communication_filename, add_references=True):
     """Read a Communication from the file specified by filename
 
@@ -61,6 +62,7 @@ def read_communication_from_file(communication_filename, add_references=True):
         add_references_to_communication(comm)
     return comm
 
+
 def read_tokenlattice_from_file(tokenlattice_filename):
     """
     Takes the filename of a serialized Concrete TokenLattice file,
@@ -69,8 +71,10 @@ def read_tokenlattice_from_file(tokenlattice_filename):
     """
     return read_thrift_from_file(TokenLattice(), tokenlattice_filename)
 
+
 def write_communication_to_file(communication, communication_filename):
     return write_thrift_to_file(communication, communication_filename)
+
 
 def write_thrift_to_file(thrift_obj, filename):
     thrift_bytes = TSerialization.serialize(thrift_obj, protocol_factory=TCompactProtocol.TCompactProtocolFactory())

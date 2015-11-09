@@ -1,6 +1,7 @@
 """Add reference variables for each UUID "pointer" in a Communication
 """
 
+
 def add_references_to_communication(comm):
     """Create references for each UUID 'pointer'
 

@@ -33,6 +33,7 @@ from concrete.util import generate_UUID
 TOOL_NAME = "Python module concrete.util.twitter"
 TWEET_TYPE = "Tweet"
 
+
 def json_tweet_object_to_Communication(tweet):
     """
     """

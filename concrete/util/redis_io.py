@@ -8,6 +8,7 @@ from thrift.transport.TTransport import TMemoryBuffer
 from concrete import Communication
 from concrete.util.references import add_references_to_communication
 
+
 def read_communication_from_buffer(buf, add_references=True):
     '''
     Deserialize buf and return resulting communication.

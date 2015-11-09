@@ -7,7 +7,6 @@ The fields used by the Twitter API are documented at:
 
 import json
 import logging
-import re
 import time
 
 from concrete import (

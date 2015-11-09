@@ -1,6 +1,5 @@
 import string
 import random
-import time
 
 from thrift.protocol.TCompactProtocol import TCompactProtocol
 from thrift.transport.TTransport import TMemoryBuffer

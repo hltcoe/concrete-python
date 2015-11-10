@@ -33,7 +33,8 @@ def get_tokens(tokenization, suppress_warnings=False):
             return token_list.tokenList
 
     else:
-        raise ValueError('Unrecognized TokenizationKind %d' % tokenization.kind)
+        raise ValueError('Unrecognized TokenizationKind %s'
+                         % tokenization.kind)
 
     return None
 

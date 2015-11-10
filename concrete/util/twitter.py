@@ -58,9 +58,7 @@ def json_tweet_object_to_TweetInfo(tweet):
     Returns:
     """
     def snake_case_to_camelcase(value):
-        """Implementation copied from:
-
-             http://stackoverflow.com/questions/4303492/how-can-i-simplify-this-conversion-from-underscore-to-camelcase-in-python
+        """Implementation copied from: http://goo.gl/SSgo9k
         """
         def camelcase():
             yield unicode.lower
@@ -83,7 +81,8 @@ def json_tweet_object_to_TweetInfo(tweet):
                 if hasattr(concrete_object, camelcased_key):
                     setattr(concrete_object, camelcased_key, twitter_dict[key])
                 else:
-                    logging.warn("Concrete schema for '%s' missing field for Twitter API field '%s'" %
+                    logging.warn("Concrete schema for '%s' missing field "
+                                 "for Twitter API field '%s'" %
                                  (type(concrete_object), key))
 
     tweet_info = TweetInfo()
@@ -132,7 +131,8 @@ def json_tweet_object_to_TweetInfo(tweet):
                 twitter_place.boundingBox = bounding_box
             if tweet[u'place'][u'attributes']:
                 place_attributes = PlaceAttributes()
-                set_flat_fields(place_attributes, tweet[u'place'][u'attributes'])
+                set_flat_fields(place_attributes,
+                                tweet[u'place'][u'attributes'])
                 twitter_place.attributes = place_attributes
             tweet_info.place = twitter_place
 

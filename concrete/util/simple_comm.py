@@ -53,7 +53,8 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
         uuid=generate_UUID())
     token_string_list = sentence_string.split()
     for i, token_string in enumerate(token_string_list):
-        tokenization.tokenList.tokenList.append(Token(text=token_string, tokenIndex=i))
+        tokenization.tokenList.tokenList.append(Token(text=token_string,
+                                                      tokenIndex=i))
 
     sentence = Sentence(
         textSpan=TextSpan(0, len(sentence_string)),

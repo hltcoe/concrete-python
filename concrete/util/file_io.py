@@ -41,7 +41,9 @@ def read_thrift_from_file(thrift_obj, filename):
     """
     thrift_file = open(filename, "rb")
     thrift_bytes = thrift_file.read()
-    TSerialization.deserialize(thrift_obj, thrift_bytes, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+    TSerialization.deserialize(
+        thrift_obj, thrift_bytes,
+        protocol_factory=TCompactProtocol.TCompactProtocolFactory())
     thrift_file.close()
     return thrift_obj
 
@@ -77,14 +79,17 @@ def write_communication_to_file(communication, communication_filename):
 
 
 def write_thrift_to_file(thrift_obj, filename):
-    thrift_bytes = TSerialization.serialize(thrift_obj, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+    thrift_bytes = TSerialization.serialize(
+        thrift_obj,
+        protocol_factory=TCompactProtocol.TCompactProtocolFactory())
     thrift_file = open(filename, "wb")
     thrift_file.write(thrift_bytes)
     thrift_file.close()
 
 
 class CommunicationReader(object):
-    """Iterator/generator class for reading one or more Communications from a file
+    """Iterator/generator class for reading one or more Communications from a
+    file
 
     The iterator returns a `(Communication, filename)` tuple
 
@@ -220,7 +225,8 @@ class CommunicationWriter(object):
         self.file = open(filename, 'wb')
 
     def write(self, comm):
-        thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+        thrift_bytes = TSerialization.serialize(
+            comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
         self.file.write(thrift_bytes)
 
     def __enter__(self):
@@ -258,7 +264,8 @@ class CommunicationWriterTar(object):
         if comm_filename is None:
             comm_filename = comm.uuid.uuidString + '.concrete'
 
-        thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
+        thrift_bytes = TSerialization.serialize(
+            comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
 
         file_like_obj = cStringIO.StringIO(thrift_bytes)
 

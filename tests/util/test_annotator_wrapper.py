@@ -51,3 +51,40 @@ class AnnotatorClientWrapperTest(unittest.TestCase):
 
         # verify invocations
         mock_transport.close.assert_called_once_with()
+
+
+class AnnotatorServiceWrapperTest(unittest.TestCase):
+    def setUp(self):
+        class Implementation(Annotator.Iface):
+            def annotate(communication):
+                raise NotImplementedError
+
+            def getMetadata():
+                raise NotImplementedError
+
+            def getDocumentation():
+                raise NotImplementedError
+
+            def shutdown():
+                raise NotImplementedError
+
+        implementation = Implementation()
+
+        self.wrapper = \
+            annotator_wrapper.AnnotatorServiceWrapper(implementation)
+
+    @mock.patch.object(annotator_wrapper.ThriftFactory, 'createServer')
+    def test_serve(self, mock_create_server):
+        # create mock for server.serve invocation
+        mock_server = mock.Mock()
+        mock_create_server.return_value = mock_server
+
+        host = 'fake-host'
+        port = 'fake-port'
+
+        self.wrapper.serve(host, port)
+
+        # verify method invocations
+        mock_create_server.assert_called_once_with(self.wrapper.processor,
+                                                   host, port)
+        mock_server.serve.assert_called_once_with()

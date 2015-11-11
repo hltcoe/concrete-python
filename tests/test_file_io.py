@@ -274,7 +274,7 @@ class TestCommunicationWriterTar(unittest.TestCase):
         writer = CommunicationWriterTar()
         (file_handle, filename) = tempfile.mkstemp()
         writer.open(filename)
-        writer.write(comm)
+        writer.write(comm, comm.uuid.uuidString + '.concrete')
         writer.close()
 
         self.assertTrue(tarfile.is_tarfile(filename))
@@ -370,7 +370,7 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         writer = CommunicationWriterTGZ()
         (file_handle, filename) = tempfile.mkstemp()
         writer.open(filename)
-        writer.write(comm)
+        writer.write(comm, comm.uuid.uuidString + '.concrete')
         writer.close()
 
         self.assertTrue(tarfile.is_tarfile(filename))

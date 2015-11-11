@@ -74,7 +74,7 @@ class AnnotatorServiceWrapperTest(unittest.TestCase):
         self.wrapper = \
             annotator_wrapper.AnnotatorServiceWrapper(implementation)
 
-    @mock.patch.object(annotator_wrapper.ThriftFactory, 'createServer')
+    @mock.patch.object(thrift.ThriftFactory, 'createServer')
     def test_serve(self, mock_create_server):
         # create mock for server.serve invocation
         mock_server = mock.Mock()

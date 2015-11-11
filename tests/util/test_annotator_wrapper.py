@@ -4,6 +4,7 @@ import unittest
 
 from concrete.services import Annotator
 from concrete.util import annotator_wrapper
+from concrete.util import thrift_factory as thrift
 
 
 class AnnotatorClientWrapperTest(unittest.TestCase):
@@ -15,10 +16,10 @@ class AnnotatorClientWrapperTest(unittest.TestCase):
                                                                 self.port)
 
     @mock.patch('concrete.services.Annotator.Client')
-    @mock.patch.object(annotator_wrapper.ThriftFactory, 'createProtocol',
+    @mock.patch.object(thrift.ThriftFactory, 'createProtocol',
                        return_value=sentinel.protocol)
-    @mock.patch.object(annotator_wrapper.ThriftFactory, 'createTransport')
-    @mock.patch.object(annotator_wrapper.ThriftFactory, 'createSocket',
+    @mock.patch.object(thrift.ThriftFactory, 'createTransport')
+    @mock.patch.object(thrift.ThriftFactory, 'createSocket',
                        return_value=sentinel.socket)
     def test___enter__(self, mock_create_socket, mock_create_transport,
                        mock_create_protocol, mock_client):

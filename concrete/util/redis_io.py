@@ -8,7 +8,6 @@ from thrift.transport.TTransport import TMemoryBuffer
 from concrete import Communication
 from concrete.util.references import add_references_to_communication
 
-
 def read_communication_from_buffer(buf, add_references=True):
     '''
     Deserialize buf and return resulting communication.
@@ -358,3 +357,12 @@ class RedisCommunicationWriter(object):
     def __str__(self):
         return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,
                                    self.key, self.key_type)
+
+
+def copy_communication(comm):
+    '''
+    Return deep copy of communication.
+    '''
+    return read_communication_from_buffer(
+        write_communication_to_buffer(comm), add_references=False
+    )

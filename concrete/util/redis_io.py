@@ -359,7 +359,7 @@ class RedisCommunicationWriter(object):
                                    self.key, self.key_type)
 
 
-def copy_communication(comm):
+def communication_deep_copy(comm):
     '''
     Return deep copy of communication.
     '''

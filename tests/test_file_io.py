@@ -81,6 +81,19 @@ class TestCommunicationReader(unittest.TestCase):
         self.assertEqual(u'simple_2.concrete', filenames[1])
         self.assertEqual(u'simple_3.concrete', filenames[2])
 
+    def test_nested_tar_file(self):
+        reader = CommunicationReader("tests/testdata/simple_nested.tar")
+        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
+        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
+        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
+        self.assertEqual(u'one', comms[0].id)
+        self.assertEqual(u'two', comms[1].id)
+        self.assertEqual(u'three', comms[2].id)
+        self.assertEqual(u'simple_1.concrete', filenames[0])
+        self.assertEqual(u'simple_2.concrete', filenames[1])
+        self.assertEqual(u'simple_3.concrete', filenames[2])
+
     def test_zip_file(self):
         reader = CommunicationReader("tests/testdata/simple.zip")
         [comms, filenames] = zip(*[(c, f) for (c, f) in reader])

@@ -1,67 +1,7 @@
 diff -ruN -x '*.pyc' a/metadata/ttypes.py b/metadata/ttypes.py
---- a/metadata/ttypes.py	2015-09-28 14:13:02.826598000 -0400
-+++ b/metadata/ttypes.py	2015-09-27 09:07:18.451590000 -0400
-@@ -401,6 +401,25 @@
-     return
- 
- 
-+  def __hash__(self):
-+    value = 17
-+    value = (value * 31) ^ hash(self.sectionTheoryList)
-+    value = (value * 31) ^ hash(self.sentenceTheoryList)
-+    value = (value * 31) ^ hash(self.tokenizationTheoryList)
-+    value = (value * 31) ^ hash(self.posTagTheoryList)
-+    value = (value * 31) ^ hash(self.nerTagTheoryList)
-+    value = (value * 31) ^ hash(self.lemmaTheoryList)
-+    value = (value * 31) ^ hash(self.langIdTheoryList)
-+    value = (value * 31) ^ hash(self.parseTheoryList)
-+    value = (value * 31) ^ hash(self.dependencyParseTheoryList)
-+    value = (value * 31) ^ hash(self.tokenAnnotationTheoryList)
-+    value = (value * 31) ^ hash(self.entityMentionSetTheoryList)
-+    value = (value * 31) ^ hash(self.entitySetTheoryList)
-+    value = (value * 31) ^ hash(self.situationMentionSetTheoryList)
-+    value = (value * 31) ^ hash(self.situationSetTheoryList)
-+    value = (value * 31) ^ hash(self.communicationsList)
-+    return value
-+
-   def __repr__(self):
-     L = ['%s=%r' % (key, value)
-       for key, value in self.__dict__.iteritems()]
-@@ -566,6 +585,17 @@
-     return
- 
- 
-+  def __hash__(self):
-+    value = 17
-+    value = (value * 31) ^ hash(self.bytesValue)
-+    value = (value * 31) ^ hash(self.int64Value)
-+    value = (value * 31) ^ hash(self.doubleValue)
-+    value = (value * 31) ^ hash(self.stringValue)
-+    value = (value * 31) ^ hash(self.int64List)
-+    value = (value * 31) ^ hash(self.doubleList)
-+    value = (value * 31) ^ hash(self.stringList)
-+    return value
-+
-   def __repr__(self):
-     L = ['%s=%r' % (key, value)
-       for key, value in self.__dict__.iteritems()]
-@@ -695,6 +725,15 @@
-     return
- 
- 
-+  def __hash__(self):
-+    value = 17
-+    value = (value * 31) ^ hash(self.tool)
-+    value = (value * 31) ^ hash(self.timestamp)
-+    value = (value * 31) ^ hash(self.digest)
-+    value = (value * 31) ^ hash(self.dependencies)
-+    value = (value * 31) ^ hash(self.kBest)
-+    return value
-+
-   def __repr__(self):
-     L = ['%s=%r' % (key, value)
-       for key, value in self.__dict__.iteritems()]
-@@ -717,7 +756,7 @@
+--- a/metadata/ttypes.py	2015-11-18 21:25:52.439371512 +0000
++++ b/metadata/ttypes.py	2015-11-18 21:25:41.303384377 +0000
+@@ -756,7 +756,7 @@
     - tweetInfo: Extra information for communications where kind==TWEET:
    Information about this tweet that is provided by the Twitter
    API.  For information about the Twitter API, see:
@@ -70,17 +10,3 @@ diff -ruN -x '*.pyc' a/metadata/ttypes.py b/metadata/ttypes.py
     - emailInfo: Extra information for communications where kind==EMAIL
     - nitfInfo: Extra information that may come from the NITF
    (News Industry Text Format) schema. See 'nitf.thrift'.
-@@ -791,6 +830,13 @@
-     return
- 
- 
-+  def __hash__(self):
-+    value = 17
-+    value = (value * 31) ^ hash(self.tweetInfo)
-+    value = (value * 31) ^ hash(self.emailInfo)
-+    value = (value * 31) ^ hash(self.nitfInfo)
-+    return value
-+
-   def __repr__(self):
-     L = ['%s=%r' % (key, value)
-       for key, value in self.__dict__.iteritems()]

@@ -38,6 +38,28 @@ def get_tokens(tokenization, suppress_warnings=False):
     return None
 
 
+def get_lemmas(tokenization):
+    '''
+    Return list of lemmas (as TaggedTokens), if there is a unique
+    choice.
+
+    Raise exception if there is no lemma tagging or more than one
+    lemma tagging.
+    '''
+
+    lemma_tts = [
+        tt
+        for tt in tokenization.tokenTaggingList
+        if tt.taggingType == u'LEMMA'
+    ]
+    if len(lemma_tts) == 0:
+        raise Exception('No lemma tagging.')
+    elif len(lemma_tts) == 1:
+        return lemma_tts[0].taggedTokenList
+    else:
+        raise Exception('More than one lemma tagging.')
+
+
 plus = lambda x, y: x + y
 
 flatten = lambda a: reduce(plus, a, [])

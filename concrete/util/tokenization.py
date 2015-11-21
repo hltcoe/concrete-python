@@ -60,6 +60,28 @@ def get_lemmas(tokenization):
         raise Exception('More than one lemma tagging.')
 
 
+def get_pos(tokenization):
+    '''
+    Return list of POS tags (as TaggedTokens), if there is a unique
+    choice.
+
+    Raise exception if there is no POS tagging or more than one
+    POS tagging.
+    '''
+
+    pos_tts = [
+        tt
+        for tt in tokenization.tokenTaggingList
+        if tt.taggingType == u'POS'
+    ]
+    if len(pos_tts) == 0:
+        raise Exception('No POS tagging.')
+    elif len(pos_tts) == 1:
+        return pos_tts[0].taggedTokenList
+    else:
+        raise Exception('More than one POS tagging.')
+
+
 plus = lambda x, y: x + y
 
 flatten = lambda a: reduce(plus, a, [])

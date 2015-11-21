@@ -1,7 +1,10 @@
-diff -ruN -x '*.pyc' a/structure/ttypes.py b/structure/ttypes.py
---- a/structure/ttypes.py	2015-11-18 21:25:52.463371493 +0000
-+++ b/structure/ttypes.py	2015-11-18 21:25:41.303384377 +0000
-@@ -2127,8 +2127,14 @@
+--- a/structure/ttypes.py	2015-11-21 01:50:42.186154970 +0000
++++ b/structure/ttypes.py	2015-11-21 01:50:11.118231222 +0000
+@@ -2124,16 +2124,22 @@
+     value = (value * 31) ^ hash(self.tokenTaggingList)
+     value = (value * 31) ^ hash(self.parseList)
+     value = (value * 31) ^ hash(self.dependencyParseList)
+     value = (value * 31) ^ hash(self.spanLinkList)
      return value
  
    def __repr__(self):
@@ -17,3 +20,7 @@ diff -ruN -x '*.pyc' a/structure/ttypes.py b/structure/ttypes.py
      return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
  
    def __eq__(self, other):
+     return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+ 
+   def __ne__(self, other):
+     return not (self == other)

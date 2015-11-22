@@ -68,7 +68,8 @@ class RedisCommunicationReader(object):
 
     def __init__(self, redis_db, key, key_type=None, pop=False, block=False,
                  right_to_left=True, add_references=True,
-                 block_timeout=0, temp_key_ttl=3600, temp_key_leaf_len=32):
+                 block_timeout=0, temp_key_ttl=3600, temp_key_leaf_len=32,
+                 cycle_list=False):
         '''
         Create communication reader for specified key in specified
         redis_db.
@@ -114,6 +115,12 @@ class RedisCommunicationReader(object):
             raise ValueError('can only pop on set or list')
         if block and not pop:
             raise ValueError('can only block if popping too')
+        if cycle_list and block:
+            raise ValueError('can only cycle list when not blocking')
+        if cycle_list and key_type not in ('list',):
+            raise ValueError('can only cycle list on list type')
+        if cycle_list and not right_to_left:
+            raise ValueError('can only cycle list if processing right-to-left')
 
         self.pop = pop
         self.block = block
@@ -125,6 +132,8 @@ class RedisCommunicationReader(object):
         self.right_to_left = right_to_left
         self.add_references = add_references
 
+        self.cycle_list = cycle_list
+
     def __iter__(self):
         if self.key_type in ('list', 'set') and self.pop:
             buf = self._pop_buf()
@@ -133,10 +142,18 @@ class RedisCommunicationReader(object):
                 buf = self._pop_buf()
 
         elif self.key_type == 'list' and not self.pop:
-            for i in xrange(self.redis_db.llen(self.key)):
-                idx = -(i+1) if self.right_to_left else i
-                buf = self.redis_db.lindex(self.key, idx)
-                yield self._load_from_buffer(buf)
+            if cycle_list:
+                buf = self.redis_db.rpoplpush(self.key, self.key)
+                i = 0
+                while buf is not None and i < redis_db.llen(self.key):
+                    yield self._load_from_buffer(buf)
+                    buf = self.redis_db.rpoplpush(self.key, self.key)
+                    i += 1
+            else:
+                for i in xrange(self.redis_db.llen(self.key)):
+                    idx = -(i+1) if self.right_to_left else i
+                    buf = self.redis_db.lindex(self.key, idx)
+                    yield self._load_from_buffer(buf)
 
         elif self.key_type in ('set', 'hash') and not self.pop:
             if self.key_type == 'set':

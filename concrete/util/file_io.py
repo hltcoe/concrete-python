@@ -178,7 +178,7 @@ class CommunicationReader:
             # hack to keep memory usage O(1)
             # (...but the real hack is tarfile :)
             self.tar.members = []
-            return (comm, filename)
+            return (comm, tarinfo.name)
 
     def _next_from_zip(self):
         if self.zip_infolist_index >= len(self.zip_infolist):

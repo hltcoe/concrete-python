@@ -90,9 +90,9 @@ class TestCommunicationReader(unittest.TestCase):
         self.assertEqual(u'one', comms[0].id)
         self.assertEqual(u'two', comms[1].id)
         self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+        self.assertEqual(u'd/dd/simple_1.concrete', filenames[0])
+        self.assertEqual(u'd/dd/simple_2.concrete', filenames[1])
+        self.assertEqual(u'd/dd/simple_3.concrete', filenames[2])
 
     def test_zip_file(self):
         reader = CommunicationReader("tests/testdata/simple.zip")

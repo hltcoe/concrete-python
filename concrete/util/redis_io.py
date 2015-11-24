@@ -38,15 +38,15 @@ def read_communication_from_redis_key(redis_db, key, add_references=True):
                                               add_references=add_references)
 
 
-class RedisCommunicationReader(object):
+class RedisReader(object):
     '''
-    Iterable class for reading one or more Communications from redis.
+    Iterable class for reading one or more objects from redis.
 
     Supported input types are:
 
-    - a set containing zero or more Communications
-    - a list containing zero or more Communications
-    - a hash containing zero or more UUID-Communication key-value pairs
+    - a set containing zero or more objects
+    - a list containing zero or more objects
+    - a hash containing zero or more key-object pairs
 
     For list and set types, the reader can optionally pop (consume) its
     input; for lists only, the reader can moreover block on the input.
@@ -62,24 +62,24 @@ class RedisCommunicationReader(object):
 
         from redis import Redis
         redis_db = Redis(port=12345)
-        for comm in RedisCommunicationReader(redis_db, 'my_comm_set_key'):
-            do_something(comm)
+        for obj in RedisReader(redis_db, 'my-set-key'):
+            do_something(obj)
     '''
 
     def __init__(self, redis_db, key, key_type=None, pop=False, block=False,
-                 right_to_left=True, add_references=True,
+                 right_to_left=True,
                  block_timeout=0, temp_key_ttl=3600, temp_key_leaf_len=32,
-                 cycle_list=False):
+                 cycle_list=False, deserialize_func=None):
         '''
-        Create communication reader for specified key in specified
+        Create reader for specified key in specified
         redis_db.
 
             redis_db: object of class redis.Redis
-            key:      name of redis key containing your communication(s)
+            key:      name of redis key containing your object(s)
             key_type: 'set', 'list', 'hash', or None; if None, look up
                       type in redis (only works if the key exists, so
                       probably not suitable for block and/or pop modes)
-            pop:      boolean, True to remove communications from redis
+            pop:      boolean, True to remove objects from redis
                       as we iterate over them, and False to leave redis
                       unaltered
             block:    boolean, True to block for data (i.e., wait for
@@ -88,11 +88,11 @@ class RedisCommunicationReader(object):
             right_to_left: boolean, True to iterate over and index in
                       lists from right to left, False to iterate/index
                       from left to right
-            add_references: boolean, True to fill in members in the
-                      communication according to UUID relationships (see
-                      concrete.util.add_references), False to return
-                      communication as-is (note: you may need this False
-                      if you are dealing with incomplete communications)
+            deserialize_func: function, maps blobs from redis to some more
+                      friendly representation (e.g., if all your items
+                      are unicode strings, you might want to specify
+                      lambda s: s.decode('utf-8')); return blobs
+                      unchanged if deserialize_func is None
         '''
         self.redis_db = redis_db
         self.key = key
@@ -130,55 +130,60 @@ class RedisCommunicationReader(object):
         self.temp_key_leaf_len = temp_key_leaf_len
 
         self.right_to_left = right_to_left
-        self.add_references = add_references
 
         self.cycle_list = cycle_list
+
+        self.deserialize_func = (
+            deserialize_func
+            if (deserialize_func is not None)
+            else (lambda o: o)
+        )
 
     def __iter__(self):
         if self.key_type in ('list', 'set') and self.pop:
             buf = self._pop_buf()
             while buf is not None:
-                yield self._load_from_buffer(buf)
+                yield self.deserialize_func(buf)
                 buf = self._pop_buf()
 
         elif self.key_type == 'list' and not self.pop:
-            if cycle_list:
+            if self.cycle_list:
                 buf = self.redis_db.rpoplpush(self.key, self.key)
                 i = 0
                 while buf is not None and i < redis_db.llen(self.key):
-                    yield self._load_from_buffer(buf)
+                    yield self.deserialize_func(buf)
                     buf = self.redis_db.rpoplpush(self.key, self.key)
                     i += 1
             else:
                 for i in xrange(self.redis_db.llen(self.key)):
                     idx = -(i+1) if self.right_to_left else i
                     buf = self.redis_db.lindex(self.key, idx)
-                    yield self._load_from_buffer(buf)
+                    yield self.deserialize_func(buf)
 
         elif self.key_type in ('set', 'hash') and not self.pop:
             if self.key_type == 'set':
-                num_comms = self.redis_db.scard(self.key)
+                num_objs = self.redis_db.scard(self.key)
                 scan = self.redis_db.sscan
                 # batch is an iterable of buffers
-                get_comm = lambda k, batch: self._load_from_buffer(k)
+                get_obj = lambda k, batch: self.deserialize_func(k)
             else:
-                num_comms = self.redis_db.hlen(self.key)
+                num_objs = self.redis_db.hlen(self.key)
                 scan = self.redis_db.hscan
-                # batch is a dict of uuid-buffer key-value pairs
-                get_comm = lambda k, batch: self._load_from_buffer(batch[k])
+                # batch is a dict of key-buffer pairs
+                get_obj = lambda k, batch: self.deserialize_func(batch[k])
 
             temp_key = self._make_temp_key()
 
             i = 0
             cursor = 0
-            while i < num_comms:
+            while i < num_objs:
                 (cursor, batch) = scan(self.key, cursor)
                 for k in batch:
-                    if i == num_comms:
+                    if i == num_objs:
                         break
                     if self.redis_db.sadd(temp_key, k) > 0:
                         i += 1
-                        yield get_comm(k, batch)
+                        yield get_obj(k, batch)
                     self.redis_db.expire(temp_key, self.temp_key_ttl)
 
         else:
@@ -199,7 +204,7 @@ class RedisCommunicationReader(object):
 
     def __getitem__(self, k):
         '''
-        Return item at specified list index or hash key (UUID);
+        Return item at specified list index or hash key;
         never pop or block.
         '''
         if self.key_type in ('list', 'hash'):
@@ -208,14 +213,14 @@ class RedisCommunicationReader(object):
                 buf = self.redis_db.lindex(self.key, idx)
             else:
                 buf = self.redis_db.hget(self.key, k)
-            return None if buf is None else self._load_from_buffer(buf)
+            return None if buf is None else self.deserialize_func(buf)
 
         else:
             raise Exception('not implemented')
 
     def batch(self, n):
         '''
-        Return a batch of n communications.  May be faster than
+        Return a batch of n objects.  May be faster than
         one-at-a-time iteration, but currently only supported for
         non-popping, non-blocking set configurations.  Support for
         popping, non-blocking sets is planned; see
@@ -223,7 +228,7 @@ class RedisCommunicationReader(object):
         '''
         if self.key_type == 'set' and not self.pop and not self.block:
             return [
-                self._load_from_buffer(buf)
+                self.deserialize_func(buf)
                 for buf
                 in self.redis_db.srandmember(self.key, n)
             ]
@@ -233,7 +238,7 @@ class RedisCommunicationReader(object):
 
     def _pop_buf(self):
         '''
-        Pop and return a serialized communication, or None if there is
+        Pop and return a serialized object, or None if there is
         none (or we blocked and timed out).
         '''
         if self.key_type == 'list':
@@ -259,9 +264,6 @@ class RedisCommunicationReader(object):
         else:
             raise Exception('not implemented')
 
-    def _load_from_buffer(self, buf):
-        return read_communication_from_buffer(buf, add_references=self.add_references)
-
     def _make_temp_key(self):
         '''
         Generate temporary (random, unused) key.  Do not set in redis
@@ -282,6 +284,46 @@ class RedisCommunicationReader(object):
                                    self.key, self.key_type)
 
 
+class RedisCommunicationReader(RedisReader):
+    '''
+    Iterable class for reading one or more Communications from redis.
+    See RedisReader for further description.
+
+    Example usage:
+
+        from redis import Redis
+        redis_db = Redis(port=12345)
+        for comm in RedisCommunicationReader(redis_db, 'my-set-key'):
+            do_something(comm)
+    '''
+
+    def __init__(self, redis_db, key, add_references=True, **kwargs):
+        '''
+        Create communication reader for specified key in specified
+        redis_db.
+
+            redis_db: object of class redis.Redis
+            key:      name of redis key containing your communication(s)
+            add_references: boolean, True to fill in members in the
+                      communication according to UUID relationships (see
+                      concrete.util.add_references), False to return
+                      communication as-is (note: you may need this False
+                      if you are dealing with incomplete communications)
+
+        All other keyword arguments are passed through to RedisReader.
+        '''
+
+        if 'deserialize_func' in kwargs:
+            raise ValueError('RedisCommunicationReader does not allow custom deserialize_func')
+        self.add_references = add_references
+        super(RedisCommunicationReader, self).__init__(
+            redis_db, key, deserialize_func=self._load_from_buffer, **kwargs
+        )
+
+    def _load_from_buffer(self, buf):
+        return read_communication_from_buffer(buf, add_references=self.add_references)
+
+
 def write_communication_to_buffer(comm):
     '''
     Serialize communication and return result.
@@ -299,35 +341,43 @@ def write_communication_to_redis_key(redis_db, key, comm):
     redis_db.set(key, write_communication_to_buffer(comm))
 
 
-class RedisCommunicationWriter(object):
+class RedisWriter(object):
     '''
-    Class for writing one or more Communications to redis.
+    Class for writing one or more objects to redis.
 
     Supported input types are:
 
-    - a set of Communications
-    - a list of Communications
-    - a hash of UUID-Communication key-value pairs
+    - a set of objects
+    - a list of objects
+    - a hash of key-object pairs
 
     Example usage:
 
         from redis import Redis
         redis_db = Redis(port=12345)
-        w = RedisCommunicationWriter(redis_db, 'my_comm_set_key')
-        w.write(comm)
+        w = RedisWriter(redis_db, 'my-set-key')
+        w.write(obj)
     '''
 
-    def __init__(self, redis_db, key, key_type=None, right_to_left=True):
+    def __init__(self, redis_db, key, key_type=None, right_to_left=True,
+                 serialize_func=None, hash_key_func=None):
         '''
-        Create communication writer for specified key in specified
+        Create object writer for specified key in specified
         redis_db.
 
             redis_db: object of class redis.Redis
-            key:      name of redis key containing your communication(s)
+            key:      name of redis key containing your object(s)
             key_type: 'set', 'list', 'hash', or None; if None, look up
                       type in redis (only works if the key exists)
             right_to_left: boolean, True to write elements to the left
                       end of lists, False to write to the right end
+            serialize_func: function, maps objects to blobs before
+                      sending to Redis (e.g., if everything you write
+                      will be a unicode string, you might want to use
+                      lambda u: u.encode('utf-8')); pass objects to
+                      Redis unchanged if serialize_func is None
+            hash_key_func: function, maps objects to keys when key_type
+                      is hash (None: use Python's hash function)
         '''
         self.redis_db = redis_db
         self.key = key
@@ -345,11 +395,22 @@ class RedisCommunicationWriter(object):
         self.key_type = key_type
         self.right_to_left = right_to_left
 
+        self.serialize_func = (
+            serialize_func
+            if (serialize_func is not None)
+            else (lambda o: o)
+        )
+        self.hash_key_func = (
+            hash_key_func
+            if (hash_key_func is not None)
+            else hash
+        )
+
     def clear(self):
         self.redis_db.delete(self.key)
 
-    def write(self, comm):
-        buf = self._write_to_buffer(comm)
+    def write(self, obj):
+        buf = self.serialize_func(obj)
 
         if self.key_type == 'list':
             _push = (
@@ -363,13 +424,54 @@ class RedisCommunicationWriter(object):
             return self.redis_db.sadd(self.key, buf)
 
         elif self.key_type == 'hash':
-            return self.redis_db.hset(self.key, comm.uuid.uuidString, buf)
+            return self.redis_db.hset(self.key, self.hash_key_func(obj), buf)
 
         else:
             raise Exception('not implemented')
 
+    def __str__(self):
+        return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,
+                                   self.key, self.key_type)
+
+
+class RedisCommunicationWriter(RedisWriter):
+    '''
+    Class for writing one or more Communications to redis.
+    See RedisWriter for further description.
+
+    Example usage:
+
+        from redis import Redis
+        redis_db = Redis(port=12345)
+        w = RedisCommunicationWriter(redis_db, 'my-set-key')
+        w.write(comm)
+    '''
+
+    def __init__(self, redis_db, key, uuid_hash_key=False, **kwargs):
+        '''
+        Create communication writer for specified key in specified
+        redis_db.
+
+            redis_db: object of class redis.Redis
+            key:      name of redis key containing your communication(s)
+            uuid_hash_key: boolean, True to use the UUID as the hash key
+                      for a communication, False to use the id
+        '''
+        if 'serialize_func' in kwargs:
+            raise ValueError('RedisCommunicationWriter does not allow custom serialize_func')
+        if 'hash_key_func' in kwargs:
+            raise ValueError('RedisCommunicationWriter does not allow custom hash_key_func')
+        self.uuid_hash_key = uuid_hash_key
+        super(RedisCommunicationWriter, self).__init__(
+            redis_db, key, serialize_func=self._write_to_buffer,
+            hash_key_func=self._to_key, **kwargs
+        )
+
     def _write_to_buffer(self, comm):
         return write_communication_to_buffer(comm)
+
+    def _to_key(self, comm):
+        return (comm.uuid.uuidString if self.uuid_hash_key else comm.id)
 
     def __str__(self):
         return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,

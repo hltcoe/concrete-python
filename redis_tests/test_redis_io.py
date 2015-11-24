@@ -672,6 +672,27 @@ class TestRedisCommunicationWriter(unittest.TestCase):
             w = RedisCommunicationWriter(redis_db, key, key_type='hash')
             w.write(comm1)
             self.assertEquals(1, redis_db.hlen(key))
+            self.assertEquals(buf1, redis_db.hget(key, comm1.id))
+            w.write(comm2)
+            w.write(comm3)
+            self.assertEquals(3, redis_db.hlen(key))
+            self.assertEquals(buf1, redis_db.hget(key, comm1.id))
+            self.assertEquals(buf2, redis_db.hget(key, comm2.id))
+            self.assertEquals(buf3, redis_db.hget(key, comm3.id))
+
+    def test_hash_uuid_key(self):
+        key = 'dataset'
+        comm1 = create_simple_comm('comm-1')
+        buf1 = write_communication_to_buffer(comm1)
+        comm2 = create_simple_comm('comm-2')
+        buf2 = write_communication_to_buffer(comm2)
+        comm3 = create_simple_comm('comm-3')
+        buf3 = write_communication_to_buffer(comm3)
+        with RedisServer() as server:
+            redis_db = Redis(port=server.port)
+            w = RedisCommunicationWriter(redis_db, key, key_type='hash', uuid_hash_key=True)
+            w.write(comm1)
+            self.assertEquals(1, redis_db.hlen(key))
             self.assertEquals(buf1, redis_db.hget(key, comm1.uuid.uuidString))
             w.write(comm2)
             w.write(comm3)
@@ -745,14 +766,14 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf3 = write_communication_to_buffer(comm3)
         with RedisServer() as server:
             redis_db = Redis(port=server.port)
-            redis_db.hset(key, comm1.uuid.uuidString, buf1)
+            redis_db.hset(key, comm1.id, buf1)
             w = RedisCommunicationWriter(redis_db, key)
             w.write(comm2)
             w.write(comm3)
             self.assertEquals(3, redis_db.hlen(key))
-            self.assertEquals(buf1, redis_db.hget(key, comm1.uuid.uuidString))
-            self.assertEquals(buf2, redis_db.hget(key, comm2.uuid.uuidString))
-            self.assertEquals(buf3, redis_db.hget(key, comm3.uuid.uuidString))
+            self.assertEquals(buf1, redis_db.hget(key, comm1.id))
+            self.assertEquals(buf2, redis_db.hget(key, comm2.id))
+            self.assertEquals(buf3, redis_db.hget(key, comm3.id))
 
     def test_implicit_empty(self):
         key = 'dataset'

@@ -38,48 +38,29 @@ def get_tokens(tokenization, suppress_warnings=False):
     return None
 
 
-def get_lemmas(tokenization):
+def get_tagged_tokens(tokenization, tagging_type):
     '''
-    Return list of lemmas (as TaggedTokens), if there is a unique
-    choice.
+    Return list of TaggedTokens of taggingType equal to tagging_type,
+    if there is a unique choice.
 
-    Raise exception if there is no lemma tagging or more than one
-    lemma tagging.
+    Raise exception if there is no matching tagging or more than one
+    matching tagging.
     '''
-
-    lemma_tts = [
+    tts = [
         tt
         for tt in tokenization.tokenTaggingList
-        if tt.taggingType == u'LEMMA'
+        if tt.taggingType == tagging_type
     ]
-    if len(lemma_tts) == 0:
-        raise Exception('No lemma tagging.')
-    elif len(lemma_tts) == 1:
-        return lemma_tts[0].taggedTokenList
+    if len(tts) == 0:
+        raise Exception('No %s tagging.' % tagging_type)
+    elif len(tts) == 1:
+        return tts[0].taggedTokenList
     else:
-        raise Exception('More than one lemma tagging.')
+        raise Exception('More than one %s tagging.' % tagging_type)
 
 
-def get_pos(tokenization):
-    '''
-    Return list of POS tags (as TaggedTokens), if there is a unique
-    choice.
-
-    Raise exception if there is no POS tagging or more than one
-    POS tagging.
-    '''
-
-    pos_tts = [
-        tt
-        for tt in tokenization.tokenTaggingList
-        if tt.taggingType == u'POS'
-    ]
-    if len(pos_tts) == 0:
-        raise Exception('No POS tagging.')
-    elif len(pos_tts) == 1:
-        return pos_tts[0].taggedTokenList
-    else:
-        raise Exception('More than one POS tagging.')
+get_lemmas = lambda t: get_tagged_tokens(t, 'LEMMA')
+get_pos = lambda t: get_tagged_tokens(t, 'POS')
 
 
 plus = lambda x, y: x + y

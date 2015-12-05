@@ -122,3 +122,13 @@ nested data structures are not checked for required fields.
 The `validate_communication()` function recursively checks a
 Communication object for required fields, plus additional checks for
 UUID mismatches.
+
+
+Building from Thrift definitions
+================================
+
+To rebuild the `concrete-python` sources from the concrete thrift
+definitions, use `build.bash`.  This script takes the path to the
+`thrift` subdirectory of the `concrete` repository as an optional
+argument, generates the Python sources from the thrift definitions
+in that subdirectory, and patches to the generated code as necessary.

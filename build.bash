@@ -22,10 +22,11 @@
 #
 
 
+DEFAULT_CONCRETE_THRIFT_DIR=../concrete/thrift
 DEFAULT_OUTPUT_DIR=concrete
 
 print_usage() {
-    echo "Usage: $0 [--raw] CONCRETE-THRIFT-PATH"
+    echo "Usage: $0 [--raw] [--output-dir OUTPUT-DIR] [CONCRETE-THRIFT-DIR]"
     echo "  --raw:  Just generate classes from thrift definitions"
     echo "          (do not apply our modifications)"
     echo "  --output-dir OUTPUT-DIR:  Write output to OUTPUT_DIR instead of"
@@ -37,8 +38,11 @@ print_usage() {
 # Parse command-line arguments
 #
 
+concrete_thrift_dir="$DEFAULT_CONCRETE_THRIFT_DIR"
 raw=false
 output_dir="$DEFAULT_OUTPUT_DIR"
+
+num_pos_args=0
 
 while [ $# -gt 0 ]
 do
@@ -59,9 +63,10 @@ do
             exit 0
             ;;
         *)
-            if [ -z "$concrete_thrift_path" ]
+            if [ $num_pos_args -eq 0 ]
             then
-                concrete_thrift_path="$1"
+                concrete_thrift_dir="$1"
+                num_pos_args=$(($num_pos_args + 1))
             else
                 print_usage >&2
                 exit 1
@@ -71,18 +76,12 @@ do
     shift
 done
 
-if [ -z "$concrete_thrift_path" ]
-then
-    print_usage >&2
-    exit 1
-fi
-
 
 set -e
 
 echo 'Generating Python classes from thrift definitions...'
 rm -rf gen-py
-for P in `find $concrete_thrift_path -name '*.thrift'`
+for P in `find $concrete_thrift_dir -name '*.thrift'`
 do
     thrift --gen py:new_style,utf8strings,coding=utf-8 $P
 done

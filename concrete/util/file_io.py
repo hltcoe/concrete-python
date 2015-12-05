@@ -79,7 +79,7 @@ def write_thrift_to_file(thrift_obj, filename):
     thrift_file.close()
 
 
-class CommunicationReader:
+class CommunicationReader(object):
     """Iterator/generator class for reading one or more Communications from a file
 
     The iterator returns a `(Communication, filename)` tuple
@@ -194,7 +194,7 @@ class CommunicationReader:
         return (comm, zipinfo.filename)
 
 
-class CommunicationWriter:
+class CommunicationWriter(object):
     """Class for writing one or more Communications to a file
 
     -----
@@ -226,20 +226,21 @@ class CommunicationWriter:
         self.close()
 
 
-class CommunicationWriterTGZ:
-    """Class for writing one or more Communications to a .TAR.GZ archive
+class CommunicationWriterTar(object):
+    """Class for writing one or more Communications to a .TAR archive
 
     -----
 
     Sample usage:
 
-        writer = CommunicationWriterTGZ('multiple_comms.tgz')
+        writer = CommunicationWriterTar('multiple_comms.tar')
         writer.write(comm_object_one, 'comm_one.concrete')
         writer.write(comm_object_two, 'comm_two.concrete')
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
     """
-    def __init__(self, tar_filename=None):
+    def __init__(self, tar_filename=None, gzip=False):
+        self.gzip = gzip
         if tar_filename is not None:
             self.open(tar_filename)
 
@@ -247,7 +248,7 @@ class CommunicationWriterTGZ:
         self.tarfile.close()
 
     def open(self, tar_filename):
-        self.tarfile = tarfile.open(tar_filename, 'w:gz')
+        self.tarfile = tarfile.open(tar_filename, 'w:gz' if self.gzip else 'w')
 
     def write(self, comm, comm_filename):
         thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
@@ -272,3 +273,20 @@ class CommunicationWriterTGZ:
 
     def __exit__(self, type, value, traceback):
         self.close()
+
+
+class CommunicationWriterTGZ(CommunicationWriterTar):
+    """Class for writing one or more Communications to a .TAR.GZ archive
+
+    -----
+
+    Sample usage:
+
+        writer = CommunicationWriterTGZ('multiple_comms.tgz')
+        writer.write(comm_object_one, 'comm_one.concrete')
+        writer.write(comm_object_two, 'comm_two.concrete')
+        writer.write(comm_object_three, 'comm_three.concrete')
+        writer.close()
+    """
+    def __init__(self, tar_filename=None):
+        super(CommunicationWriterTGZ, self).__init__(tar_filename, gzip=True)

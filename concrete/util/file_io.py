@@ -250,7 +250,10 @@ class CommunicationWriterTar(object):
     def open(self, tar_filename):
         self.tarfile = tarfile.open(tar_filename, 'w:gz' if self.gzip else 'w')
 
-    def write(self, comm, comm_filename):
+    def write(self, comm, comm_filename=None):
+        if comm_filename is None:
+            comm_filename = comm.uuid.uuidString + '.concrete'
+
         thrift_bytes = TSerialization.serialize(comm, protocol_factory=TCompactProtocol.TCompactProtocolFactory())
 
         file_like_obj = cStringIO.StringIO(thrift_bytes)

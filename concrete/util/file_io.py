@@ -107,7 +107,7 @@ class CommunicationReader(object):
         if tarfile.is_tarfile(filename):
             # File is either a '.tar' or '.tar.gz' file
             self.filetype = 'tar'
-            self.tar = tarfile.open(filename)
+            self.tar = tarfile.open(filename, 'r|*')
         elif zipfile.is_zipfile(filename):
             self.filetype = 'zip'
             self.zip = zipfile.ZipFile(filename, 'r')

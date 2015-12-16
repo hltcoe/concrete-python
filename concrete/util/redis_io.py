@@ -150,7 +150,7 @@ class RedisReader(object):
             if self.cycle_list:
                 buf = self.redis_db.rpoplpush(self.key, self.key)
                 i = 0
-                while buf is not None and i < redis_db.llen(self.key):
+                while buf is not None and i < self.redis_db.llen(self.key):
                     yield self.deserialize_func(buf)
                     buf = self.redis_db.rpoplpush(self.key, self.key)
                     i += 1

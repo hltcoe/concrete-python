@@ -9,6 +9,7 @@ import uuid as python_uuid
 
 import concrete
 
+
 def generate_UUID():
     """Helper function for generating a Concrete UUID object
     """

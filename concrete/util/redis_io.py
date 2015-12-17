@@ -1,12 +1,12 @@
 import string
 import random
-import time
 
 from thrift.protocol.TCompactProtocol import TCompactProtocol
 from thrift.transport.TTransport import TMemoryBuffer
 
 from concrete import Communication
 from concrete.util.references import add_references_to_communication
+
 
 def read_communication_from_buffer(buf, add_references=True):
     '''
@@ -150,7 +150,7 @@ class RedisReader(object):
             if self.cycle_list:
                 buf = self.redis_db.rpoplpush(self.key, self.key)
                 i = 0
-                while buf is not None and i < redis_db.llen(self.key):
+                while buf is not None and i < self.redis_db.llen(self.key):
                     yield self.deserialize_func(buf)
                     buf = self.redis_db.rpoplpush(self.key, self.key)
                     i += 1
@@ -314,14 +314,16 @@ class RedisCommunicationReader(RedisReader):
         '''
 
         if 'deserialize_func' in kwargs:
-            raise ValueError('RedisCommunicationReader does not allow custom deserialize_func')
+            raise ValueError('RedisCommunicationReader does not allow custom '
+                             'deserialize_func')
         self.add_references = add_references
         super(RedisCommunicationReader, self).__init__(
             redis_db, key, deserialize_func=self._load_from_buffer, **kwargs
         )
 
     def _load_from_buffer(self, buf):
-        return read_communication_from_buffer(buf, add_references=self.add_references)
+        return read_communication_from_buffer(
+            buf, add_references=self.add_references)
 
 
 def write_communication_to_buffer(comm):
@@ -458,9 +460,11 @@ class RedisCommunicationWriter(RedisWriter):
                       for a communication, False to use the id
         '''
         if 'serialize_func' in kwargs:
-            raise ValueError('RedisCommunicationWriter does not allow custom serialize_func')
+            raise ValueError('RedisCommunicationWriter does not allow custom '
+                             'serialize_func')
         if 'hash_key_func' in kwargs:
-            raise ValueError('RedisCommunicationWriter does not allow custom hash_key_func')
+            raise ValueError('RedisCommunicationWriter does not allow custom '
+                             'hash_key_func')
         self.uuid_hash_key = uuid_hash_key
         super(RedisCommunicationWriter, self).__init__(
             redis_db, key, serialize_func=self._write_to_buffer,

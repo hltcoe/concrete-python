@@ -36,7 +36,7 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
 
     - A Concrete Communication object
     """
-    toolname="TEST"
+    toolname = "TEST"
     timestamp = int(time.time())
 
     comm = Communication(
@@ -53,7 +53,8 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
         uuid=generate_UUID())
     token_string_list = sentence_string.split()
     for i, token_string in enumerate(token_string_list):
-        tokenization.tokenList.tokenList.append(Token(text=token_string, tokenIndex=i))
+        tokenization.tokenList.tokenList.append(Token(text=token_string,
+                                                      tokenIndex=i))
 
     sentence = Sentence(
         textSpan=TextSpan(0, len(sentence_string)),
@@ -66,7 +67,7 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
         textSpan=TextSpan(0, len(sentence_string)),
         uuid=generate_UUID())
 
-    comm.sectionList=[section]
+    comm.sectionList = [section]
 
     return comm
 

@@ -14,7 +14,8 @@ def get_tokens(tokenization, suppress_warnings=False):
 
     if tokenization.kind is None:
         if not suppress_warnings:
-            logging.warn('Tokenization.kind is None but is required in Concrete; using tokenList')
+            logging.warn('Tokenization.kind is None but is required in '
+                         'Concrete; using tokenList')
 
         token_list = tokenization.tokenList
         if token_list.tokenList is not None:
@@ -33,7 +34,8 @@ def get_tokens(tokenization, suppress_warnings=False):
             return token_list.tokenList
 
     else:
-        raise ValueError('Unrecognized TokenizationKind %d' % tokenization.kind)
+        raise ValueError('Unrecognized TokenizationKind %d'
+                         % tokenization.kind)
 
     return None
 
@@ -67,6 +69,7 @@ plus = lambda x, y: x + y
 
 flatten = lambda a: reduce(plus, a, [])
 
+
 def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
     '''
     Return list of Tokens in communication, delegating to get_tokens
@@ -78,6 +81,5 @@ def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
             sect.sentenceList
         )),
         filter(sect_pred, comm.sectionList)
-            if (sect_pred is not None)
-            else comm.sectionList
+        if (sect_pred is not None) else comm.sectionList
     ))

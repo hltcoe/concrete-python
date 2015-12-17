@@ -1,11 +1,11 @@
 import string
 import random
 
-from thrift.protocol.TCompactProtocol import TCompactProtocol
 from thrift.transport.TTransport import TMemoryBuffer
 
 from concrete import Communication
 from concrete.util.references import add_references_to_communication
+from concrete.util import thrift_factory as thrift
 
 
 def read_communication_from_buffer(buf, add_references=True):
@@ -14,7 +14,7 @@ def read_communication_from_buffer(buf, add_references=True):
     Add references if requested.
     '''
     transport_in = TMemoryBuffer(buf)
-    protocol_in = TCompactProtocol(transport_in)
+    protocol_in = thrift.factory.createProtocol(transport_in)
     comm = Communication()
     comm.read(protocol_in)
     if add_references:
@@ -331,7 +331,7 @@ def write_communication_to_buffer(comm):
     Serialize communication and return result.
     '''
     transport = TMemoryBuffer()
-    protocol = TCompactProtocol(transport)
+    protocol = thrift.factory.createProtocol(transport)
     comm.write(protocol)
     return transport.getvalue()
 

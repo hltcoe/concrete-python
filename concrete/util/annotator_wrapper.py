@@ -1,45 +1,9 @@
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TCompactProtocol
-from thrift.server import TServer
-
 from multiprocessing import Process
 from time import sleep
 from socket import create_connection
 
 from concrete.services import Annotator
-
-
-class ThriftFactory(object):
-    """Abstract factory to create Thrift objects for client and server."""
-
-    def __init__(self, transportFactory, protocolFactory):
-        self.transportFactory = transportFactory
-        self.protocolFactory = protocolFactory
-
-    def createSocket(self, host, port):
-        socket = TSocket.TSocket(host, port)
-        return socket
-
-    def createTransport(self, socket):
-        transport = self.transportFactory.getTransport(socket)
-        return transport
-
-    def createProtocol(self, transport):
-        protocol = self.protocolFactory.getProtocol(transport)
-        return protocol
-
-    def createServer(self, processor, host, port):
-        socket = TSocket.TServerSocket(host, port)
-
-        server = TServer.TThreadedServer(processor, socket,
-                                         self.transportFactory,
-                                         self.protocolFactory)
-        return server
-
-
-thriftFactory = ThriftFactory(TTransport.TFramedTransportFactory(),
-                              TCompactProtocol.TCompactProtocolFactory())
+from concrete.util import thrift_factory as thrift
 
 
 class AnnotatorClientWrapper(object):
@@ -55,9 +19,9 @@ class AnnotatorClientWrapper(object):
         self.port = port
 
     def __enter__(self):
-        socket = thriftFactory.createSocket(self.host, self.port)
-        self.transport = thriftFactory.createTransport(socket)
-        protocol = thriftFactory.createProtocol(self.transport)
+        socket = thrift.factory.createSocket(self.host, self.port)
+        self.transport = thrift.factory.createTransport(socket)
+        protocol = thrift.factory.createProtocol(self.transport)
 
         cli = Annotator.Client(protocol)
 
@@ -79,7 +43,7 @@ class AnnotatorServiceWrapper(object):
         self.processor = Annotator.Processor(implementation)
 
     def serve(self, host, port):
-        server = thriftFactory.createServer(self.processor, host, port)
+        server = thrift.factory.createServer(self.processor, host, port)
 
         # NOTE: Thrift's servers run indefinitely. This server implementation
         # may be killed by a KeyboardInterrupt (Control-C); otherwise, the

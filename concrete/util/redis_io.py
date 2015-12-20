@@ -112,7 +112,7 @@ class RedisReader(object):
         if pop and key_type not in ('set', 'list'):
             raise ValueError('can only pop on set or list')
         if block and key_type not in ('list',):
-            raise ValueError('can only pop on set or list')
+            raise ValueError('can only block-pop on list')
         if block and not pop:
             raise ValueError('can only block if popping too')
         if cycle_list and block:

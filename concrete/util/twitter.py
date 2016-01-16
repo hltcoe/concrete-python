@@ -26,7 +26,7 @@ from concrete import (
     UserMention
 )
 
-from concrete.util import generate_UUID
+from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 
 
 TOOL_NAME = "Python module concrete.util.twitter"
@@ -38,6 +38,8 @@ def json_tweet_object_to_Communication(tweet):
     """
     tweet_info = json_tweet_object_to_TweetInfo(tweet)
 
+    augf = AnalyticUUIDGeneratorFactory()
+    aug = augf.create()
     comm = Communication(
         communicationMetadata=CommunicationMetadata(
             tweetInfo=tweet_info),
@@ -46,7 +48,7 @@ def json_tweet_object_to_Communication(tweet):
             timestamp=int(time.time())),
         originalText=tweet_info.text,
         type=TWEET_TYPE,
-        uuid=generate_UUID()
+        uuid=aug.next()
     )
     return comm
 

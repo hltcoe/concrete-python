@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ
+from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
+from concrete.util.unnone import lun
+
+
+def compress_uuids(input_path, output_path):
+    reader = CommunicationReader(input_path)
+    writer = CommunicationWriterTGZ(output_path)
+
+    for (i, (comm, _)) in enumerate(reader):
+        augf = AnalyticUUIDGeneratorFactory(comm)
+        augs = dict()
+
+        def _update_augs(tool):
+            if tool not in augs:
+                augs[tool] = augf.create()
+
+        def _gen(old_uuid, aug, uuid_map=None):
+            new_uuid = aug.next()
+            if uuid_map is not None:
+                uuid_map[old_uuid] = new_uuid
+            return new_uuid
+
+        _update_augs(comm.metadata.tool)
+        comm.uuid = _gen(comm.uuid, augs[comm.metadata.tool])
+
+        for x in lun(comm.communicationTaggingList):
+            _update_augs(x.metadata.tool)
+            x.uuid = _gen(x.uuid, augs[x.metadata.tool])
+
+        for x in lun(comm.lidList):
+            _update_augs(x.metadata.tool)
+            x.uuid = _gen(x.uuid, augs[x.metadata.tool])
+
+        # sections
+
+        t = dict()
+        p = dict()
+        for section in lun(comm.sectionList):
+            section.uuid = _gen(section.uuid, augs[comm.metadata.tool])
+            for sentence in lun(section.sentenceList):
+                sentence.uuid = _gen(sentence.uuid, augs[comm.metadata.tool])
+                sentence.tokenization.uuid = _gen(sentence.tokenization.uuid, augs[comm.metadata.tool], t)
+                for x in lun(sentence.tokenization.dependencyParseList):
+                    _update_augs(x.metadata.tool)
+                    x.uuid = _gen(x.uuid, augs[x.metadata.tool])
+                for x in lun(sentence.tokenization.parseList):
+                    _update_augs(x.metadata.tool)
+                    x.uuid = _gen(x.uuid, augs[x.metadata.tool], p)
+                for x in lun(sentence.tokenization.tokenTaggingList):
+                    _update_augs(x.metadata.tool)
+                    x.uuid = _gen(x.uuid, augs[x.metadata.tool])
+
+        # entity mentions
+
+        ems = dict()
+        em = dict()
+        for x in lun(comm.entityMentionSetList):
+            _update_augs(x.metadata.tool)
+            x.uuid = _gen(x.uuid, augs[x.metadata.tool], ems)
+            # first pass
+            for y in lun(x.mentionList):
+                y.uuid = _gen(y.uuid, augs[x.metadata.tool], em)
+                if y.tokens is not None:
+                    y.tokens.tokenizationId = t[y.tokens.tokenizationId]
+            # second pass
+            for y in lun(x.mentionList):
+                y.childMentionIdList = [em[z] for z in y.childMentionIdList] if y.childMentionIdList is not None else None
+            for y in lun(x.linkingList):
+                if y.targetId is not None:
+                    y.targetId = em[y.targetId]
+
+        # entities
+
+        for x in lun(comm.entitySetList):
+            _update_augs(x.metadata.tool)
+            x.uuid = _gen(x.uuid, augs[x.metadata.tool])
+            if x.mentionSetId is not None:
+                x.mentionSetId = ems[x.mentionSetId]
+            s = dict()
+            for y in lun(x.entityList):
+                y.uuid = _gen(y.uuid, augs[x.metadata.tool], s)
+                y.mentionIdList = [em[z] for z in lun(y.mentionIdList)] if y.mentionIdList is not None else None
+            for y in lun(x.linkingList):
+                if y.targetId is not None:
+                    y.targetId = s[y.targetId]
+
+        # situation mentions
+
+        sms = dict()
+        sm = dict()
+        # first pass
+        for x in lun(comm.situationMentionSetList):
+            _update_augs(x.metadata.tool)
+            x.uuid = _gen(x.uuid, augs[x.metadata.tool], sms)
+            for y in lun(x.mentionList):
+                y.uuid = _gen(y.uuid, augs[x.metadata.tool], sm)
+                if y.tokens is not None:
+                    y.tokens.tokenizationId = t[y.tokens.tokenizationId]
+                if y.constituent is not None:
+                    y.constituent.parseId = p[y.constituent.parseId]
+            for y in lun(x.linkingList):
+                if y.targetId is not None:
+                    y.targetId = sm[y.targetId]
+        # second pass
+        for x in lun(comm.situationMentionSetList):
+            for y in lun(x.mentionList):
+                for z in lun(y.argumentList):
+                    if z.tokens is not None:
+                        z.tokens.tokenizationId = t[z.tokens.tokenizationId]
+                    if z.constituent is not None:
+                        z.constituent.parseId = p[z.constituent.parseId]
+                    if z.entityMentionId is not None:
+                        z.entityMentionId = em[z.entityMentionId]
+                    if z.situationMentionId is not None:
+                        z.situationMentionId = sm[z.situationMentionId]
+
+        # situations
+
+        # first pass
+        for x in lun(comm.situationSetList):
+            _update_augs(x.metadata.tool)
+            x.uuid = _gen(x.uuid, augs[x.metadata.tool])
+            s = dict()
+            for y in lun(x.situationList):
+                y.uuid = _gen(y.uuid, augs[x.metadata.tool], s)
+                y.mentionIdList = [sm[z] for z in y.mentionIdList] if y.mentionIdList is not None else None
+                for z in lun(y.justificationList):
+                    z.mentionId = sm[z.mentionId]
+                    for w in lun(z.tokenRefSeqList):
+                        if w.tokenizationId is not None:
+                            w.tokenizationId = t[w.tokenizationId]
+            for y in lun(x.linkingList):
+                if y.targetId is not None:
+                    y.targetId = s[y.targetId]
+        # second pass
+        for x in lun(comm.situationSetList):
+            for y in lun(x.situationList):
+                for z in lun(y.argumentList):
+                    if z.entityId is not None:
+                        z.entityId = em[z.entityId]
+                    if z.situationId is not None:
+                        z.situationId = sm[z.situationId]
+
+        print '(%d, %d, {%s})' % (i+1, len(augs), ', '.join("'%s': %d" % (k, augs[k].n) for k in sorted(augs.keys())))
+        writer.write(comm)
+
+
+def main():
+    parser = ArgumentParser(
+        formatter_class=ArgumentDefaultsHelpFormatter,
+        description='Read a concrete tarball and write it back out, rewriting UUIDs with compressible UUID scheme',
+    )
+    parser.add_argument('input_path', type=str, help='Input tarball path (- for stdin)')
+    parser.add_argument('output_path', type=str, help='Output tarball path (- for stdout)')
+    args = parser.parse_args()
+
+    # Won't work on Windows...
+    # but stdin/stdout pipelines using this script in Windows have probability 0
+    input_path = '/dev/fd/0' if args.input_path == '-' else args.input_path
+    output_path = '/dev/fd/1' if args.output_path == '-' else args.output_path
+
+    compress_uuids(input_path, output_path)
+
+
+if __name__ == "__main__":
+    main()

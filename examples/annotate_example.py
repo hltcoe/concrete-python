@@ -8,6 +8,7 @@ import time
 import concrete
 import concrete.util
 from concrete.validate import validate_communication
+from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 
 
 def main():
@@ -30,6 +31,9 @@ def create_comm_from_tweet(json_tweet_string):
     """
     tweet_data = json.loads(json_tweet_string)
 
+    augf = AnalyticUUIDGeneratorFactory()
+    aug = augf.create()
+
     comm = concrete.Communication()
     comm.id = "Annotation_Test_1"
     comm.metadata = concrete.AnnotationMetadata(
@@ -38,13 +42,13 @@ def create_comm_from_tweet(json_tweet_string):
     )
     comm.text = tweet_data['text']
     comm.type = "Tweet"
-    comm.uuid = concrete.util.generate_UUID()
+    comm.uuid = aug.next()
 
     comm.sectionList = [concrete.Section()]
     comm.sectionList[0].kind = "mySectionKind"
-    comm.sectionList[0].uuid = concrete.util.generate_UUID()
+    comm.sectionList[0].uuid = aug.next()
     comm.sectionList[0].sentenceList = [concrete.Sentence()]
-    comm.sectionList[0].sentenceList[0].uuid = concrete.util.generate_UUID()
+    comm.sectionList[0].sentenceList[0].uuid = aug.next()
     comm.sectionList[0].sentenceList[0].tokenization = concrete.Tokenization()
 
     tokenization = comm.sectionList[0].sentenceList[0].tokenization
@@ -52,7 +56,7 @@ def create_comm_from_tweet(json_tweet_string):
     tokenization.metadata = concrete.AnnotationMetadata(tool="TEST", timestamp=int(time.time()))
     tokenization.tokenList = concrete.TokenList()
     tokenization.tokenList.tokenList = []
-    tokenization.uuid = concrete.util.generate_UUID()
+    tokenization.uuid = aug.next()
 
     # Whitespace tokenization
     tokens = comm.text.split()
@@ -88,6 +92,9 @@ def add_dictionary_tagging(comm):
     for w in open('/usr/share/dict/words'):
         dictionary.add(w.strip().lower())
 
+    augf = AnalyticUUIDGeneratorFactory(comm)
+    aug = augf.create()
+
     if comm.sectionList:
         for section in comm.sectionList:
             if section.sentenceList:
@@ -96,7 +103,7 @@ def add_dictionary_tagging(comm):
                     posTagList.metadata = concrete.AnnotationMetadata(tool="POS Tagger", timestamp=int(time.time()))
                     posTagList.taggingType = "POS"
                     posTagList.taggedTokenList = []
-                    posTagList.uuid = concrete.util.generate_UUID()
+                    posTagList.uuid = aug.next()
                     if sentence.tokenization.tokenList:
                         for i, token in enumerate(sentence.tokenization.tokenList.tokenList):
                             tt = concrete.TaggedToken()

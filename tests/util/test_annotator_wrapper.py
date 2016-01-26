@@ -4,7 +4,7 @@ import unittest
 
 from concrete.services import Annotator
 from concrete.util import annotator_wrapper
-from concrete.util import thrift_factory as thrift
+from concrete.util.thrift_factory import ThriftFactory
 
 
 class AnnotatorClientWrapperTest(unittest.TestCase):

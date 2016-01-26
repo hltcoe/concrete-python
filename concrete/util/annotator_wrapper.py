@@ -3,7 +3,7 @@ from time import sleep
 from socket import create_connection
 
 from concrete.services import Annotator
-from concrete.util import thrift_factory as thrift
+from concrete.util.thrift_factory import factory
 
 
 class AnnotatorClientWrapper(object):
@@ -19,9 +19,9 @@ class AnnotatorClientWrapper(object):
         self.port = port
 
     def __enter__(self):
-        socket = thrift.factory.createSocket(self.host, self.port)
-        self.transport = thrift.factory.createTransport(socket)
-        protocol = thrift.factory.createProtocol(self.transport)
+        socket = factory.createSocket(self.host, self.port)
+        self.transport = factory.createTransport(socket)
+        protocol = factory.createProtocol(self.transport)
 
         cli = Annotator.Client(protocol)
 
@@ -43,7 +43,7 @@ class AnnotatorServiceWrapper(object):
         self.processor = Annotator.Processor(implementation)
 
     def serve(self, host, port):
-        server = thrift.factory.createServer(self.processor, host, port)
+        server = factory.createServer(self.processor, host, port)
 
         # NOTE: Thrift's servers run indefinitely. This server implementation
         # may be killed by a KeyboardInterrupt (Control-C); otherwise, the

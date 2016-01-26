@@ -18,7 +18,7 @@ from thrift.transport import TTransport
 
 from concrete import Communication, TokenLattice
 from concrete.util.references import add_references_to_communication
-from concrete.util import thrift_factory as thrift
+from concrete.util.thrift_factory import factory
 
 
 def read_thrift_from_file(thrift_obj, filename):
@@ -43,7 +43,7 @@ def read_thrift_from_file(thrift_obj, filename):
     thrift_bytes = thrift_file.read()
     TSerialization.deserialize(
         thrift_obj, thrift_bytes,
-        protocol_factory=thrift.factory.protocolFactory)
+        protocol_factory=factory.protocolFactory)
     thrift_file.close()
     return thrift_obj
 
@@ -81,7 +81,7 @@ def write_communication_to_file(communication, communication_filename):
 def write_thrift_to_file(thrift_obj, filename):
     thrift_bytes = TSerialization.serialize(
         thrift_obj,
-        protocol_factory=thrift.factory.protocolFactory)
+        protocol_factory=factory.protocolFactory)
     thrift_file = open(filename, "wb")
     thrift_file.write(thrift_bytes)
     thrift_file.close()
@@ -131,7 +131,7 @@ class CommunicationReader(object):
 
         if self.filetype is 'stream':
             self.transport = TTransport.TFileObjectTransport(f)
-            self.protocol = thrift.factory.createProtocol(self.transport)
+            self.protocol = factory.createProtocol(self.transport)
             self.transport.open()
 
     def __iter__(self):
@@ -181,7 +181,7 @@ class CommunicationReader(object):
             comm = TSerialization.deserialize(
                 Communication(),
                 self.tar.extractfile(tarinfo).read(),
-                protocol_factory=thrift.factory.protocolFactory)
+                protocol_factory=factory.protocolFactory)
             if self._add_references:
                 add_references_to_communication(comm)
             # hack to keep memory usage O(1)
@@ -197,7 +197,7 @@ class CommunicationReader(object):
         comm = TSerialization.deserialize(
             Communication(),
             self.zip.open(zipinfo).read(),
-            protocol_factory=thrift.factory.protocolFactory)
+            protocol_factory=factory.protocolFactory)
         if self._add_references:
             add_references_to_communication(comm)
         return (comm, zipinfo.filename)
@@ -226,7 +226,7 @@ class CommunicationWriter(object):
 
     def write(self, comm):
         thrift_bytes = TSerialization.serialize(
-            comm, protocol_factory=thrift.factory.protocolFactory)
+            comm, protocol_factory=factory.protocolFactory)
         self.file.write(thrift_bytes)
 
     def __enter__(self):
@@ -265,7 +265,7 @@ class CommunicationWriterTar(object):
             comm_filename = comm.uuid.uuidString + '.concrete'
 
         thrift_bytes = TSerialization.serialize(
-            comm, protocol_factory=thrift.factory.protocolFactory)
+            comm, protocol_factory=factory.protocolFactory)
 
         file_like_obj = cStringIO.StringIO(thrift_bytes)
 

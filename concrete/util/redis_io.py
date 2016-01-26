@@ -1,24 +1,12 @@
-from thrift.transport.TTransport import TMemoryBuffer
+from concrete.communication.ttypes import Communication
 
-from concrete import Communication
-from concrete.util.references import add_references_to_communication
-from concrete.util import thrift_factory as thrift
+from concrete.util.mem_io import (
+        read_communication_from_buffer,
+        write_communication_to_buffer,
+        communication_deep_copy
+        )
 
 from uuid import uuid4
-
-
-def read_communication_from_buffer(buf, add_references=True):
-    '''
-    Deserialize buf and return resulting communication.
-    Add references if requested.
-    '''
-    transport_in = TMemoryBuffer(buf)
-    protocol_in = thrift.factory.createProtocol(transport_in)
-    comm = Communication()
-    comm.read(protocol_in)
-    if add_references:
-        add_references_to_communication(comm)
-    return comm
 
 
 def read_communication_from_redis_key(redis_db, key, add_references=True):
@@ -322,16 +310,6 @@ class RedisCommunicationReader(RedisReader):
             buf, add_references=self.add_references)
 
 
-def write_communication_to_buffer(comm):
-    '''
-    Serialize communication and return result.
-    '''
-    transport = TMemoryBuffer()
-    protocol = thrift.factory.createProtocol(transport)
-    comm.write(protocol)
-    return transport.getvalue()
-
-
 def write_communication_to_redis_key(redis_db, key, comm):
     '''
     Serialize communication and store result in redis key.
@@ -476,12 +454,3 @@ class RedisCommunicationWriter(RedisWriter):
     def __str__(self):
         return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,
                                    self.key, self.key_type)
-
-
-def communication_deep_copy(comm):
-    '''
-    Return deep copy of communication.
-    '''
-    return read_communication_from_buffer(
-        write_communication_to_buffer(comm), add_references=False
-    )

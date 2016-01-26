@@ -1,11 +1,10 @@
-import string
-import random
-
 from thrift.transport.TTransport import TMemoryBuffer
 
 from concrete import Communication
 from concrete.util.references import add_references_to_communication
 from concrete.util import thrift_factory as thrift
+
+from uuid import uuid4
 
 
 def read_communication_from_buffer(buf, add_references=True):
@@ -272,10 +271,7 @@ class RedisReader(object):
         temp_key = None
         while temp_key is None or self.redis_db.exists(temp_key):
             # thanks: http://stackoverflow.com/a/2257449
-            temp_key_leaf = ''.join(
-                random.choice(string.ascii_lowercase + string.digits)
-                for _ in range(self.temp_key_leaf_len)
-            )
+            temp_key_leaf = str(uuid4())
             temp_key = ':'.join(('temp', self.key, temp_key_leaf))
         return temp_key
 

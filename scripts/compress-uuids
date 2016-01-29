@@ -3,20 +3,23 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.uuid.ttypes import UUID
 from concrete.metadata.ttypes import AnnotationMetadata
-from concrete.structure.ttypes import (
-    Parse, DependencyParse, TokenTagging, TokenList, LatticePath
-)
-from inspect import isroutine, getmembers
+from inspect import isroutine
 from concrete.util.redis_io import communication_deep_copy
 from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ
 from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 from concrete.util.unnone import lun
-import json
 
 import logging
 
 
 def filtered_getmembers(obj):
+    '''
+    Generate key-value pairs of object members that may contain UUIDs.
+    Over-generate, but filter the output enough that concrete objects
+    can be traversed recursively using this function without leading to
+    stack overflows or infinite loops.
+    '''
+
     for k in dir(obj):
         if not (k[0] == '_' or k == 'thrift_spec' or k == 'read' or k == 'write'
                 or k == 'validate'):
@@ -27,50 +30,68 @@ def filtered_getmembers(obj):
                 yield (k, v)
 
 
-def has_minimal_uuids(obj):
-    '''
-    return True iff obj.uuid and obj.metadata are the only places UUIDs
-    may appear
-    '''
-    return (isinstance(obj, Parse) or isinstance(obj, DependencyParse)
-            or isinstance(obj, TokenTagging) or isinstance(obj, TokenList)
-            or isinstance(obj, LatticePath))
-
-
 class UUIDClustering(object):
+    '''
+    Representation of the UUID instance clusters in a concrete
+    communication (each cluster represents the set of nested members of
+    the communication that reference or are identified by a given UUID).
+    '''
+
     def __init__(self, comm):
-        self.clusters = dict()
+        self._clusters = dict() # map: UUID -> set of nested members
         self._search(comm)
 
     def hashable_clusters(self):
-        return set(tuple(sorted(c)) for c in self.clusters.values())
+        '''
+        Return the set of unlabeled UUID clusters in a unique and
+        hashable format.  Two UUIDClusterings c1 and c2 are equivalent
+        (the two underlying communications' UUID structures are
+        equivalent) if and only if:
 
-    def _search(self, obj, prefix=None):
-        if prefix is None:
-            prefix = ()
+            c1.hashable_clusters() == c2.hashable_clusters()
+        '''
+        return set(tuple(sorted(c)) for c in self._clusters.values())
 
-        for (k, v) in filtered_getmembers(obj):
-            if isinstance(v, UUID):
-                self._add_uuid_field(v.uuidString, prefix + (k,))
-            elif isinstance(v, list):
-                for (i, elt) in enumerate(v):
-                    self._search(elt, prefix + ((k, 'list', i),))
-            elif isinstance(v, set):
-                raise ValueError('UUIDClustering does not support sets')
-            elif isinstance(v, dict):
-                for (kk, vv) in v.items():
-                    self._search(vv, prefix + ((k, 'dict', kk),))
-            else:
-                self._search(v, prefix + (k,))
+    def _search(self, obj, prefix=()):
+        '''
+        Search obj for UUIDs, calling _add_uuid_field when UUIDs are
+        found and calling _search on other object members.
+        When _search calls itself, prefix is appended with the object
+        member name, forming a uniquely identifiable tuple
+        representation of the path from the root object to a nested
+        object member.
+        '''
+
+        if isinstance(obj, UUID):
+            self._add_uuid_field(obj.uuidString, prefix)
+        elif isinstance(obj, list):
+            for (i, v) in enumerate(obj):
+                self._search(v, prefix + (('list', i),) )
+        elif isinstance(obj, set):
+            raise ValueError('UUIDClustering does not support sets')
+        elif isinstance(obj, dict):
+            for (k, v) in obj.items():
+                self._search(v, prefix + (('dict', k),) )
+        else:
+            for (k, v) in filtered_getmembers(obj):
+                self._search(v, prefix + (k,) )
 
     def _add_uuid_field(self, u, f):
-        if u in self.clusters:
-            self.clusters[u].add(f)
+        '''
+        Add UUID field f (a unique, hashable representation of the path
+        from the root communication to a nested UUID object) to the UUID
+        cluster indexed by UUID string u.
+        '''
+        if u in self._clusters:
+            self._clusters[u].add(f)
         else:
-            self.clusters[u] = set([f])
+            self._clusters[u] = set([f])
 
 
 class UUIDCompressor(object):
+    def __init__(self, single_analytic=False):
+        self.single_analytic = single_analytic
+
     def compress(self, comm):
         'Return a deep copy of comm with compressed UUIDs.'
 
@@ -84,45 +105,34 @@ class UUIDCompressor(object):
 
         return cc
 
-    def _compress_uuids(self, obj, tool=None):
+    def _compress_uuids(self, obj, name_is_uuid=False, tool=None):
         'Generate new UUIDs in "uuid" fields and save mapping'
 
         tool = self._get_tool(obj, tool)
 
-        if hasattr(obj, 'uuid'):
-            if isinstance(obj.uuid, UUID):
-                obj.uuid = self._gen_uuid(obj.uuid, tool)
+        if name_is_uuid:
+            if isinstance(obj, UUID):
+                obj.uuidString = self._gen_uuid(obj, tool)
             else:
                 logging.warning('uuid not instance of UUID')
 
-        if has_minimal_uuids(obj):
-            return # no other field named "uuid" under obj
+        if not isinstance(obj, UUID): # we already took care of "uuid"
+            self._apply(
+                lambda elt, elt_name_is_uuid: self._compress_uuids(elt,
+                    name_is_uuid=elt_name_is_uuid, tool=tool), obj)
 
-        for (k, v) in filtered_getmembers(obj):
-            if not isinstance(v, UUID): # we already took care of "uuid"
-                self._apply(lambda elt: self._compress_uuids(elt, tool), v)
-
-    def _compress_uuid_refs(self, obj, tool=None):
+    def _compress_uuid_refs(self, obj, name_is_uuid=False, tool=None):
         'Update UUID references (not in "uuid" fields) using saved mapping'
 
         tool = self._get_tool(obj, tool)
 
-        if has_minimal_uuids(obj):
-            # just need to check grandchildren of metadata
-            if hasattr(obj, 'metadata'):
-                if isinstance(obj.metadata, AnnotationMetadata):
-                    self._compress_uuid_refs(obj.metadata, tool)
-                else:
-                    logging.warning('metadata not instance of'
-                            ' AnnotationMetadata')
-            return
-
-        for (k, v) in filtered_getmembers(obj):
-            if isinstance(v, UUID):
-                if k != 'uuid':
-                    setattr(obj, k, UUID(uuidString=self.uuid_map[v.uuidString]))
-            else:
-                self._apply(lambda elt: self._compress_uuid_refs(elt, tool), v)
+        if isinstance(obj, UUID):
+            if not name_is_uuid:
+                obj.uuidString = self.uuid_map[obj.uuidString]
+        else:
+            self._apply(
+                lambda elt, elt_name_is_uuid: self._compress_uuid_refs(elt,
+                    name_is_uuid=elt_name_is_uuid, tool=tool), obj)
 
     def _get_tool(self, obj, tool=None):
         '''
@@ -135,6 +145,8 @@ class UUIDCompressor(object):
                 tool = obj.metadata.tool
             else:
                 logging.warning('metadata not instance of AnnotationMetadata')
+        if self.single_analytic:
+            tool = None
         if tool not in self.augs:
             self.augs[tool] = self.augf.create()
         return tool
@@ -151,7 +163,7 @@ class UUIDCompressor(object):
             raise ValueError('encountered UUID %s twice, aborting' %
                     old_uuid.uuidString)
         self.uuid_map[old_uuid.uuidString] = new_uuid.uuidString
-        return new_uuid
+        return new_uuid.uuidString
 
     @classmethod
     def _apply(cls, f, x):
@@ -162,18 +174,20 @@ class UUIDCompressor(object):
 
         if isinstance(x, list):
             for elt in x:
-                f(elt)
+                f(elt, False)
         elif isinstance(x, set):
             for elt in x:
-                f(elt)
+                f(elt, False)
         elif isinstance(x, dict):
             for elt in x.values():
-                f(elt)
+                f(elt, False)
         else:
-            f(x)
+            for (k, v) in filtered_getmembers(x):
+                f(v, k == 'uuid')
 
 
-def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None):
+def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None,
+                   single_analytic=False):
     reader = CommunicationReader(input_path, add_references=False)
     writer = CommunicationWriterTGZ(output_path)
 
@@ -182,7 +196,7 @@ def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None):
     else:
         uuid_map_file = open(uuid_map_path, 'w')
 
-    uc = UUIDCompressor()
+    uc = UUIDCompressor(single_analytic=single_analytic)
 
     for (i, (comm, _)) in enumerate(reader):
         new_comm = uc.compress(comm)
@@ -202,6 +216,8 @@ def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None):
             c1 = UUIDClustering(comm).hashable_clusters()
             c2 = UUIDClustering(new_comm).hashable_clusters()
 
+            # Verification is c1 == c2;
+            # also check UUID map lengths are the same as a sanity-check
             if num_old_uuids == num_new_uuids and c1 == c2:
                 logging.info('verified %s (%d uuid instances, %d uuids)'
                              % (comm.id, sum(len(c) for c in c1), len(c1)))
@@ -240,6 +256,9 @@ def main():
     parser.add_argument('--verify', action='store_true',
                         help='Verify within-communication links are satisfied'
                              ' after conversion')
+    parser.add_argument('--single-analytic', action='store_true',
+                        help='Verify within-communication links are satisfied'
+                             ' after conversion')
     parser.add_argument('--uuid-map-path', type=str,
                         help='Output path of UUID map')
     ns = parser.parse_args()
@@ -255,7 +274,8 @@ def main():
     )
 
     compress_uuids(input_path, output_path, verify=ns.verify,
-            uuid_map_path=ns.uuid_map_path)
+                   single_analytic=ns.single_analytic,
+                   uuid_map_path=ns.uuid_map_path)
 
 
 if __name__ == "__main__":

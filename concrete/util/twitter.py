@@ -90,9 +90,9 @@ def json_tweet_object_to_TweetInfo(tweet):
                 if hasattr(concrete_object, camelcased_key):
                     setattr(concrete_object, camelcased_key, twitter_dict[key])
                 else:
-                    logging.warn("Concrete schema for '%s' missing field "
-                                 "for Twitter API field '%s'" %
-                                 (type(concrete_object), key))
+                    logging.debug("Concrete schema for '%s' missing field "
+                                  "for Twitter API field '%s'" %
+                                  (type(concrete_object), key))
 
     tweet_info = TweetInfo()
     set_flat_fields(tweet_info, tweet)

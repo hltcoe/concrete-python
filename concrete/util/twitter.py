@@ -137,6 +137,8 @@ def json_tweet_object_to_TweetInfo(tweet):
             if tweet[u'place'][u'bounding_box']:
                 bounding_box = BoundingBox()
                 set_flat_fields(bounding_box, tweet[u'place'][u'bounding_box'])
+                if bounding_box.coordinateList is None:
+                    bounding_box.coordinateList = []
                 twitter_place.boundingBox = bounding_box
             if tweet[u'place'][u'attributes']:
                 place_attributes = PlaceAttributes()

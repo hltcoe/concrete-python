@@ -90,9 +90,9 @@ def json_tweet_object_to_TweetInfo(tweet):
                 if hasattr(concrete_object, camelcased_key):
                     setattr(concrete_object, camelcased_key, twitter_dict[key])
                 else:
-                    logging.warn("Concrete schema for '%s' missing field "
-                                 "for Twitter API field '%s'" %
-                                 (type(concrete_object), key))
+                    logging.debug("Concrete schema for '%s' missing field "
+                                  "for Twitter API field '%s'" %
+                                  (type(concrete_object), key))
 
     tweet_info = TweetInfo()
     set_flat_fields(tweet_info, tweet)
@@ -150,9 +150,16 @@ def json_tweet_object_to_TweetInfo(tweet):
     return tweet_info
 
 
-def json_tweet_string_to_Communication(json_tweet_string):
-    tweet = json.loads(json_tweet_string)
-    return json_tweet_object_to_Communication(tweet)
+def json_tweet_string_to_Communication(json_tweet_string, check_empty=False, check_delete=False):
+    json_tweet_string = json_tweet_string.strip()
+    if (not check_empty) or json_tweet_string:
+        json_tweet = json.loads(json_tweet_string)
+        if (not check_delete) or tuple(json_tweet.keys()) != ('delete',):
+            return json_tweet_object_to_Communication(json_tweet)
+        else:
+            return None
+    else:
+        return None
 
 
 def json_tweet_string_to_TweetInfo(json_tweet_string):

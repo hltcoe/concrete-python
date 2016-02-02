@@ -3,14 +3,19 @@
 'Convert Tweet file to Concrete Communications file.'
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from multiprocessing import Pool
 import codecs
 import gzip
 import logging
 import mimetypes
-import json
 
-from concrete.util import CommunicationReader, CommunicationWriter
-from concrete.util.twitter import json_tweet_object_to_Communication
+from concrete.util.mem_io import write_communication_to_buffer
+from concrete.util.twitter import json_tweet_string_to_Communication
+
+
+def json_str_to_concrete_bytes(tweet_str):
+    b = json_tweet_string_to_Communication(tweet_str, True, True)
+    return None if b is None else write_communication_to_buffer(b)
 
 
 def main():
@@ -18,7 +23,7 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read tweets formatted in the Twitter JSON API and write communications',
     )
-    parser.set_defaults(log_level='INFO')
+    parser.set_defaults(log_level='INFO', num_proc=1, chunk_size=10000)
     parser.add_argument('tweet_path', type=str,
                         help='Output twitter JSON file path (- for stdout)')
     parser.add_argument('concrete_path', type=str,
@@ -26,6 +31,10 @@ def main():
     parser.add_argument('--log-level', type=str,
                         choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
                         help='Logging verbosity level (to stderr)')
+    parser.add_argument('--num-proc', type=int,
+                        help='Number of worker processes to use')
+    parser.add_argument('--chunk-size', type=int,
+                        help='Chunk size (in number of tweets) when dispatching jobs to workers')
     ns = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely
@@ -44,19 +53,16 @@ def main():
     else:
         tweet_reader = codecs.open(tweet_path, 'r', encoding='utf-8')
 
-    with CommunicationWriter(concrete_path) as comm_writer:
+    with open(concrete_path, 'wb') as writer:
         i = 0
-        for tweet_str in tweet_reader:
-            tweet_str = tweet_str.strip()
 
-            if tweet_str:
-                tweet_json = json.loads(tweet_str)
-                if tuple(tweet_json.keys()) != ('delete',):
-                    comm = json_tweet_object_to_Communication(tweet_json)
-                    if (i+1) % 1000 == 0:
-                        logging.info('writing tweet %d (%s)...' % (i+1, comm.id))
-                    comm_writer.write(comm)
-                    i += 1
+        p = Pool(ns.num_proc)
+        for concrete_bytes in p.imap(json_str_to_concrete_bytes, tweet_reader, ns.chunk_size):
+            if concrete_bytes is not None:
+                if i > 0 and i % 10000 == 0:
+                    logging.error('writing tweet %d...' % (i+1))
+                writer.write(concrete_bytes)
+                i += 1
 
 
 if __name__ == "__main__":

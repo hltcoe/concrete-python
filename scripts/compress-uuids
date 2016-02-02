@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from thrift.Thrift import TType
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.uuid.ttypes import UUID
 from concrete.metadata.ttypes import AnnotationMetadata
@@ -10,7 +11,6 @@ from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 from concrete.util.unnone import lun
 
 import logging
-
 
 def filtered_getmembers(obj):
     '''
@@ -28,6 +28,18 @@ def filtered_getmembers(obj):
                     or isinstance(v, int) or isinstance(v, float)
                     or isinstance(v, str) or isinstance(v, unicode)):
                 yield (k, v)
+
+FILTERED_TTYPES = set((TType.STRUCT, TType.LIST, TType.MAP, TType.SET))
+
+def fast_filtered_getmembers(obj):
+    'Fast thrift-specific implementation of filtered_getmembers.'
+    if hasattr(obj, 'thrift_spec'):
+        for s in obj.thrift_spec:
+            if s is not None:
+                t = s[1]
+                if t in FILTERED_TTYPES:
+                    k = s[2]
+                    yield (k, getattr(obj, k))
 
 
 class UUIDClustering(object):
@@ -182,7 +194,7 @@ class UUIDCompressor(object):
             for elt in x.values():
                 f(elt, False)
         else:
-            for (k, v) in filtered_getmembers(x):
+            for (k, v) in fast_filtered_getmembers(x):
                 f(v, k == 'uuid')
 
 

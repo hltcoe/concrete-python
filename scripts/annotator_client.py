@@ -16,8 +16,7 @@ def main():
     parser.add_argument('--output', default='-', help="Output source to use. '-' for stdout; otherwise takes a path to a file.")
     args = parser.parse_args()
 
-    # Won't work on Windows...
-    # but stdin/stdout pipelines using this script in Windows have probability 0
+    # Won't work on Windows... but that use case is very unlikely
     input_path = '/dev/fd/0' if (args.input) == '-' else args.input
     output_path = '/dev/fd/1' if (args.output) == '-' else args.output
 

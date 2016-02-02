@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+'Convert Tweet file to Concrete Communications file.'
+
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import codecs
+import gzip
+import logging
+import mimetypes
+import json
+
+from concrete.util import CommunicationReader, CommunicationWriter
+from concrete.util.twitter import json_tweet_object_to_Communication
+
+
+def main():
+    parser = ArgumentParser(
+        formatter_class=ArgumentDefaultsHelpFormatter,
+        description='Read tweets formatted in the Twitter JSON API and write communications',
+    )
+    parser.set_defaults(log_level='INFO')
+    parser.add_argument('tweet_path', type=str,
+                        help='Output twitter JSON file path (- for stdout)')
+    parser.add_argument('concrete_path', type=str,
+                        help='Output concrete file path (- for stdout)')
+    parser.add_argument('--log-level', type=str,
+                        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
+                        help='Logging verbosity level (to stderr)')
+    ns = parser.parse_args()
+
+    # Won't work on Windows... but that use case is very unlikely
+    tweet_path = '/dev/fd/0' if ns.tweet_path == '-' else ns.tweet_path
+    concrete_path = '/dev/fd/1' if ns.concrete_path == '-' else ns.concrete_path
+
+    logging.basicConfig(
+        level=ns.log_level,
+        format='%(asctime)-15s %(levelname)s: %(message)s'
+    )
+
+    if ns.tweet_path != '-' and mimetypes.guess_type(tweet_path)[1] == 'gzip':
+        gz_file = gzip.open(tweet_path, 'r')
+        utf8_reader = codecs.getreader("utf-8")
+        tweet_reader = utf8_reader(gz_file)
+    else:
+        tweet_reader = codecs.open(tweet_path, 'r', encoding='utf-8')
+
+    with CommunicationWriter(concrete_path) as comm_writer:
+        i = 0
+        for tweet_str in tweet_reader:
+            tweet_str = tweet_str.strip()
+
+            if tweet_str:
+                tweet_json = json.loads(tweet_str)
+                if tuple(tweet_json.keys()) != ('delete',):
+                    comm = json_tweet_object_to_Communication(tweet_json)
+                    if (i+1) % 1000 == 0:
+                        logging.info('writing tweet %d (%s)...' % (i+1, comm.id))
+                    comm_writer.write(comm)
+                    i += 1
+
+
+if __name__ == "__main__":
+    main()

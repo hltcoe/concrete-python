@@ -40,6 +40,11 @@ def json_tweet_object_to_Communication(tweet):
 
     augf = AnalyticUUIDGeneratorFactory()
     aug = augf.create()
+    if 'id_str' in tweet:
+        tweet_id = tweet['id_str']
+    else:
+        logging.warning('Tweet has no id_str, leaving communication id blank')
+        tweet_id = None
     comm = Communication(
         communicationMetadata=CommunicationMetadata(
             tweetInfo=tweet_info),
@@ -47,8 +52,10 @@ def json_tweet_object_to_Communication(tweet):
             tool=TOOL_NAME,
             timestamp=int(time.time())),
         originalText=tweet_info.text,
+        text=tweet_info.text,
         type=TWEET_TYPE,
-        uuid=aug.next()
+        uuid=aug.next(),
+        id=tweet_id,
     )
     return comm
 

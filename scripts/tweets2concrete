@@ -23,7 +23,7 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read tweets formatted in the Twitter JSON API and write communications',
     )
-    parser.set_defaults(log_level='INFO')
+    parser.set_defaults(log_level='INFO', num_proc=1, chunk_size=10000)
     parser.add_argument('tweet_path', type=str,
                         help='Output twitter JSON file path (- for stdout)')
     parser.add_argument('concrete_path', type=str,

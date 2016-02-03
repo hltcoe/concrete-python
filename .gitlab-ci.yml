@@ -1,0 +1,22 @@
+image: ubuntu:latest
+
+before_script:
+  - apt-get update -qq && apt-get install -y -qq python python-pip python-dev redis-server
+  - which python
+  - python --version
+  - which redis-server
+  - redis-server --version
+  - pip install --upgrade setuptools redis tox
+  - python setup.py install
+
+test:
+  script:
+    - python setup.py test
+
+redis_test:
+  script:
+    - python -m unittest redis_tests
+
+tox:
+  script:
+    - tox

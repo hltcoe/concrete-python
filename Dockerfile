@@ -1,9 +1,8 @@
 FROM ubuntu:latest
 
 
-RUN apt-get -y update && \
-    apt-get -y upgrade && \
-    apt-get install -y \
+RUN apt-get update \
+    && apt-get install -y \
         gcc \
         make \
         python \
@@ -12,10 +11,9 @@ RUN apt-get -y update && \
         wget \
         tar \
         vim \
-        man
-
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+        man \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install ipython
 RUN pip install --upgrade setuptools

@@ -43,7 +43,7 @@ RUN cd concrete-python \
 
 
 # add hltcoe user
-RUN useradd -U -m -s /bin/bash -G sudo hltcoe \
+RUN useradd -U -m -s /bin/bash hltcoe \
     && passwd -l hltcoe
 
 # set up hltcoe user environment, including local copy of source,

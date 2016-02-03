@@ -5,7 +5,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.uuid.ttypes import UUID
 from concrete.metadata.ttypes import AnnotationMetadata
 from inspect import isroutine
-from concrete.util.redis_io import communication_deep_copy
+from concrete.util.mem_io import communication_deep_copy
 from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ
 from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 from concrete.util.unnone import lun

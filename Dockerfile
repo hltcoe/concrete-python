@@ -17,9 +17,8 @@ RUN apt-get -y update && \
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install redis thrift ipython
+RUN pip install ipython
 RUN pip install --upgrade setuptools
-RUN pip install git+https://github.com/hltcoe/concrete-python.git#egg=concrete
 
 
 # pre-install
@@ -50,3 +49,4 @@ RUN cd /root && \
 
 # add source
 ADD . /root/concrete-python/
+RUN bash -c 'source /root/.bashrc && cd /root/concrete-python && python setup.py install'

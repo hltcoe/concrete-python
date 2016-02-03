@@ -1,6 +1,7 @@
 """Add reference variables for each UUID "pointer" in a Communication
 """
 
+
 def add_references_to_communication(comm):
     """Create references for each UUID 'pointer'
 
@@ -60,26 +61,33 @@ def add_references_to_communication(comm):
             comm.sectionForUUID[section.uuid.uuidString] = section
             if section.sentenceList:
                 for sentence in section.sentenceList:
-                    comm.sentenceForUUID[sentence.uuid.uuidString]= sentence
+                    comm.sentenceForUUID[sentence.uuid.uuidString] = sentence
                     if sentence.tokenization:
-                        comm.tokenizationForUUID[sentence.tokenization.uuid.uuidString] = sentence.tokenization
+                        comm.tokenizationForUUID[
+                            sentence.tokenization.uuid.uuidString] = \
+                            sentence.tokenization
                         sentence.tokenization.sentence = sentence
 
     if comm.entityMentionSetList:
         for entityMentionSet in comm.entityMentionSetList:
             for entityMention in entityMentionSet.mentionList:
-                comm.entityMentionForUUID[entityMention.uuid.uuidString] = entityMention
+                comm.entityMentionForUUID[entityMention.uuid.uuidString] = \
+                    entityMention
                 try:
-                    entityMention.tokens.tokenization = comm.tokenizationForUUID[entityMention.tokens.tokenizationId.uuidString]
+                    entityMention.tokens.tokenization = \
+                        comm.tokenizationForUUID[
+                            entityMention.tokens.tokenizationId.uuidString]
                 except KeyError:
                     entityMention.tokens.tokenization = None
-                # childMentionList and parentMention are in-memory references, and not part of the Concrete schema
+                # childMentionList and parentMention are in-memory references,
+                # and not part of the Concrete schema
                 entityMention.childMentionList = []
                 entityMention.parentMention = None
             for entityMention in entityMentionSet.mentionList:
                 if entityMention.childMentionIdList:
                     for childMentionId in entityMention.childMentionIdList:
-                        childMention = comm.entityMentionForUUID[childMentionId.uuidString]
+                        childMention = comm.entityMentionForUUID[
+                            childMentionId.uuidString]
                         childMention.parentMention = entityMention
                         entityMention.childMentionList.append(childMention)
 
@@ -89,26 +97,37 @@ def add_references_to_communication(comm):
                 comm.entityForUUID[entity.uuid.uuidString] = entity
                 entity.mentionList = []
                 for mentionId in entity.mentionIdList:
-                    entity.mentionList.append(comm.entityMentionForUUID[mentionId.uuidString])
+                    entity.mentionList.append(
+                        comm.entityMentionForUUID[mentionId.uuidString])
 
     if comm.situationMentionSetList:
         for situationMentionSet in comm.situationMentionSetList:
             for situationMention in situationMentionSet.mentionList:
-                comm.situationMentionForUUID[situationMention.uuid.uuidString] = situationMention
+                comm.situationMentionForUUID[situationMention.uuid.uuidString]\
+                    = situationMention
                 for argument in situationMention.argumentList:
                     if argument.entityMentionId:
-                        argument.entityMention = comm.entityMentionForUUID[argument.entityMentionId.uuidString]
+                        argument.entityMention = comm.entityMentionForUUID[
+                            argument.entityMentionId.uuidString]
                     else:
                         argument.entityMention = None
                     if argument.situationMentionId:
-                        argument.situationMention = comm.situationMentionForUUID[argument.situationMentionId.uuidString]
+                        argument.situationMention = \
+                            comm.situationMentionForUUID[
+                                argument.situationMentionId.uuidString]
                     else:
                         argument.situationMention = None
                     if argument.tokens:
-                        argument.tokens.tokenization = comm.tokenizationForUUID[argument.tokens.tokenizationId.uuidString]
+                        argument.tokens.tokenization = \
+                            comm.tokenizationForUUID[
+                                argument.tokens.tokenizationId.uuidString]
                 if situationMention.tokens:
                     try:
-                        situationMention.tokens.tokenization = comm.tokenizationForUUID[situationMention.tokens.tokenizationId.uuidString]
+                        situationMention.tokens.tokenization = \
+                            comm.tokenizationForUUID[
+                                situationMention.tokens.
+                                tokenizationId.uuidString
+                            ]
                     except KeyError:
                         situationMention.tokens.tokenization = None
 
@@ -119,6 +138,7 @@ def add_references_to_communication(comm):
                 if situation.mentionIdList:
                     situation.mentionList = []
                     for mentionId in situation.mentionIdList:
-                        situation.mentionList.append(comm.situationMentionForUUID[mentionId.uuidString])
+                        situation.mentionList.append(
+                            comm.situationMentionForUUID[mentionId.uuidString])
                 else:
                     situation.mentionList = None

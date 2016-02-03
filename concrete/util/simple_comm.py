@@ -16,7 +16,7 @@ from concrete import (
     TokenizationKind,
     TokenList
 )
-from concrete.util import generate_UUID
+from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 from concrete.util.file_io import CommunicationWriter
 
 
@@ -36,37 +36,45 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
 
     - A Concrete Communication object
     """
-    toolname="TEST"
+    toolname = "TEST"
     timestamp = int(time.time())
+
+    augf = AnalyticUUIDGeneratorFactory()
+    aug = augf.create()
 
     comm = Communication(
         id=comm_id,
         metadata=AnnotationMetadata(tool=toolname, timestamp=timestamp),
         type=toolname,
-        uuid=generate_UUID())
+        uuid=aug.next()
+    )
 
     tokenization = Tokenization(
         kind=TokenizationKind.TOKEN_LIST,
         metadata=AnnotationMetadata(tool=toolname, timestamp=timestamp),
         tokenList=TokenList(
             tokenList=[]),
-        uuid=generate_UUID())
+        uuid=aug.next()
+    )
     token_string_list = sentence_string.split()
     for i, token_string in enumerate(token_string_list):
-        tokenization.tokenList.tokenList.append(Token(text=token_string, tokenIndex=i))
+        tokenization.tokenList.tokenList.append(Token(text=token_string,
+                                                      tokenIndex=i))
 
     sentence = Sentence(
         textSpan=TextSpan(0, len(sentence_string)),
         tokenization=tokenization,
-        uuid=generate_UUID())
+        uuid=aug.next()
+    )
 
     section = Section(
         kind="SectionKind",
         sentenceList=[sentence],
         textSpan=TextSpan(0, len(sentence_string)),
-        uuid=generate_UUID())
+        uuid=aug.next()
+    )
 
-    comm.sectionList=[section]
+    comm.sectionList = [section]
 
     return comm
 

@@ -1,25 +1,12 @@
-import string
-import random
-import time
+from concrete.communication.ttypes import Communication
 
-from thrift.protocol.TCompactProtocol import TCompactProtocol
-from thrift.transport.TTransport import TMemoryBuffer
+from concrete.util.mem_io import (
+        read_communication_from_buffer,
+        write_communication_to_buffer,
+        communication_deep_copy
+        )
 
-from concrete import Communication
-from concrete.util.references import add_references_to_communication
-
-def read_communication_from_buffer(buf, add_references=True):
-    '''
-    Deserialize buf and return resulting communication.
-    Add references if requested.
-    '''
-    transport_in = TMemoryBuffer(buf)
-    protocol_in = TCompactProtocol(transport_in)
-    comm = Communication()
-    comm.read(protocol_in)
-    if add_references:
-        add_references_to_communication(comm)
-    return comm
+from uuid import uuid4
 
 
 def read_communication_from_redis_key(redis_db, key, add_references=True):
@@ -112,7 +99,7 @@ class RedisReader(object):
         if pop and key_type not in ('set', 'list'):
             raise ValueError('can only pop on set or list')
         if block and key_type not in ('list',):
-            raise ValueError('can only pop on set or list')
+            raise ValueError('can only block-pop on list')
         if block and not pop:
             raise ValueError('can only block if popping too')
         if cycle_list and block:
@@ -150,7 +137,7 @@ class RedisReader(object):
             if self.cycle_list:
                 buf = self.redis_db.rpoplpush(self.key, self.key)
                 i = 0
-                while buf is not None and i < redis_db.llen(self.key):
+                while buf is not None and i < self.redis_db.llen(self.key):
                     yield self.deserialize_func(buf)
                     buf = self.redis_db.rpoplpush(self.key, self.key)
                     i += 1
@@ -272,10 +259,7 @@ class RedisReader(object):
         temp_key = None
         while temp_key is None or self.redis_db.exists(temp_key):
             # thanks: http://stackoverflow.com/a/2257449
-            temp_key_leaf = ''.join(
-                random.choice(string.ascii_lowercase + string.digits)
-                for _ in range(self.temp_key_leaf_len)
-            )
+            temp_key_leaf = str(uuid4())
             temp_key = ':'.join(('temp', self.key, temp_key_leaf))
         return temp_key
 
@@ -314,24 +298,16 @@ class RedisCommunicationReader(RedisReader):
         '''
 
         if 'deserialize_func' in kwargs:
-            raise ValueError('RedisCommunicationReader does not allow custom deserialize_func')
+            raise ValueError('RedisCommunicationReader does not allow custom '
+                             'deserialize_func')
         self.add_references = add_references
         super(RedisCommunicationReader, self).__init__(
             redis_db, key, deserialize_func=self._load_from_buffer, **kwargs
         )
 
     def _load_from_buffer(self, buf):
-        return read_communication_from_buffer(buf, add_references=self.add_references)
-
-
-def write_communication_to_buffer(comm):
-    '''
-    Serialize communication and return result.
-    '''
-    transport = TMemoryBuffer()
-    protocol = TCompactProtocol(transport)
-    comm.write(protocol)
-    return transport.getvalue()
+        return read_communication_from_buffer(
+            buf, add_references=self.add_references)
 
 
 def write_communication_to_redis_key(redis_db, key, comm):
@@ -458,9 +434,11 @@ class RedisCommunicationWriter(RedisWriter):
                       for a communication, False to use the id
         '''
         if 'serialize_func' in kwargs:
-            raise ValueError('RedisCommunicationWriter does not allow custom serialize_func')
+            raise ValueError('RedisCommunicationWriter does not allow custom '
+                             'serialize_func')
         if 'hash_key_func' in kwargs:
-            raise ValueError('RedisCommunicationWriter does not allow custom hash_key_func')
+            raise ValueError('RedisCommunicationWriter does not allow custom '
+                             'hash_key_func')
         self.uuid_hash_key = uuid_hash_key
         super(RedisCommunicationWriter, self).__init__(
             redis_db, key, serialize_func=self._write_to_buffer,
@@ -476,12 +454,3 @@ class RedisCommunicationWriter(RedisWriter):
     def __str__(self):
         return '%s(%s, %s, %s)' % (type(self).__name__, self.redis_db,
                                    self.key, self.key_type)
-
-
-def communication_deep_copy(comm):
-    '''
-    Return deep copy of communication.
-    '''
-    return read_communication_from_buffer(
-        write_communication_to_buffer(comm), add_references=False
-    )

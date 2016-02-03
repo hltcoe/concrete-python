@@ -6,8 +6,7 @@
 import time
 import unittest
 
-from concrete import AnnotationMetadata, Tokenization
-from concrete.util import generate_UUID
+from concrete import AnnotationMetadata, Tokenization, UUID
 from test_helper import read_test_comm
 
 
@@ -37,7 +36,8 @@ class TestRepr(unittest.TestCase):
         """
         tokenization = Tokenization(
             metadata=AnnotationMetadata(tool="test", timestamp=int(time.time())),
-            uuid=generate_UUID())
+            uuid=UUID(uuidString='01234567-0123-4567-89ab-cdef89abcdef')
+        )
         s = tokenization.__repr__()
 
 

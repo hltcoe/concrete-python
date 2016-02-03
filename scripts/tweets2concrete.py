@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-"""Convert Tweet file to Concrete Communications file
+"""
+Deprecated: use tweets2concrete instead
+Convert Tweet file to Concrete Communications file.
 """
 
 import argparse
@@ -14,7 +16,8 @@ from concrete.util.twitter import json_tweet_string_to_Communication
 
 
 def main():
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=logging.ERROR)
+    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=logging.WARNING)
+    logging.warning('tweets2concrete.py is deprecated: use tweets2concrete instead')
 
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('tweet_file')

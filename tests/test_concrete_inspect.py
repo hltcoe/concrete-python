@@ -7,7 +7,6 @@ import unittest
 
 from concrete import AnnotationMetadata, Communication
 import concrete.inspect
-from concrete.util import generate_UUID
 from concrete.validate import validate_communication
 
 import sys

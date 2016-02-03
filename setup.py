@@ -39,7 +39,7 @@ setup(
               + glob.glob('concrete/services/*-remote'),
 
     setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'mock', 'flake8'],
 
     install_requires = [
         'networkx',

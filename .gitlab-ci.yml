@@ -6,16 +6,16 @@ before_script:
   - python --version
   - which redis-server
   - redis-server --version
-  - pip install --upgrade setuptools redis tox
+  - pip install --upgrade setuptools tox pytest pytest-cov six
   - python setup.py install
 
-test:
+basic_test:
   script:
     - python setup.py test
 
-redis_test:
+test:
   script:
-    - python -m unittest redis_tests
+    - python setup.py test --addopts '--cov=concrete/ tests redis_tests'
 
 tox:
   script:

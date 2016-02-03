@@ -38,7 +38,8 @@ setup(
     scripts = glob.glob('scripts/*')
               + glob.glob('concrete/services/*-remote'),
 
-    test_suite = "tests",
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
 
     install_requires = [
         'networkx',

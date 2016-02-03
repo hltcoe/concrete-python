@@ -4,6 +4,8 @@
 
 /.cache/
 /.tox/
+/.eggs/
+/.coverage
 /build/
 /concrete.egg-info/
 /dist/

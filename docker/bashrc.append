@@ -1,0 +1,11 @@
+
+export PATH="/usr/local/bin:$PATH"
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$HOME/lib:$LD_LIBRARY_PATH"
+export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
+export LIBRARY_PATH="$HOME/lib:$LIBRARY_PATH"
+export C_INCLUDE_PATH="/usr/local/include:$C_INCLUDE_PATH"
+export C_INCLUDE_PATH="$HOME/include:$C_INCLUDE_PATH"
+export CPLUS_INCLUDE_PATH="/usr/local/include:$CPLUS_INCLUDE_PATH"
+export CPLUS_INCLUDE_PATH="$HOME/include:$CPLUS_INCLUDE_PATH"

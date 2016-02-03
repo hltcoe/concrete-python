@@ -80,7 +80,7 @@ class TestReadCommunicationFromRedisKey(unittest.TestCase):
         key = 'comm'
         with open(filename, 'rb') as f:
             buf = f.read()
-            with RedisServer() as server:
+            with RedisServer(loglevel='warning') as server:
                 redis_db = Redis(port=server.port)
                 redis_db.set(key, buf)
                 comm = read_communication_from_redis_key(redis_db, key)
@@ -93,7 +93,7 @@ class TestReadCommunicationFromRedisKey(unittest.TestCase):
         key = 'comm'
         with open(filename, 'rb') as f:
             buf = f.read()
-            with RedisServer() as server:
+            with RedisServer(loglevel='warning') as server:
                 redis_db = Redis(port=server.port)
                 redis_db.set(key, buf)
                 comm = read_communication_from_redis_key(
@@ -111,7 +111,7 @@ class TestWriteCommunicationToRedisKey(unittest.TestCase):
         with open(filename, 'rb') as f:
             f_buf = f.read()
             comm = read_communication_from_buffer(f_buf)
-            with RedisServer() as server:
+            with RedisServer(loglevel='warning') as server:
                 redis_db = Redis(port=server.port)
                 write_communication_to_redis_key(redis_db, key, comm)
                 self.assertEquals(f_buf, redis_db.get(key))
@@ -119,7 +119,7 @@ class TestWriteCommunicationToRedisKey(unittest.TestCase):
     def test_read_write_fixed_point(self):
         key = 'comm'
         comm = create_simple_comm('comm-1')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             buf_1 = write_communication_to_redis_key(redis_db, key, comm)
             buf_2 = write_communication_to_redis_key(
@@ -135,7 +135,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.sadd(key, write_communication_to_buffer(comm1))
             redis_db.sadd(key, write_communication_to_buffer(comm2))
@@ -167,7 +167,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -191,7 +191,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.hset(key, comm1.uuid.uuidString,
                           write_communication_to_buffer(comm1))
@@ -220,7 +220,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -245,7 +245,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.sadd(key, write_communication_to_buffer(comm1))
             redis_db.sadd(key, write_communication_to_buffer(comm2))
@@ -261,7 +261,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -275,7 +275,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.hset(key, comm1.uuid.uuidString,
                           write_communication_to_buffer(comm1))
@@ -294,7 +294,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             reader = RedisCommunicationReader(redis_db, key, key_type='set')
             self.assertEquals(0, len(reader))
@@ -312,7 +312,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             reader = RedisCommunicationReader(redis_db, key, key_type='list')
             self.assertEquals(0, len(reader))
@@ -328,7 +328,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             reader = RedisCommunicationReader(redis_db, key, key_type='hash')
             self.assertEquals(0, len(reader))
@@ -346,7 +346,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_implicit_empty(self):
         key = 'dataset'
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             with self.assertRaises(Exception):
                 RedisCommunicationReader(redis_db, key)
@@ -356,7 +356,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.sadd(key, write_communication_to_buffer(comm1))
             redis_db.sadd(key, write_communication_to_buffer(comm2))
@@ -377,7 +377,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -396,7 +396,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.hset(key, comm1.uuid.uuidString,
                           write_communication_to_buffer(comm1))
@@ -420,7 +420,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.sadd(key, write_communication_to_buffer(comm1))
             redis_db.sadd(key, write_communication_to_buffer(comm2))
@@ -447,7 +447,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -472,7 +472,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -497,7 +497,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -523,7 +523,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -550,7 +550,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
         comm1 = create_simple_comm('comm-1')
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, write_communication_to_buffer(comm1))
             redis_db.lpush(key, write_communication_to_buffer(comm2))
@@ -577,7 +577,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf1 = write_communication_to_buffer(comm1)
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='set')
             w.write(comm1)
@@ -595,7 +595,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf2 = write_communication_to_buffer(comm2)
         comm3 = create_simple_comm('comm-3')
         buf3 = write_communication_to_buffer(comm3)
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='list')
             w.write(comm1)
@@ -616,7 +616,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf2 = write_communication_to_buffer(comm2)
         comm3 = create_simple_comm('comm-3')
         buf3 = write_communication_to_buffer(comm3)
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='hash')
             w.write(comm1)
@@ -637,7 +637,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf2 = write_communication_to_buffer(comm2)
         comm3 = create_simple_comm('comm-3')
         buf3 = write_communication_to_buffer(comm3)
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='hash', uuid_hash_key=True)
             w.write(comm1)
@@ -658,7 +658,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf2 = write_communication_to_buffer(comm2)
         comm3 = create_simple_comm('comm-3')
         buf3 = write_communication_to_buffer(comm3)
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='list',
                                          right_to_left=False)
@@ -678,7 +678,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf1 = write_communication_to_buffer(comm1)
         comm2 = create_simple_comm('comm-2')
         comm3 = create_simple_comm('comm-3')
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.sadd(key, buf1)
             w = RedisCommunicationWriter(redis_db, key)
@@ -694,7 +694,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf2 = write_communication_to_buffer(comm2)
         comm3 = create_simple_comm('comm-3')
         buf3 = write_communication_to_buffer(comm3)
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.lpush(key, buf1)
             w = RedisCommunicationWriter(redis_db, key)
@@ -713,7 +713,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         buf2 = write_communication_to_buffer(comm2)
         comm3 = create_simple_comm('comm-3')
         buf3 = write_communication_to_buffer(comm3)
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             redis_db.hset(key, comm1.id, buf1)
             w = RedisCommunicationWriter(redis_db, key)
@@ -726,7 +726,7 @@ class TestRedisCommunicationWriter(unittest.TestCase):
 
     def test_implicit_empty(self):
         key = 'dataset'
-        with RedisServer() as server:
+        with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             with self.assertRaises(Exception):
                 RedisCommunicationWriter(redis_db, key)

@@ -14,6 +14,7 @@ class AnnotatorClientWrapper(object):
 
     TODO: named args for transport/protocol?
     """
+
     def __init__(self, host, port):
         self.host = host
         self.port = port

@@ -24,6 +24,7 @@ def generate_UUID():
 def hex_to_bin(h):
     return int(h, 16)
 
+
 def bin_to_hex(b, n=None):
     h = hex(b)[2:]
     if n is None:
@@ -31,6 +32,7 @@ def bin_to_hex(b, n=None):
     elif len(h) > n:
         raise ValueError('hex string "%s" is longer than %d chars' % (h, n))
     return ('0' * (n - len(h))) + h
+
 
 def split_uuid(u):
     p = u.split('-')
@@ -55,6 +57,7 @@ def split_uuid(u):
 
     return (xs, ys, zs)
 
+
 def join_uuid(xs, ys, zs):
     valid_input = (
         len(xs) == 12
@@ -68,11 +71,14 @@ def join_uuid(xs, ys, zs):
 
     return u
 
+
 def generate_hex_unif(n):
     return ''.join(random.choice('abcdef0123456789') for i in xrange(n))
 
+
 def generate_uuid_unif():
     return join_uuid(generate_hex_unif(12), generate_hex_unif(8), generate_hex_unif(12))
+
 
 class _AnalyticUUIDGenerator(object):
     '''
@@ -84,7 +90,7 @@ class _AnalyticUUIDGenerator(object):
         self._ys = generate_hex_unif(len(ys))
         self._z = hex_to_bin(generate_hex_unif(len(zs)))
         self._z_len = len(zs)
-        self._z_bound = 2**(4*len(zs))
+        self._z_bound = 2**(4 * len(zs))
         self.n = 0
 
     def __iter__(self):
@@ -98,8 +104,10 @@ class _AnalyticUUIDGenerator(object):
         self._z = (self._z + 1) % self._z_bound
         self.n += 1
         c_uuid = concrete.UUID()
-        c_uuid.uuidString = join_uuid(self._xs, self._ys, bin_to_hex(self._z, self._z_len))
+        c_uuid.uuidString = join_uuid(
+            self._xs, self._ys, bin_to_hex(self._z, self._z_len))
         return c_uuid
+
 
 class AnalyticUUIDGeneratorFactory(object):
     '''

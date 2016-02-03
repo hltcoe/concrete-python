@@ -109,6 +109,7 @@ class CommunicationReader(object):
         for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
     """
+
     def __init__(self, filename, add_references=True):
         self._add_references = add_references
 
@@ -214,6 +215,7 @@ class CommunicationWriter(object):
         writer.write(existing_comm_object)
         writer.close()
     """
+
     def __init__(self, filename=None):
         if filename is not None:
             self.open(filename)
@@ -249,6 +251,7 @@ class CommunicationWriterTar(object):
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
     """
+
     def __init__(self, tar_filename=None, gzip=False):
         self.gzip = gzip
         if tar_filename is not None:
@@ -302,5 +305,6 @@ class CommunicationWriterTGZ(CommunicationWriterTar):
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
     """
+
     def __init__(self, tar_filename=None):
         super(CommunicationWriterTGZ, self).__init__(tar_filename, gzip=True)

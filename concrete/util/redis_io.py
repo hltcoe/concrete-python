@@ -1,10 +1,10 @@
 from concrete.communication.ttypes import Communication
 
 from concrete.util.mem_io import (
-        read_communication_from_buffer,
-        write_communication_to_buffer,
-        communication_deep_copy
-        )
+    read_communication_from_buffer,
+    write_communication_to_buffer,
+    communication_deep_copy
+)
 
 from uuid import uuid4
 
@@ -143,7 +143,7 @@ class RedisReader(object):
                     i += 1
             else:
                 for i in xrange(self.redis_db.llen(self.key)):
-                    idx = -(i+1) if self.right_to_left else i
+                    idx = -(i + 1) if self.right_to_left else i
                     buf = self.redis_db.lindex(self.key, idx)
                     yield self.deserialize_func(buf)
 
@@ -196,7 +196,7 @@ class RedisReader(object):
         '''
         if self.key_type in ('list', 'hash'):
             if self.key_type == 'list':
-                idx = -(k+1) if self.right_to_left else k
+                idx = -(k + 1) if self.right_to_left else k
                 buf = self.redis_db.lindex(self.key, idx)
             else:
                 buf = self.redis_db.hget(self.key, k)

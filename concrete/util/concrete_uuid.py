@@ -38,12 +38,12 @@ def split_uuid(u):
     p = u.split('-')
 
     valid_input = (
-        len(p) == 5
-        and len(p[0]) == 8
-        and len(p[1]) == 4
-        and len(p[2]) == 4
-        and len(p[3]) == 4
-        and len(p[4]) == 12
+        len(p) == 5 and
+        len(p[0]) == 8 and
+        len(p[1]) == 4 and
+        len(p[2]) == 4 and
+        len(p[3]) == 4 and
+        len(p[4]) == 12
     )
     if not valid_input:
         raise ValueError(
@@ -60,9 +60,9 @@ def split_uuid(u):
 
 def join_uuid(xs, ys, zs):
     valid_input = (
-        len(xs) == 12
-        and len(ys) == 8
-        and len(zs) == 12
+        len(xs) == 12 and
+        len(ys) == 8 and
+        len(zs) == 12
     )
     if not valid_input:
         raise ValueError('uuid pieces do not have lengths 12, 8, 12')
@@ -77,7 +77,9 @@ def generate_hex_unif(n):
 
 
 def generate_uuid_unif():
-    return join_uuid(generate_hex_unif(12), generate_hex_unif(8), generate_hex_unif(12))
+    return join_uuid(generate_hex_unif(12),
+                     generate_hex_unif(8),
+                     generate_hex_unif(12))
 
 
 class _AnalyticUUIDGenerator(object):

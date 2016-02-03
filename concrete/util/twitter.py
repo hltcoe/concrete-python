@@ -150,7 +150,8 @@ def json_tweet_object_to_TweetInfo(tweet):
     return tweet_info
 
 
-def json_tweet_string_to_Communication(json_tweet_string, check_empty=False, check_delete=False):
+def json_tweet_string_to_Communication(json_tweet_string, check_empty=False,
+                                       check_delete=False):
     json_tweet_string = json_tweet_string.strip()
     if (not check_empty) or json_tweet_string:
         json_tweet = json.loads(json_tweet_string)

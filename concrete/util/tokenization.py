@@ -61,13 +61,20 @@ def get_tagged_tokens(tokenization, tagging_type):
         raise Exception('More than one %s tagging.' % tagging_type)
 
 
-get_lemmas = lambda t: get_tagged_tokens(t, 'LEMMA')
-get_pos = lambda t: get_tagged_tokens(t, 'POS')
+def get_lemmas(t):
+    return get_tagged_tokens(t, 'LEMMA')
 
 
-plus = lambda x, y: x + y
+def get_pos(t):
+    return get_tagged_tokens(t, 'POS')
 
-flatten = lambda a: reduce(plus, a, [])
+
+def plus(x, y):
+    return x + y
+
+
+def flatten(a):
+    return reduce(plus, a, [])
 
 
 def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):

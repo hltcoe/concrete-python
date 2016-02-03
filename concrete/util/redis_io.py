@@ -1,12 +1,13 @@
-from concrete.communication.ttypes import Communication
-
 from concrete.util.mem_io import (
     read_communication_from_buffer,
-    write_communication_to_buffer,
-    communication_deep_copy
+    write_communication_to_buffer
 )
 
 from uuid import uuid4
+
+
+def _identity(o):
+    return o
 
 
 def read_communication_from_redis_key(redis_db, key, add_references=True):
@@ -123,7 +124,7 @@ class RedisReader(object):
         self.deserialize_func = (
             deserialize_func
             if (deserialize_func is not None)
-            else (lambda o: o)
+            else _identity
         )
 
     def __iter__(self):
@@ -152,12 +153,18 @@ class RedisReader(object):
                 num_objs = self.redis_db.scard(self.key)
                 scan = self.redis_db.sscan
                 # batch is an iterable of buffers
-                get_obj = lambda k, batch: self.deserialize_func(k)
+
+                def _deserialize(k, batch):
+                    return self.deserialize_func(k)
             else:
                 num_objs = self.redis_db.hlen(self.key)
                 scan = self.redis_db.hscan
                 # batch is a dict of key-buffer pairs
-                get_obj = lambda k, batch: self.deserialize_func(batch[k])
+
+                def _deserialize(k, batch):
+                    return self.deserialize_func(batch[k])
+
+            get_obj = _deserialize
 
             temp_key = self._make_temp_key()
 
@@ -374,7 +381,7 @@ class RedisWriter(object):
         self.serialize_func = (
             serialize_func
             if (serialize_func is not None)
-            else (lambda o: o)
+            else _identity
         )
         self.hash_key_func = (
             hash_key_func

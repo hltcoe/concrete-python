@@ -14,6 +14,8 @@ RUN apt-get -y update && \
         vim \
         man
 
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install redis thrift ipython
 RUN pip install --upgrade setuptools

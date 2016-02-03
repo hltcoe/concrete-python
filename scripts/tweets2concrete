@@ -21,7 +21,8 @@ def json_str_to_concrete_bytes(tweet_str):
 def main():
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
-        description='Read tweets formatted in the Twitter JSON API and write communications',
+        description='Read tweets formatted in the Twitter JSON API and write'
+                    ' communications',
     )
     parser.set_defaults(log_level='INFO', num_proc=1, chunk_size=10000)
     parser.add_argument('tweet_path', type=str,
@@ -34,7 +35,12 @@ def main():
     parser.add_argument('--num-proc', type=int,
                         help='Number of worker processes to use')
     parser.add_argument('--chunk-size', type=int,
-                        help='Chunk size (in number of tweets) when dispatching jobs to workers')
+                        help='Chunk size (in number of tweets) when dispatching'
+                             ' jobs to workers')
+    parser.add_argument('--catch-ioerror', action='store_true',
+                        help='Treat IOError as successful end of stream'
+                             ' (recommended if gzipped input files were not'
+                             ' completely written)')
     ns = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely
@@ -52,6 +58,17 @@ def main():
         tweet_reader = utf8_reader(gz_file)
     else:
         tweet_reader = codecs.open(tweet_path, 'r', encoding='utf-8')
+
+    if ns.catch_ioerror:
+        def _catch(g):
+            it = iter(g)
+            while True:
+                try:
+                    x = it.next()
+                    yield x
+                except IOError:
+                    raise StopIteration('Caught IOError.')
+        tweet_reader = _catch(tweet_reader)
 
     with open(concrete_path, 'wb') as writer:
         i = 0

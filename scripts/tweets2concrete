@@ -60,7 +60,7 @@ def main():
         for concrete_bytes in p.imap(json_str_to_concrete_bytes, tweet_reader, ns.chunk_size):
             if concrete_bytes is not None:
                 if i > 0 and i % 10000 == 0:
-                    logging.error('writing tweet %d...' % (i+1))
+                    logging.info('writing tweet %d...' % (i+1))
                 writer.write(concrete_bytes)
                 i += 1
 

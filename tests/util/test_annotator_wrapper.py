@@ -16,10 +16,10 @@ class AnnotatorClientWrapperTest(unittest.TestCase):
                                                                 self.port)
 
     @mock.patch('concrete.services.Annotator.Client')
-    @mock.patch.object(thrift.ThriftFactory, 'createProtocol',
+    @mock.patch.object(ThriftFactory, 'createProtocol',
                        return_value=sentinel.protocol)
-    @mock.patch.object(thrift.ThriftFactory, 'createTransport')
-    @mock.patch.object(thrift.ThriftFactory, 'createSocket',
+    @mock.patch.object(ThriftFactory, 'createTransport')
+    @mock.patch.object(ThriftFactory, 'createSocket',
                        return_value=sentinel.socket)
     def test___enter__(self, mock_create_socket, mock_create_transport,
                        mock_create_protocol, mock_client):
@@ -74,7 +74,7 @@ class AnnotatorServiceWrapperTest(unittest.TestCase):
         self.wrapper = \
             annotator_wrapper.AnnotatorServiceWrapper(implementation)
 
-    @mock.patch.object(thrift.ThriftFactory, 'createServer')
+    @mock.patch.object(ThriftFactory, 'createServer')
     def test_serve(self, mock_create_server):
         # create mock for server.serve invocation
         mock_server = mock.Mock()

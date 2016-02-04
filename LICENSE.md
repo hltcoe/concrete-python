@@ -1,4 +1,4 @@
-Copyright 2012-2013 Johns Hopkins University Human Language Technology
+Copyright 2012-2016 Johns Hopkins University Human Language Technology
 Center of Excellence (JHU HLTCOE). All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -1,22 +1,32 @@
-image: ubuntu:latest
-
-before_script:
-  - apt-get update -qq && apt-get install -y -qq python python-pip python-dev redis-server
-  - which python
-  - python --version
-  - which redis-server
-  - redis-server --version
-  - pip install --upgrade setuptools tox pytest pytest-cov six
-  - python setup.py install
-
-basic_test:
+test:anaconda:
+  image: continuumio/anaconda
   script:
-    - python setup.py test
+    - bash docker/anaconda-install-deps.bash
+    - python setup.py test --addopts '--cov=concrete/ tests'
+    - flake8 concrete/util
 
-test:
+test:centos:
+  image: centos:centos7
   script:
-    - python setup.py test --addopts '--cov=concrete/ tests redis_tests'
+    - bash docker/centos-install-deps.bash
+    - python setup.py test --addopts '--cov=concrete/ tests'
+    - flake8 concrete/util
 
-tox:
+tox:centos:
+  image: centos:centos7
   script:
+    - bash docker/centos-install-deps.bash
     - tox
+
+install:anaconda:
+  image: continuumio/anaconda
+  script:
+    - bash docker/anaconda-install-deps.bash
+    - python setup.py install
+
+install:centos:
+  image: centos:centos7
+  script:
+    - bash docker/centos-install-deps.bash
+    - python setup.py install
+

@@ -30,3 +30,10 @@ install:centos:
     - bash docker/centos-install-deps.bash
     - python setup.py install
 
+integration:centos:
+  image: centos:centos7
+  script:
+    - bash docker/centos-install-deps.bash
+    - bash docker/centos-install-integration-deps.bash
+    - python setup.py install
+    - python setup.py test --addopts integration_tests

@@ -18,3 +18,5 @@ make install
 popd
 popd
 rm -rf ${redis_version}
+
+ldconfig -v

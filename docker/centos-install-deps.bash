@@ -14,3 +14,6 @@ pip install --upgrade \
     pytest-cov \
     setuptools \
     tox
+
+echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
+ldconfig -v

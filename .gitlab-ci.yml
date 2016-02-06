@@ -30,6 +30,15 @@ install:centos:
     - bash docker/centos-install-deps.bash
     - python setup.py install
 
+integration:anaconda:
+  image: continuumio/anaconda
+  script:
+    - bash docker/anaconda-install-deps.bash
+    - bash docker/anaconda-install-integration-deps.bash
+    - source /etc/profile
+    - python setup.py install
+    - python setup.py test --addopts integration_tests
+
 integration:centos:
   image: centos:centos7
   script:

@@ -7,8 +7,8 @@ from concrete import Communication
 
 def read_communication_from_buffer(buf, add_references=True):
     '''
-    Deserialize buf and return resulting communication.
-    Add references if requested.
+    Deserialize buf (a binary string) and return resulting
+    communication.  Add references if requested.
     '''
     transport_in = TMemoryBuffer(buf)
     protocol_in = factory.createProtocol(transport_in)
@@ -21,7 +21,8 @@ def read_communication_from_buffer(buf, add_references=True):
 
 def write_communication_to_buffer(comm):
     '''
-    Serialize communication and return result.
+    Serialize communication to buffer (binary string) and return
+    buffer.
     '''
     transport = TMemoryBuffer()
     protocol = factory.createProtocol(transport)

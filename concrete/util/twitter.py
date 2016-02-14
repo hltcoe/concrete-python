@@ -15,6 +15,7 @@ from concrete import (
     Communication,
     CommunicationMetadata,
     HashTag,
+    LanguageIdentification,
     PlaceAttributes,
     TweetInfo,
     TwitterCoordinates,
@@ -55,8 +56,14 @@ def json_tweet_object_to_Communication(tweet):
         text=tweet_info.text,
         type=TWEET_TYPE,
         uuid=aug.next(),
-        id=tweet_id,
+        id=tweet_id
     )
+
+    # either this, or pass in gen as parameter to fx
+    # latter is more annoying to test but slightly cleaner
+    tweet_info.lid.uuid = aug.next()
+    lidList = [tweet_info.lid]
+    comm.lidList = lidList
     return comm
 
 
@@ -147,6 +154,7 @@ def json_tweet_object_to_TweetInfo(tweet):
                 twitter_place.attributes = place_attributes
             tweet_info.place = twitter_place
 
+    tweet_info.lid = capture_tweet_lid(tweet)
     return tweet_info
 
 
@@ -166,3 +174,23 @@ def json_tweet_string_to_Communication(json_tweet_string, check_empty=False,
 def json_tweet_string_to_TweetInfo(json_tweet_string):
     tweet = json.loads(json_tweet_string)
     return json_tweet_object_to_TweetInfo(tweet)
+
+
+def capture_tweet_lid(twitter_dict):
+    """
+    Attempts to capture the 'lang' field in the twitter API, if it
+    exists.
+
+    Returns a list of LanguageIdentification objects, or None if the
+    field is not present in the tweet json.
+    """
+    if u'lang' in twitter_dict:
+        amd = AnnotationMetadata(tool="Twitter API",
+                                 timestamp=int(time.time()),
+                                 kBest=1)
+        kvs = {}
+        kvs[twitter_dict[u'lang']] = 1.0
+        return LanguageIdentification(metadata=amd,
+                                     languageToProbabilityMap=kvs)
+    else:
+        return None

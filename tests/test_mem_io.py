@@ -7,7 +7,7 @@ from concrete.util.mem_io import (
     write_communication_to_buffer,
     communication_deep_copy
 )
-from concrete.util.simple_comm import create_simple_comm
+from concrete.util.simple_comm import create_comm
 from concrete.structure.ttypes import Token
 
 
@@ -55,13 +55,13 @@ class TestCommunicationDeepCopy(unittest.TestCase):
         )
 
     def test_communication_deep_copy(self):
-        comm1 = create_simple_comm('a-b-c')
+        comm1 = create_comm('a-b-c', text='foo bar baz .')
         comm2 = communication_deep_copy(comm1)
         comm3 = communication_deep_copy(comm1)
         self.assert_simple_comms_equal(comm1, comm2)
         self.assert_simple_comms_equal(comm2, comm3)
         comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList[0] = Token(
-            text='9001--this-is-probably-not-a-token-text-from-create_simple_comm', tokenIndex=0
+            text='bbq', tokenIndex=0
         )
         self.assertNotEqual(
             map(lambda t: t.text, comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
@@ -98,7 +98,7 @@ class TestWriteCommunicationToBuffer(unittest.TestCase):
         self.assertEquals(f_buf, buf)
 
     def test_read_write_fixed_point(self):
-        comm = create_simple_comm('comm-1')
+        comm = create_comm('comm-1')
         buf_1 = write_communication_to_buffer(comm)
         buf_2 = write_communication_to_buffer(
             read_communication_from_buffer(buf_1)

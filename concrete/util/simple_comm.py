@@ -144,9 +144,9 @@ def create_comm(comm_id, text='',
                     ]),
                 ),
             ) for (sen_text, sen_start, sen_end) in _split(sec_text, '\n')]
-                if (('\n' in sec_text) or sec_text.strip()) else [],
+            if (('\n' in sec_text) or sec_text.strip()) else [],
         ) for (sec_text, sec_start, sec_end) in _split(text, '\n\n')]
-            if text.strip() else None,
+        if text.strip() else None,
     )
 
 

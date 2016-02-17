@@ -10,7 +10,7 @@ from concrete.services import Annotator
 
 from concrete.util.annotator_wrapper import SubprocessAnnotatorServiceWrapper
 from concrete.util.net import find_port
-from concrete.util.simple_comm import create_simple_comm
+from concrete.util.simple_comm import create_comm
 
 
 from time import time
@@ -45,7 +45,7 @@ class TestAnnotator(unittest.TestCase):
         timeout = 5
 
         comm_id = '1-2-3-4'
-        comm = create_simple_comm(comm_id)
+        comm = create_comm(comm_id)
 
         comm_uuid_uuidString = comm.uuid.uuidString
         comm_metadata_tool = comm.metadata.tool

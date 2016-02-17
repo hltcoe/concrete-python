@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim: set fileencoding=utf-8 :
 
 """
 """
@@ -32,6 +33,26 @@ class TestCreateComm(unittest.TestCase):
         self.assertEqual('one', comm.id)
         self.assertEqual('\t \t\r\n\n', comm.text)
         self.assertEqual(None, comm.sectionList)
+        self.assertTrue(validate_communication(comm))
+
+    def test_create_comm_unicode(self):
+        comm = create_comm('one', u'狐狸\t\t.')
+        self.assertEqual('one', comm.id)
+        self.assertEqual(u'狐狸\t\t.', comm.text)
+        self.assertEqual(1, len(comm.sectionList))
+        sect = comm.sectionList[0]
+        self.assertEqual(0, sect.textSpan.start)
+        self.assertEqual(5, sect.textSpan.ending)
+        self.assertEqual(1, len(sect.sentenceList))
+        sent = sect.sentenceList[0]
+        self.assertEqual(0, sent.textSpan.start)
+        self.assertEqual(5, sent.textSpan.ending)
+        tl = sent.tokenization.tokenList.tokenList
+        self.assertEqual(2, len(tl))
+        self.assertEqual(0, tl[0].tokenIndex)
+        self.assertEqual(u'狐狸', tl[0].text)
+        self.assertEqual(1, tl[1].tokenIndex)
+        self.assertEqual('.', tl[1].text)
         self.assertTrue(validate_communication(comm))
 
     def test_create_comm_one_sentence(self):

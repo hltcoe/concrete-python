@@ -5,7 +5,7 @@ from concrete.structure.ttypes import (
     TokenTagging, TaggedToken, Tokenization
 )
 
-from concrete.util.simple_comm import create_simple_comm
+from concrete.util.simple_comm import create_comm
 from concrete.util.tokenization import get_tokens, get_pos, get_lemmas, get_tagged_tokens
 
 
@@ -158,20 +158,20 @@ class TestGetTaggedTokens(unittest.TestCase):
 
 class TestGetTokenList(unittest.TestCase):
     def test_no_lattice(self):
-        comm = create_simple_comm('comm-1', sentence_string='mambo no. 4')
+        comm = create_comm('comm-1', 'mambo no. 4')
         tokenization = comm.sectionList[0].sentenceList[0].tokenization
         tokenization.kind = None
         token_texts = [t.text for t in get_tokens(tokenization)]
         self.assertEqual(['mambo', 'no.', '4'], token_texts)
 
     def test_no_lattice_with_no_kind(self):
-        comm = create_simple_comm('comm-1', sentence_string='mambo no. 4')
+        comm = create_comm('comm-1', 'mambo no. 4')
         tokenization = comm.sectionList[0].sentenceList[0].tokenization
         token_texts = [t.text for t in get_tokens(tokenization)]
         self.assertEqual(['mambo', 'no.', '4'], token_texts)
 
     def test_lattice_with_token_list_kind(self):
-        comm = create_simple_comm('comm-1', sentence_string='mambo no. 4')
+        comm = create_comm('comm-1', 'mambo no. 4')
         tokenization = comm.sectionList[0].sentenceList[0].tokenization
         lattice_path = LatticePath()
         lattice_path.tokenList = [Token(tokenIndex=0, text='mambo'),
@@ -184,7 +184,7 @@ class TestGetTokenList(unittest.TestCase):
         self.assertEqual(['mambo', 'no.', '4'], token_texts)
 
     def test_lattice_with_token_lattice_kind(self):
-        comm = create_simple_comm('comm-1', sentence_string='mambo no. 4')
+        comm = create_comm('comm-1', 'mambo no. 4')
         tokenization = comm.sectionList[0].sentenceList[0].tokenization
         lattice_path = LatticePath()
         lattice_path.tokenList = [Token(tokenIndex=0, text='mambo'),
@@ -198,7 +198,7 @@ class TestGetTokenList(unittest.TestCase):
         self.assertEqual(['mambo', 'no.', '3'], token_texts)
 
     def test_lattice_with_no_kind(self):
-        comm = create_simple_comm('comm-1', sentence_string='mambo no. 4')
+        comm = create_comm('comm-1', 'mambo no. 4')
         tokenization = comm.sectionList[0].sentenceList[0].tokenization
         lattice_path = LatticePath()
         lattice_path.tokenList = [Token(tokenIndex=0, text='mambo'),

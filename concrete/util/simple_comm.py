@@ -4,6 +4,7 @@
 import time
 import tempfile
 import os
+import logging
 
 from concrete import (
     AnnotationMetadata,
@@ -36,6 +37,9 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
 
     - A Concrete Communication object
     """
+    logging.warning('create_simple_comm will be removed in a future'
+                    ' release, please use create_comm instead')
+
     toolname = "TEST"
     timestamp = int(time.time())
 
@@ -75,8 +79,75 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
     )
 
     comm.sectionList = [section]
+    comm.text = sentence_string
 
     return comm
+
+
+def _split(s, delim):
+    pieces = s.split(delim)
+    indexed_pieces = []
+    offset = 0
+    for p in pieces:
+        indexed_pieces.append((p, offset, offset + len(p)))
+        offset += len(p) + len(delim)
+    return indexed_pieces
+
+
+def create_comm(comm_id, text='',
+                comm_type='article', section_kind='passage',
+                metadata_tool='concrete-python',
+                metadata_timestamp=None):
+    '''
+    Create a simple (valid) Communication for testing purposes.
+    The text will be split by double-newlines into sections and
+    then by single newlines into sentences within those sections.
+    If metadata_timestamp is None, the current time will be used.
+    '''
+
+    if metadata_timestamp is None:
+        metadata_timestamp = int(time.time())
+
+    augf = AnalyticUUIDGeneratorFactory()
+    aug = augf.create()
+
+    return Communication(
+        id=comm_id,
+        uuid=aug.next(),
+        type=comm_type,
+        text=text,
+        metadata=AnnotationMetadata(
+            tool=metadata_tool,
+            timestamp=metadata_timestamp,
+        ),
+        sectionList=[Section(
+            uuid=aug.next(),
+            textSpan=TextSpan(sec_start, sec_end),
+            kind=section_kind,
+            sentenceList=[Sentence(
+                uuid=aug.next(),
+                textSpan=TextSpan(sec_start + sen_start, sec_start + sen_end),
+                tokenization=Tokenization(
+                    uuid=aug.next(),
+                    kind=TokenizationKind.TOKEN_LIST,
+                    metadata=AnnotationMetadata(
+                        tool=metadata_tool,
+                        timestamp=metadata_timestamp,
+                    ),
+                    tokenList=TokenList(tokenList=[
+                        Token(
+                            tokenIndex=i,
+                            text=tok_text,
+                        )
+                        for (i, tok_text)
+                        in enumerate(sen_text.split())
+                    ]),
+                ),
+            ) for (sen_text, sen_start, sen_end) in _split(sec_text, '\n')]
+                if (('\n' in sec_text) or sec_text.strip()) else [],
+        ) for (sec_text, sec_start, sec_end) in _split(text, '\n\n')]
+            if text.strip() else None,
+    )
 
 
 class SimpleCommTempFile(object):
@@ -124,6 +195,9 @@ class SimpleCommTempFile(object):
             suffix: file path suffix (you probably want to choose this
                     to match writer_class)
         '''
+        logging.warning('SimpleCommTempFile will be removed in a future'
+                        ' release, please use create_comm instead')
+
         (fd, path) = tempfile.mkstemp(suffix=suffix)
         os.close(fd)
         self.path = path

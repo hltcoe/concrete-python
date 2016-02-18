@@ -11,8 +11,6 @@ class AnnotatorClientWrapper(object):
     A sample client implementation of the Concrete Annotator service.
 
     Provides sensible/current defaults for transport and protocol.
-
-    TODO: named args for transport/protocol?
     """
 
     def __init__(self, host, port):

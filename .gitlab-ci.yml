@@ -3,14 +3,14 @@ test:anaconda:
   script:
     - bash docker/anaconda-install-deps.bash
     - python setup.py test --addopts '--cov=concrete/ tests'
-    - flake8 concrete/util
+    - bash check-style.bash
 
 test:centos:
   image: centos:centos7
   script:
     - bash docker/centos-install-deps.bash
     - python setup.py test --addopts '--cov=concrete/ tests'
-    - flake8 concrete/util
+    - bash check-style.bash
 
 tox:centos:
   image: centos:centos7
@@ -37,7 +37,7 @@ integration:anaconda:
     - bash docker/anaconda-install-integration-deps.bash
     - source /etc/profile
     - python setup.py install
-    - python setup.py test --addopts integration_tests
+    - python setup.py test --addopts integration-tests
 
 integration:centos:
   image: centos:centos7
@@ -45,4 +45,4 @@ integration:centos:
     - bash docker/centos-install-deps.bash
     - bash docker/centos-install-integration-deps.bash
     - python setup.py install
-    - python setup.py test --addopts integration_tests
+    - python setup.py test --addopts integration-tests

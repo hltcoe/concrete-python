@@ -7,21 +7,21 @@ specification defined using [Thrift](http://thrift.apache.org).
 """
 
 
-from audio.ttypes import *
-from clustering.ttypes import *
-from communication.ttypes import *
-from email.ttypes import *
-from entities.ttypes import *
-from exceptions.ttypes import *
-from language.ttypes import *
-from linking.ttypes import *
-from metadata.ttypes import *
-from nitf.ttypes import *
-from services.ttypes import *
-from situations.ttypes import *
-from spans.ttypes import *
-from structure.ttypes import *
-from twitter.ttypes import *
-from uuid.ttypes import *
+from audio.ttypes import *  # noqa
+from clustering.ttypes import *  # noqa
+from communication.ttypes import *  # noqa
+from email.ttypes import *  # noqa
+from entities.ttypes import *  # noqa
+from exceptions.ttypes import *  # noqa
+from language.ttypes import *  # noqa
+from linking.ttypes import *  # noqa
+from metadata.ttypes import *  # noqa
+from nitf.ttypes import *  # noqa
+from services.ttypes import *  # noqa
+from situations.ttypes import *  # noqa
+from spans.ttypes import *  # noqa
+from structure.ttypes import *  # noqa
+from twitter.ttypes import *  # noqa
+from uuid.ttypes import *  # noqa
 
-from version import __version__
+from version import __version__  # noqa

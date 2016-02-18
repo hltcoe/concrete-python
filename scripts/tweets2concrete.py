@@ -11,13 +11,15 @@ import gzip
 import logging
 import mimetypes
 
-from concrete.util import CommunicationReader, CommunicationWriter
+from concrete.util import CommunicationWriter
 from concrete.util.twitter import json_tweet_string_to_Communication
 
 
 def main():
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=logging.WARNING)
-    logging.warning('tweets2concrete.py is deprecated: use tweets2concrete instead')
+    logging.basicConfig(
+        format='%(levelname)7s:  %(message)s', level=logging.WARNING)
+    logging.warning(
+        'tweets2concrete.py is deprecated: use tweets2concrete instead')
 
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('tweet_file')

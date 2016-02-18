@@ -14,9 +14,11 @@ from concrete.validate import validate_communication_file
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate a Concrete Communication file")
+    parser = argparse.ArgumentParser(
+        description="Validate a Concrete Communication file")
     parser.add_argument('communication_file')
-    parser.add_argument('-l', '--loglevel', choices=['debug', 'info', 'warning', 'error'],
+    parser.add_argument('-l', '--loglevel', choices=['debug', 'info',
+                                                     'warning', 'error'],
                         help="Log level threshold")
     args = parser.parse_args()
 
@@ -32,9 +34,9 @@ def main():
         elif lowercase_loglevel == 'error':
             loglevel = logging.ERROR
         else:
-            loglevel=logging.DEBUG
+            loglevel = logging.DEBUG
     else:
-        loglevel=logging.DEBUG
+        loglevel = logging.DEBUG
     logging.basicConfig(format='%(levelname)7s:  %(message)s', level=loglevel)
 
     validate_communication_file(args.communication_file)

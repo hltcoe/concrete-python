@@ -14,9 +14,10 @@ from concrete.util.file_io import (
     read_communication_from_file,
     FileType
 )
-from concrete.validate import validate_communication
+
 
 class TestCommunicationReader(unittest.TestCase):
+
     def test_single_file(self):
         filename = u'tests/testdata/simple_1.concrete'
         reader = CommunicationReader(filename)
@@ -304,7 +305,8 @@ class TestCommunicationReader(unittest.TestCase):
         self.assertEqual(u'simple_3.concrete', filenames[2])
 
     def test_tar_gz_file_no_add_references(self):
-        reader = CommunicationReader("tests/testdata/simple.tar.gz", add_references=False)
+        reader = CommunicationReader(
+            "tests/testdata/simple.tar.gz", add_references=False)
         [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
         self.assertFalse(hasattr(comms[0], 'sentenceForUUID'))
         self.assertFalse(hasattr(comms[1], 'sentenceForUUID'))
@@ -317,7 +319,8 @@ class TestCommunicationReader(unittest.TestCase):
         self.assertEqual(u'simple_3.concrete', filenames[2])
 
     def test_zip_file_no_add_references(self):
-        reader = CommunicationReader("tests/testdata/simple.zip", add_references=False)
+        reader = CommunicationReader(
+            "tests/testdata/simple.zip", add_references=False)
         [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
         self.assertFalse(hasattr(comms[0], 'sentenceForUUID'))
         self.assertFalse(hasattr(comms[1], 'sentenceForUUID'))
@@ -331,6 +334,7 @@ class TestCommunicationReader(unittest.TestCase):
 
 
 class TestCommunicationWriter(unittest.TestCase):
+
     def test_single_file(self):
         comm = read_communication_from_file("tests/testdata/simple_1.concrete")
         writer = CommunicationWriter()
@@ -354,6 +358,7 @@ TIME_MARGIN = 60 * 60 * 24
 
 
 class TestCommunicationWriterTar(unittest.TestCase):
+
     def test_single_file(self):
         comm = read_communication_from_file("tests/testdata/simple_1.concrete")
         writer = CommunicationWriterTar()
@@ -372,7 +377,8 @@ class TestCommunicationWriterTar(unittest.TestCase):
         self.assertEquals("simple_1.concrete", tarinfo.name)
         self.assertTrue(tarinfo.isreg())
         self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(
+            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
         self.assertEquals(0644, tarinfo.mode)
         self.assertEquals(os.getuid(), tarinfo.uid)
         self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
@@ -402,7 +408,8 @@ class TestCommunicationWriterTar(unittest.TestCase):
         self.assertEquals("simple_1.concrete", tarinfo.name)
         self.assertTrue(tarinfo.isreg())
         self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(
+            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
         self.assertEquals(0644, tarinfo.mode)
         self.assertEquals(os.getuid(), tarinfo.uid)
         self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
@@ -434,7 +441,8 @@ class TestCommunicationWriterTar(unittest.TestCase):
         self.assertEquals(comm.uuid.uuidString + '.concrete', tarinfo.name)
         self.assertTrue(tarinfo.isreg())
         self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(
+            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
         self.assertEquals(0644, tarinfo.mode)
         self.assertEquals(os.getuid(), tarinfo.uid)
         self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
@@ -450,6 +458,7 @@ class TestCommunicationWriterTar(unittest.TestCase):
 
 
 class TestCommunicationWriterTGZ(unittest.TestCase):
+
     def test_single_file(self):
         comm = read_communication_from_file("tests/testdata/simple_1.concrete")
         writer = CommunicationWriterTGZ()
@@ -468,7 +477,8 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         self.assertEquals("simple_1.concrete", tarinfo.name)
         self.assertTrue(tarinfo.isreg())
         self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(
+            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
         self.assertEquals(0644, tarinfo.mode)
         self.assertEquals(os.getuid(), tarinfo.uid)
         self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
@@ -498,7 +508,8 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         self.assertEquals("simple_1.concrete", tarinfo.name)
         self.assertTrue(tarinfo.isreg())
         self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(
+            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
         self.assertEquals(0644, tarinfo.mode)
         self.assertEquals(os.getuid(), tarinfo.uid)
         self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
@@ -530,7 +541,8 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         self.assertEquals(comm.uuid.uuidString + '.concrete', tarinfo.name)
         self.assertTrue(tarinfo.isreg())
         self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
+        self.assertEquals(
+            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
         self.assertEquals(0644, tarinfo.mode)
         self.assertEquals(os.getuid(), tarinfo.uid)
         self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)

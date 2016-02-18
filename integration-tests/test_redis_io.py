@@ -27,6 +27,7 @@ def _add_comm_to_list(sleep, port, comm_id, key):
 
 
 class TestReadCommunicationFromRedisKey(unittest.TestCase):
+
     def test_read_against_file_contents(self):
         filename = u'tests/testdata/simple_1.concrete'
         key = 'comm'
@@ -57,6 +58,7 @@ class TestReadCommunicationFromRedisKey(unittest.TestCase):
 
 
 class TestWriteCommunicationToRedisKey(unittest.TestCase):
+
     def test_write_against_file_contents(self):
         filename = u'tests/testdata/simple_1.concrete'
         key = 'comm'
@@ -82,6 +84,7 @@ class TestWriteCommunicationToRedisKey(unittest.TestCase):
 
 
 class TestRedisCommunicationReader(unittest.TestCase):
+
     def setUp(self):
         self.comm1 = create_comm('comm-1')
         self.comm2 = create_comm('comm-2')
@@ -107,9 +110,9 @@ class TestRedisCommunicationReader(unittest.TestCase):
             batch_ids = [c.id for c in reader.batch(2)]
             # do this weird thing because set(['foo']) != set([u'foo'])
             self.assertTrue(
-                ('comm-1' in batch_ids and 'comm-2' in batch_ids)
-                or ('comm-1' in batch_ids and 'comm-3' in batch_ids)
-                or ('comm-2' in batch_ids and 'comm-3' in batch_ids)
+                ('comm-1' in batch_ids and 'comm-2' in batch_ids) or
+                ('comm-1' in batch_ids and 'comm-3' in batch_ids) or
+                ('comm-2' in batch_ids and 'comm-3' in batch_ids)
             )
             # assert data still there
             ids = [c.id for c in reader]
@@ -471,6 +474,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
 
 class TestRedisCommunicationWriter(unittest.TestCase):
+
     def setUp(self):
         self.comm1 = create_comm('comm-1')
         self.comm2 = create_comm('comm-2')
@@ -525,16 +529,21 @@ class TestRedisCommunicationWriter(unittest.TestCase):
         key = 'dataset'
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            w = RedisCommunicationWriter(redis_db, key, key_type='hash', uuid_hash_key=True)
+            w = RedisCommunicationWriter(
+                redis_db, key, key_type='hash', uuid_hash_key=True)
             w.write(self.comm1)
             self.assertEquals(1, redis_db.hlen(key))
-            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.uuid.uuidString))
+            self.assertEquals(self.buf1, redis_db.hget(
+                key, self.comm1.uuid.uuidString))
             w.write(self.comm2)
             w.write(self.comm3)
             self.assertEquals(3, redis_db.hlen(key))
-            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.uuid.uuidString))
-            self.assertEquals(self.buf2, redis_db.hget(key, self.comm2.uuid.uuidString))
-            self.assertEquals(self.buf3, redis_db.hget(key, self.comm3.uuid.uuidString))
+            self.assertEquals(self.buf1, redis_db.hget(
+                key, self.comm1.uuid.uuidString))
+            self.assertEquals(self.buf2, redis_db.hget(
+                key, self.comm2.uuid.uuidString))
+            self.assertEquals(self.buf3, redis_db.hget(
+                key, self.comm3.uuid.uuidString))
 
     def test_list_left_to_right(self):
         key = 'dataset'

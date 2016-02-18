@@ -31,12 +31,13 @@ def start_redis(*args, **kwargs):
         time.sleep(0.1)
         try:
             ret = r.ping()
-        except redis.ConnectionError as ex:
+        except redis.ConnectionError:
             pass
         else:
             if ret:
                 break
     return (p, r, port)
+
 
 def stop_redis(p, r):
     '''
@@ -76,7 +77,8 @@ class RedisServer(object):
         self._kwargs = kwargs
 
     def __enter__(self):
-        (self.popen, self.client, self.port) = start_redis(*self._args, **self._kwargs)
+        (self.popen, self.client, self.port) = start_redis(
+            *self._args, **self._kwargs)
         return self
 
     def __exit__(self, type, value, traceback):

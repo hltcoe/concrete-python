@@ -23,6 +23,7 @@ def json_str_to_validated_concrete_bytes(tweet_str):
     else:
         return write_communication_to_buffer(b)
 
+
 def json_str_to_concrete_bytes(tweet_str):
     b = json_tweet_string_to_Communication(tweet_str, True, True)
     if b is None:
@@ -30,11 +31,13 @@ def json_str_to_concrete_bytes(tweet_str):
     else:
         return write_communication_to_buffer(b)
 
+
 def json_str_to_concrete_bytes_skip_bad_lines(tweet_str):
     try:
         return json_str_to_concrete_bytes(tweet_str)
     except:
         return None
+
 
 def json_str_to_validated_concrete_bytes_skip_bad_lines(tweet_str):
     try:
@@ -132,8 +135,8 @@ def main():
         for concrete_bytes in p.imap(map_func, tweet_reader,
                                      ns.chunk_size):
             if concrete_bytes is not None:
-                if (i+1) % ns.log_interval == 0:
-                    logging.info('writing tweet %d...' % (i+1))
+                if (i + 1) % ns.log_interval == 0:
+                    logging.info('writing tweet %d...' % (i + 1))
                 writer.write(concrete_bytes)
                 i += 1
 

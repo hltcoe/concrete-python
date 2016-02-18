@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-Compare two Concrete files by converting to JSON then running the Git diff command
+Compare two Concrete files by converting to JSON then running the Git
+diff command
 """
 
 import argparse
@@ -10,13 +11,16 @@ import os.path
 import subprocess
 import tempfile
 
-from concrete.util import communication_file_to_json, read_communication_from_file
+from concrete.util import communication_file_to_json
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Compare JSON representation of two concrete files")
-    parser.add_argument('--include-uuids', action='store_true', help="Include UUIDs in JSON output")
-    parser.add_argument('--include-timestamps', action='store_true', help="Include timestamps in JSON output")
+    parser = argparse.ArgumentParser(
+        description="Compare JSON representation of two concrete files")
+    parser.add_argument('--include-uuids', action='store_true',
+                        help="Include UUIDs in JSON output")
+    parser.add_argument('--include-timestamps', action='store_true',
+                        help="Include timestamps in JSON output")
     parser.add_argument('file_one')
     parser.add_argument('file_two')
     args = parser.parse_args()
@@ -30,18 +34,20 @@ def main():
     if json_one_filename == json_two_filename:
         json_two_filename += ".1"
 
-    json_comm_one = communication_file_to_json(args.file_one,
-                                               remove_timestamps=not args.include_timestamps,
-                                               remove_uuids=not args.include_uuids)
-    json_comm_two = communication_file_to_json(args.file_two,
-                                               remove_timestamps=not args.include_timestamps,
-                                               remove_uuids=not args.include_uuids)
-    
+    json_comm_one = communication_file_to_json(
+        args.file_one, remove_timestamps=not args.include_timestamps,
+        remove_uuids=not args.include_uuids)
+    json_comm_two = communication_file_to_json(
+        args.file_two, remove_timestamps=not args.include_timestamps,
+        remove_uuids=not args.include_uuids)
+
     codecs.open(json_one_filename, "w", encoding="utf-8").write(json_comm_one)
     codecs.open(json_two_filename, "w", encoding="utf-8").write(json_comm_two)
 
-    diff_command = "diff --unified %s %s" % (json_one_filename, json_two_filename)
-    diff_output = subprocess.Popen(diff_command, shell=True, stdout=subprocess.PIPE).stdout.read()
+    diff_command = "diff --unified %s %s" % (
+        json_one_filename, json_two_filename)
+    diff_output = subprocess.Popen(
+        diff_command, shell=True, stdout=subprocess.PIPE).stdout.read()
 
     # Clean up temporary files
     os.remove(json_one_filename)

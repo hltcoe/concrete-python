@@ -1,14 +1,11 @@
 import unittest
 
-from concrete import AnnotationMetadata, Communication
-import concrete.inspect
-from concrete.validate import validate_communication
-
 import sys
 from subprocess import Popen, PIPE
 
 
 class TestConcreteInspect(unittest.TestCase):
+
     def setUp(self):
         self.comm_path = "tests/testdata/serif_dog-bites-man.concrete"
 
@@ -20,39 +17,39 @@ class TestConcreteInspect(unittest.TestCase):
         ], stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = p.communicate()
         expected_output = '''\
-INDEX	TOKEN	CHAR	LEMMA	POS	NER	HEAD
------	-----	----	-----	---	---	----
-1	John	John		NNP	PER	
-2	Smith	Smith		NNP	PER	
-3	,	,		,		
-4	manager	manager		NN		
-5	of	of		IN		
-6	ACME	ACME		NNP	ORG	
-7	INC	INC		NNP	ORG	
-8	,	,		,		
-9	was	was		VBD		
-10	bit	bit		NN		
-11	by	by		IN		
-12	a	a		DT		
-13	dog	dog		NN		
-14	on	on		IN		
-15	March	March		DATE-NNP		
-16	10th	10th		JJ		
-17	,	,		,		
-18	2013	2013		CD		
-19	.	.		.		
+INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD
+-----\t-----\t----\t-----\t---\t---\t----
+1\tJohn\tJohn\t\tNNP\tPER\t
+2\tSmith\tSmith\t\tNNP\tPER\t
+3\t,\t,\t\t,\t\t
+4\tmanager\tmanager\t\tNN\t\t
+5\tof\tof\t\tIN\t\t
+6\tACME\tACME\t\tNNP\tORG\t
+7\tINC\tINC\t\tNNP\tORG\t
+8\t,\t,\t\t,\t\t
+9\twas\twas\t\tVBD\t\t
+10\tbit\tbit\t\tNN\t\t
+11\tby\tby\t\tIN\t\t
+12\ta\ta\t\tDT\t\t
+13\tdog\tdog\t\tNN\t\t
+14\ton\ton\t\tIN\t\t
+15\tMarch\tMarch\t\tDATE-NNP\t\t
+16\t10th\t10th\t\tJJ\t\t
+17\t,\t,\t\t,\t\t
+18\t2013\t2013\t\tCD\t\t
+19\t.\t.\t\t.\t\t
 
-1	He	He		PRP		
-2	died	died		VBD		
-3	!	!		.		
+1\tHe\tHe\t\tPRP\t\t
+2\tdied\tdied\t\tVBD\t\t
+3\t!\t!\t\t.\t\t
 
-1	John	John		NNP	PER	
-2	's	's		POS		
-3	daughter	daughter		NN		
-4	Mary	Mary		NNP	PER	
-5	expressed	expressed		VBD		
-6	sorrow	sorrow		NN		
-7	.	.		.		
+1\tJohn\tJohn\t\tNNP\tPER\t
+2\t's\t's\t\tPOS\t\t
+3\tdaughter\tdaughter\t\tNN\t\t
+4\tMary\tMary\t\tNNP\tPER\t
+5\texpressed\texpressed\t\tVBD\t\t
+6\tsorrow\tsorrow\t\tNN\t\t
+7\t.\t.\t\t.\t\t
 
 '''
         self.assertEquals(0, p.returncode)
@@ -229,11 +226,14 @@ John's daughter Mary expressed sorrow.
         ], stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = p.communicate()
         expected_output = '''
-<ENTITY ID=0><ENTITY ID=0>John Smith</ENTITY> , <ENTITY ID=0>manager of <ENTITY ID=1>ACME INC</ENTITY></ENTITY> ,</ENTITY> was bit by a dog on <ENTITY ID=3>March 10th , 2013</ENTITY> .
+<ENTITY ID=0><ENTITY ID=0>John Smith</ENTITY> , <ENTITY ID=0>manager of \
+<ENTITY ID=1>ACME INC</ENTITY></ENTITY> ,</ENTITY> was bit by a dog on \
+<ENTITY ID=3>March 10th , 2013</ENTITY> .
 
 <ENTITY ID=0>He</ENTITY> died !
 
-<ENTITY ID=2><ENTITY ID=0>John</ENTITY> 's <ENTITY ID=2>daughter</ENTITY> Mary</ENTITY> expressed sorrow .
+<ENTITY ID=2><ENTITY ID=0>John</ENTITY> 's <ENTITY ID=2>daughter</ENTITY> \
+Mary</ENTITY> expressed sorrow .
 
 '''
         self.assertEquals(0, p.returncode)

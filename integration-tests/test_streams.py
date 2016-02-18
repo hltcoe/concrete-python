@@ -1,7 +1,7 @@
 from pytest import fixture
 from concrete.util.file_io import (
-        CommunicationReader, FileType
-        )
+    CommunicationReader, FileType
+)
 import os
 import tempfile
 
@@ -13,7 +13,7 @@ def fifo(request):
     (fd, path) = tempfile.mkstemp()
     os.close(fd)
     os.remove(path)
-    os.mkfifo(path) # not quite secure...
+    os.mkfifo(path)  # not quite secure...
 
     def _remove():
         if os.path.exists(path):

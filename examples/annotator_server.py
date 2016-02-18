@@ -37,7 +37,8 @@ def main():
     parser.add_argument('--host', dest='host', action='store', type=str,
                         default='localhost', help='Host on which to listen')
     parser.add_argument('-p', '--port', dest='port', action='store', type=int,
-                        default=None, help='Port on which to listen (default: auto)')
+                        default=None,
+                        help='Port on which to listen (default: auto)')
     args = parser.parse_args()
 
     host = args.host

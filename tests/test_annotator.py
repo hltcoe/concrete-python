@@ -4,8 +4,6 @@ from thrift.protocol import TCompactProtocol
 
 import unittest
 
-from concrete.services import Annotator
-
 from concrete.util.annotator_wrapper import SubprocessAnnotatorServiceWrapper
 from concrete.util.net import find_port
 from concrete.util.simple_comm import create_comm
@@ -36,6 +34,7 @@ class NoopAnnotator(Annotator.Iface):
 
 
 class TestAnnotator(unittest.TestCase):
+
     def test_annotate(self):
         impl = NoopAnnotator()
         host = 'localhost'
@@ -49,7 +48,8 @@ class TestAnnotator(unittest.TestCase):
         comm_metadata_tool = comm.metadata.tool
         comm_metadata_timestamp = comm.metadata.timestamp
 
-        with SubprocessAnnotatorServiceWrapper(impl, host, port, timeout=timeout) as w:
+        with SubprocessAnnotatorServiceWrapper(impl, host, port,
+                                               timeout=timeout):
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
             protocol = TCompactProtocol.TCompactProtocol(transport)
@@ -70,7 +70,8 @@ class TestAnnotator(unittest.TestCase):
         port = find_port()
         timeout = 5
 
-        with SubprocessAnnotatorServiceWrapper(impl, host, port, timeout=timeout) as w:
+        with SubprocessAnnotatorServiceWrapper(impl, host, port,
+                                               timeout=timeout):
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
             protocol = TCompactProtocol.TCompactProtocol(transport)

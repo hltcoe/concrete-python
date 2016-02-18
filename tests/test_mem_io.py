@@ -10,6 +10,7 @@ from concrete.structure.ttypes import Token
 
 
 class TestCommunicationDeepCopy(unittest.TestCase):
+
     def assert_simple_comms_equal(self, comm1, comm2):
         self.assertEquals(comm1.id, comm2.id)
         self.assertEquals(comm1.uuid.uuidString, comm2.uuid.uuidString)
@@ -40,16 +41,22 @@ class TestCommunicationDeepCopy(unittest.TestCase):
             comm2.sectionList[0].sentenceList[0].tokenization.metadata.tool,
         )
         self.assertEquals(
-            comm1.sectionList[0].sentenceList[0].tokenization.metadata.timestamp,
-            comm2.sectionList[0].sentenceList[0].tokenization.metadata.timestamp,
+            comm1.sectionList[0].sentenceList[
+                0].tokenization.metadata.timestamp,
+            comm2.sectionList[0].sentenceList[
+                0].tokenization.metadata.timestamp,
         )
         self.assertEquals(
-            map(lambda t: t.text, comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-            map(lambda t: t.text, comm2.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
+            map(lambda t: t.text, comm1.sectionList[0].sentenceList[
+                0].tokenization.tokenList.tokenList),
+            map(lambda t: t.text, comm2.sectionList[0].sentenceList[
+                0].tokenization.tokenList.tokenList),
         )
         self.assertEquals(
-            map(lambda t: t.tokenIndex, comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-            map(lambda t: t.tokenIndex, comm2.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
+            map(lambda t: t.tokenIndex, comm1.sectionList[
+                0].sentenceList[0].tokenization.tokenList.tokenList),
+            map(lambda t: t.tokenIndex, comm2.sectionList[
+                0].sentenceList[0].tokenization.tokenList.tokenList),
         )
 
     def test_communication_deep_copy(self):
@@ -58,17 +65,18 @@ class TestCommunicationDeepCopy(unittest.TestCase):
         comm3 = communication_deep_copy(comm1)
         self.assert_simple_comms_equal(comm1, comm2)
         self.assert_simple_comms_equal(comm2, comm3)
-        comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList[0] = Token(
-            text='bbq', tokenIndex=0
-        )
+        tkzn1 = comm1.sectionList[0].sentenceList[0].tokenization
+        tkzn1.tokenList.tokenList[0] = Token(text='bbq', tokenIndex=0)
+        tkzn2 = comm2.sectionList[0].sentenceList[0].tokenization
         self.assertNotEqual(
-            map(lambda t: t.text, comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-            map(lambda t: t.text, comm2.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
+            map(lambda t: t.text, tkzn1.tokenList.tokenList),
+            map(lambda t: t.text, tkzn2.tokenList.tokenList),
         )
         self.assert_simple_comms_equal(comm2, comm3)
 
 
 class TestReadCommunicationFromBuffer(unittest.TestCase):
+
     def test_read_against_file_contents(self):
         filename = u'tests/testdata/simple_1.concrete'
         with open(filename, 'rb') as f:
@@ -87,6 +95,7 @@ class TestReadCommunicationFromBuffer(unittest.TestCase):
 
 
 class TestWriteCommunicationToBuffer(unittest.TestCase):
+
     def test_write_against_file_contents(self):
         filename = u'tests/testdata/simple_1.concrete'
         with open(filename, 'rb') as f:

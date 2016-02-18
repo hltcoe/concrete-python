@@ -10,10 +10,17 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
         description="Interface with a Concrete Annotator service"
     )
-    parser.add_argument('host', help="Hostname of annotator service to which to connect.")
-    parser.add_argument('port', type=int, help="Port of annotator service to which to connect.")
-    parser.add_argument('--input', default='-', help="Input source to use. '-' for stdin; otherwise takes a path to a file.")
-    parser.add_argument('--output', default='-', help="Output source to use. '-' for stdout; otherwise takes a path to a file.")
+    parser.add_argument('host',
+                        help="Hostname of annotator service to which to"
+                             " connect.")
+    parser.add_argument('port', type=int,
+                        help="Port of annotator service to which to connect.")
+    parser.add_argument('--input', default='-',
+                        help="Input source to use. '-' for stdin; otherwise"
+                             " takes a path to a file.")
+    parser.add_argument('--output', default='-',
+                        help="Output source to use. '-' for stdout; otherwise"
+                             " takes a path to a file.")
     args = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely

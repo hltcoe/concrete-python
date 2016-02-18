@@ -3,20 +3,21 @@
 import unittest
 
 from concrete.validate import validate_communication
-from concrete.util import CommunicationReader
 
-from concrete.util.simple_comm import (
-        create_comm, create_simple_comm, SimpleCommTempFile
-        )
+from concrete.util.simple_comm import create_comm, create_simple_comm
+
 
 class TestCreateSimpleComm(unittest.TestCase):
+
     def test_create_simple_comm(self):
         comm = create_simple_comm('one')
         self.assertEqual('one', comm.id)
         self.assertEqual('Super simple sentence .', comm.text)
         self.assertTrue(validate_communication(comm))
 
+
 class TestCreateComm(unittest.TestCase):
+
     def test_create_comm_empty(self):
         comm = create_comm('one')
         self.assertEqual('one', comm.id)

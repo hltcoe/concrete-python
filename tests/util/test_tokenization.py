@@ -6,7 +6,9 @@ from concrete.structure.ttypes import (
 )
 
 from concrete.util.simple_comm import create_comm
-from concrete.util.tokenization import get_tokens, get_pos, get_lemmas, get_tagged_tokens
+from concrete.util.tokenization import (
+    get_tokens, get_pos, get_lemmas, get_tagged_tokens
+)
 
 
 class TestTokenization(unittest.TestCase):
@@ -126,11 +128,13 @@ class TestGetTaggedTokens(unittest.TestCase):
     def test_get_tagged_tokens(self):
         self.assertEqual(
             ['N', 'N', 'Y'],
-            map(lambda t: t.tag, get_tagged_tokens(self.tokenization, 'NUMERAL'))
+            map(lambda t: t.tag, get_tagged_tokens(self.tokenization,
+                                                   'NUMERAL'))
         )
         self.assertEqual(
             [0, 1, 2],
-            map(lambda t: t.tokenIndex, get_tagged_tokens(self.tokenization, 'NUMERAL'))
+            map(lambda t: t.tokenIndex, get_tagged_tokens(self.tokenization,
+                                                          'NUMERAL'))
         )
 
     def test_get_tagged_tokens_no_tagging(self):

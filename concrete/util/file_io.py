@@ -3,6 +3,7 @@
 
 import cStringIO
 import gzip
+import bz2
 import mimetypes
 import os.path
 import tarfile
@@ -87,6 +88,66 @@ def write_thrift_to_file(thrift_obj, filename):
     thrift_file.close()
 
 
+class _FileTypeClass(object):
+    '''
+    An instance of this class represents filetypes abstractly; its
+    members correspond to individual filetypes.  It probably doesn't
+    make sense to have more than one instance of this class.
+    '''
+
+    def __init__(self, *names):
+        self.CHOICES = tuple(names)
+        for (i, name) in enumerate(names):
+            if name == 'CHOICES':
+                raise ValueError('%s is an invalid filetype name' % name)
+            setattr(self, self._normalize(name), i)
+
+    @classmethod
+    def _normalize(cls, name):
+        return name.replace('-', '_').upper()
+
+    def lookup(self, ft):
+        '''
+        Return filetype (integer value) for ft, where ft may be
+        a filetype name or (for convenience) the filetype integer
+        value itself.
+        '''
+
+        if isinstance(ft, int):
+            return ft
+        elif isinstance(ft, str) or isinstance(ft, unicode):
+            return getattr(self, self._normalize(ft))
+        else:
+            raise ValueError('unknown filetype %s' % str(ft))
+
+    def add_argument(self, argparse_parser, flag='--input-filetype',
+                     help_name='input file'):
+        '''
+        Add filetype argument to parser, return function that can be
+        called on argparse namespace to retrieve argument value, e.g.,
+
+        >>> get_filetype = add_argument(parser, ...)
+        >>> ns = parser.parse_args()
+        >>> filetype = get_filetype(ns)
+        '''
+        argparse_parser.add_argument(flag, type=str, choices=self.CHOICES,
+                                     default=self.CHOICES[0],
+                                     help='filetype for %s (choices: %s)' %
+                                          (help_name, ', '.join(self.CHOICES)))
+
+        def _get_value(ns):
+            return getattr(ns, flag.lstrip('-').replace('-', '_'))
+        return _get_value
+
+
+FileType = _FileTypeClass(
+    'auto',
+    'zip',
+    'tar', 'tar-gz', 'tar-bz2',
+    'stream', 'stream-gz', 'stream-bz2',
+)
+
+
 class CommunicationReader(object):
     """Iterator/generator class for reading one or more Communications from a
     file
@@ -110,25 +171,72 @@ class CommunicationReader(object):
             do_something(comm)
     """
 
-    def __init__(self, filename, add_references=True):
-        self._add_references = add_references
+    def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
+        filetype = FileType.lookup(filetype)
 
+        self._add_references = add_references
         self._source_filename = filename
-        if tarfile.is_tarfile(filename):
-            # File is either a '.tar' or '.tar.gz' file
+
+        if filetype == FileType.TAR:
             self.filetype = 'tar'
-            self.tar = tarfile.open(filename, 'r|*')
-        elif zipfile.is_zipfile(filename):
+            self.tar = tarfile.open(filename, 'r|')
+
+        elif filetype == FileType.TAR_GZ:
+            self.filetype = 'tar'
+            self.tar = tarfile.open(filename, 'r|gz')
+
+        elif filetype == FileType.TAR_BZ2:
+            self.filetype = 'tar'
+            self.tar = tarfile.open(filename, 'r|bz2')
+
+        elif filetype == FileType.ZIP:
             self.filetype = 'zip'
             self.zip = zipfile.ZipFile(filename, 'r')
             self.zip_infolist = self.zip.infolist()
             self.zip_infolist_index = 0
-        elif mimetypes.guess_type(filename)[1] == 'gzip':
-            self.filetype = 'stream'
-            f = gzip.open(filename, 'rb')
-        else:
+
+        elif filetype == FileType.STREAM:
             self.filetype = 'stream'
             f = open(filename, 'rb')
+
+        elif filetype == FileType.STREAM_GZ:
+            self.filetype = 'stream'
+            f = gzip.open(filename, 'rb')
+
+        elif filetype == FileType.STREAM_BZ2:
+            self.filetype = 'stream'
+            f = bz2.BZ2File(filename, 'r')
+
+        elif filetype == FileType.AUTO:
+            if tarfile.is_tarfile(filename):
+                self.filetype = 'tar'
+                self.tar = tarfile.open(filename, 'r|*')
+
+            elif zipfile.is_zipfile(filename):
+                self.filetype = 'zip'
+                self.zip = zipfile.ZipFile(filename, 'r')
+                self.zip_infolist = self.zip.infolist()
+                self.zip_infolist_index = 0
+
+            elif mimetypes.guess_type(filename)[1] == 'gzip':
+                # this is not a true stream---is_tarfile will have
+                # successfully seeked backwards on the file if we have
+                # reached this point
+                self.filetype = 'stream'
+                f = gzip.open(filename, 'rb')
+
+            elif mimetypes.guess_type(filename)[1] == 'bzip2':
+                # this is not a true stream
+                self.filetype = 'stream'
+                f = bz2.BZ2File(filename, 'r')
+
+            else:
+                # this is not a true stream
+                self.filetype = 'stream'
+                f = open(filename, 'rb')
+
+        else:
+            raise ValueError('unknown filetype %d' % filetype)
 
         if self.filetype is 'stream':
             self.transport = TTransport.TFileObjectTransport(f)

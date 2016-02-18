@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-
-"""
-"""
-
 from concrete.util.concrete_uuid import *
 
 from concrete import AnnotationMetadata, Communication
@@ -312,7 +307,3 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
                 u = aug.next().uuidString
                 s.add(u)
         self.assertEquals(len(s), m*n)
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

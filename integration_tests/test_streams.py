@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-
-"""
-"""
-
-import unittest
-
 from pytest import fixture
 from concrete.util.file_io import (
         CommunicationReader, FileType
@@ -140,7 +133,3 @@ def test_tar_bz2(fifo):
     assert comm.id == 'three'
 
     p.join()
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

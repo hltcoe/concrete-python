@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-
 import unittest
+
 import time
 from redis import Redis
 from multiprocessing import Process
@@ -19,59 +18,12 @@ from concrete.util.simple_comm import create_comm
 from redis_server import RedisServer
 
 
-# So I haven't looked up how to do fixtures with unittest...
-
-
 def _add_comm_to_list(sleep, port, comm_id, key):
     time.sleep(sleep)
     redis_db = Redis(port=port)
     comm = create_comm(comm_id)
     buf = write_communication_to_buffer(comm)
     redis_db.lpush(key, buf)
-
-
-class TestCommunicationDeepCopy(unittest.TestCase):
-    def assert_simple_comms_equal(self, comm1, comm2):
-        self.assertEquals(comm1.id, comm2.id)
-        self.assertEquals(comm1.uuid.uuidString, comm2.uuid.uuidString)
-        self.assertEquals(comm1.metadata.tool, comm2.metadata.tool)
-        self.assertEquals(comm1.metadata.timestamp, comm2.metadata.timestamp)
-        self.assertEquals(
-            comm1.sectionList[0].uuid.uuidString,
-            comm2.sectionList[0].uuid.uuidString,
-        )
-        self.assertEquals(
-            comm1.sectionList[0].kind,
-            comm2.sectionList[0].kind,
-        )
-        self.assertEquals(
-            comm1.sectionList[0].sentenceList[0].uuid.uuidString,
-            comm2.sectionList[0].sentenceList[0].uuid.uuidString,
-        )
-        self.assertEquals(
-            comm1.sectionList[0].sentenceList[0].tokenization.uuid,
-            comm2.sectionList[0].sentenceList[0].tokenization.uuid,
-        )
-        self.assertEquals(
-            comm1.sectionList[0].sentenceList[0].tokenization.kind,
-            comm2.sectionList[0].sentenceList[0].tokenization.kind,
-        )
-        self.assertEquals(
-            comm1.sectionList[0].sentenceList[0].tokenization.metadata.tool,
-            comm2.sectionList[0].sentenceList[0].tokenization.metadata.tool,
-        )
-        self.assertEquals(
-            comm1.sectionList[0].sentenceList[0].tokenization.metadata.timestamp,
-            comm2.sectionList[0].sentenceList[0].tokenization.metadata.timestamp,
-        )
-        self.assertEquals(
-            map(lambda t: t.text, comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-            map(lambda t: t.text, comm2.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-        )
-        self.assertEquals(
-            map(lambda t: t.tokenIndex, comm1.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-            map(lambda t: t.tokenIndex, comm2.sectionList[0].sentenceList[0].tokenization.tokenList.tokenList),
-        )
 
 
 class TestReadCommunicationFromRedisKey(unittest.TestCase):
@@ -130,16 +82,18 @@ class TestWriteCommunicationToRedisKey(unittest.TestCase):
 
 
 class TestRedisCommunicationReader(unittest.TestCase):
+    def setUp(self):
+        self.comm1 = create_comm('comm-1')
+        self.comm2 = create_comm('comm-2')
+        self.comm3 = create_comm('comm-3')
+
     def test_set(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.sadd(key, write_communication_to_buffer(comm1))
-            redis_db.sadd(key, write_communication_to_buffer(comm2))
-            redis_db.sadd(key, write_communication_to_buffer(comm3))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm1))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm2))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='set')
             comms = [c for c in reader]
             ids = [c.id for c in comms]
@@ -164,14 +118,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list')
             comms = [c for c in reader]
             ids = [c.id for c in comms]
@@ -188,17 +139,14 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_hash(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.hset(key, comm1.uuid.uuidString,
-                          write_communication_to_buffer(comm1))
-            redis_db.hset(key, comm2.uuid.uuidString,
-                          write_communication_to_buffer(comm2))
-            redis_db.hset(key, comm3.uuid.uuidString,
-                          write_communication_to_buffer(comm3))
+            redis_db.hset(key, self.comm1.uuid.uuidString,
+                          write_communication_to_buffer(self.comm1))
+            redis_db.hset(key, self.comm2.uuid.uuidString,
+                          write_communication_to_buffer(self.comm2))
+            redis_db.hset(key, self.comm3.uuid.uuidString,
+                          write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='hash')
             comms = [c for c in reader]
             ids = [c.id for c in comms]
@@ -206,7 +154,7 @@ class TestRedisCommunicationReader(unittest.TestCase):
             self.assertEquals(3, len(ids))
             self.assertEquals(set(['comm-1', 'comm-2', 'comm-3']), set(ids))
             self.assertEquals(3, len(reader))
-            self.assertEquals('comm-2', reader[comm2.uuid.uuidString].id)
+            self.assertEquals('comm-2', reader[self.comm2.uuid.uuidString].id)
             self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
             self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
             self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
@@ -217,14 +165,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_left_to_right(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               right_to_left=False)
             comms = [c for c in reader]
@@ -242,14 +187,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_set_implicit(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.sadd(key, write_communication_to_buffer(comm1))
-            redis_db.sadd(key, write_communication_to_buffer(comm2))
-            redis_db.sadd(key, write_communication_to_buffer(comm3))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm1))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm2))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key)
             ids = [c.id for c in reader]
             # assert no duplicates
@@ -258,31 +200,25 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_implicit(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key)
             ids = [c.id for c in reader]
             self.assertEquals(['comm-1', 'comm-2', 'comm-3'], ids)
 
     def test_hash_implicit(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.hset(key, comm1.uuid.uuidString,
-                          write_communication_to_buffer(comm1))
-            redis_db.hset(key, comm2.uuid.uuidString,
-                          write_communication_to_buffer(comm2))
-            redis_db.hset(key, comm3.uuid.uuidString,
-                          write_communication_to_buffer(comm3))
+            redis_db.hset(key, self.comm1.uuid.uuidString,
+                          write_communication_to_buffer(self.comm1))
+            redis_db.hset(key, self.comm2.uuid.uuidString,
+                          write_communication_to_buffer(self.comm2))
+            redis_db.hset(key, self.comm3.uuid.uuidString,
+                          write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key)
             ids = [c.id for c in reader]
             # assert no duplicates
@@ -291,16 +227,13 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_set_empty(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             reader = RedisCommunicationReader(redis_db, key, key_type='set')
             self.assertEquals(0, len(reader))
-            redis_db.sadd(key, write_communication_to_buffer(comm1))
-            redis_db.sadd(key, write_communication_to_buffer(comm2))
-            redis_db.sadd(key, write_communication_to_buffer(comm3))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm1))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm2))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm3))
             ids = [c.id for c in reader]
             # assert no duplicates
             self.assertEquals(3, len(ids))
@@ -309,35 +242,29 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_empty(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             reader = RedisCommunicationReader(redis_db, key, key_type='list')
             self.assertEquals(0, len(reader))
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             ids = [c.id for c in reader]
             self.assertEquals(['comm-1', 'comm-2', 'comm-3'], ids)
             self.assertEquals(3, len(reader))
 
     def test_hash_empty(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             reader = RedisCommunicationReader(redis_db, key, key_type='hash')
             self.assertEquals(0, len(reader))
-            redis_db.hset(key, comm1.uuid.uuidString,
-                          write_communication_to_buffer(comm1))
-            redis_db.hset(key, comm2.uuid.uuidString,
-                          write_communication_to_buffer(comm2))
-            redis_db.hset(key, comm3.uuid.uuidString,
-                          write_communication_to_buffer(comm3))
+            redis_db.hset(key, self.comm1.uuid.uuidString,
+                          write_communication_to_buffer(self.comm1))
+            redis_db.hset(key, self.comm2.uuid.uuidString,
+                          write_communication_to_buffer(self.comm2))
+            redis_db.hset(key, self.comm3.uuid.uuidString,
+                          write_communication_to_buffer(self.comm3))
             ids = [c.id for c in reader]
             # assert no duplicates
             self.assertEquals(3, len(ids))
@@ -353,14 +280,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_set_no_add_references(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.sadd(key, write_communication_to_buffer(comm1))
-            redis_db.sadd(key, write_communication_to_buffer(comm2))
-            redis_db.sadd(key, write_communication_to_buffer(comm3))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm1))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm2))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='set',
                                               add_references=False)
             comms = [c for c in reader]
@@ -374,14 +298,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_no_add_references(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               add_references=False)
             comms = [c for c in reader]
@@ -393,17 +314,14 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_hash_no_add_references(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.hset(key, comm1.uuid.uuidString,
-                          write_communication_to_buffer(comm1))
-            redis_db.hset(key, comm2.uuid.uuidString,
-                          write_communication_to_buffer(comm2))
-            redis_db.hset(key, comm3.uuid.uuidString,
-                          write_communication_to_buffer(comm3))
+            redis_db.hset(key, self.comm1.uuid.uuidString,
+                          write_communication_to_buffer(self.comm1))
+            redis_db.hset(key, self.comm2.uuid.uuidString,
+                          write_communication_to_buffer(self.comm2))
+            redis_db.hset(key, self.comm3.uuid.uuidString,
+                          write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='hash',
                                               add_references=False)
             comms = [c for c in reader]
@@ -417,14 +335,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_set_pop(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.sadd(key, write_communication_to_buffer(comm1))
-            redis_db.sadd(key, write_communication_to_buffer(comm2))
-            redis_db.sadd(key, write_communication_to_buffer(comm3))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm1))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm2))
+            redis_db.sadd(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='set',
                                               pop=True)
             it = iter(reader)
@@ -444,14 +359,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_pop(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               pop=True)
             it = iter(reader)
@@ -469,14 +381,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_pop_left_to_right(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               pop=True, right_to_left=False)
             it = iter(reader)
@@ -494,14 +403,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_block_pop(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               pop=True, block=True)
             it = iter(reader)
@@ -520,14 +426,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_block_pop_left_to_right(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               pop=True, block=True,
                                               right_to_left=False)
@@ -547,14 +450,11 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
     def test_list_block_pop_timeout(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, write_communication_to_buffer(comm1))
-            redis_db.lpush(key, write_communication_to_buffer(comm2))
-            redis_db.lpush(key, write_communication_to_buffer(comm3))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm1))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm2))
+            redis_db.lpush(key, write_communication_to_buffer(self.comm3))
             reader = RedisCommunicationReader(redis_db, key, key_type='list',
                                               pop=True, block=True,
                                               block_timeout=1)
@@ -571,158 +471,122 @@ class TestRedisCommunicationReader(unittest.TestCase):
 
 
 class TestRedisCommunicationWriter(unittest.TestCase):
+    def setUp(self):
+        self.comm1 = create_comm('comm-1')
+        self.comm2 = create_comm('comm-2')
+        self.comm3 = create_comm('comm-3')
+        self.buf1 = write_communication_to_buffer(self.comm1)
+        self.buf2 = write_communication_to_buffer(self.comm2)
+        self.buf3 = write_communication_to_buffer(self.comm3)
+
     def test_set(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='set')
-            w.write(comm1)
+            w.write(self.comm1)
             self.assertEquals(1, redis_db.scard(key))
-            self.assertEquals(buf1, redis_db.srandmember(key))
-            w.write(comm2)
-            w.write(comm3)
+            self.assertEquals(self.buf1, redis_db.srandmember(key))
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.scard(key))
 
     def test_list(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        buf2 = write_communication_to_buffer(comm2)
-        comm3 = create_comm('comm-3')
-        buf3 = write_communication_to_buffer(comm3)
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='list')
-            w.write(comm1)
+            w.write(self.comm1)
             self.assertEquals(1, redis_db.llen(key))
-            self.assertEquals(buf1, redis_db.lindex(key, 0))
-            w.write(comm2)
-            w.write(comm3)
+            self.assertEquals(self.buf1, redis_db.lindex(key, 0))
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.llen(key))
-            self.assertEquals(buf1, redis_db.lindex(key, -1))
-            self.assertEquals(buf2, redis_db.lindex(key, -2))
-            self.assertEquals(buf3, redis_db.lindex(key, -3))
+            self.assertEquals(self.buf1, redis_db.lindex(key, -1))
+            self.assertEquals(self.buf2, redis_db.lindex(key, -2))
+            self.assertEquals(self.buf3, redis_db.lindex(key, -3))
 
     def test_hash(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        buf2 = write_communication_to_buffer(comm2)
-        comm3 = create_comm('comm-3')
-        buf3 = write_communication_to_buffer(comm3)
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='hash')
-            w.write(comm1)
+            w.write(self.comm1)
             self.assertEquals(1, redis_db.hlen(key))
-            self.assertEquals(buf1, redis_db.hget(key, comm1.id))
-            w.write(comm2)
-            w.write(comm3)
+            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.id))
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.hlen(key))
-            self.assertEquals(buf1, redis_db.hget(key, comm1.id))
-            self.assertEquals(buf2, redis_db.hget(key, comm2.id))
-            self.assertEquals(buf3, redis_db.hget(key, comm3.id))
+            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.id))
+            self.assertEquals(self.buf2, redis_db.hget(key, self.comm2.id))
+            self.assertEquals(self.buf3, redis_db.hget(key, self.comm3.id))
 
     def test_hash_uuid_key(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        buf2 = write_communication_to_buffer(comm2)
-        comm3 = create_comm('comm-3')
-        buf3 = write_communication_to_buffer(comm3)
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='hash', uuid_hash_key=True)
-            w.write(comm1)
+            w.write(self.comm1)
             self.assertEquals(1, redis_db.hlen(key))
-            self.assertEquals(buf1, redis_db.hget(key, comm1.uuid.uuidString))
-            w.write(comm2)
-            w.write(comm3)
+            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.uuid.uuidString))
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.hlen(key))
-            self.assertEquals(buf1, redis_db.hget(key, comm1.uuid.uuidString))
-            self.assertEquals(buf2, redis_db.hget(key, comm2.uuid.uuidString))
-            self.assertEquals(buf3, redis_db.hget(key, comm3.uuid.uuidString))
+            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.uuid.uuidString))
+            self.assertEquals(self.buf2, redis_db.hget(key, self.comm2.uuid.uuidString))
+            self.assertEquals(self.buf3, redis_db.hget(key, self.comm3.uuid.uuidString))
 
     def test_list_left_to_right(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        buf2 = write_communication_to_buffer(comm2)
-        comm3 = create_comm('comm-3')
-        buf3 = write_communication_to_buffer(comm3)
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
             w = RedisCommunicationWriter(redis_db, key, key_type='list',
                                          right_to_left=False)
-            w.write(comm1)
+            w.write(self.comm1)
             self.assertEquals(1, redis_db.llen(key))
-            self.assertEquals(buf1, redis_db.lindex(key, 0))
-            w.write(comm2)
-            w.write(comm3)
+            self.assertEquals(self.buf1, redis_db.lindex(key, 0))
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.llen(key))
-            self.assertEquals(buf3, redis_db.lindex(key, -1))
-            self.assertEquals(buf2, redis_db.lindex(key, -2))
-            self.assertEquals(buf1, redis_db.lindex(key, -3))
+            self.assertEquals(self.buf3, redis_db.lindex(key, -1))
+            self.assertEquals(self.buf2, redis_db.lindex(key, -2))
+            self.assertEquals(self.buf1, redis_db.lindex(key, -3))
 
     def test_set_implicit(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        comm3 = create_comm('comm-3')
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.sadd(key, buf1)
+            redis_db.sadd(key, self.buf1)
             w = RedisCommunicationWriter(redis_db, key)
-            w.write(comm2)
-            w.write(comm3)
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.scard(key))
 
     def test_list_implicit(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        buf2 = write_communication_to_buffer(comm2)
-        comm3 = create_comm('comm-3')
-        buf3 = write_communication_to_buffer(comm3)
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.lpush(key, buf1)
+            redis_db.lpush(key, self.buf1)
             w = RedisCommunicationWriter(redis_db, key)
-            w.write(comm2)
-            w.write(comm3)
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.llen(key))
-            self.assertEquals(buf1, redis_db.lindex(key, -1))
-            self.assertEquals(buf2, redis_db.lindex(key, -2))
-            self.assertEquals(buf3, redis_db.lindex(key, -3))
+            self.assertEquals(self.buf1, redis_db.lindex(key, -1))
+            self.assertEquals(self.buf2, redis_db.lindex(key, -2))
+            self.assertEquals(self.buf3, redis_db.lindex(key, -3))
 
     def test_hash_implicit(self):
         key = 'dataset'
-        comm1 = create_comm('comm-1')
-        buf1 = write_communication_to_buffer(comm1)
-        comm2 = create_comm('comm-2')
-        buf2 = write_communication_to_buffer(comm2)
-        comm3 = create_comm('comm-3')
-        buf3 = write_communication_to_buffer(comm3)
         with RedisServer(loglevel='warning') as server:
             redis_db = Redis(port=server.port)
-            redis_db.hset(key, comm1.id, buf1)
+            redis_db.hset(key, self.comm1.id, self.buf1)
             w = RedisCommunicationWriter(redis_db, key)
-            w.write(comm2)
-            w.write(comm3)
+            w.write(self.comm2)
+            w.write(self.comm3)
             self.assertEquals(3, redis_db.hlen(key))
-            self.assertEquals(buf1, redis_db.hget(key, comm1.id))
-            self.assertEquals(buf2, redis_db.hget(key, comm2.id))
-            self.assertEquals(buf3, redis_db.hget(key, comm3.id))
+            self.assertEquals(self.buf1, redis_db.hget(key, self.comm1.id))
+            self.assertEquals(self.buf2, redis_db.hget(key, self.comm2.id))
+            self.assertEquals(self.buf3, redis_db.hget(key, self.comm3.id))
 
     def test_implicit_empty(self):
         key = 'dataset'
@@ -730,7 +594,3 @@ class TestRedisCommunicationWriter(unittest.TestCase):
             redis_db = Redis(port=server.port)
             with self.assertRaises(Exception):
                 RedisCommunicationWriter(redis_db, key)
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

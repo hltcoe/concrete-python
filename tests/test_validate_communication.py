@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-
-"""
-TODO: Add tests for...
-  - validate_constituency_parse()
-  - validate_dependency_parss()
-"""
-
 import logging
 import sys
 import time
@@ -166,7 +158,3 @@ class TestTextspanOffsets(unittest.TestCase):
             textSpan=sentence_textspan,
             uuid='TEST')
         return sentence
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

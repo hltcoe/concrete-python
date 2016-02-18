@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-
-"""
-"""
-
 import os
 import tarfile
 import tempfile
@@ -548,7 +543,3 @@ class TestCommunicationWriterTGZ(unittest.TestCase):
         f.close()
 
         os.remove(filename)
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

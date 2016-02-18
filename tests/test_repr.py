@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-
-"""Test conversion of Concrete objects to strings
-"""
-
 import time
 import unittest
 
@@ -39,7 +34,3 @@ class TestRepr(unittest.TestCase):
             uuid=UUID(uuidString='01234567-0123-4567-89ab-cdef89abcdef')
         )
         s = tokenization.__repr__()
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

@@ -1,6 +1,3 @@
-
-
-
 from concrete.util import read_communication_from_file
 
 

@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-
-"""
-"""
 
 import unittest
 
@@ -131,7 +127,3 @@ class TestCreateComm(unittest.TestCase):
         self.assertEqual(0, len(tl))
 
         self.assertTrue(validate_communication(comm))
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

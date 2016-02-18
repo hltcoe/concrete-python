@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-
-"""
-"""
-
 import unittest
 
 from concrete import AnnotationMetadata, Communication
@@ -311,7 +306,3 @@ John 's daughter Mary expressed sorrow .
         self.assertEquals(0, p.returncode)
         self.assertEquals(expected_output, stdout)
         self.assertEquals('', stderr)
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

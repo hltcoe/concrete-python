@@ -210,7 +210,3 @@ class TestGetTokenList(unittest.TestCase):
         tokenization.kind = None
         token_texts = [t.text for t in get_tokens(tokenization)]
         self.assertEqual(['mambo', 'no.', '4'], token_texts)
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

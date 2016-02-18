@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from thrift.transport import TTransport
 from thrift.transport import TSocket
 from thrift.protocol import TCompactProtocol
@@ -83,7 +81,3 @@ class TestAnnotator(unittest.TestCase):
             transport.close()
 
             self.assertEqual(NoopAnnotator.METADATA_TOOL, metadata.tool)
-
-
-if __name__ == '__main__':
-    unittest.main(buffer=True)

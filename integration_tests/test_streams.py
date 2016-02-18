@@ -46,6 +46,13 @@ def test_concatenated(fifo):
     (comm, path) = it.next()
     assert comm.id == 'three'
 
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
+
     p.join()
 
 
@@ -72,6 +79,13 @@ def test_concatenated_bz2(fifo):
     (comm, path) = it.next()
     assert comm.id == 'three'
 
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
+
     p.join()
 
 
@@ -91,6 +105,13 @@ def test_tar(fifo):
 
     (comm, path) = it.next()
     assert comm.id == 'three'
+
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
 
     p.join()
 
@@ -112,6 +133,13 @@ def test_tar_gz(fifo):
     (comm, path) = it.next()
     assert comm.id == 'three'
 
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
+
     p.join()
 
 
@@ -131,5 +159,12 @@ def test_tar_bz2(fifo):
 
     (comm, path) = it.next()
     assert comm.id == 'three'
+
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
 
     p.join()

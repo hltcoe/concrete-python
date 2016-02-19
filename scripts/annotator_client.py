@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util import CommunicationReader, CommunicationWriter
 from concrete.util.annotator_wrapper import AnnotatorClientWrapper
@@ -21,6 +22,7 @@ def main():
     parser.add_argument('--output', default='-',
                         help="Output source to use. '-' for stdout; otherwise"
                              " takes a path to a file.")
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely

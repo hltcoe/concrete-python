@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""
-Pretty-prints a Concrete file as JSON
-"""
 
+'Pretty-prints a Concrete file as JSON'
+
+import concrete.version
 import argparse
 import codecs
 import sys
@@ -34,6 +34,7 @@ def main():
                         help="Removes UUIDs from JSON output")
     parser.add_argument('concrete_file')
     parser.add_argument('json_file', nargs='?', default='STDOUT')
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     if args.protocol == 'simple':

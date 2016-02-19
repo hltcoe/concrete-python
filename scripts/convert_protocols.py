@@ -39,6 +39,7 @@ from thrift.protocol import (
 )
 from thrift.transport import TTransport
 from concrete import Communication
+import concrete.version
 import mimetypes
 
 PROTOCOLS = {
@@ -68,6 +69,7 @@ def make_parser():
         '--iprotocol', choices=sorted(PROTOCOLS.keys()), required=False)
     parser.add_argument(
         '--oprotocol', choices=sorted(PROTOCOLS.keys()), required=False)
+    concrete.version.add_argparse_argument(parser)
     return parser
 
 

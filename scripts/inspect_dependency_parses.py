@@ -13,6 +13,7 @@ import logging
 import networkx as nx
 
 import concrete.inspect
+import concrete.version
 from concrete.util import CommunicationReader
 
 
@@ -20,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Inspect empty dependency parses")
     parser.add_argument('communication_file')
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     logging.basicConfig(

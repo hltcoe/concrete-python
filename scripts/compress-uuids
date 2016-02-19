@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import concrete.version
 from thrift.Thrift import TType
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.uuid.ttypes import UUID
@@ -276,6 +277,7 @@ def main():
                              ' after conversion')
     parser.add_argument('--uuid-map-path', type=str,
                         help='Output path of UUID map')
+    concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely

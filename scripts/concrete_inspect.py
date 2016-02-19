@@ -10,6 +10,7 @@ import argparse
 import codecs
 import sys
 
+import concrete.version
 import concrete.inspect
 import concrete.util
 
@@ -89,11 +90,7 @@ def main():
                         help="Don't add references to communication (may preve"
                              "nt 'NoneType' errors)",
                         action="store_true")
-    parser.add_argument("--version", action="version",
-                        version=("Concrete schema version: %s, concrete python"
-                                 " library version: %s") %
-                                (concrete_schema_version(),
-                                 concrete_library_version()))
+    concrete.version.add_argparse_argument(parser)
     (args, passthru_args) = parser.parse_known_args()
 
     add_references = not args.no_references
@@ -134,14 +131,6 @@ def main():
         concrete.inspect.print_penn_treebank_for_communication(comm)
     else:
         parser.print_help()
-
-
-def concrete_library_version():
-    return concrete.__version__
-
-
-def concrete_schema_version():
-    return ".".join(concrete.__version__.split(".")[0:2])
 
 
 if __name__ == "__main__":

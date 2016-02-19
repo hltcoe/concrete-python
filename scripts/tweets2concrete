@@ -11,6 +11,7 @@ import logging
 import logging.config
 import mimetypes
 
+import concrete.version
 from concrete.validate import validate_communication
 from concrete.util.mem_io import write_communication_to_buffer
 from concrete.util.twitter import json_tweet_string_to_Communication
@@ -84,6 +85,7 @@ def main():
     parser.add_argument('--skip-invalid-comms', action='store_true',
                         help='Skip invalid communications (increases runtime)'
                              ' (by default, validation is not performed)')
+    concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely

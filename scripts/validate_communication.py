@@ -10,6 +10,7 @@ concrete.validate library.
 import argparse
 import logging
 
+import concrete.version
 from concrete.validate import validate_communication_file
 
 
@@ -20,6 +21,7 @@ def main():
     parser.add_argument('-l', '--loglevel', choices=['debug', 'info',
                                                      'warning', 'error'],
                         help="Log level threshold")
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     # Set logging level

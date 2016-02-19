@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+
 """
 Compare two Concrete files by converting to JSON then running the Git
 diff command
 """
 
+import concrete.version
 import argparse
 import codecs
 import os
@@ -23,6 +25,7 @@ def main():
                         help="Include timestamps in JSON output")
     parser.add_argument('file_one')
     parser.add_argument('file_two')
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     tmp_path = tempfile.mkdtemp()

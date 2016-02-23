@@ -273,8 +273,11 @@ def main():
                         help='Verify within-communication links are satisfied'
                              ' after conversion')
     parser.add_argument('--single-analytic', action='store_true',
-                        help='Verify within-communication links are satisfied'
-                             ' after conversion')
+                        help='Use one 10-byte prefix for all UUIDs in the'
+                             ' communication rather than keying 4 of those'
+                             ' bytes on the metadata tool (does not make a'
+                             ' noticeable difference in size for typical'
+                             ' communications)')
     parser.add_argument('--uuid-map-path', type=str,
                         help='Output path of UUID map')
     concrete.version.add_argparse_argument(parser)

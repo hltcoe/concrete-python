@@ -17,13 +17,9 @@ the Concrete GitHub repository: https://github.com/hltcoe/concrete
 Requirements
 ------------
 
-Concrete-Python requires the following:
-
-* Python >= 2.7.x
-* 'networkx' Python package
-* 'thrift' Python package >= 0.9.2
-
-You do not need to install the Thrift compiler to use this library.
+Concrete-Python requires Python 2.7 and the Thrift Python library, among
+other Python libraries.  These are installed automatically by `setup.py`
+or `pip`.  The Thrift compiler is *not* required.
 
 **Note on Windows compatibility**: The 'thrift' Python package (and
 thus the Concrete Python package) does not seem to work with the
@@ -35,38 +31,42 @@ version of Python that comes with 64-bit Cygwin on 64-bit Windows.
 Installation
 ------------
 
-You can install Concrete using the pip package manager:
+You can install Concrete using the `pip` package manager:
 
-    pip install git+https://github.com/hltcoe/concrete-python.git#egg=concrete
+```
+pip install concrete
+```
 
-or by cloning this repository and running setup.py:
+or by cloning the repository and running `setup.py`:
 
-    git clone https://github.com/hltcoe/concrete-python.git
-    cd concrete-python
-    python setup.py test
-    python setup.py install
+```
+git clone https://github.com/hltcoe/concrete-python.git
+cd concrete-python
+python setup.py test
+python setup.py install
+```
 
 Useful Scripts
 --------------
 
 The Concrete Python package comes with three scripts:
 
-* **concrete_inspect.py** reads in a Concrete Communication and prints
+* `concrete_inspect.py` reads in a Concrete Communication and prints
   out human-readable information about the Communication's contents
   (such as tokens, POS and NER tags, Entities, Situations, etc) to
   stdout.
 
-* **concrete2json.py** reads in a Concrete Communication and prints a
+* `concrete2json.py` reads in a Concrete Communication and prints a
   JSON version of the Communication to stdout.  The JSON is "pretty
   printed" with indentation and whitespace, which makes the JSON
   easier to read and to use for diffs.
 
-* **validate_communication.py** reads in a Concrete Communication file
+* `validate_communication.py` reads in a Concrete Communication file
   and prints out information about any invalid fields.  This script is
   a command-line wrapper around the functionality in the
   `concrete.validate` library.
 
-Use the '-h/--help' flag for details about the scripts' command line
+Use the `--help` flag for details about the scripts' command line
 arguments.
 
 

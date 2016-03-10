@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 flake8 concrete/util concrete/*.py \
-     scripts examples \
+     scripts/* examples/* \
      tests integration-tests
 bash check-todo-fixme-hack.bash

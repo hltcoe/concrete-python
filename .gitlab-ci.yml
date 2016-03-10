@@ -4,6 +4,8 @@ test:anaconda:
     - bash docker/anaconda-install-deps.bash
     - python setup.py test --addopts '--cov=concrete/ tests'
     - bash check-style.bash
+  tags:
+    - docker
 
 test:centos:
   image: centos:centos7
@@ -11,24 +13,32 @@ test:centos:
     - bash docker/centos-install-deps.bash
     - python setup.py test --addopts '--cov=concrete/ tests'
     - bash check-style.bash
+  tags:
+    - docker
 
 tox:centos:
   image: centos:centos7
   script:
     - bash docker/centos-install-deps.bash
     - tox
+  tags:
+    - docker
 
 install:anaconda:
   image: continuumio/anaconda
   script:
     - bash docker/anaconda-install-deps.bash
     - python setup.py install
+  tags:
+    - docker
 
 install:centos:
   image: centos:centos7
   script:
     - bash docker/centos-install-deps.bash
     - python setup.py install
+  tags:
+    - docker
 
 integration:anaconda:
   image: continuumio/anaconda
@@ -38,6 +48,8 @@ integration:anaconda:
     - source /etc/profile
     - python setup.py install
     - python setup.py test --addopts integration-tests
+  tags:
+    - docker
 
 integration:centos:
   image: centos:centos7
@@ -46,3 +58,5 @@ integration:centos:
     - bash docker/centos-install-integration-deps.bash
     - python setup.py install
     - python setup.py test --addopts integration-tests
+  tags:
+    - docker

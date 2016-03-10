@@ -73,8 +73,8 @@ def main():
     parser.add_argument('--num-proc', type=int,
                         help='Number of worker processes to use')
     parser.add_argument('--chunk-size', type=int,
-                        help='Chunk size (in number of tweets) when dispatching'
-                             ' jobs to workers')
+                        help='Chunk size (in number of tweets) when'
+                             ' dispatching jobs to workers')
     parser.add_argument('--catch-ioerror', action='store_true',
                         help='Treat IOError as successful end of stream'
                              ' (recommended if gzipped input files were not'
@@ -90,7 +90,9 @@ def main():
 
     # Won't work on Windows... but that use case is very unlikely
     tweet_path = '/dev/fd/0' if ns.tweet_path == '-' else ns.tweet_path
-    concrete_path = '/dev/fd/1' if ns.concrete_path == '-' else ns.concrete_path
+    concrete_path = (
+        '/dev/fd/1' if ns.concrete_path == '-' else ns.concrete_path
+    )
 
     if ns.log_conf_path:
         with open(ns.log_conf_path) as f:

@@ -88,20 +88,20 @@ def main():
                         help="Don't add references to communication (may preve"
                              "nt 'NoneType' errors)",
                         action="store_true")
+    parser.add_argument('communication_filename',
+                        nargs='?',
+                        type=str,
+                        help='Path to a Concrete Communication from which '
+                        'to display information. If not specified, read '
+                        'read from standard input')
     concrete.version.add_argparse_argument(parser)
-    (args, passthru_args) = parser.parse_known_args()
+    args = parser.parse_args()
 
     add_references = not args.no_references
 
-    if passthru_args:
-        if len(passthru_args) > 1:
-            sys.stderr.write('Error: unexpected arguments: %s\n\n' %
-                             ' '.join(passthru_args[1:]))
-            sys.stderr.write(parser.format_help())
-            sys.exit(1)
-        communication_filename = passthru_args[0]
+    if not args.communication_filename is None:
         comm = concrete.util.read_communication_from_file(
-            communication_filename, add_references=add_references)
+            args.communication_filename, add_references=add_references)
     else:
         comm = concrete.util.read_communication_from_buffer(
             sys.stdin.read(), add_references=add_references)

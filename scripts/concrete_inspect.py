@@ -24,13 +24,6 @@ def main():
                     " stdout.  If communication_filename is specified, read"
                     " communication from file; otherwise, read from standard"
                     " input.",
-        usage='''concrete_inspect.py [-h] [--char-offsets] [--dependency]
-                           [--entities] [--lemmas] [--metadata] [--mentions]
-                           [--ner] [--pos] [--situation-mentions]
-                           [--situations] [--text] [--tokens] [--treebank]
-                           [--version] [--no-references]
-                           [communication_filename]
-''',
     )
     parser.add_argument("--char-offsets",
                         help="Print token text extracted from character offset"

@@ -99,7 +99,7 @@ def main():
 
     add_references = not args.no_references
 
-    if not args.communication_filename is None:
+    if args.communication_filename is not None:
         comm = concrete.util.read_communication_from_file(
             args.communication_filename, add_references=add_references)
     else:

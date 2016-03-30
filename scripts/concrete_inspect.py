@@ -66,6 +66,10 @@ def main():
                         help="Print first set of Part-Of-Speech token tags in "
                              "'ConLL-style' format",
                         action="store_true")
+    parser.add_argument("--sections",
+                        action = 'store_true',
+                        help="Print text according to Section offsets "
+                             "(textSpan values). These textSpans are assumed valid.")
     parser.add_argument("--situation-mentions",
                         help="Print info about all SituationMentions",
                         action="store_true")
@@ -119,6 +123,8 @@ def main():
         concrete.inspect.print_tokens_with_entityMentions(comm)
     elif args.metadata:
         concrete.inspect.print_metadata(comm)
+    elif args.sections:
+        concrete.inspect.print_sections(comm)
     elif args.situation_mentions:
         concrete.inspect.print_situation_mentions(comm)
     elif args.situations:

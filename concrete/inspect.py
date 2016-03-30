@@ -173,6 +173,25 @@ def print_metadata(comm):
         print
 
 
+def print_sections(comm):
+    """Print information for all Sections, according to their spans.
+
+    Args:
+
+    - `comm`: A Concrete Communication
+    """
+    text = comm.text
+    for sect_idx, sect in enumerate(lun(comm.sectionList)):
+        ts = sect.textSpan
+        if ts is None:
+            print u"Section %s does not have a textSpan field set" % (sect.uuid.uuidString)
+            continue
+        print u"Section %d (%s), from %d to %d:" % (sect_idx, sect.uuid.uuidString, ts.start, ts.ending)
+        print u"%s" % ( text[ts.start : ts.ending] )
+        print
+    print
+
+
 def print_situation_mentions(comm):
     """Print information for all SituationMentions (some of which may
     not have Situations)

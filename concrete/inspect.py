@@ -96,9 +96,9 @@ def print_entities(comm):
                 print u"  Entity %d-%d:" % (entitySet_index, entity_index)
                 for em_index, em in enumerate(entity.mentionList):
                     print u"      EntityMention %d-%d-%d:" % (
-                            entitySet_index, entity_index, em_index)
+                        entitySet_index, entity_index, em_index)
                     print u"          tokens:     %s" % (
-                            u" ".join(get_tokens_for_entityMention(em)))
+                        u" ".join(get_tokens_for_entityMention(em)))
                     if em.text:
                         print u"          text:       %s" % em.text
                     print u"          entityType: %s" % em.entityType
@@ -171,6 +171,27 @@ def print_metadata(comm):
         for i, situationSet in enumerate(comm.situationSetList):
             print u"  SituationSet #%d:  %s" % (i, situationSet.metadata.tool)
         print
+
+
+def print_sections(comm):
+    """Print information for all Sections, according to their spans.
+
+    Args:
+
+    - `comm`: A Concrete Communication
+    """
+    text = comm.text
+    for sect_idx, sect in enumerate(lun(comm.sectionList)):
+        ts = sect.textSpan
+        if ts is None:
+            print u"Section %s does not have a textSpan "
+            "field set" % (sect.uuid.uuidString)
+            continue
+        print u"Section %d (%s), from %d to %d:" % (
+            sect_idx, sect.uuid.uuidString, ts.start, ts.ending)
+        print u"%s" % (text[ts.start:ts.ending])
+        print
+    print
 
 
 def print_situation_mentions(comm):

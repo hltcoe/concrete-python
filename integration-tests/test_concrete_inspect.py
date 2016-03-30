@@ -306,3 +306,39 @@ John 's daughter Mary expressed sorrow .
         self.assertEquals(0, p.returncode)
         self.assertEquals(expected_output, stdout)
         self.assertEquals('', stderr)
+
+    def test_print_sections_for_communication(self):
+        p = Popen([
+            sys.executable, 'scripts/concrete_inspect.py',
+            '--sections',
+            self.comm_path
+        ], stdout=PIPE, stderr=PIPE)
+        (stdout, stderr) = p.communicate()
+        expected_output = '''\
+Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05), from 81 to 82:
+
+
+
+Section 1 (54902d75-1841-4d8d-b4c5-390d4ef1a47a), from 85 to 162:
+
+John Smith, manager of ACME INC, was bit by a dog on March 10th, 2013.
+</P>
+
+
+Section 2 (7ec8b7d9-6be0-4c62-af57-3c6c48bad711), from 165 to 180:
+
+He died!
+</P>
+
+
+Section 3 (68da91a1-5beb-4129-943d-170c40c7d0f7), from 183 to 228:
+
+John's daughter Mary expressed sorrow.
+</P>
+
+
+
+'''
+        self.assertEquals(0, p.returncode)
+        self.assertEquals(expected_output, stdout)
+        self.assertEquals('', stderr)

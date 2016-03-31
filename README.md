@@ -14,6 +14,12 @@ compiler, but not the .thrift definition files that were used to
 generate these classes.  The .thrift definition files can be found in
 the Concrete GitHub repository: https://github.com/hltcoe/concrete
 
+The `accel` branch of Concrete-Python supports the accelerated thrift
+protocols.  For many workloads these are 10 to 30 times faster than the
+pure Python protocols.  To take advantage of them, check out the
+`accel` branch from the Concrete-Python Git repository and follow the
+README there to install.
+
 Requirements
 ------------
 

@@ -17,15 +17,39 @@ the Concrete GitHub repository: https://github.com/hltcoe/concrete
 Requirements
 ------------
 
-Concrete-Python requires Python 2.7 and the Thrift Python library, among
-other Python libraries.  These are installed automatically by `setup.py`
-or `pip`.  The Thrift compiler is *not* required.
+Concrete-Python requires Python 2.7 and a snapshot of the Thrift Python
+library with accelerated protocol support.  To install on the COE grid,
+from the same directory as this README, do:
 
-**Note on Windows compatibility**: The 'thrift' Python package (and
+```
+bash coe-install-fast-thrift.bash
+pip install --user .
+```
+
+On the CLSP grid, do:
+
+```
+bash clsp-install-fast-thrift.bash
+pip install --user .
+```
+
+On MARCC, do:
+
+```
+bash marcc-install-fast-thrift.bash
+pip install --user .
+```
+
+If you are not on the COE or CLSP grids or MARCC you will need to build
+a modern Thrift yourself; see the end of this README for details.
+The other libraries are installed automatically by
+`setup.py` or `pip`.  Note the Thrift compiler is not required.
+
+**Note on Windows compatibility**: The `thrift` Python package (and
 thus the Concrete Python package) does not seem to work with the
 [Python Windows binaries from
 Python.org](https://www.python.org/downloads/windows/) (32 and 64-bit
-versions) on 64-bit Windows.  The 'thrift' package does work using the
+versions) on 64-bit Windows.  The `thrift` package does work using the
 version of Python that comes with 64-bit Cygwin on 64-bit Windows.
 
 Installation
@@ -127,8 +151,25 @@ UUID mismatches.
 Building from Thrift definitions
 ================================
 
-To rebuild the `concrete-python` sources from the concrete thrift
+To rebuild the `concrete-python` sources from the concrete Thrift
 definitions, use `build.bash`.  This script takes the path to the
 `thrift` subdirectory of the `concrete` repository as an optional
-argument, generates the Python sources from the thrift definitions
+argument, generates the Python sources from the `.thrift` files
 in that subdirectory, and patches to the generated code as necessary.
+
+
+Building Thrift with accelerated protocol support
+=================================================
+
+To build Thrift with support for the Cython binary and compact
+protocol extensions, run:
+
+```
+bash install-fast-thrift.bash
+```
+
+Note this script will download the Thrift source, build it, and install
+it (with Python library support only) to your home directory.
+
+If the build fails because of unsatisfied dependencies, consult the
+Thrift build instructions in the concrete-c project.

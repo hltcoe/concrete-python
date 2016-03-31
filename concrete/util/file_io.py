@@ -239,7 +239,9 @@ class CommunicationReader(object):
             raise ValueError('unknown filetype %d' % filetype)
 
         if self.filetype is 'stream':
-            self.transport = TTransport.TFileObjectTransport(f)
+            self.transport = TTransport.TBufferedTransport(
+                TTransport.TFileObjectTransport(f)
+            )
             self.protocol = factory.createProtocol(self.transport)
             self.transport.open()
 

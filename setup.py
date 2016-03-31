@@ -44,7 +44,7 @@ setup(
     install_requires=[
         'networkx',
         'testfixtures',
-        'thrift>=0.9.2',
+        'thrift>=1.0.0.dev0',
         'redis>=2.10.0',
         ],
 

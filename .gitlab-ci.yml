@@ -1,62 +1,11 @@
-test:anaconda:
-  image: continuumio/anaconda
-  script:
-    - bash docker/anaconda-install-deps.bash
-    - python setup.py test --addopts '--cov=concrete/ tests'
-    - bash check-style.bash
-  tags:
-    - docker
+before_script:
+  - docker info
 
-test:centos:
-  image: centos:centos7
+build-image:
   script:
-    - bash docker/centos-install-deps.bash
-    - python setup.py test --addopts '--cov=concrete/ tests'
-    - bash check-style.bash
+    - docker build --pull=true -t concrete-python .
+    - docker run concrete-python python setup.py test --addopts '--cov=concrete/ tests'
+    - docker run concrete-python bash check-style.bash
+    - docker run concrete-python python setup.py install --user test --addopts integration-tests
   tags:
-    - docker
-
-tox:centos:
-  image: centos:centos7
-  script:
-    - bash docker/centos-install-deps.bash
-    - tox
-  tags:
-    - docker
-
-install:anaconda:
-  image: continuumio/anaconda
-  script:
-    - bash docker/anaconda-install-deps.bash
-    - python setup.py install
-  tags:
-    - docker
-
-install:centos:
-  image: centos:centos7
-  script:
-    - bash docker/centos-install-deps.bash
-    - python setup.py install
-  tags:
-    - docker
-
-integration:anaconda:
-  image: continuumio/anaconda
-  script:
-    - bash docker/anaconda-install-deps.bash
-    - bash docker/anaconda-install-integration-deps.bash
-    - source /etc/profile
-    - python setup.py install
-    - python setup.py test --addopts integration-tests
-  tags:
-    - docker
-
-integration:centos:
-  image: centos:centos7
-  script:
-    - bash docker/centos-install-deps.bash
-    - bash docker/centos-install-integration-deps.bash
-    - python setup.py install
-    - python setup.py test --addopts integration-tests
-  tags:
-    - docker
+    - shell

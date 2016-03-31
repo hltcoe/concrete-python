@@ -1,0 +1,208 @@
+diff --git a/concrete/audio/ttypes.py b/concrete/audio/ttypes.py
+index e8a0b39..439b1aa 100644
+--- a/concrete/audio/ttypes.py
++++ b/concrete/audio/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport
+diff --git a/concrete/clustering/ttypes.py b/concrete/clustering/ttypes.py
+index 6fccbaf..9ff15ef 100644
+--- a/concrete/clustering/ttypes.py
++++ b/concrete/clustering/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.uuid.ttypes
+ import concrete.metadata.ttypes
+diff --git a/concrete/communication/ttypes.py b/concrete/communication/ttypes.py
+index e1c3978..c2bccf3 100644
+--- a/concrete/communication/ttypes.py
++++ b/concrete/communication/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.uuid.ttypes
+ import concrete.language.ttypes
+diff --git a/concrete/email/ttypes.py b/concrete/email/ttypes.py
+index 3fdfbe4..e0860e6 100644
+--- a/concrete/email/ttypes.py
++++ b/concrete/email/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport
+diff --git a/concrete/entities/ttypes.py b/concrete/entities/ttypes.py
+index a8b6de0..a5e838c 100644
+--- a/concrete/entities/ttypes.py
++++ b/concrete/entities/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.structure.ttypes
+ import concrete.metadata.ttypes
+diff --git a/concrete/exceptions/ttypes.py b/concrete/exceptions/ttypes.py
+index 4c182ae..40fb431 100644
+--- a/concrete/exceptions/ttypes.py
++++ b/concrete/exceptions/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport
+diff --git a/concrete/language/ttypes.py b/concrete/language/ttypes.py
+index 54c6fe3..8d359a4 100644
+--- a/concrete/language/ttypes.py
++++ b/concrete/language/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.metadata.ttypes
+ import concrete.uuid.ttypes
+diff --git a/concrete/linking/ttypes.py b/concrete/linking/ttypes.py
+index e15c973..932ca33 100644
+--- a/concrete/linking/ttypes.py
++++ b/concrete/linking/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.uuid.ttypes
+ import concrete.metadata.ttypes
+diff --git a/concrete/metadata/ttypes.py b/concrete/metadata/ttypes.py
+index 4a88bf9..3748e5f 100644
+--- a/concrete/metadata/ttypes.py
++++ b/concrete/metadata/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.uuid.ttypes
+ import concrete.twitter.ttypes
+diff --git a/concrete/nitf/ttypes.py b/concrete/nitf/ttypes.py
+index 9266f2a..db3388c 100644
+--- a/concrete/nitf/ttypes.py
++++ b/concrete/nitf/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport
+diff --git a/concrete/services/ttypes.py b/concrete/services/ttypes.py
+index 452b908..6a749b0 100644
+--- a/concrete/services/ttypes.py
++++ b/concrete/services/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.metadata.ttypes
+ import concrete.language.ttypes
+diff --git a/concrete/situations/ttypes.py b/concrete/situations/ttypes.py
+index 88f1faa..ef2d61b 100644
+--- a/concrete/situations/ttypes.py
++++ b/concrete/situations/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.structure.ttypes
+ import concrete.metadata.ttypes
+diff --git a/concrete/spans/ttypes.py b/concrete/spans/ttypes.py
+index 4930360..1045ee4 100644
+--- a/concrete/spans/ttypes.py
++++ b/concrete/spans/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport
+diff --git a/concrete/structure/ttypes.py b/concrete/structure/ttypes.py
+index 8e9a144..525ca98 100644
+--- a/concrete/structure/ttypes.py
++++ b/concrete/structure/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ import concrete.metadata.ttypes
+ import concrete.spans.ttypes
+@@ -1992,8 +1993,14 @@ class Tokenization(object):
+         return
+ 
+     def __repr__(self):
++        # The implementation of this function is NOT auto-generated
++        # Prevent infinite recursion caused by backpointer added by
++        #   concrete.util.references.add_references_to_communication()
++        dict_without_backpointer = self.__dict__.copy()
++        if 'sentence' in dict_without_backpointer:
++            dict_without_backpointer.pop('sentence')
+         L = ['%s=%r' % (key, value)
+-             for key, value in self.__dict__.items()]
++             for key, value in dict_without_backpointer.iteritems()]
+         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+ 
+     def __eq__(self, other):
+diff --git a/concrete/twitter/ttypes.py b/concrete/twitter/ttypes.py
+index c8aca21..5537217 100644
+--- a/concrete/twitter/ttypes.py
++++ b/concrete/twitter/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport
+diff --git a/concrete/uuid/ttypes.py b/concrete/uuid/ttypes.py
+index b2c332c..f229081 100644
+--- a/concrete/uuid/ttypes.py
++++ b/concrete/uuid/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ import sys
+ 
+ from thrift.transport import TTransport

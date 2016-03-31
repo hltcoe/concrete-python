@@ -26,3 +26,9 @@ How to contribute code
    `git push -f` to the feature branch.
 9. Create a merge request for your feature branch into `master`,
    referencing the Gitlab issue.
+
+Note concrete-python releases use a parallel versioning scheme: even
+micro versions (e.g., the 10 in 4.8.10) are pure-python thrift protocol
+builds while odd micro versions (e.g., 4.8.11) are the corresponding
+accelerated thrift protocol builds.  These versions are released from
+the `master` and `accel` branches, respectively.

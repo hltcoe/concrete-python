@@ -1,7 +1,7 @@
 before_script:
   - docker info
 
-build-image:
+build-only:
   script:
     - docker build --pull=true -t concrete-python .
     - docker run concrete-python python setup.py test --addopts '--cov=concrete/ tests'
@@ -9,3 +9,16 @@ build-image:
     - docker run concrete-python python setup.py install --user test --addopts integration-tests
   tags:
     - shell
+
+build-deploy-accel:
+  script:
+    - docker build --pull=true -t concrete-python .
+    - docker run concrete-python python setup.py test --addopts '--cov=concrete/ tests'
+    - docker run concrete-python bash check-style.bash
+    - docker run concrete-python python setup.py install --user test --addopts integration-tests
+    - docker tag concrete-python r8n01:5000/concrete-python:accel
+    - docker push r8n01:5000/concrete-python:accel
+  tags:
+    - shell
+  only:
+    - accel

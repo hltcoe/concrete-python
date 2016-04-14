@@ -21,6 +21,131 @@ from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 from concrete.util.file_io import CommunicationWriter
 
 
+AL_NONE = 'none'
+AL_SECTION = 'section'
+AL_SENTENCE = 'sentence'
+AL_TOKEN = 'token'
+
+
+def _split(s, delim):
+    pieces = s.split(delim)
+    indexed_pieces = []
+    offset = 0
+    for p in pieces:
+        indexed_pieces.append((p, offset, offset + len(p)))
+        offset += len(p) + len(delim)
+    return indexed_pieces
+
+
+def create_sentence(sen_text, sen_start, sen_end,
+                    aug, metadata_tool, metadata_timestamp,
+                    annotation_level):
+    '''
+    Create sentence from provided text and metadata.
+    Lower-level routine (called indirectly by create_comm).
+    '''
+
+    sections = (annotation_level is not None) and (annotation_level != AL_NONE)
+    sentences = sections and (annotation_level != AL_SECTION)
+    tokens = sentences and (annotation_level != AL_SENTENCE)
+
+    return Sentence(
+        uuid=aug.next(),
+        textSpan=TextSpan(sen_start, sen_end),
+        tokenization=Tokenization(
+            uuid=aug.next(),
+            kind=TokenizationKind.TOKEN_LIST,
+            metadata=AnnotationMetadata(
+                tool=metadata_tool,
+                timestamp=metadata_timestamp,
+            ),
+            tokenList=TokenList(tokenList=[
+                Token(
+                    tokenIndex=i,
+                    text=tok_text,
+                )
+                for (i, tok_text)
+                in enumerate(sen_text.split())
+            ]),
+        ) if tokens else None,
+    )
+
+
+def create_section(sec_text, sec_start, sec_end, section_kind,
+                   aug, metadata_tool, metadata_timestamp,
+                   annotation_level):
+    '''
+    Create section from provided text and metadata.
+    Lower-level routine (called by create_comm).
+    '''
+
+    sections = (annotation_level is not None) and (annotation_level != AL_NONE)
+    sentences = sections and (annotation_level != AL_SECTION)
+
+    return Section(
+        uuid=aug.next(),
+        textSpan=TextSpan(sec_start, sec_end),
+        kind=section_kind,
+        sentenceList=(
+            [
+                create_sentence(sen_text,
+                                sec_start + sen_start,
+                                sec_start + sen_end,
+                                aug, metadata_tool, metadata_timestamp,
+                                annotation_level)
+                for (sen_text, sen_start, sen_end) in _split(sec_text, '\n')
+            ] if ('\n' in sec_text) or sec_text.strip() else []
+        ) if sentences else None,
+    )
+
+
+def create_comm(comm_id, text='',
+                comm_type='article', section_kind='passage',
+                metadata_tool='concrete-python',
+                metadata_timestamp=None,
+                annotation_level=AL_TOKEN):
+    '''
+    Create a simple, valid Communication from text.
+    By default the text will be split by double-newlines into sections
+    and then by single newlines into sentences within those sections.
+
+    annotation_level controls the amount of annotation that is added:
+      AL_NONE      add no optional annotations (not even sections)
+      AL_SECTION   add sections but not sentences
+      AL_SENTENCE  add sentences but not tokens
+      AL_TOKEN     add all annotations, up to tokens (the default)
+
+    If metadata_timestamp is None, the current time will be used.
+    '''
+
+    if metadata_timestamp is None:
+        metadata_timestamp = int(time.time())
+
+    augf = AnalyticUUIDGeneratorFactory()
+    aug = augf.create()
+
+    sections = (annotation_level is not None) and (annotation_level != AL_NONE)
+
+    return Communication(
+        id=comm_id,
+        uuid=aug.next(),
+        type=comm_type,
+        text=text,
+        metadata=AnnotationMetadata(
+            tool=metadata_tool,
+            timestamp=metadata_timestamp,
+        ),
+        sectionList=(
+            [
+                create_section(sec_text, sec_start, sec_end, section_kind,
+                               aug, metadata_tool, metadata_timestamp,
+                               annotation_level)
+                for (sec_text, sec_start, sec_end) in _split(text, '\n\n')
+            ] if text.strip() else []
+        ) if sections else None,
+    )
+
+
 def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
     """Create a simple (valid) Communication suitable for testing purposes
 
@@ -82,72 +207,6 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
     comm.text = sentence_string
 
     return comm
-
-
-def _split(s, delim):
-    pieces = s.split(delim)
-    indexed_pieces = []
-    offset = 0
-    for p in pieces:
-        indexed_pieces.append((p, offset, offset + len(p)))
-        offset += len(p) + len(delim)
-    return indexed_pieces
-
-
-def create_comm(comm_id, text='',
-                comm_type='article', section_kind='passage',
-                metadata_tool='concrete-python',
-                metadata_timestamp=None):
-    '''
-    Create a simple (valid) Communication for testing purposes.
-    The text will be split by double-newlines into sections and
-    then by single newlines into sentences within those sections.
-    If metadata_timestamp is None, the current time will be used.
-    '''
-
-    if metadata_timestamp is None:
-        metadata_timestamp = int(time.time())
-
-    augf = AnalyticUUIDGeneratorFactory()
-    aug = augf.create()
-
-    return Communication(
-        id=comm_id,
-        uuid=aug.next(),
-        type=comm_type,
-        text=text,
-        metadata=AnnotationMetadata(
-            tool=metadata_tool,
-            timestamp=metadata_timestamp,
-        ),
-        sectionList=[Section(
-            uuid=aug.next(),
-            textSpan=TextSpan(sec_start, sec_end),
-            kind=section_kind,
-            sentenceList=[Sentence(
-                uuid=aug.next(),
-                textSpan=TextSpan(sec_start + sen_start, sec_start + sen_end),
-                tokenization=Tokenization(
-                    uuid=aug.next(),
-                    kind=TokenizationKind.TOKEN_LIST,
-                    metadata=AnnotationMetadata(
-                        tool=metadata_tool,
-                        timestamp=metadata_timestamp,
-                    ),
-                    tokenList=TokenList(tokenList=[
-                        Token(
-                            tokenIndex=i,
-                            text=tok_text,
-                        )
-                        for (i, tok_text)
-                        in enumerate(sen_text.split())
-                    ]),
-                ),
-            ) for (sen_text, sen_start, sen_end) in _split(sec_text, '\n')]
-            if (('\n' in sec_text) or sec_text.strip()) else [],
-        ) for (sec_text, sec_start, sec_end) in _split(text, '\n\n')]
-        if text.strip() else None,
-    )
 
 
 class SimpleCommTempFile(object):

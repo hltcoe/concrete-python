@@ -177,5 +177,48 @@ bash install-fast-thrift.bash
 Note this script will download the Thrift source, build it, and install
 it (with Python library support only) to your home directory.
 
-If the build fails because of unsatisfied dependencies, consult the
-Thrift build instructions in the concrete-c project.
+If the build fails because of unsatisfied dependencies, commands to
+install those dependencies are provided for certain platforms:
+
+On CentOS 7
+-----------
+
+```
+sudo yum install -y \
+    autoconf \
+    automake \
+    bison \
+    flex \
+    gcc-c++ \
+    git \
+    libtool \
+    m4 \
+    make \
+    pkgconfig \
+    python-devel \
+    tar
+
+sudo pip install --upgrade Twisted setuptools
+```
+
+On Ubuntu Trusty
+----------------
+
+```
+sudo apt-get update
+
+sudo apt-get install -y \
+    autoconf \
+    automake \
+    byacc \
+    flex \
+    g++ \
+    git \
+    libtool \
+    m4 \
+    make \
+    pkg-config \
+    python-dev
+
+sudo pip install --upgrade --ignore-installed Twisted setuptools six
+```

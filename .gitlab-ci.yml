@@ -10,6 +10,15 @@ build-only:
   tags:
     - shell
 
+build-only:ubuntu:
+  script:
+    - docker build --pull=true -t concrete-python-ubuntu -f ubuntu.Dockerfile .
+    - docker run concrete-python-ubuntu python setup.py test --addopts '--cov=concrete/ tests'
+    - docker run concrete-python-ubuntu bash check-style.bash
+    - docker run concrete-python-ubuntu python setup.py install --user test --addopts integration-tests
+  tags:
+    - shell
+
 build-deploy-accel:
   script:
     - docker build --pull=true -t concrete-python .

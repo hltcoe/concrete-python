@@ -1,6 +1,5 @@
 import os
 import tarfile
-import tempfile
 import unittest
 import time
 import pwd
@@ -14,6 +13,22 @@ from concrete.util.file_io import (
     read_communication_from_file,
     FileType
 )
+
+from pytest import fixture
+from tempfile import mkstemp
+
+
+@fixture
+def output_file(request):
+    (fd, path) = mkstemp()
+    os.close(fd)
+
+    def _remove():
+        if os.path.exists(path):
+            os.remove(path)
+
+    request.addfinalizer(_remove)
+    return path
 
 
 class TestCommunicationReader(unittest.TestCase):
@@ -333,225 +348,294 @@ class TestCommunicationReader(unittest.TestCase):
         self.assertEqual(u'simple_3.concrete', filenames[2])
 
 
-class TestCommunicationWriter(unittest.TestCase):
+def test_CommunicationReader_single_file_unicode():
+    reader = CommunicationReader(
+        "tests/testdata/les-deux-chandeliers.concrete"
+    )
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert len(comms) == 1
+    assert 'tests/testdata/les-deux-chandeliers.txt' == comms[0].id
 
-    def test_single_file(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        writer = CommunicationWriter()
-        (file_handle, filename) = tempfile.mkstemp()
-        writer.open(filename)
+
+def test_CommunicationReader_tar_gz_file_unicode():
+    reader = CommunicationReader(
+        "tests/testdata/les-deux-chandeliers.concrete.tar.gz"
+    )
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert len(comms) == 2
+    assert 'les-deux-chandeliers/l0.txt' == comms[0].id
+    assert 'les-deux-chandeliers/l1.txt' == comms[1].id
+
+
+def test_CommunicationWriter_fixed_point(output_file):
+    input_file = 'tests/testdata/simple_1.concrete'
+    comm = read_communication_from_file(input_file)
+
+    writer = CommunicationWriter()
+    writer.open(output_file)
+    writer.write(comm)
+    writer.close()
+
+    with open(input_file, 'rb') as expected_f:
+        expected_data = expected_f.read()
+        with open(output_file, 'rb') as actual_f:
+            actual_data = actual_f.read()
+            assert expected_data == actual_data
+
+
+def test_CommunicationWriter_fixed_point_ctx_mgr(output_file):
+    input_file = 'tests/testdata/simple_1.concrete'
+    comm = read_communication_from_file(input_file)
+
+    with CommunicationWriter(output_file) as writer:
         writer.write(comm)
-        writer.close()
 
-        os.remove(filename)
+    with open(input_file, 'rb') as expected_f:
+        expected_data = expected_f.read()
+        with open(output_file, 'rb') as actual_f:
+            actual_data = actual_f.read()
+            assert expected_data == actual_data
 
-    def test_single_file_ctx_mgr(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        (file_handle, filename) = tempfile.mkstemp()
-        with CommunicationWriter(filename) as writer:
-            writer.write(comm)
 
-        os.remove(filename)
+def test_CommunicationWriter_fixed_point_unicode(output_file):
+    input_file = 'tests/testdata/les-deux-chandeliers.concrete'
+    comm = read_communication_from_file(input_file)
+
+    with CommunicationWriter(output_file) as writer:
+        writer.write(comm)
+
+    with open(input_file, 'rb') as expected_f:
+        expected_data = expected_f.read()
+        with open(output_file, 'rb') as actual_f:
+            actual_data = actual_f.read()
+            assert expected_data == actual_data
 
 
 TIME_MARGIN = 60 * 60 * 24
 
 
-class TestCommunicationWriterTar(unittest.TestCase):
+def test_CommunicationWriterTar_single_file(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    writer = CommunicationWriterTar()
+    writer.open(output_file)
+    writer.write(comm, "simple_1.concrete")
+    writer.close()
 
-    def test_single_file(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        writer = CommunicationWriterTar()
-        (file_handle, filename) = tempfile.mkstemp()
-        writer.open(filename)
+    assert tarfile.is_tarfile(output_file)
+
+    f = tarfile.open(output_file)
+
+    tarinfo = f.next()
+    assert tarinfo is not None
+
+    assert "simple_1.concrete" == tarinfo.name
+    assert tarinfo.isreg()
+    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
+    assert 0644 == tarinfo.mode
+    assert os.getuid() == tarinfo.uid
+    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
+    assert os.getgid() == tarinfo.gid
+    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+
+    tarinfo = f.next()
+    assert tarinfo is None
+
+    f.close()
+
+
+def test_CommunicationWriterTar_single_file_ctx_mgr(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    with CommunicationWriterTar(output_file) as writer:
         writer.write(comm, "simple_1.concrete")
-        writer.close()
 
-        self.assertTrue(tarfile.is_tarfile(filename))
+    assert tarfile.is_tarfile(output_file)
 
-        f = tarfile.open(filename)
+    f = tarfile.open(output_file)
 
-        tarinfo = f.next()
-        self.assertIsNotNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is not None
 
-        self.assertEquals("simple_1.concrete", tarinfo.name)
-        self.assertTrue(tarinfo.isreg())
-        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(
-            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
-        self.assertEquals(0644, tarinfo.mode)
-        self.assertEquals(os.getuid(), tarinfo.uid)
-        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
-        self.assertEquals(os.getgid(), tarinfo.gid)
-        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
+    assert "simple_1.concrete" == tarinfo.name
+    assert tarinfo.isreg()
+    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
+    assert 0644 == tarinfo.mode
+    assert os.getuid() == tarinfo.uid
+    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
+    assert os.getgid() == tarinfo.gid
+    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
 
-        tarinfo = f.next()
-        self.assertIsNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is None
 
-        f.close()
-
-        os.remove(filename)
-
-    def test_single_file_ctx_mgr(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        (file_handle, filename) = tempfile.mkstemp()
-        with CommunicationWriterTar(filename) as writer:
-            writer.write(comm, "simple_1.concrete")
-
-        self.assertTrue(tarfile.is_tarfile(filename))
-
-        f = tarfile.open(filename)
-
-        tarinfo = f.next()
-        self.assertIsNotNone(tarinfo)
-
-        self.assertEquals("simple_1.concrete", tarinfo.name)
-        self.assertTrue(tarinfo.isreg())
-        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(
-            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
-        self.assertEquals(0644, tarinfo.mode)
-        self.assertEquals(os.getuid(), tarinfo.uid)
-        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
-        self.assertEquals(os.getgid(), tarinfo.gid)
-        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
-
-        tarinfo = f.next()
-        self.assertIsNone(tarinfo)
-
-        f.close()
-
-        os.remove(filename)
-
-    def test_single_file_default_name(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        writer = CommunicationWriterTar()
-        (file_handle, filename) = tempfile.mkstemp()
-        writer.open(filename)
-        writer.write(comm)
-        writer.close()
-
-        self.assertTrue(tarfile.is_tarfile(filename))
-
-        f = tarfile.open(filename)
-
-        tarinfo = f.next()
-        self.assertIsNotNone(tarinfo)
-
-        self.assertEquals(comm.uuid.uuidString + '.concrete', tarinfo.name)
-        self.assertTrue(tarinfo.isreg())
-        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(
-            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
-        self.assertEquals(0644, tarinfo.mode)
-        self.assertEquals(os.getuid(), tarinfo.uid)
-        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
-        self.assertEquals(os.getgid(), tarinfo.gid)
-        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
-
-        tarinfo = f.next()
-        self.assertIsNone(tarinfo)
-
-        f.close()
-
-        os.remove(filename)
+    f.close()
 
 
-class TestCommunicationWriterTGZ(unittest.TestCase):
-
-    def test_single_file(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        writer = CommunicationWriterTGZ()
-        (file_handle, filename) = tempfile.mkstemp()
-        writer.open(filename)
+def test_CommunicationWriterTar_single_file_fixed_point(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    with CommunicationWriterTar(output_file) as writer:
         writer.write(comm, "simple_1.concrete")
-        writer.close()
 
-        self.assertTrue(tarfile.is_tarfile(filename))
+    assert tarfile.is_tarfile(output_file)
 
-        f = tarfile.open(filename)
+    f = tarfile.open(output_file)
 
-        tarinfo = f.next()
-        self.assertIsNotNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is not None
 
-        self.assertEquals("simple_1.concrete", tarinfo.name)
-        self.assertTrue(tarinfo.isreg())
-        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(
-            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
-        self.assertEquals(0644, tarinfo.mode)
-        self.assertEquals(os.getuid(), tarinfo.uid)
-        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
-        self.assertEquals(os.getgid(), tarinfo.gid)
-        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
+    assert "simple_1.concrete" == tarinfo.name
+    actual_data = f.extractfile(tarinfo).read()
+    with open('tests/testdata/simple_1.concrete', 'rb') as expected_f:
+        expected_data = expected_f.read()
+        assert expected_data == actual_data
 
-        tarinfo = f.next()
-        self.assertIsNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is None
 
-        f.close()
+    f.close()
 
-        os.remove(filename)
 
-    def test_single_file_ctx_mgr(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        (file_handle, filename) = tempfile.mkstemp()
-        with CommunicationWriterTGZ(filename) as writer:
-            writer.write(comm, "simple_1.concrete")
+def test_CommunicationWriterTar_single_file_fixed_point_unicode(output_file):
+    comm = read_communication_from_file(
+        "tests/testdata/les-deux-chandeliers.concrete"
+    )
+    with CommunicationWriterTar(output_file) as writer:
+        writer.write(comm, "les-deux-chandeliers.concrete")
 
-        self.assertTrue(tarfile.is_tarfile(filename))
+    assert tarfile.is_tarfile(output_file)
 
-        f = tarfile.open(filename)
+    f = tarfile.open(output_file)
 
-        tarinfo = f.next()
-        self.assertIsNotNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is not None
 
-        self.assertEquals("simple_1.concrete", tarinfo.name)
-        self.assertTrue(tarinfo.isreg())
-        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(
-            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
-        self.assertEquals(0644, tarinfo.mode)
-        self.assertEquals(os.getuid(), tarinfo.uid)
-        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
-        self.assertEquals(os.getgid(), tarinfo.gid)
-        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
+    assert "les-deux-chandeliers.concrete" == tarinfo.name
+    actual_data = f.extractfile(tarinfo).read()
+    with open('tests/testdata/les-deux-chandeliers.concrete',
+              'rb') as expected_f:
+        expected_data = expected_f.read()
+        assert expected_data == actual_data
 
-        tarinfo = f.next()
-        self.assertIsNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is None
 
-        f.close()
+    f.close()
 
-        os.remove(filename)
 
-    def test_single_file_default_name(self):
-        comm = read_communication_from_file("tests/testdata/simple_1.concrete")
-        writer = CommunicationWriterTGZ()
-        (file_handle, filename) = tempfile.mkstemp()
-        writer.open(filename)
-        writer.write(comm)
-        writer.close()
+def test_CommunicationWriterTar_single_file_default_name(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    writer = CommunicationWriterTar()
+    writer.open(output_file)
+    writer.write(comm)
+    writer.close()
 
-        self.assertTrue(tarfile.is_tarfile(filename))
+    assert tarfile.is_tarfile(output_file)
 
-        f = tarfile.open(filename)
+    f = tarfile.open(output_file)
 
-        tarinfo = f.next()
-        self.assertIsNotNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is not None
 
-        self.assertEquals(comm.uuid.uuidString + '.concrete', tarinfo.name)
-        self.assertTrue(tarinfo.isreg())
-        self.assertTrue(tarinfo.mtime > time.time() - TIME_MARGIN)
-        self.assertEquals(
-            os.stat('tests/testdata/simple_1.concrete').st_size, tarinfo.size)
-        self.assertEquals(0644, tarinfo.mode)
-        self.assertEquals(os.getuid(), tarinfo.uid)
-        self.assertEquals(pwd.getpwuid(os.getuid()).pw_name, tarinfo.uname)
-        self.assertEquals(os.getgid(), tarinfo.gid)
-        self.assertEquals(grp.getgrgid(os.getgid()).gr_name, tarinfo.gname)
+    assert comm.uuid.uuidString + '.concrete' == tarinfo.name
+    assert tarinfo.isreg()
+    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
+    assert 0644 == tarinfo.mode
+    assert os.getuid() == tarinfo.uid
+    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
+    assert os.getgid() == tarinfo.gid
+    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
 
-        tarinfo = f.next()
-        self.assertIsNone(tarinfo)
+    tarinfo = f.next()
+    assert tarinfo is None
 
-        f.close()
+    f.close()
 
-        os.remove(filename)
+
+def test_CommunicationWriterTGZ_single_file(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    writer = CommunicationWriterTGZ()
+    writer.open(output_file)
+    writer.write(comm, "simple_1.concrete")
+    writer.close()
+
+    assert tarfile.is_tarfile(output_file)
+
+    f = tarfile.open(output_file)
+
+    tarinfo = f.next()
+    assert tarinfo is not None
+
+    assert "simple_1.concrete" == tarinfo.name
+    assert tarinfo.isreg()
+    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
+    assert 0644 == tarinfo.mode
+    assert os.getuid() == tarinfo.uid
+    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
+    assert os.getgid() == tarinfo.gid
+    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+
+    tarinfo = f.next()
+    assert tarinfo is None
+
+    f.close()
+
+
+def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    with CommunicationWriterTGZ(output_file) as writer:
+        writer.write(comm, "simple_1.concrete")
+
+    assert tarfile.is_tarfile(output_file)
+
+    f = tarfile.open(output_file)
+
+    tarinfo = f.next()
+    assert tarinfo is not None
+
+    assert "simple_1.concrete" == tarinfo.name
+    assert tarinfo.isreg()
+    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
+    assert 0644 == tarinfo.mode
+    assert os.getuid() == tarinfo.uid
+    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
+    assert os.getgid() == tarinfo.gid
+    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+
+    tarinfo = f.next()
+    assert tarinfo is None
+
+    f.close()
+
+
+def test_CommunicationWriterTGZ_single_file_default_name(output_file):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    writer = CommunicationWriterTGZ()
+    writer.open(output_file)
+    writer.write(comm)
+    writer.close()
+
+    assert tarfile.is_tarfile(output_file)
+
+    f = tarfile.open(output_file)
+
+    tarinfo = f.next()
+    assert tarinfo is not None
+
+    assert comm.uuid.uuidString + '.concrete' == tarinfo.name
+    assert tarinfo.isreg()
+    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
+    assert 0644 == tarinfo.mode
+    assert os.getuid() == tarinfo.uid
+    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
+    assert os.getgid() == tarinfo.gid
+    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+
+    tarinfo = f.next()
+    assert tarinfo is None
+
+    f.close()

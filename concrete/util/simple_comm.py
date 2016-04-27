@@ -27,6 +27,21 @@ AL_SENTENCE = 'sentence'
 AL_TOKEN = 'token'
 
 
+def add_annotation_level_argparse_argument(parser):
+    parser.add_argument('--annotation-level', type=str,
+                        choices=(AL_NONE, AL_SECTION, AL_SENTENCE, AL_TOKEN),
+                        help='Level of concrete annotation to infer from'
+                             ' whitespace in text (%s: no annotation,'
+                             ' %s: sections inferred'
+                             ' from double-newline, %s: "%s" and sentences'
+                             ' inferred from single-newline, %s: "%s" and'
+                             ' tokens inferred from remaining whitespace)' %
+                             (AL_NONE,
+                              AL_SECTION,
+                              AL_SENTENCE, AL_SECTION,
+                              AL_TOKEN, AL_SENTENCE))
+
+
 def _split(s, delim):
     pieces = s.split(delim)
     indexed_pieces = []

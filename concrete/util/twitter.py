@@ -8,6 +8,7 @@ The fields used by the Twitter API are documented at:
 import json
 import logging
 import time
+import pycountry
 
 from concrete import (
     AnnotationMetadata,
@@ -15,6 +16,7 @@ from concrete import (
     Communication,
     CommunicationMetadata,
     HashTag,
+    LanguageIdentification,
     PlaceAttributes,
     TweetInfo,
     TwitterCoordinates,
@@ -31,6 +33,7 @@ from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 
 TOOL_NAME = "Python module concrete.util.twitter"
 TWEET_TYPE = "Tweet"
+ISO_LANGS = pycountry.languages
 
 
 def json_tweet_object_to_Communication(tweet):
@@ -58,6 +61,11 @@ def json_tweet_object_to_Communication(tweet):
         id=tweet_id
     )
 
+    # either this, or pass in gen as parameter to fx
+    # latter is more annoying to test but slightly cleaner
+    tweet_info.lid.uuid = aug.next()
+    lidList = [tweet_info.lid]
+    comm.lidList = lidList
     return comm
 
 
@@ -148,6 +156,7 @@ def json_tweet_object_to_TweetInfo(tweet):
                 twitter_place.attributes = place_attributes
             tweet_info.place = twitter_place
 
+    tweet_info.lid = capture_tweet_lid(tweet)
     return tweet_info
 
 
@@ -167,3 +176,39 @@ def json_tweet_string_to_Communication(json_tweet_string, check_empty=False,
 def json_tweet_string_to_TweetInfo(json_tweet_string):
     tweet = json.loads(json_tweet_string)
     return json_tweet_object_to_TweetInfo(tweet)
+
+
+def capture_tweet_lid(twitter_dict):
+    """
+    Attempts to capture the 'lang' field in the twitter API, if it
+    exists.
+
+    Returns a list of LanguageIdentification objects, or None if the
+    field is not present in the tweet json.
+    """
+    if u'lang' in twitter_dict:
+        amd = AnnotationMetadata(tool="Twitter LID",
+                                 timestamp=int(time.time()),
+                                 kBest=1)
+        kvs = {}
+        kvs[twitter_lid_to_iso639_3(twitter_dict[u'lang'])] = 1.0
+        return LanguageIdentification(metadata=amd,
+                                      languageToProbabilityMap=kvs)
+    else:
+        return None
+
+
+def twitter_lid_to_iso639_3(twitter_lid):
+    """
+    Ref: https://dev.twitter.com/rest/reference/get/help/languages
+
+    This can be an iso639-3 code (no-op), iso639-1 2-letter abbr
+    (converted to 3), or combo (split by '-', then first part converted)
+    """
+    if len(twitter_lid) == 2:
+        return ISO_LANGS.get(iso639_1_code=twitter_lid).iso639_3_code
+    elif '-' in twitter_lid and len(twitter_lid) == 5:
+        spl = twitter_lid[0:2]
+        return ISO_LANGS.get(iso639_1_code=spl).iso639_3_code
+    else:
+        return twitter_lid

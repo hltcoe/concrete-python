@@ -63,9 +63,10 @@ def json_tweet_object_to_Communication(tweet):
 
     # either this, or pass in gen as parameter to fx
     # latter is more annoying to test but slightly cleaner
-    tweet_info.lid.uuid = aug.next()
-    lidList = [tweet_info.lid]
-    comm.lidList = lidList
+    if tweet_info.lid is not None:
+        tweet_info.lid.uuid = aug.next()
+        lidList = [tweet_info.lid]
+        comm.lidList = lidList
     return comm
 
 

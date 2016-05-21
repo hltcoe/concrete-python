@@ -36,7 +36,6 @@ def load(path, per_line, annotation_level):
                     if text.endswith('\n'):
                         text = text[:-1]
                     for (i, line) in enumerate(text.split('\n')):
-                        print i
                         yield create_comm(u'%s/%d' % (ti.name, i),
                                           line + u'\n',
                                           annotation_level=annotation_level)

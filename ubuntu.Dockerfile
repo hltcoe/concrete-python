@@ -33,4 +33,6 @@ RUN chown -R concrete:concrete /home/concrete
 
 USER concrete
 WORKDIR /home/concrete/concrete-python
-RUN python setup.py build
+RUN python setup.py test --addopts '--cov=concrete/ tests' && \
+    bash check-style.bash && \
+    python setup.py install --user

@@ -15,13 +15,15 @@ RUN yum install -y \
         python-devel \
         tar
 
-RUN curl https://bootstrap.pypa.io/get-pip.py | python
-RUN pip install --upgrade \
-        flake8 \
+RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
+    pip install --upgrade \
+        setuptools && \
+    pip install --upgrade \
         pytest \
         pytest-cov \
-        setuptools \
-        tox
+        pytest-mock \
+        flake8 \
+        redis
 
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}
@@ -47,4 +49,6 @@ RUN chown -R concrete:concrete /home/concrete
 
 USER concrete
 WORKDIR /home/concrete/concrete-python
-RUN python setup.py build
+RUN python setup.py test --addopts '--cov=concrete/ tests' && \
+    bash check-style.bash && \
+    python setup.py install --user

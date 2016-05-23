@@ -3,28 +3,22 @@ before_script:
 
 build-only:
   script:
-    - docker build --pull=true -t concrete-python .
-    - docker run concrete-python python setup.py test --addopts '--cov=concrete/ tests'
-    - docker run concrete-python bash check-style.bash
-    - docker run concrete-python python setup.py install --user test --addopts integration-tests
+    - docker build --no-cache --pull=true -t concrete-python .
+    - docker run concrete-python python setup.py test --addopts integration-tests
   tags:
     - shell
 
 build-only:ubuntu:
   script:
-    - docker build --pull=true -t concrete-python-ubuntu -f ubuntu.Dockerfile .
-    - docker run concrete-python-ubuntu python setup.py test --addopts '--cov=concrete/ tests'
-    - docker run concrete-python-ubuntu bash check-style.bash
-    - docker run concrete-python-ubuntu python setup.py install --user test --addopts integration-tests
+    - docker build --no-cache --pull=true -t concrete-python-ubuntu -f ubuntu.Dockerfile .
+    - docker run concrete-python-ubuntu python setup.py test --addopts integration-tests
   tags:
     - shell
 
 build-deploy:
   script:
-    - docker build --pull=true -t concrete-python .
-    - docker run concrete-python python setup.py test --addopts '--cov=concrete/ tests'
-    - docker run concrete-python bash check-style.bash
-    - docker run concrete-python python setup.py install --user test --addopts integration-tests
+    - docker build --no-cache --pull=true -t concrete-python .
+    - docker run concrete-python python setup.py test --addopts integration-tests
     - docker tag concrete-python r8n01:5000/concrete-python:master
     - docker push r8n01:5000/concrete-python:master
   tags:

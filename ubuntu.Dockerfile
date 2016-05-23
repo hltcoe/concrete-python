@@ -16,13 +16,13 @@ RUN apt-get install -y \
         python-dev \
         python-pip
 
-RUN pip install --upgrade --ignore-installed setuptools six
-RUN pip install --upgrade \
-        flake8 \
+RUN pip install --upgrade --ignore-installed setuptools six && \
+    pip install --upgrade \
         pytest \
         pytest-cov \
-        tox \
-        Twisted
+        pytest-mock \
+        flake8 \
+        redis
 
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}
@@ -48,4 +48,6 @@ RUN chown -R concrete:concrete /home/concrete
 
 USER concrete
 WORKDIR /home/concrete/concrete-python
-RUN python setup.py build
+RUN python setup.py test --addopts '--cov=concrete/ tests' && \
+    bash check-style.bash && \
+    python setup.py install --user

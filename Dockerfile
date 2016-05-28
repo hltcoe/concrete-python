@@ -13,15 +13,15 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}
 
-RUN curl http://download.redis.io/releases/redis-3.0.7.tar.gz | tar -xz && \
-    pushd redis-3.0.7 && \
+RUN curl http://download.redis.io/releases/redis-3.2.0.tar.gz | tar -xz && \
+    pushd redis-3.2.0 && \
     make && \
     make install && \
     pushd deps/hiredis && \
     make install && \
     popd && \
     popd && \
-    rm -rf redis-3.0.7*
+    rm -rf redis-3.2.0*
 
 RUN ldconfig -v
 

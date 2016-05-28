@@ -12,15 +12,15 @@ RUN pip install --upgrade \
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}
 
-RUN curl http://download.redis.io/releases/redis-3.0.7.tar.gz | tar -xz && \
-    cd redis-3.0.7 && \
+RUN curl http://download.redis.io/releases/redis-3.2.0.tar.gz | tar -xz && \
+    cd redis-3.2.0 && \
     make && \
     make install && \
     cd deps/hiredis && \
     make install && \
     cd ../.. && \
     cd .. && \
-    rm -rf redis-3.0.7*
+    rm -rf redis-3.2.0*
 
 RUN ldconfig -v
 

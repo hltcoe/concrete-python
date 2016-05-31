@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+'''
+Read a concrete tarball and write it back out, rewriting UUIDs with
+compressible UUID scheme
+'''
+
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ

@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-'''
-Deprecated: use compress-uuids.py instead
-'''
-
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ
@@ -22,7 +18,7 @@ def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None,
     else:
         uuid_map_file = open(uuid_map_path, 'w')
 
-    for (i, (comm, _)) in enumerate(reader):
+    for (i, (comm, comm_filename)) in enumerate(reader):
         (new_comm, uc) = _compress_uuids(comm, verify=verify,
                                          single_analytic=single_analytic)
 
@@ -34,15 +30,10 @@ def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None,
                                                key=lambda p: str(p[1])):
                 uuid_map_file.write('%s %s\n' % (old_uuid, new_uuid))
 
-        writer.write(new_comm)
+        writer.write(new_comm, comm_filename=comm_filename)
 
 
 def main():
-    logging.basicConfig(
-        format='%(levelname)7s:  %(message)s', level=logging.WARNING)
-    logging.warning(
-        'compress-uuids is deprecated: use compress-uuids.py instead')
-
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read a concrete tarball and write it back out, rewriting'

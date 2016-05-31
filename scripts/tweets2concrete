@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-'Convert Tweet file to Concrete Communications file.'
+'''
+Deprecated: use tweets2concrete.py instead
+Convert Tweet file to Concrete Communications file.
+'''
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from multiprocessing import Pool
@@ -48,6 +51,11 @@ def json_str_to_validated_concrete_bytes_skip_bad_lines(tweet_str):
 
 
 def main():
+    logging.basicConfig(
+        format='%(levelname)7s:  %(message)s', level=logging.WARNING)
+    logging.warning(
+        'tweets2concrete is deprecated: use tweets2concrete.py instead')
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read tweets formatted in the Twitter JSON API and write'

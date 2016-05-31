@@ -30,7 +30,7 @@ def test_compress_uuids(output_file, args):
     input_file = 'tests/testdata/simple.tar.gz'
 
     p = Popen([
-        'scripts/compress-uuids',
+        'scripts/compress-uuids.py',
         input_file,
         output_file
     ] + list(args), stdout=PIPE, stderr=PIPE)
@@ -41,15 +41,18 @@ def test_compress_uuids(output_file, args):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, comm_filename) = it.next()
+    assert comm_filename == 'simple_1.concrete'
     assert comm.id == 'one'
     assert validate_communication(comm)
 
-    (comm, _) = it.next()
+    (comm, comm_filename) = it.next()
+    assert comm_filename == 'simple_2.concrete'
     assert comm.id == 'two'
     assert validate_communication(comm)
 
-    (comm, _) = it.next()
+    (comm, comm_filename) = it.next()
+    assert comm_filename == 'simple_3.concrete'
     assert comm.id == 'three'
     assert validate_communication(comm)
 

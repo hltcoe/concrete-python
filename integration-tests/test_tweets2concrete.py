@@ -60,7 +60,7 @@ def output_file(request):
 
 def test_tweets2concrete(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         'tests/testdata/tweets.json',
         output_file
     ], stdout=PIPE, stderr=PIPE)
@@ -88,7 +88,7 @@ def test_tweets2concrete(output_file):
 
 def test_tweets2concrete_stdin(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '-',
         output_file
     ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -117,7 +117,7 @@ def test_tweets2concrete_stdin(output_file):
 
 def test_tweets2concrete_stdout(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         'tests/testdata/tweets.json',
         '-'
     ], stdout=PIPE, stderr=PIPE)
@@ -148,7 +148,7 @@ def test_tweets2concrete_stdout(output_file):
 
 def test_tweets2concrete_multiproc(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--num-proc', '2',
         'tests/testdata/tweets.json',
         output_file
@@ -177,7 +177,7 @@ def test_tweets2concrete_multiproc(output_file):
 
 def test_tweets2concrete_log_every(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--log-level', 'INFO',
         '--log-interval', '1',
         'tests/testdata/tweets.json',
@@ -210,7 +210,7 @@ def test_tweets2concrete_log_every(output_file):
 
 def test_tweets2concrete_gz(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         'tests/testdata/tweets.json.gz',
         output_file
     ], stdout=PIPE, stderr=PIPE)
@@ -238,7 +238,7 @@ def test_tweets2concrete_gz(output_file):
 
 def test_tweets2concrete_incomplete_gz(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--catch-ioerror',
         'tests/testdata/tweets.json.incomplete.gz',
         output_file
@@ -267,7 +267,7 @@ def test_tweets2concrete_incomplete_gz(output_file):
 
 def test_tweets2concrete_incomplete_gz_multiproc(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--num-proc', '2',
         '--catch-ioerror',
         'tests/testdata/tweets.json.incomplete.gz',
@@ -298,7 +298,7 @@ def test_tweets2concrete_incomplete_gz_multiproc(output_file):
 def test_tweets2concrete_log_config(log_conf, output_file):
     (log_conf_path, log_path) = log_conf
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--log-conf-path', log_conf_path,
         '--log-interval', '1',
         'tests/testdata/tweets.json',
@@ -336,7 +336,7 @@ def test_tweets2concrete_log_config(log_conf, output_file):
 
 def test_tweets2concrete_deleted(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         'tests/testdata/tweets.deleted.json',
         output_file
     ], stdout=PIPE, stderr=PIPE)
@@ -364,7 +364,7 @@ def test_tweets2concrete_deleted(output_file):
 
 def test_tweets2concrete_bad_line(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--skip-bad-lines',
         'tests/testdata/tweets.bad-line.json',
         output_file
@@ -393,7 +393,7 @@ def test_tweets2concrete_bad_line(output_file):
 
 def test_tweets2concrete_invalid(output_file):
     p = Popen([
-        'scripts/tweets2concrete',
+        'scripts/tweets2concrete.py',
         '--skip-invalid-comms',
         'tests/testdata/tweets.invalid.json',
         output_file

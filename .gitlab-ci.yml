@@ -16,7 +16,9 @@ build-test-deploy:
     - docker run concrete-python bash check-style.bash
     - docker run concrete-python python setup.py test
     - docker run concrete-python python setup.py test --addopts integration-tests
-    - docker tag concrete-python r8n01:5000/concrete-python:latest
-    - docker push r8n01:5000/concrete-python:latest
+    - # work around gitlab CI... only deploy on master
+      bash -c "[[ $CI_BUILD_REF_NAME != master ]] ||
+      (docker tag concrete-python r8n01:5000/concrete-python:latest &&
+      docker push r8n01:5000/concrete-python:latest)"
   tags:
     - shell

@@ -1,27 +1,22 @@
 before_script:
   - docker info
 
-build-only:
+build-test-ubuntu-accel:
   script:
-    - docker build --pull=true -t concrete-python:accel .
-    - docker run concrete-python:accel python setup.py test --addopts integration-tests
-  tags:
-    - shell
-
-build-only:ubuntu:
-  script:
-    - docker build --pull=true -t concrete-python-ubuntu:accel -f ubuntu.Dockerfile .
+    - docker build -t concrete-python-ubuntu:accel -f ubuntu.Dockerfile .
+    - docker run concrete-python-ubuntu:accel bash check-style.bash
+    - docker run concrete-python-ubuntu:accel python setup.py test
     - docker run concrete-python-ubuntu:accel python setup.py test --addopts integration-tests
   tags:
     - shell
 
-build-deploy-accel:
+build-test-deploy-accel:
   script:
-    - docker build --pull=true -t concrete-python:accel .
+    - docker build -t concrete-python:accel .
+    - docker run concrete-python:accel bash check-style.bash
+    - docker run concrete-python:accel python setup.py test
     - docker run concrete-python:accel python setup.py test --addopts integration-tests
     - docker tag concrete-python:accel r8n01:5000/concrete-python:accel
     - docker push r8n01:5000/concrete-python:accel
   tags:
     - shell
-  only:
-    - accel

@@ -30,10 +30,10 @@ RUN useradd -m -U -s /bin/bash concrete && \
 RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> \
         /home/concrete/.bashrc
 ADD . /home/concrete/concrete-python
-RUN chown -R concrete:concrete /home/concrete
+RUN cd /home/concrete/concrete-python && \
+    python setup.py install && \
+    python setup.py clean && \
+    chown -R concrete:concrete /home/concrete
 
 USER concrete
 WORKDIR /home/concrete/concrete-python
-RUN python setup.py test && \
-    bash check-style.bash && \
-    python setup.py install --user

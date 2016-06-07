@@ -18,8 +18,8 @@ build-test-deploy-accel:
     - docker run concrete-python:accel python setup.py test --addopts integration-tests
     - docker tag concrete-python:accel r8n01:5000/concrete-python:accel
     - docker push r8n01:5000/concrete-python:accel
-    - # work around gitlab CI... only deploy on master
-      bash -c "[[ $CI_BUILD_REF_NAME != master ]] ||
+    - # work around gitlab CI... only deploy on accel
+      bash -c "[[ $CI_BUILD_REF_NAME != accel ]] ||
       (docker tag concrete-python:accel r8n01:5000/concrete-python:accel &&
       docker push r8n01:5000/concrete-python:accel)"
   tags:

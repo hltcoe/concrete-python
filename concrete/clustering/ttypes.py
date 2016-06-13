@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.uuid.ttypes
 import concrete.metadata.ttypes
@@ -98,11 +99,11 @@ class ClusterMember(object):
 
     def validate(self):
         if self.communicationId is None:
-            raise TProtocol.TProtocolException(message='Required field communicationId is unset!')
+            raise TProtocolException(message='Required field communicationId is unset!')
         if self.setId is None:
-            raise TProtocol.TProtocolException(message='Required field setId is unset!')
+            raise TProtocolException(message='Required field setId is unset!')
         if self.elementId is None:
-            raise TProtocol.TProtocolException(message='Required field elementId is unset!')
+            raise TProtocolException(message='Required field elementId is unset!')
         return
 
     def __repr__(self):
@@ -359,9 +360,9 @@ class Clustering(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         return
 
     def __repr__(self):

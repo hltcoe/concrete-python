@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.structure.ttypes
 import concrete.metadata.ttypes
@@ -137,9 +138,9 @@ class Entity(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.mentionIdList is None:
-            raise TProtocol.TProtocolException(message='Required field mentionIdList is unset!')
+            raise TProtocolException(message='Required field mentionIdList is unset!')
         return
 
     def __repr__(self):
@@ -277,11 +278,11 @@ class EntitySet(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.entityList is None:
-            raise TProtocol.TProtocolException(message='Required field entityList is unset!')
+            raise TProtocolException(message='Required field entityList is unset!')
         return
 
     def __repr__(self):
@@ -457,9 +458,9 @@ class EntityMention(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.tokens is None:
-            raise TProtocol.TProtocolException(message='Required field tokens is unset!')
+            raise TProtocolException(message='Required field tokens is unset!')
         return
 
     def __repr__(self):
@@ -584,11 +585,11 @@ class EntityMentionSet(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.mentionList is None:
-            raise TProtocol.TProtocolException(message='Required field mentionList is unset!')
+            raise TProtocolException(message='Required field mentionList is unset!')
         return
 
     def __repr__(self):

@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 
 from thrift.transport import TTransport
@@ -76,7 +77,7 @@ class ConcreteThriftException(TException):
 
     def validate(self):
         if self.message is None:
-            raise TProtocol.TProtocolException(message='Required field message is unset!')
+            raise TProtocolException(message='Required field message is unset!')
         return
 
     def __str__(self):

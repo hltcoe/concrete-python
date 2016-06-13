@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.uuid.ttypes
 import concrete.twitter.ttypes
@@ -683,11 +684,11 @@ class AnnotationMetadata(object):
 
     def validate(self):
         if self.tool is None:
-            raise TProtocol.TProtocolException(message='Required field tool is unset!')
+            raise TProtocolException(message='Required field tool is unset!')
         if self.timestamp is None:
-            raise TProtocol.TProtocolException(message='Required field timestamp is unset!')
+            raise TProtocolException(message='Required field timestamp is unset!')
         if self.kBest is None:
-            raise TProtocol.TProtocolException(message='Required field kBest is unset!')
+            raise TProtocolException(message='Required field kBest is unset!')
         return
 
     def __repr__(self):

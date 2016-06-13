@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.metadata.ttypes
 import concrete.uuid.ttypes
@@ -113,11 +114,11 @@ class LanguageIdentification(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.languageToProbabilityMap is None:
-            raise TProtocol.TProtocolException(message='Required field languageToProbabilityMap is unset!')
+            raise TProtocolException(message='Required field languageToProbabilityMap is unset!')
         return
 
     def __repr__(self):

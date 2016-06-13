@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.structure.ttypes
 import concrete.metadata.ttypes
@@ -97,9 +98,9 @@ class Property(object):
 
     def validate(self):
         if self.value is None:
-            raise TProtocol.TProtocolException(message='Required field value is unset!')
+            raise TProtocolException(message='Required field value is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         return
 
     def __repr__(self):
@@ -317,7 +318,7 @@ class Justification(object):
 
     def validate(self):
         if self.mentionId is None:
-            raise TProtocol.TProtocolException(message='Required field mentionId is unset!')
+            raise TProtocolException(message='Required field mentionId is unset!')
         return
 
     def __repr__(self):
@@ -832,9 +833,9 @@ class Situation(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.situationType is None:
-            raise TProtocol.TProtocolException(message='Required field situationType is unset!')
+            raise TProtocolException(message='Required field situationType is unset!')
         return
 
     def __repr__(self):
@@ -955,11 +956,11 @@ class SituationSet(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.situationList is None:
-            raise TProtocol.TProtocolException(message='Required field situationList is unset!')
+            raise TProtocolException(message='Required field situationList is unset!')
         return
 
     def __repr__(self):
@@ -1528,9 +1529,9 @@ class SituationMention(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.argumentList is None:
-            raise TProtocol.TProtocolException(message='Required field argumentList is unset!')
+            raise TProtocolException(message='Required field argumentList is unset!')
         return
 
     def __repr__(self):
@@ -1651,11 +1652,11 @@ class SituationMentionSet(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.mentionList is None:
-            raise TProtocol.TProtocolException(message='Required field mentionList is unset!')
+            raise TProtocolException(message='Required field mentionList is unset!')
         return
 
     def __repr__(self):

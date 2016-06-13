@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.uuid.ttypes
 import concrete.metadata.ttypes
@@ -199,9 +200,9 @@ class Link(object):
 
     def validate(self):
         if self.sourceId is None:
-            raise TProtocol.TProtocolException(message='Required field sourceId is unset!')
+            raise TProtocolException(message='Required field sourceId is unset!')
         if self.linkTargetList is None:
-            raise TProtocol.TProtocolException(message='Required field linkTargetList is unset!')
+            raise TProtocolException(message='Required field linkTargetList is unset!')
         return
 
     def __repr__(self):
@@ -287,9 +288,9 @@ class Linking(object):
 
     def validate(self):
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.linkList is None:
-            raise TProtocol.TProtocolException(message='Required field linkList is unset!')
+            raise TProtocolException(message='Required field linkList is unset!')
         return
 
     def __repr__(self):

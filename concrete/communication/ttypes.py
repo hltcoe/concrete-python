@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.uuid.ttypes
 import concrete.language.ttypes
@@ -146,11 +147,11 @@ class CommunicationTagging(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.taggingType is None:
-            raise TProtocol.TProtocolException(message='Required field taggingType is unset!')
+            raise TProtocolException(message='Required field taggingType is unset!')
         return
 
     def __repr__(self):
@@ -187,10 +188,14 @@ class Communication(object):
      - uuid: Universally unique identifier for this communication instance.
     This is generated randomly, and can *not* be mapped back to the
     source corpus. It is used as a target for symbolic "pointers".
-     - type: An enumeration used to indicate what type of communication this
-    is. The optional fields named "<i>kind</i>Info" can be used to
-    store extra fields that are specific to the communication
-    type.
+     - type: A short, corpus-specific term characterizing the nature of the
+    communication; may change in a future version of concrete.
+    Often used for filtering.  For example, Gigaword uses
+    the type "story" to distinguish typical news articles from
+    weekly summaries ("multi"), editorial advisories ("advis"), etc.
+    At present, this value is typically a literal form from the
+    originating corpus: as a result, a type marked 'other' may have
+    different meanings across different corpora.
      - text: The full text contents of this communication in its original
     form, or in the least-processed form available, if the original
     is not available.
@@ -542,13 +547,13 @@ class Communication(object):
 
     def validate(self):
         if self.id is None:
-            raise TProtocol.TProtocolException(message='Required field id is unset!')
+            raise TProtocolException(message='Required field id is unset!')
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.type is None:
-            raise TProtocol.TProtocolException(message='Required field type is unset!')
+            raise TProtocolException(message='Required field type is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         return
 
     def __repr__(self):

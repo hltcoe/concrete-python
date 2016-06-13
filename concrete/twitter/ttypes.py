@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 
 from thrift.transport import TTransport
@@ -412,7 +413,7 @@ class BoundingBox(object):
 
     def validate(self):
         if self.coordinateList is None:
-            raise TProtocol.TProtocolException(message='Required field coordinateList is unset!')
+            raise TProtocolException(message='Required field coordinateList is unset!')
         return
 
     def __repr__(self):

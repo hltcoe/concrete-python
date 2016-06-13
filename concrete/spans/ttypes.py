@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 
 from thrift.transport import TTransport
@@ -85,9 +86,9 @@ class TextSpan(object):
 
     def validate(self):
         if self.start is None:
-            raise TProtocol.TProtocolException(message='Required field start is unset!')
+            raise TProtocolException(message='Required field start is unset!')
         if self.ending is None:
-            raise TProtocol.TProtocolException(message='Required field ending is unset!')
+            raise TProtocolException(message='Required field ending is unset!')
         return
 
     def __repr__(self):
@@ -169,9 +170,9 @@ class AudioSpan(object):
 
     def validate(self):
         if self.start is None:
-            raise TProtocol.TProtocolException(message='Required field start is unset!')
+            raise TProtocolException(message='Required field start is unset!')
         if self.ending is None:
-            raise TProtocol.TProtocolException(message='Required field ending is unset!')
+            raise TProtocolException(message='Required field ending is unset!')
         return
 
     def __repr__(self):

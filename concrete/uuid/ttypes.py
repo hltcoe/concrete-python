@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 
 from thrift.transport import TTransport
@@ -64,7 +65,7 @@ class UUID(object):
 
     def validate(self):
         if self.uuidString is None:
-            raise TProtocol.TProtocolException(message='Required field uuidString is unset!')
+            raise TProtocolException(message='Required field uuidString is unset!')
         return
 
     def __repr__(self):

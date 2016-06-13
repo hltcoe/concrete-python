@@ -9,6 +9,7 @@
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol import TProtocol
+from thrift.protocol.TProtocol import TProtocolException
 import sys
 import concrete.metadata.ttypes
 import concrete.spans.ttypes
@@ -174,7 +175,7 @@ class Token(object):
 
     def validate(self):
         if self.tokenIndex is None:
-            raise TProtocol.TProtocolException(message='Required field tokenIndex is unset!')
+            raise TProtocolException(message='Required field tokenIndex is unset!')
         return
 
     def __repr__(self):
@@ -251,9 +252,9 @@ class ConstituentRef(object):
 
     def validate(self):
         if self.parseId is None:
-            raise TProtocol.TProtocolException(message='Required field parseId is unset!')
+            raise TProtocolException(message='Required field parseId is unset!')
         if self.constituentIndex is None:
-            raise TProtocol.TProtocolException(message='Required field constituentIndex is unset!')
+            raise TProtocolException(message='Required field constituentIndex is unset!')
         return
 
     def __repr__(self):
@@ -416,9 +417,9 @@ class TokenRefSequence(object):
 
     def validate(self):
         if self.tokenIndexList is None:
-            raise TProtocol.TProtocolException(message='Required field tokenIndexList is unset!')
+            raise TProtocolException(message='Required field tokenIndexList is unset!')
         if self.tokenizationId is None:
-            raise TProtocol.TProtocolException(message='Required field tokenizationId is unset!')
+            raise TProtocolException(message='Required field tokenizationId is unset!')
         return
 
     def __repr__(self):
@@ -686,11 +687,11 @@ class TokenTagging(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.taggedTokenList is None:
-            raise TProtocol.TProtocolException(message='Required field taggedTokenList is unset!')
+            raise TProtocolException(message='Required field taggedTokenList is unset!')
         return
 
     def __repr__(self):
@@ -778,7 +779,7 @@ class Dependency(object):
 
     def validate(self):
         if self.dep is None:
-            raise TProtocol.TProtocolException(message='Required field dep is unset!')
+            raise TProtocolException(message='Required field dep is unset!')
         return
 
     def __repr__(self):
@@ -882,13 +883,13 @@ class DependencyParseStructure(object):
 
     def validate(self):
         if self.isAcyclic is None:
-            raise TProtocol.TProtocolException(message='Required field isAcyclic is unset!')
+            raise TProtocolException(message='Required field isAcyclic is unset!')
         if self.isConnected is None:
-            raise TProtocol.TProtocolException(message='Required field isConnected is unset!')
+            raise TProtocolException(message='Required field isConnected is unset!')
         if self.isSingleHeaded is None:
-            raise TProtocol.TProtocolException(message='Required field isSingleHeaded is unset!')
+            raise TProtocolException(message='Required field isSingleHeaded is unset!')
         if self.isProjective is None:
-            raise TProtocol.TProtocolException(message='Required field isProjective is unset!')
+            raise TProtocolException(message='Required field isProjective is unset!')
         return
 
     def __repr__(self):
@@ -1000,11 +1001,11 @@ class DependencyParse(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.dependencyList is None:
-            raise TProtocol.TProtocolException(message='Required field dependencyList is unset!')
+            raise TProtocolException(message='Required field dependencyList is unset!')
         return
 
     def __repr__(self):
@@ -1145,9 +1146,9 @@ class Constituent(object):
 
     def validate(self):
         if self.id is None:
-            raise TProtocol.TProtocolException(message='Required field id is unset!')
+            raise TProtocolException(message='Required field id is unset!')
         if self.childList is None:
-            raise TProtocol.TProtocolException(message='Required field childList is unset!')
+            raise TProtocolException(message='Required field childList is unset!')
         return
 
     def __repr__(self):
@@ -1253,11 +1254,11 @@ class Parse(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.constituentList is None:
-            raise TProtocol.TProtocolException(message='Required field constituentList is unset!')
+            raise TProtocolException(message='Required field constituentList is unset!')
         return
 
     def __repr__(self):
@@ -1340,7 +1341,7 @@ class LatticePath(object):
 
     def validate(self):
         if self.tokenList is None:
-            raise TProtocol.TProtocolException(message='Required field tokenList is unset!')
+            raise TProtocolException(message='Required field tokenList is unset!')
         return
 
     def __repr__(self):
@@ -1571,7 +1572,7 @@ class TokenLattice(object):
 
     def validate(self):
         if self.arcList is None:
-            raise TProtocol.TProtocolException(message='Required field arcList is unset!')
+            raise TProtocolException(message='Required field arcList is unset!')
         return
 
     def __repr__(self):
@@ -1644,7 +1645,7 @@ class TokenList(object):
 
     def validate(self):
         if self.tokenList is None:
-            raise TProtocol.TProtocolException(message='Required field tokenList is unset!')
+            raise TProtocolException(message='Required field tokenList is unset!')
         return
 
     def __repr__(self):
@@ -1750,9 +1751,9 @@ class SpanLink(object):
 
     def validate(self):
         if self.tokens is None:
-            raise TProtocol.TProtocolException(message='Required field tokens is unset!')
+            raise TProtocolException(message='Required field tokens is unset!')
         if self.linkType is None:
-            raise TProtocol.TProtocolException(message='Required field linkType is unset!')
+            raise TProtocolException(message='Required field linkType is unset!')
         return
 
     def __repr__(self):
@@ -1985,11 +1986,11 @@ class Tokenization(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
-            raise TProtocol.TProtocolException(message='Required field metadata is unset!')
+            raise TProtocolException(message='Required field metadata is unset!')
         if self.kind is None:
-            raise TProtocol.TProtocolException(message='Required field kind is unset!')
+            raise TProtocolException(message='Required field kind is unset!')
         return
 
     def __repr__(self):
@@ -2134,7 +2135,7 @@ class Sentence(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         return
 
     def __repr__(self):
@@ -2157,7 +2158,7 @@ class Section(object):
 
     Attributes:
      - uuid: The unique identifier for this section.
-     - sentenceList: Theories about how this section is divided into sentences.
+     - sentenceList: The sentences of this "section."
      - textSpan: Location of this section in the communication text.
 
     NOTE: This text span represents a best guess, or 'provenance':
@@ -2176,7 +2177,12 @@ class Section(object):
     it cannot be guaranteed that this text span matches the _exact_
     text of the original document, but is the annotation's best
     effort at such a representation.
-     - kind: The type of this section.
+     - kind: A short, sometimes corpus-specific term characterizing the nature
+    of the section; may change in a future version of concrete.  This
+    often acts as a coarse-grained descriptor that is used for
+    filtering.  For example, Gigaword uses the section kind "passage"
+    to distinguish content-bearing paragraphs in the body of an
+    article from other paragraphs, such as the headline and dateline.
      - label: The name of the section. For example, a title of a section on
     Wikipedia.
      - numberList: Position within the communication with respect to other Sections:
@@ -2357,9 +2363,9 @@ class Section(object):
 
     def validate(self):
         if self.uuid is None:
-            raise TProtocol.TProtocolException(message='Required field uuid is unset!')
+            raise TProtocolException(message='Required field uuid is unset!')
         if self.kind is None:
-            raise TProtocol.TProtocolException(message='Required field kind is unset!')
+            raise TProtocolException(message='Required field kind is unset!')
         return
 
     def __repr__(self):

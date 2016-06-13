@@ -2300,7 +2300,7 @@ class Section(object):
 
   Attributes:
    - uuid: The unique identifier for this section.
-   - sentenceList: Theories about how this section is divided into sentences.
+   - sentenceList: The sentences of this "section."
    - textSpan: Location of this section in the communication text.
 
   NOTE: This text span represents a best guess, or 'provenance':
@@ -2319,7 +2319,12 @@ class Section(object):
   it cannot be guaranteed that this text span matches the _exact_
   text of the original document, but is the annotation's best
   effort at such a representation.
-   - kind: The type of this section.
+   - kind: A short, sometimes corpus-specific term characterizing the nature
+  of the section; may change in a future version of concrete.  This
+  often acts as a coarse-grained descriptor that is used for
+  filtering.  For example, Gigaword uses the section kind "passage"
+  to distinguish content-bearing paragraphs in the body of an
+  article from other paragraphs, such as the headline and dateline.
    - label: The name of the section. For example, a title of a section on
   Wikipedia.
    - numberList: Position within the communication with respect to other Sections:

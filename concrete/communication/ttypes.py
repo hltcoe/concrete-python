@@ -201,10 +201,14 @@ class Communication(object):
    - uuid: Universally unique identifier for this communication instance.
   This is generated randomly, and can *not* be mapped back to the
   source corpus. It is used as a target for symbolic "pointers".
-   - type: An enumeration used to indicate what type of communication this
-  is. The optional fields named "<i>kind</i>Info" can be used to
-  store extra fields that are specific to the communication
-  type.
+   - type: A short, corpus-specific term characterizing the nature of the
+  communication; may change in a future version of concrete.
+  Often used for filtering.  For example, Gigaword uses
+  the type "story" to distinguish typical news articles from
+  weekly summaries ("multi"), editorial advisories ("advis"), etc.
+  At present, this value is typically a literal form from the
+  originating corpus: as a result, a type marked 'other' may have
+  different meanings across different corpora.
    - text: The full text contents of this communication in its original
   form, or in the least-processed form available, if the original
   is not available.

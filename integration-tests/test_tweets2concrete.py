@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 from pytest import fixture
 from concrete.util.file_io import CommunicationReader
 from concrete.validate import validate_communication
@@ -208,6 +211,35 @@ def test_tweets2concrete_log_every(output_file):
         assert False
 
 
+def test_tweets2concrete_unicode(output_file):
+    p = Popen([
+        'scripts/tweets2concrete.py',
+        'tests/testdata/tweets.unicode.json',
+        output_file
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    assert p.returncode == 0
+
+    reader = CommunicationReader(output_file)
+    it = iter(reader)
+
+    (comm, _) = it.next()
+    assert comm.id == '238426131689242624'
+    assert u'上海市' in comm.text
+    assert validate_communication(comm)
+
+    (comm, _) = it.next()
+    assert comm.id == '238426131689242625'
+    assert validate_communication(comm)
+
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
+
+
 def test_tweets2concrete_gz(output_file):
     p = Popen([
         'scripts/tweets2concrete.py',
@@ -367,6 +399,35 @@ def test_tweets2concrete_bad_line(output_file):
         'scripts/tweets2concrete.py',
         '--skip-bad-lines',
         'tests/testdata/tweets.bad-line.json',
+        output_file
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    assert p.returncode == 0
+
+    reader = CommunicationReader(output_file)
+    it = iter(reader)
+
+    (comm, _) = it.next()
+    assert comm.id == '238426131689242624'
+    assert validate_communication(comm)
+
+    (comm, _) = it.next()
+    assert comm.id == '238426131689242625'
+    assert validate_communication(comm)
+
+    try:
+        it.next()
+    except StopIteration:
+        pass
+    else:
+        assert False
+
+
+def test_tweets2concrete_bad_line_unicode(output_file):
+    p = Popen([
+        'scripts/tweets2concrete.py',
+        '--skip-bad-lines',
+        'tests/testdata/tweets.bad-line-unicode.json',
         output_file
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()

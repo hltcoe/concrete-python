@@ -6,7 +6,6 @@ Convert Tweet file to Concrete Communications file.
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from multiprocessing import Pool
-import codecs
 import gzip
 import json
 import logging
@@ -20,6 +19,7 @@ from concrete.util.twitter import json_tweet_string_to_Communication
 
 
 def json_str_to_validated_concrete_bytes(tweet_str):
+    tweet_str = tweet_str.decode('utf-8')
     b = json_tweet_string_to_Communication(tweet_str, True, True)
     if b is None or not validate_communication(b):
         return None
@@ -28,6 +28,7 @@ def json_str_to_validated_concrete_bytes(tweet_str):
 
 
 def json_str_to_concrete_bytes(tweet_str):
+    tweet_str = tweet_str.decode('utf-8')
     b = json_tweet_string_to_Communication(tweet_str, True, True)
     if b is None:
         return None
@@ -37,6 +38,7 @@ def json_str_to_concrete_bytes(tweet_str):
 
 def json_str_to_concrete_bytes_skip_bad_lines(tweet_str):
     try:
+        tweet_str = tweet_str.decode('utf-8')
         return json_str_to_concrete_bytes(tweet_str)
     except:
         return None
@@ -44,6 +46,7 @@ def json_str_to_concrete_bytes_skip_bad_lines(tweet_str):
 
 def json_str_to_validated_concrete_bytes_skip_bad_lines(tweet_str):
     try:
+        tweet_str = tweet_str.decode('utf-8')
         return json_str_to_concrete_bytes(tweet_str)
     except:
         return None
@@ -106,11 +109,9 @@ def main():
         )
 
     if ns.tweet_path != '-' and mimetypes.guess_type(tweet_path)[1] == 'gzip':
-        gz_file = gzip.open(tweet_path, 'r')
-        utf8_reader = codecs.getreader("utf-8")
-        tweet_reader = utf8_reader(gz_file)
+        tweet_reader = gzip.open(tweet_path, 'r')
     else:
-        tweet_reader = codecs.open(tweet_path, 'r', encoding='utf-8')
+        tweet_reader = open(tweet_path, 'rb')
 
     if ns.catch_ioerror:
         def _catch(g):

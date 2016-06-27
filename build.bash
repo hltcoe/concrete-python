@@ -23,6 +23,7 @@
 
 
 DEFAULT_CONCRETE_THRIFT_DIR=../concrete/thrift
+DEFAULT_CONCRETE_SERVICES_THRIFT_DIR=../concrete-services/thrift
 DEFAULT_OUTPUT_DIR=concrete
 
 print_usage() {
@@ -40,6 +41,7 @@ print_usage() {
 #
 
 concrete_thrift_dir="$DEFAULT_CONCRETE_THRIFT_DIR"
+concrete_services_thrift_dir="$DEFAULT_CONCRETE_SERVICES_THRIFT_DIR"
 raw=false
 output_dir="$DEFAULT_OUTPUT_DIR"
 

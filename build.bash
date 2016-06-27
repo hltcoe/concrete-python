@@ -27,7 +27,8 @@ DEFAULT_CONCRETE_SERVICES_THRIFT_DIR=../concrete-services/thrift
 DEFAULT_OUTPUT_DIR=concrete
 
 print_usage() {
-    echo "Usage: $0 [--raw] [--output-dir OUTPUT-DIR] [CONCRETE-THRIFT-DIR]"
+    echo "Usage: $0 [--raw] [--output-dir OUTPUT-DIR]"
+    echo "           [CONCRETE-THRIFT-DIR [CONCRETE-SERVICES-THRIFT-DIR]]"
     echo "  --raw:  Just generate classes from thrift definitions"
     echo "          (do not apply our modifications)"
     echo "  --output-dir OUTPUT-DIR:  Write output to OUTPUT_DIR instead of"
@@ -69,6 +70,10 @@ do
             then
                 concrete_thrift_dir="$1"
                 num_pos_args=$(($num_pos_args + 1))
+            elif [ $num_pos_args -eq 1 ]
+            then
+                concrete_services_thrift_dir="$1"
+                num_pos_args=$(($num_pos_args + 1))
             else
                 print_usage >&2
                 exit 1
@@ -83,10 +88,9 @@ set -e
 
 echo 'Generating Python classes from thrift definitions...'
 rm -rf gen-py
-for P in `find $concrete_thrift_dir $concrete_services_thrift_dir -name '*.thrift'`
-do
-    thrift --gen py:new_style,utf8strings,coding=utf-8 -I $concrete_thrift_dir -I $concrete_services_thrift_dir $P
-done
+find $concrete_thrift_dir $concrete_services_thrift_dir -name '*.thrift' -exec \
+    thrift --gen py:new_style,utf8strings,coding=utf-8 \
+        -I $concrete_thrift_dir -I $concrete_services_thrift_dir {} \;
 
 echo 'Deleting generated files we do not want...'
 rm -f gen-py/concrete/__init__.py

@@ -27,8 +27,6 @@ RUN ldconfig -v
 
 RUN useradd -m -U -s /bin/bash concrete && \
     passwd -l concrete
-RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> \
-        /home/concrete/.bashrc
 ADD . /home/concrete/concrete-python
 RUN cd /home/concrete/concrete-python && \
     python setup.py install && \

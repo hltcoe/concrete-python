@@ -14,7 +14,7 @@ How to contribute code
 5. Run the test again, ensuring that it now passes.
 6. Run all tests and style checks, ensuring that they pass:
    ```
-   py.test tests
+   python setup.py test
    bash check-style.bash
    ```
 7. Push your changes to a feature branch on Gitlab (e.g., called

@@ -40,17 +40,23 @@ class SearchQuery(object):
   questions is a list in order that possibly different phrasings of
   the question can be included, e.g.: "what is the name of spain's
   capital?"
+   - communicationId: Refers to an optional communication that can provide context for the query.
+   - tokens: Refers to a sequence of tokens in the communication referenced by communicationId.
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.LIST, 'keywords', (TType.STRING,None), None, ), # 1
     (2, TType.LIST, 'questions', (TType.STRING,None), None, ), # 2
+    (3, TType.STRING, 'communicationId', None, None, ), # 3
+    (4, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ), # 4
   )
 
-  def __init__(self, keywords=None, questions=None,):
+  def __init__(self, keywords=None, questions=None, communicationId=None, tokens=None,):
     self.keywords = keywords
     self.questions = questions
+    self.communicationId = communicationId
+    self.tokens = tokens
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -81,6 +87,17 @@ class SearchQuery(object):
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.communicationId = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.tokens = concrete.structure.ttypes.TokenRefSequence()
+          self.tokens.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -105,6 +122,14 @@ class SearchQuery(object):
         oprot.writeString(iter13.encode('utf-8'))
       oprot.writeListEnd()
       oprot.writeFieldEnd()
+    if self.communicationId is not None:
+      oprot.writeFieldBegin('communicationId', TType.STRING, 3)
+      oprot.writeString(self.communicationId.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.tokens is not None:
+      oprot.writeFieldBegin('tokens', TType.STRUCT, 4)
+      self.tokens.write(oprot)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -116,6 +141,8 @@ class SearchQuery(object):
     value = 17
     value = (value * 31) ^ hash(self.keywords)
     value = (value * 31) ^ hash(self.questions)
+    value = (value * 31) ^ hash(self.communicationId)
+    value = (value * 31) ^ hash(self.tokens)
     return value
 
   def __repr__(self):

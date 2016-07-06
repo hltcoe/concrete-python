@@ -44,7 +44,7 @@ def unix_time(dt):
     Source:
     http://stackoverflow.com/questions/6999726/how-can-i-convert-a-datetime-object-to-milliseconds-since-epoch-unix-time-in-p
     '''
-    return (dt - EPOCH).total_seconds()
+    return int((dt - EPOCH).total_seconds())
 
 
 def json_tweet_object_to_Communication(tweet):

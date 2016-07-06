@@ -9,6 +9,20 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 
 
+def assert_first_comm(comm):
+    assert comm.id == '238426131689242624'
+    assert comm.startTime == 1345680194
+    assert comm.endTime == 1345680194
+    assert validate_communication(comm)
+
+
+def assert_second_comm(comm):
+    assert comm.id == '238426131689242625'
+    assert comm.startTime == 1345680195
+    assert comm.endTime == 1345680195
+    assert validate_communication(comm)
+
+
 @fixture
 def log_conf(request):
     (fd, log_path) = mkstemp()
@@ -74,12 +88,10 @@ def test_tweets2concrete(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -103,12 +115,10 @@ def test_tweets2concrete_stdin(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -134,12 +144,10 @@ def test_tweets2concrete_stdout(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -163,12 +171,10 @@ def test_tweets2concrete_multiproc(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -196,12 +202,10 @@ def test_tweets2concrete_log_every(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -224,13 +228,11 @@ def test_tweets2concrete_unicode(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert u'上海市' in comm.text
+    assert_first_comm(comm)
     assert validate_communication(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -253,12 +255,10 @@ def test_tweets2concrete_gz(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -282,12 +282,10 @@ def test_tweets2concrete_incomplete_gz(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -312,12 +310,10 @@ def test_tweets2concrete_incomplete_gz_multiproc(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -351,12 +347,10 @@ def test_tweets2concrete_log_config(log_conf, output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -379,12 +373,10 @@ def test_tweets2concrete_deleted(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -408,12 +400,10 @@ def test_tweets2concrete_bad_line(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -437,12 +427,10 @@ def test_tweets2concrete_bad_line_unicode(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()
@@ -466,12 +454,10 @@ def test_tweets2concrete_invalid(output_file):
     it = iter(reader)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242624'
-    assert validate_communication(comm)
+    assert_first_comm(comm)
 
     (comm, _) = it.next()
-    assert comm.id == '238426131689242625'
-    assert validate_communication(comm)
+    assert_second_comm(comm)
 
     try:
         it.next()

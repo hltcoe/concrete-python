@@ -9,10 +9,6 @@
 /build/
 /concrete.egg-info/
 /dist/
-/gen-py/
 /setuptools*.zip
 /setuptools*.egg
 /testfixtures*.egg
-
-/a/
-/b/

@@ -9,6 +9,7 @@ import json
 import logging
 import time
 import pycountry
+from datetime import datetime
 
 from concrete import (
     AnnotationMetadata,
@@ -34,6 +35,16 @@ from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
 TOOL_NAME = "Python module concrete.util.twitter"
 TWEET_TYPE = "Tweet"
 ISO_LANGS = pycountry.languages
+CREATED_AT_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
+EPOCH = datetime.utcfromtimestamp(0)
+
+
+def unix_time(dt):
+    '''
+    Source:
+    http://stackoverflow.com/questions/6999726/how-can-i-convert-a-datetime-object-to-milliseconds-since-epoch-unix-time-in-p
+    '''
+    return (dt - EPOCH).total_seconds()
 
 
 def json_tweet_object_to_Communication(tweet):
@@ -48,6 +59,8 @@ def json_tweet_object_to_Communication(tweet):
     else:
         logging.warning('Tweet has no id_str, leaving communication id blank')
         tweet_id = None
+    tweet_time = unix_time(datetime.strptime(tweet_info.createdAt,
+                                             CREATED_AT_FORMAT))
     comm = Communication(
         communicationMetadata=CommunicationMetadata(
             tweetInfo=tweet_info),
@@ -58,6 +71,8 @@ def json_tweet_object_to_Communication(tweet):
         text=tweet_info.text,
         type=TWEET_TYPE,
         uuid=aug.next(),
+        startTime=tweet_time,
+        endTime=tweet_time,
         id=tweet_id
     )
 

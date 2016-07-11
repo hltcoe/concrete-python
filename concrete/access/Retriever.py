@@ -106,7 +106,7 @@ class Processor(Iface, TProcessor):
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
-    except concrete.access.ttypes.RetrieveException as ex:
+    except RetrieveException as ex:
       msg_type = TMessageType.REPLY
       result.ex = ex
     except Exception as ex:
@@ -196,7 +196,7 @@ class retrieve_result(object):
 
   thrift_spec = (
     (0, TType.STRUCT, 'success', (RetrieveResults, RetrieveResults.thrift_spec), None, ), # 0
-    (1, TType.STRUCT, 'ex', (concrete.access.ttypes.RetrieveException, concrete.access.ttypes.RetrieveException.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'ex', (RetrieveException, RetrieveException.thrift_spec), None, ), # 1
   )
 
   def __init__(self, success=None, ex=None,):
@@ -220,7 +220,7 @@ class retrieve_result(object):
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ex = concrete.access.ttypes.RetrieveException()
+          self.ex = RetrieveException()
           self.ex.read(iprot)
         else:
           iprot.skip(ftype)

@@ -128,7 +128,7 @@ class Processor(Iface, TProcessor):
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
-    except concrete.access.ttypes.SendException as ex:
+    except SendException as ex:
       msg_type = TMessageType.REPLY
       result.ex = ex
     except Exception as ex:
@@ -217,7 +217,7 @@ class send_result(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ex', (concrete.access.ttypes.SendException, concrete.access.ttypes.SendException.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'ex', (SendException, SendException.thrift_spec), None, ), # 1
   )
 
   def __init__(self, ex=None,):
@@ -234,7 +234,7 @@ class send_result(object):
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ex = concrete.access.ttypes.SendException()
+          self.ex = SendException()
           self.ex.read(iprot)
         else:
           iprot.skip(ftype)

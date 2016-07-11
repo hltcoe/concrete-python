@@ -19,6 +19,8 @@ from thrift.transport import TTransport
 class Iface(object):
     def searchCommunications(self, query):
         """
+        Perform a search and return communications
+
         Parameters:
          - query
         """
@@ -26,6 +28,8 @@ class Iface(object):
 
     def searchSentences(self, query):
         """
+        Perform a search and return sentences within communications
+
         Parameters:
          - query
         """
@@ -41,6 +45,8 @@ class Client(Iface):
 
     def searchCommunications(self, query):
         """
+        Perform a search and return communications
+
         Parameters:
          - query
         """
@@ -72,6 +78,8 @@ class Client(Iface):
 
     def searchSentences(self, query):
         """
+        Perform a search and return sentences within communications
+
         Parameters:
          - query
         """

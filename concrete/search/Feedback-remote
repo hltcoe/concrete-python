@@ -17,15 +17,17 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from concrete.annotate import Sender
-from concrete.annotate.ttypes import *
+from concrete.search import Feedback
+from concrete.search.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  void send(Communication communication)')
+    print('  void startFeedback(SearchResults results)')
+    print('  void addCommunicationFeedback(UUID searchResultsId, string communicationId, SearchFeedback feedback)')
+    print('  void addSentenceFeedback(UUID searchResultsId, string communicationId, UUID sentenceId, SearchFeedback feedback)')
     print('')
     sys.exit(0)
 
@@ -79,14 +81,26 @@ else:
     else:
         transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol(transport)
-client = Sender.Client(protocol)
+client = Feedback.Client(protocol)
 transport.open()
 
-if cmd == 'send':
+if cmd == 'startFeedback':
     if len(args) != 1:
-        print('send requires 1 args')
+        print('startFeedback requires 1 args')
         sys.exit(1)
-    pp.pprint(client.send(eval(args[0]),))
+    pp.pprint(client.startFeedback(eval(args[0]),))
+
+elif cmd == 'addCommunicationFeedback':
+    if len(args) != 3:
+        print('addCommunicationFeedback requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.addCommunicationFeedback(eval(args[0]), args[1], eval(args[2]),))
+
+elif cmd == 'addSentenceFeedback':
+    if len(args) != 4:
+        print('addSentenceFeedback requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.addSentenceFeedback(eval(args[0]), args[1], eval(args[2]), eval(args[3]),))
 
 else:
     print('Unrecognized method %s' % cmd)

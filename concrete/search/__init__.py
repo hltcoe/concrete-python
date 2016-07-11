@@ -1,1 +1,1 @@
-__all__ = ['ttypes', 'constants', 'Search']
+__all__ = ['ttypes', 'constants', 'Search', 'Feedback']

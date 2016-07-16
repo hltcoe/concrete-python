@@ -1,6 +1,7 @@
 FROM cjmay/thrift:latest
 
-RUN pip install --upgrade setuptools && \
+RUN pip install --upgrade pip && \
+    pip install --upgrade setuptools && \
     pip install --upgrade setuptools && \
     pip install --upgrade \
         pytest \

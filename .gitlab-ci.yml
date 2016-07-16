@@ -3,7 +3,7 @@ before_script:
 
 build-test-deploy-accel:
   script:
-    - docker build -t concrete-python:accel .
+    - docker build --pull=true -t concrete-python:accel .
     - docker run concrete-python:accel bash check-style.bash
     - docker run concrete-python:accel python setup.py test
     - docker run concrete-python:accel python setup.py test --addopts integration-tests

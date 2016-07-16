@@ -9,4 +9,3 @@ include requirements.txt
 include test-requirements.txt
 include tox.ini
 include Dockerfile
-include ubuntu.Dockerfile

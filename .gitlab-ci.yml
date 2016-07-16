@@ -1,15 +1,6 @@
 before_script:
   - docker info
 
-build-test-ubuntu-accel:
-  script:
-    - docker build -t concrete-python-ubuntu:accel -f ubuntu.Dockerfile .
-    - docker run concrete-python-ubuntu:accel bash check-style.bash
-    - docker run concrete-python-ubuntu:accel python setup.py test
-    - docker run concrete-python-ubuntu:accel python setup.py test --addopts integration-tests
-  tags:
-    - shell
-
 build-test-deploy-accel:
   script:
     - docker build -t concrete-python:accel .

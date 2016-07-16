@@ -1,15 +1,6 @@
 before_script:
   - docker info
 
-build-test-ubuntu:
-  script:
-    - docker build -t concrete-python-ubuntu -f ubuntu.Dockerfile .
-    - docker run concrete-python-ubuntu bash check-style.bash
-    - docker run concrete-python-ubuntu python setup.py test
-    - docker run concrete-python-ubuntu python setup.py test --addopts integration-tests
-  tags:
-    - shell
-
 build-test-deploy:
   script:
     - docker build -t concrete-python .

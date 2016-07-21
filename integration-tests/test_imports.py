@@ -8,10 +8,12 @@ import sys
 def import_ok(module_name):
     try:
         module = __import__(module_name)
-        sys.stdout.write('import succeeded: %s -> %s\n' % (module_name, module))
+        sys.stdout.write('import succeeded: %s -> %s\n' %
+                         (module_name, module))
         return True
     except Exception as ex:
-        sys.stderr.write('import failed: %s: %s\n' % (module_name, ex.message))
+        sys.stderr.write('import failed: %s: %s\n' %
+                         (module_name, ex.message))
         return False
 
 

@@ -21,64 +21,88 @@ except:
 
 
 class Iface(concrete.services.Service.Iface):
-  def startFeedback(self, results):
+  """
+  The active learning server is responsible for sorting a list of communications.
+  Users annotate communications based on the sort.
+
+  Active learning is an asynchronous process.
+  It is started by the client calling start().
+  At arbitrary times, the client can call addAnnotations().
+  When the server is done with a sort of the data, it calls submitSort() on the client.
+  The server can perform additional sorts until stop() is called.
+
+  The server must be preconfigured with the details of the data source to pull communications.
+  """
+  def start(self, sessionId, task, contact):
     """
-    Start providing feedback for the specified SearchResults.
-    This causes the search and its results to be persisted.
+    Start an active learning session on these communications
 
     Parameters:
-     - results
+     - sessionId
+     - task
+     - contact
     """
     pass
 
-  def addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
+  def stop(self, sessionId):
     """
-    Provide feedback on the relevance of a particular communication to a search
+    Stop the learning session
 
     Parameters:
-     - searchResultsId
-     - communicationId
-     - feedback
+     - sessionId
     """
     pass
 
-  def addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
+  def addAnnotations(self, sessionId, annotations):
     """
-    Provide feedback on the relevance of a particular sentence to a search
+    Add annotations from the user to the learning process
 
     Parameters:
-     - searchResultsId
-     - communicationId
-     - sentenceId
-     - feedback
+     - sessionId
+     - annotations
     """
     pass
 
 
 class Client(concrete.services.Service.Client, Iface):
+  """
+  The active learning server is responsible for sorting a list of communications.
+  Users annotate communications based on the sort.
+
+  Active learning is an asynchronous process.
+  It is started by the client calling start().
+  At arbitrary times, the client can call addAnnotations().
+  When the server is done with a sort of the data, it calls submitSort() on the client.
+  The server can perform additional sorts until stop() is called.
+
+  The server must be preconfigured with the details of the data source to pull communications.
+  """
   def __init__(self, iprot, oprot=None):
     concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-  def startFeedback(self, results):
+  def start(self, sessionId, task, contact):
     """
-    Start providing feedback for the specified SearchResults.
-    This causes the search and its results to be persisted.
+    Start an active learning session on these communications
 
     Parameters:
-     - results
+     - sessionId
+     - task
+     - contact
     """
-    self.send_startFeedback(results)
-    self.recv_startFeedback()
+    self.send_start(sessionId, task, contact)
+    return self.recv_start()
 
-  def send_startFeedback(self, results):
-    self._oprot.writeMessageBegin('startFeedback', TMessageType.CALL, self._seqid)
-    args = startFeedback_args()
-    args.results = results
+  def send_start(self, sessionId, task, contact):
+    self._oprot.writeMessageBegin('start', TMessageType.CALL, self._seqid)
+    args = start_args()
+    args.sessionId = sessionId
+    args.task = task
+    args.contact = contact
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_startFeedback(self):
+  def recv_start(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -86,36 +110,65 @@ class Client(concrete.services.Service.Client, Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = startFeedback_result()
+    result = start_result()
     result.read(iprot)
     iprot.readMessageEnd()
-    if result.ex is not None:
-      raise result.ex
+    if result.success is not None:
+      return result.success
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "start failed: unknown result")
+
+  def stop(self, sessionId):
+    """
+    Stop the learning session
+
+    Parameters:
+     - sessionId
+    """
+    self.send_stop(sessionId)
+    self.recv_stop()
+
+  def send_stop(self, sessionId):
+    self._oprot.writeMessageBegin('stop', TMessageType.CALL, self._seqid)
+    args = stop_args()
+    args.sessionId = sessionId
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_stop(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = stop_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
     return
 
-  def addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
+  def addAnnotations(self, sessionId, annotations):
     """
-    Provide feedback on the relevance of a particular communication to a search
+    Add annotations from the user to the learning process
 
     Parameters:
-     - searchResultsId
-     - communicationId
-     - feedback
+     - sessionId
+     - annotations
     """
-    self.send_addCommunicationFeedback(searchResultsId, communicationId, feedback)
-    self.recv_addCommunicationFeedback()
+    self.send_addAnnotations(sessionId, annotations)
+    self.recv_addAnnotations()
 
-  def send_addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
-    self._oprot.writeMessageBegin('addCommunicationFeedback', TMessageType.CALL, self._seqid)
-    args = addCommunicationFeedback_args()
-    args.searchResultsId = searchResultsId
-    args.communicationId = communicationId
-    args.feedback = feedback
+  def send_addAnnotations(self, sessionId, annotations):
+    self._oprot.writeMessageBegin('addAnnotations', TMessageType.CALL, self._seqid)
+    args = addAnnotations_args()
+    args.sessionId = sessionId
+    args.annotations = annotations
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_addCommunicationFeedback(self):
+  def recv_addAnnotations(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -123,59 +176,18 @@ class Client(concrete.services.Service.Client, Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = addCommunicationFeedback_result()
+    result = addAnnotations_result()
     result.read(iprot)
     iprot.readMessageEnd()
-    if result.ex is not None:
-      raise result.ex
-    return
-
-  def addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
-    """
-    Provide feedback on the relevance of a particular sentence to a search
-
-    Parameters:
-     - searchResultsId
-     - communicationId
-     - sentenceId
-     - feedback
-    """
-    self.send_addSentenceFeedback(searchResultsId, communicationId, sentenceId, feedback)
-    self.recv_addSentenceFeedback()
-
-  def send_addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
-    self._oprot.writeMessageBegin('addSentenceFeedback', TMessageType.CALL, self._seqid)
-    args = addSentenceFeedback_args()
-    args.searchResultsId = searchResultsId
-    args.communicationId = communicationId
-    args.sentenceId = sentenceId
-    args.feedback = feedback
-    args.write(self._oprot)
-    self._oprot.writeMessageEnd()
-    self._oprot.trans.flush()
-
-  def recv_addSentenceFeedback(self):
-    iprot = self._iprot
-    (fname, mtype, rseqid) = iprot.readMessageBegin()
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      raise x
-    result = addSentenceFeedback_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.ex is not None:
-      raise result.ex
     return
 
 
 class Processor(concrete.services.Service.Processor, Iface, TProcessor):
   def __init__(self, handler):
     concrete.services.Service.Processor.__init__(self, handler)
-    self._processMap["startFeedback"] = Processor.process_startFeedback
-    self._processMap["addCommunicationFeedback"] = Processor.process_addCommunicationFeedback
-    self._processMap["addSentenceFeedback"] = Processor.process_addSentenceFeedback
+    self._processMap["start"] = Processor.process_start
+    self._processMap["stop"] = Processor.process_stop
+    self._processMap["addAnnotations"] = Processor.process_addAnnotations
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -192,68 +204,59 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
       self._processMap[name](self, seqid, iprot, oprot)
     return True
 
-  def process_startFeedback(self, seqid, iprot, oprot):
-    args = startFeedback_args()
+  def process_start(self, seqid, iprot, oprot):
+    args = start_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = startFeedback_result()
+    result = start_result()
     try:
-      self._handler.startFeedback(args.results)
+      result.success = self._handler.start(args.sessionId, args.task, args.contact)
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
-    except concrete.services.ttypes.ServicesException as ex:
-      msg_type = TMessageType.REPLY
-      result.ex = ex
     except Exception as ex:
       msg_type = TMessageType.EXCEPTION
       logging.exception(ex)
       result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-    oprot.writeMessageBegin("startFeedback", msg_type, seqid)
+    oprot.writeMessageBegin("start", msg_type, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_addCommunicationFeedback(self, seqid, iprot, oprot):
-    args = addCommunicationFeedback_args()
+  def process_stop(self, seqid, iprot, oprot):
+    args = stop_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = addCommunicationFeedback_result()
+    result = stop_result()
     try:
-      self._handler.addCommunicationFeedback(args.searchResultsId, args.communicationId, args.feedback)
+      self._handler.stop(args.sessionId)
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
-    except concrete.services.ttypes.ServicesException as ex:
-      msg_type = TMessageType.REPLY
-      result.ex = ex
     except Exception as ex:
       msg_type = TMessageType.EXCEPTION
       logging.exception(ex)
       result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-    oprot.writeMessageBegin("addCommunicationFeedback", msg_type, seqid)
+    oprot.writeMessageBegin("stop", msg_type, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_addSentenceFeedback(self, seqid, iprot, oprot):
-    args = addSentenceFeedback_args()
+  def process_addAnnotations(self, seqid, iprot, oprot):
+    args = addAnnotations_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = addSentenceFeedback_result()
+    result = addAnnotations_result()
     try:
-      self._handler.addSentenceFeedback(args.searchResultsId, args.communicationId, args.sentenceId, args.feedback)
+      self._handler.addAnnotations(args.sessionId, args.annotations)
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
-    except concrete.services.ttypes.ServicesException as ex:
-      msg_type = TMessageType.REPLY
-      result.ex = ex
     except Exception as ex:
       msg_type = TMessageType.EXCEPTION
       logging.exception(ex)
       result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-    oprot.writeMessageBegin("addSentenceFeedback", msg_type, seqid)
+    oprot.writeMessageBegin("addAnnotations", msg_type, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -261,19 +264,25 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-class startFeedback_args(object):
+class start_args(object):
   """
   Attributes:
-   - results
+   - sessionId
+   - task
+   - contact
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'results', (SearchResults, SearchResults.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'task', (AnnotationTask, AnnotationTask.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'contact', (concrete.services.ttypes.AsyncContactInfo, concrete.services.ttypes.AsyncContactInfo.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, results=None,):
-    self.results = results
+  def __init__(self, sessionId=None, task=None, contact=None,):
+    self.sessionId = sessionId
+    self.task = task
+    self.contact = contact
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -286,323 +295,20 @@ class startFeedback_args(object):
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.results = SearchResults()
-          self.results.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('startFeedback_args')
-    if self.results is not None:
-      oprot.writeFieldBegin('results', TType.STRUCT, 1)
-      self.results.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __hash__(self):
-    value = 17
-    value = (value * 31) ^ hash(self.results)
-    return value
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class startFeedback_result(object):
-  """
-  Attributes:
-   - ex
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ), # 1
-  )
-
-  def __init__(self, ex=None,):
-    self.ex = ex
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.ex = concrete.services.ttypes.ServicesException()
-          self.ex.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('startFeedback_result')
-    if self.ex is not None:
-      oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-      self.ex.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __hash__(self):
-    value = 17
-    value = (value * 31) ^ hash(self.ex)
-    return value
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class addCommunicationFeedback_args(object):
-  """
-  Attributes:
-   - searchResultsId
-   - communicationId
-   - feedback
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'searchResultsId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
-    (2, TType.STRING, 'communicationId', None, None, ), # 2
-    (3, TType.I32, 'feedback', None, None, ), # 3
-  )
-
-  def __init__(self, searchResultsId=None, communicationId=None, feedback=None,):
-    self.searchResultsId = searchResultsId
-    self.communicationId = communicationId
-    self.feedback = feedback
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.searchResultsId = concrete.uuid.ttypes.UUID()
-          self.searchResultsId.read(iprot)
+          self.sessionId = concrete.uuid.ttypes.UUID()
+          self.sessionId.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.STRING:
-          self.communicationId = iprot.readString().decode('utf-8')
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.I32:
-          self.feedback = iprot.readI32()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('addCommunicationFeedback_args')
-    if self.searchResultsId is not None:
-      oprot.writeFieldBegin('searchResultsId', TType.STRUCT, 1)
-      self.searchResultsId.write(oprot)
-      oprot.writeFieldEnd()
-    if self.communicationId is not None:
-      oprot.writeFieldBegin('communicationId', TType.STRING, 2)
-      oprot.writeString(self.communicationId.encode('utf-8'))
-      oprot.writeFieldEnd()
-    if self.feedback is not None:
-      oprot.writeFieldBegin('feedback', TType.I32, 3)
-      oprot.writeI32(self.feedback)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __hash__(self):
-    value = 17
-    value = (value * 31) ^ hash(self.searchResultsId)
-    value = (value * 31) ^ hash(self.communicationId)
-    value = (value * 31) ^ hash(self.feedback)
-    return value
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class addCommunicationFeedback_result(object):
-  """
-  Attributes:
-   - ex
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ), # 1
-  )
-
-  def __init__(self, ex=None,):
-    self.ex = ex
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
         if ftype == TType.STRUCT:
-          self.ex = concrete.services.ttypes.ServicesException()
-          self.ex.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('addCommunicationFeedback_result')
-    if self.ex is not None:
-      oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-      self.ex.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __hash__(self):
-    value = 17
-    value = (value * 31) ^ hash(self.ex)
-    return value
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class addSentenceFeedback_args(object):
-  """
-  Attributes:
-   - searchResultsId
-   - communicationId
-   - sentenceId
-   - feedback
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'searchResultsId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
-    (2, TType.STRING, 'communicationId', None, None, ), # 2
-    (3, TType.STRUCT, 'sentenceId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 3
-    (4, TType.I32, 'feedback', None, None, ), # 4
-  )
-
-  def __init__(self, searchResultsId=None, communicationId=None, sentenceId=None, feedback=None,):
-    self.searchResultsId = searchResultsId
-    self.communicationId = communicationId
-    self.sentenceId = sentenceId
-    self.feedback = feedback
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.searchResultsId = concrete.uuid.ttypes.UUID()
-          self.searchResultsId.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.communicationId = iprot.readString().decode('utf-8')
+          self.task = AnnotationTask()
+          self.task.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          self.sentenceId = concrete.uuid.ttypes.UUID()
-          self.sentenceId.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 4:
-        if ftype == TType.I32:
-          self.feedback = iprot.readI32()
+          self.contact = concrete.services.ttypes.AsyncContactInfo()
+          self.contact.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -614,22 +320,18 @@ class addSentenceFeedback_args(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('addSentenceFeedback_args')
-    if self.searchResultsId is not None:
-      oprot.writeFieldBegin('searchResultsId', TType.STRUCT, 1)
-      self.searchResultsId.write(oprot)
+    oprot.writeStructBegin('start_args')
+    if self.sessionId is not None:
+      oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+      self.sessionId.write(oprot)
       oprot.writeFieldEnd()
-    if self.communicationId is not None:
-      oprot.writeFieldBegin('communicationId', TType.STRING, 2)
-      oprot.writeString(self.communicationId.encode('utf-8'))
+    if self.task is not None:
+      oprot.writeFieldBegin('task', TType.STRUCT, 2)
+      self.task.write(oprot)
       oprot.writeFieldEnd()
-    if self.sentenceId is not None:
-      oprot.writeFieldBegin('sentenceId', TType.STRUCT, 3)
-      self.sentenceId.write(oprot)
-      oprot.writeFieldEnd()
-    if self.feedback is not None:
-      oprot.writeFieldBegin('feedback', TType.I32, 4)
-      oprot.writeI32(self.feedback)
+    if self.contact is not None:
+      oprot.writeFieldBegin('contact', TType.STRUCT, 3)
+      self.contact.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -640,10 +342,9 @@ class addSentenceFeedback_args(object):
 
   def __hash__(self):
     value = 17
-    value = (value * 31) ^ hash(self.searchResultsId)
-    value = (value * 31) ^ hash(self.communicationId)
-    value = (value * 31) ^ hash(self.sentenceId)
-    value = (value * 31) ^ hash(self.feedback)
+    value = (value * 31) ^ hash(self.sessionId)
+    value = (value * 31) ^ hash(self.task)
+    value = (value * 31) ^ hash(self.contact)
     return value
 
   def __repr__(self):
@@ -657,19 +358,83 @@ class addSentenceFeedback_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class addSentenceFeedback_result(object):
+class start_result(object):
   """
   Attributes:
-   - ex
+   - success
+  """
+
+  thrift_spec = (
+    (0, TType.BOOL, 'success', None, None, ), # 0
+  )
+
+  def __init__(self, success=None,):
+    self.success = success
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.BOOL:
+          self.success = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('start_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.BOOL, 0)
+      oprot.writeBool(self.success)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class stop_args(object):
+  """
+  Attributes:
+   - sessionId
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
   )
 
-  def __init__(self, ex=None,):
-    self.ex = ex
+  def __init__(self, sessionId=None,):
+    self.sessionId = sessionId
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -682,8 +447,8 @@ class addSentenceFeedback_result(object):
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ex = concrete.services.ttypes.ServicesException()
-          self.ex.read(iprot)
+          self.sessionId = concrete.uuid.ttypes.UUID()
+          self.sessionId.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -695,10 +460,10 @@ class addSentenceFeedback_result(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('addSentenceFeedback_result')
-    if self.ex is not None:
-      oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-      self.ex.write(oprot)
+    oprot.writeStructBegin('stop_args')
+    if self.sessionId is not None:
+      oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+      self.sessionId.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -709,7 +474,187 @@ class addSentenceFeedback_result(object):
 
   def __hash__(self):
     value = 17
-    value = (value * 31) ^ hash(self.ex)
+    value = (value * 31) ^ hash(self.sessionId)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class stop_result(object):
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('stop_result')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class addAnnotations_args(object):
+  """
+  Attributes:
+   - sessionId
+   - annotations
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
+    (2, TType.LIST, 'annotations', (TType.STRUCT,(Annotation, Annotation.thrift_spec)), None, ), # 2
+  )
+
+  def __init__(self, sessionId=None, annotations=None,):
+    self.sessionId = sessionId
+    self.annotations = annotations
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.sessionId = concrete.uuid.ttypes.UUID()
+          self.sessionId.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.annotations = []
+          (_etype10, _size7) = iprot.readListBegin()
+          for _i11 in xrange(_size7):
+            _elem12 = Annotation()
+            _elem12.read(iprot)
+            self.annotations.append(_elem12)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('addAnnotations_args')
+    if self.sessionId is not None:
+      oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+      self.sessionId.write(oprot)
+      oprot.writeFieldEnd()
+    if self.annotations is not None:
+      oprot.writeFieldBegin('annotations', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.annotations))
+      for iter13 in self.annotations:
+        iter13.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.sessionId)
+    value = (value * 31) ^ hash(self.annotations)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class addAnnotations_result(object):
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('addAnnotations_result')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
     return value
 
   def __repr__(self):

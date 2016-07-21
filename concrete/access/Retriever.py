@@ -8,6 +8,7 @@
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
+import concrete.services.Service
 import logging
 from ttypes import *
 from thrift.Thrift import TProcessor
@@ -19,7 +20,7 @@ except:
   fastbinary = None
 
 
-class Iface(object):
+class Iface(concrete.services.Service.Iface):
   """
   Service to retrieve particular communications.
   """
@@ -31,15 +32,12 @@ class Iface(object):
     pass
 
 
-class Client(Iface):
+class Client(concrete.services.Service.Client, Iface):
   """
   Service to retrieve particular communications.
   """
   def __init__(self, iprot, oprot=None):
-    self._iprot = self._oprot = iprot
-    if oprot is not None:
-      self._oprot = oprot
-    self._seqid = 0
+    concrete.services.Service.Client.__init__(self, iprot, oprot)
 
   def retrieve(self, request):
     """
@@ -75,10 +73,9 @@ class Client(Iface):
     raise TApplicationException(TApplicationException.MISSING_RESULT, "retrieve failed: unknown result")
 
 
-class Processor(Iface, TProcessor):
+class Processor(concrete.services.Service.Processor, Iface, TProcessor):
   def __init__(self, handler):
-    self._handler = handler
-    self._processMap = {}
+    concrete.services.Service.Processor.__init__(self, handler)
     self._processMap["retrieve"] = Processor.process_retrieve
 
   def process(self, iprot, oprot):
@@ -106,7 +103,7 @@ class Processor(Iface, TProcessor):
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
-    except RetrieveException as ex:
+    except concrete.services.ttypes.ServicesException as ex:
       msg_type = TMessageType.REPLY
       result.ex = ex
     except Exception as ex:
@@ -196,7 +193,7 @@ class retrieve_result(object):
 
   thrift_spec = (
     (0, TType.STRUCT, 'success', (RetrieveResults, RetrieveResults.thrift_spec), None, ), # 0
-    (1, TType.STRUCT, 'ex', (RetrieveException, RetrieveException.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ), # 1
   )
 
   def __init__(self, success=None, ex=None,):
@@ -220,7 +217,7 @@ class retrieve_result(object):
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ex = RetrieveException()
+          self.ex = concrete.services.ttypes.ServicesException()
           self.ex.read(iprot)
         else:
           iprot.skip(ftype)

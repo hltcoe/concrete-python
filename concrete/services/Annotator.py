@@ -21,6 +21,13 @@ except:
 
 class Iface(object):
   """
+  DEPRECATION NOTICE: This interface has been replaced by
+  the ServiceAnnotation interface in the concrete-services
+  package. All new development based on thrift services
+  and concrete should be based on that repo. This is only
+  left for historical, yet-to-be-updated services: do not
+  implement new services with this interface.
+
   Annotator service methods. For concrete analytics that
   are to be stood up as independent services, accessible
   from any programming language.
@@ -67,6 +74,13 @@ class Iface(object):
 
 class Client(Iface):
   """
+  DEPRECATION NOTICE: This interface has been replaced by
+  the ServiceAnnotation interface in the concrete-services
+  package. All new development based on thrift services
+  and concrete should be based on that repo. This is only
+  left for historical, yet-to-be-updated services: do not
+  implement new services with this interface.
+
   Annotator service methods. For concrete analytics that
   are to be stood up as independent services, accessible
   from any programming language.

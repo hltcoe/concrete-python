@@ -25,8 +25,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  SearchResults searchCommunications(SearchQuery query)')
-    print('  SearchResults searchSentences(SearchQuery query)')
+    print('  SearchResults search(SearchQuery query)')
+    print('  ServiceInfo about()')
+    print('  bool alive()')
     print('')
     sys.exit(0)
 
@@ -83,17 +84,23 @@ protocol = TBinaryProtocol(transport)
 client = Search.Client(protocol)
 transport.open()
 
-if cmd == 'searchCommunications':
+if cmd == 'search':
     if len(args) != 1:
-        print('searchCommunications requires 1 args')
+        print('search requires 1 args')
         sys.exit(1)
-    pp.pprint(client.searchCommunications(eval(args[0]),))
+    pp.pprint(client.search(eval(args[0]),))
 
-elif cmd == 'searchSentences':
-    if len(args) != 1:
-        print('searchSentences requires 1 args')
+elif cmd == 'about':
+    if len(args) != 0:
+        print('about requires 0 args')
         sys.exit(1)
-    pp.pprint(client.searchSentences(eval(args[0]),))
+    pp.pprint(client.about())
+
+elif cmd == 'alive':
+    if len(args) != 0:
+        print('alive requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.alive())
 
 else:
     print('Unrecognized method %s' % cmd)

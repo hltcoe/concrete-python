@@ -8,13 +8,48 @@
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
+from thrift.protocol import TProtocol
 from thrift.protocol.TProtocol import TProtocolException
 import sys
+import concrete.services.ttypes
 import concrete.structure.ttypes
 import concrete.uuid.ttypes
 import concrete.metadata.ttypes
 
 from thrift.transport import TTransport
+
+
+class SearchType(object):
+    """
+    What are we searching over
+    """
+    COMMUNICATIONS = 0
+    SECTIONS = 1
+    SENTENCES = 2
+    ENTITIES = 3
+    ENTITY_MENTIONS = 4
+    SITUATIONS = 5
+    SITUATION_MENTIONS = 6
+
+    _VALUES_TO_NAMES = {
+        0: "COMMUNICATIONS",
+        1: "SECTIONS",
+        2: "SENTENCES",
+        3: "ENTITIES",
+        4: "ENTITY_MENTIONS",
+        5: "SITUATIONS",
+        6: "SITUATION_MENTIONS",
+    }
+
+    _NAMES_TO_VALUES = {
+        "COMMUNICATIONS": 0,
+        "SECTIONS": 1,
+        "SENTENCES": 2,
+        "ENTITIES": 3,
+        "ENTITY_MENTIONS": 4,
+        "SITUATIONS": 5,
+        "SITUATION_MENTIONS": 6,
+    }
 
 
 class SearchFeedback(object):
@@ -66,6 +101,7 @@ class SearchQuery(object):
     These labels can be used to group queries and results by a domain or group of
     users for training. An example usage would be assigning the geographical region
     as a label ("spain"). User labels could be based on organizational units ("hltcoe").
+     - type: This search is over this type of data (communications, sentences, entities)
     """
 
     thrift_spec = (
@@ -79,9 +115,10 @@ class SearchQuery(object):
         (7, TType.STRING, 'userId', 'UTF8', None, ),  # 7
         (8, TType.STRING, 'name', 'UTF8', None, ),  # 8
         (9, TType.LIST, 'labels', (TType.STRING, 'UTF8', False), None, ),  # 9
+        (10, TType.I32, 'type', None, None, ),  # 10
     )
 
-    def __init__(self, terms=None, questions=None, communicationId=None, tokens=None, rawQuery=None, auths=None, userId=None, name=None, labels=None,):
+    def __init__(self, terms=None, questions=None, communicationId=None, tokens=None, rawQuery=None, auths=None, userId=None, name=None, labels=None, type=None,):
         self.terms = terms
         self.questions = questions
         self.communicationId = communicationId
@@ -91,6 +128,7 @@ class SearchQuery(object):
         self.userId = userId
         self.name = name
         self.labels = labels
+        self.type = type
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -162,6 +200,11 @@ class SearchQuery(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.type = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -217,10 +260,16 @@ class SearchQuery(object):
                 oprot.writeString(iter20.encode('utf-8') if sys.version_info[0] == 2 else iter20)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.I32, 10)
+            oprot.writeI32(self.type)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
+        if self.type is None:
+            raise TProtocolException(message='Required field type is unset!')
         return
 
     def __repr__(self):

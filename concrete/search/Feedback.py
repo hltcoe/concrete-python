@@ -10,13 +10,14 @@
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 import sys
+import concrete.services.Service
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
 
 
-class Iface(object):
+class Iface(concrete.services.Service.Iface):
     def startFeedback(self, results):
         """
         Start providing feedback for the specified SearchResults.
@@ -51,12 +52,9 @@ class Iface(object):
         pass
 
 
-class Client(Iface):
+class Client(concrete.services.Service.Client, Iface):
     def __init__(self, iprot, oprot=None):
-        self._iprot = self._oprot = iprot
-        if oprot is not None:
-            self._oprot = oprot
-        self._seqid = 0
+        concrete.services.Service.Client.__init__(self, iprot, oprot)
 
     def startFeedback(self, results):
         """
@@ -88,6 +86,8 @@ class Client(Iface):
         result = startFeedback_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
         return
 
     def addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
@@ -123,6 +123,8 @@ class Client(Iface):
         result = addCommunicationFeedback_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
         return
 
     def addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
@@ -160,13 +162,14 @@ class Client(Iface):
         result = addSentenceFeedback_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
         return
 
 
-class Processor(Iface, TProcessor):
+class Processor(concrete.services.Service.Processor, Iface, TProcessor):
     def __init__(self, handler):
-        self._handler = handler
-        self._processMap = {}
+        concrete.services.Service.Processor.__init__(self, handler)
         self._processMap["startFeedback"] = Processor.process_startFeedback
         self._processMap["addCommunicationFeedback"] = Processor.process_addCommunicationFeedback
         self._processMap["addSentenceFeedback"] = Processor.process_addSentenceFeedback
@@ -196,6 +199,9 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
+        except concrete.services.ttypes.ServicesException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
         except Exception as ex:
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
@@ -215,6 +221,9 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
+        except concrete.services.ttypes.ServicesException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
         except Exception as ex:
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
@@ -234,6 +243,9 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
+        except concrete.services.ttypes.ServicesException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
         except Exception as ex:
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
@@ -308,9 +320,18 @@ class startFeedback_args(object):
 
 
 class startFeedback_result(object):
+    """
+    Attributes:
+     - ex
+    """
 
     thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
+
+    def __init__(self, ex=None,):
+        self.ex = ex
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -321,6 +342,12 @@ class startFeedback_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = concrete.services.ttypes.ServicesException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -331,6 +358,10 @@ class startFeedback_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('startFeedback_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -435,9 +466,18 @@ class addCommunicationFeedback_args(object):
 
 
 class addCommunicationFeedback_result(object):
+    """
+    Attributes:
+     - ex
+    """
 
     thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
+
+    def __init__(self, ex=None,):
+        self.ex = ex
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -448,6 +488,12 @@ class addCommunicationFeedback_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = concrete.services.ttypes.ServicesException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -458,6 +504,10 @@ class addCommunicationFeedback_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('addCommunicationFeedback_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -575,9 +625,18 @@ class addSentenceFeedback_args(object):
 
 
 class addSentenceFeedback_result(object):
+    """
+    Attributes:
+     - ex
+    """
 
     thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
+
+    def __init__(self, ex=None,):
+        self.ex = ex
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -588,6 +647,12 @@ class addSentenceFeedback_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = concrete.services.ttypes.ServicesException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -598,6 +663,10 @@ class addSentenceFeedback_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('addSentenceFeedback_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 

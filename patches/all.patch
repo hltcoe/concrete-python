@@ -1,3 +1,27 @@
+diff --git a/concrete/access/ttypes.py b/concrete/access/ttypes.py
+index 57fabed..0a244f6 100644
+--- a/concrete/access/ttypes.py
++++ b/concrete/access/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ from thrift.protocol.TProtocol import TProtocolException
+ import sys
+ import concrete.communication.ttypes
+diff --git a/concrete/annotate/ttypes.py b/concrete/annotate/ttypes.py
+index 1ebbafb..58de779 100644
+--- a/concrete/annotate/ttypes.py
++++ b/concrete/annotate/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ from thrift.protocol.TProtocol import TProtocolException
+ import sys
+ import concrete.metadata.ttypes
 diff --git a/concrete/audio/ttypes.py b/concrete/audio/ttypes.py
 index faa7b28..67a9036 100644
 --- a/concrete/audio/ttypes.py
@@ -82,6 +106,18 @@ index d20ec95..e8a9088 100644
  from thrift.protocol.TProtocol import TProtocolException
  import sys
  import concrete.metadata.ttypes
+diff --git a/concrete/learn/ttypes.py b/concrete/learn/ttypes.py
+index debd780..f3db903 100644
+--- a/concrete/learn/ttypes.py
++++ b/concrete/learn/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ from thrift.protocol.TProtocol import TProtocolException
+ import sys
+ import concrete.services.ttypes
 diff --git a/concrete/linking/ttypes.py b/concrete/linking/ttypes.py
 index a128872..c8de437 100644
 --- a/concrete/linking/ttypes.py
@@ -118,8 +154,32 @@ index 93bf6b0..a102270 100644
  from thrift.protocol.TProtocol import TProtocolException
  import sys
  
+diff --git a/concrete/search/ttypes.py b/concrete/search/ttypes.py
+index 56290da..386ff7e 100644
+--- a/concrete/search/ttypes.py
++++ b/concrete/search/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ from thrift.protocol.TProtocol import TProtocolException
+ import sys
+ import concrete.services.ttypes
+diff --git a/concrete/services/results/ttypes.py b/concrete/services/results/ttypes.py
+index 3e662b0..7c5b3b8 100644
+--- a/concrete/services/results/ttypes.py
++++ b/concrete/services/results/ttypes.py
+@@ -8,6 +8,7 @@
+ #
+ 
+ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
++from thrift.protocol import TProtocol
+ from thrift.protocol.TProtocol import TProtocolException
+ import sys
+ import concrete.services.ttypes
 diff --git a/concrete/services/ttypes.py b/concrete/services/ttypes.py
-index 1ebbafb..58de779 100644
+index 8545779..76e2ec0 100644
 --- a/concrete/services/ttypes.py
 +++ b/concrete/services/ttypes.py
 @@ -8,6 +8,7 @@
@@ -129,7 +189,7 @@ index 1ebbafb..58de779 100644
 +from thrift.protocol import TProtocol
  from thrift.protocol.TProtocol import TProtocolException
  import sys
- import concrete.metadata.ttypes
+ import concrete.uuid.ttypes
 diff --git a/concrete/situations/ttypes.py b/concrete/situations/ttypes.py
 index f052a89..8a77ddc 100644
 --- a/concrete/situations/ttypes.py
@@ -205,4 +265,4 @@ index 58cce83..f1143d6 100644
 +from thrift.protocol import TProtocol
  from thrift.protocol.TProtocol import TProtocolException
  import sys
- 
+

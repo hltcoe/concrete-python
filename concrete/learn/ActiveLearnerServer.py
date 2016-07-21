@@ -10,110 +10,96 @@
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 import sys
+import concrete.services.Service
 import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
 
 
-class Iface(object):
+class Iface(concrete.services.Service.Iface):
     """
-    DEPRECATION NOTICE: This interface has been replaced by
-    the ServiceAnnotation interface in the concrete-services
-    package. All new development based on thrift services
-    and concrete should be based on that repo. This is only
-    left for historical, yet-to-be-updated services: do not
-    implement new services with this interface.
+    The active learning server is responsible for sorting a list of communications.
+    Users annotate communications based on the sort.
 
-    Annotator service methods. For concrete analytics that
-    are to be stood up as independent services, accessible
-    from any programming language.
+    Active learning is an asynchronous process.
+    It is started by the client calling start().
+    At arbitrary times, the client can call addAnnotations().
+    When the server is done with a sort of the data, it calls submitSort() on the client.
+    The server can perform additional sorts until stop() is called.
+
+    The server must be preconfigured with the details of the data source to pull communications.
     """
-    def annotate(self, original):
+    def start(self, sessionId, task, contact):
         """
-        Main annotation method. Takes a communication as input
-        and returns a new one as output.
-
-        It is up to the implementing service to verify that
-        the input communication is valid.
-
-        Can throw a ConcreteThriftException upon error
-        (invalid input, analytic exception, etc.).
+        Start an active learning session on these communications
 
         Parameters:
-         - original
+         - sessionId
+         - task
+         - contact
         """
         pass
 
-    def getMetadata(self):
+    def stop(self, sessionId):
         """
-        Return the tool's AnnotationMetadata.
+        Stop the learning session
+
+        Parameters:
+         - sessionId
         """
         pass
 
-    def getDocumentation(self):
+    def addAnnotations(self, sessionId, annotations):
         """
-        Return a detailed description of what the particular tool
-        does, what inputs and outputs to expect, etc.
+        Add annotations from the user to the learning process
 
-        Developers whom are not familiar with the particular
-        analytic should be able to read this string and
-        understand the essential functions of the analytic.
-        """
-        pass
-
-    def shutdown(self):
-        """
-        Indicate to the server it should shut down.
+        Parameters:
+         - sessionId
+         - annotations
         """
         pass
 
 
-class Client(Iface):
+class Client(concrete.services.Service.Client, Iface):
     """
-    DEPRECATION NOTICE: This interface has been replaced by
-    the ServiceAnnotation interface in the concrete-services
-    package. All new development based on thrift services
-    and concrete should be based on that repo. This is only
-    left for historical, yet-to-be-updated services: do not
-    implement new services with this interface.
+    The active learning server is responsible for sorting a list of communications.
+    Users annotate communications based on the sort.
 
-    Annotator service methods. For concrete analytics that
-    are to be stood up as independent services, accessible
-    from any programming language.
+    Active learning is an asynchronous process.
+    It is started by the client calling start().
+    At arbitrary times, the client can call addAnnotations().
+    When the server is done with a sort of the data, it calls submitSort() on the client.
+    The server can perform additional sorts until stop() is called.
+
+    The server must be preconfigured with the details of the data source to pull communications.
     """
     def __init__(self, iprot, oprot=None):
-        self._iprot = self._oprot = iprot
-        if oprot is not None:
-            self._oprot = oprot
-        self._seqid = 0
+        concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-    def annotate(self, original):
+    def start(self, sessionId, task, contact):
         """
-        Main annotation method. Takes a communication as input
-        and returns a new one as output.
-
-        It is up to the implementing service to verify that
-        the input communication is valid.
-
-        Can throw a ConcreteThriftException upon error
-        (invalid input, analytic exception, etc.).
+        Start an active learning session on these communications
 
         Parameters:
-         - original
+         - sessionId
+         - task
+         - contact
         """
-        self.send_annotate(original)
-        return self.recv_annotate()
+        self.send_start(sessionId, task, contact)
+        return self.recv_start()
 
-    def send_annotate(self, original):
-        self._oprot.writeMessageBegin('annotate', TMessageType.CALL, self._seqid)
-        args = annotate_args()
-        args.original = original
+    def send_start(self, sessionId, task, contact):
+        self._oprot.writeMessageBegin('start', TMessageType.CALL, self._seqid)
+        args = start_args()
+        args.sessionId = sessionId
+        args.task = task
+        args.contact = contact
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_annotate(self):
+    def recv_start(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -121,30 +107,32 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = annotate_result()
+        result = start_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "annotate failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "start failed: unknown result")
 
-    def getMetadata(self):
+    def stop(self, sessionId):
         """
-        Return the tool's AnnotationMetadata.
-        """
-        self.send_getMetadata()
-        return self.recv_getMetadata()
+        Stop the learning session
 
-    def send_getMetadata(self):
-        self._oprot.writeMessageBegin('getMetadata', TMessageType.CALL, self._seqid)
-        args = getMetadata_args()
+        Parameters:
+         - sessionId
+        """
+        self.send_stop(sessionId)
+        self.recv_stop()
+
+    def send_stop(self, sessionId):
+        self._oprot.writeMessageBegin('stop', TMessageType.CALL, self._seqid)
+        args = stop_args()
+        args.sessionId = sessionId
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_getMetadata(self):
+    def recv_stop(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -152,33 +140,32 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = getMetadata_result()
+        result = stop_result()
         result.read(iprot)
         iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "getMetadata failed: unknown result")
+        return
 
-    def getDocumentation(self):
+    def addAnnotations(self, sessionId, annotations):
         """
-        Return a detailed description of what the particular tool
-        does, what inputs and outputs to expect, etc.
+        Add annotations from the user to the learning process
 
-        Developers whom are not familiar with the particular
-        analytic should be able to read this string and
-        understand the essential functions of the analytic.
+        Parameters:
+         - sessionId
+         - annotations
         """
-        self.send_getDocumentation()
-        return self.recv_getDocumentation()
+        self.send_addAnnotations(sessionId, annotations)
+        self.recv_addAnnotations()
 
-    def send_getDocumentation(self):
-        self._oprot.writeMessageBegin('getDocumentation', TMessageType.CALL, self._seqid)
-        args = getDocumentation_args()
+    def send_addAnnotations(self, sessionId, annotations):
+        self._oprot.writeMessageBegin('addAnnotations', TMessageType.CALL, self._seqid)
+        args = addAnnotations_args()
+        args.sessionId = sessionId
+        args.annotations = annotations
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_getDocumentation(self):
+    def recv_addAnnotations(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -186,35 +173,18 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = getDocumentation_result()
+        result = addAnnotations_result()
         result.read(iprot)
         iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "getDocumentation failed: unknown result")
-
-    def shutdown(self):
-        """
-        Indicate to the server it should shut down.
-        """
-        self.send_shutdown()
-
-    def send_shutdown(self):
-        self._oprot.writeMessageBegin('shutdown', TMessageType.ONEWAY, self._seqid)
-        args = shutdown_args()
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
+        return
 
 
-class Processor(Iface, TProcessor):
+class Processor(concrete.services.Service.Processor, Iface, TProcessor):
     def __init__(self, handler):
-        self._handler = handler
-        self._processMap = {}
-        self._processMap["annotate"] = Processor.process_annotate
-        self._processMap["getMetadata"] = Processor.process_getMetadata
-        self._processMap["getDocumentation"] = Processor.process_getDocumentation
-        self._processMap["shutdown"] = Processor.process_shutdown
+        concrete.services.Service.Processor.__init__(self, handler)
+        self._processMap["start"] = Processor.process_start
+        self._processMap["stop"] = Processor.process_stop
+        self._processMap["addAnnotations"] = Processor.process_addAnnotations
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -231,35 +201,13 @@ class Processor(Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_annotate(self, seqid, iprot, oprot):
-        args = annotate_args()
+    def process_start(self, seqid, iprot, oprot):
+        args = start_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = annotate_result()
+        result = start_result()
         try:
-            result.success = self._handler.annotate(args.original)
-            msg_type = TMessageType.REPLY
-        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
-            raise
-        except concrete.exceptions.ttypes.ConcreteThriftException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except Exception as ex:
-            msg_type = TMessageType.EXCEPTION
-            logging.exception(ex)
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("annotate", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_getMetadata(self, seqid, iprot, oprot):
-        args = getMetadata_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = getMetadata_result()
-        try:
-            result.success = self._handler.getMetadata()
+            result.success = self._handler.start(args.sessionId, args.task, args.contact)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -267,18 +215,18 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("getMetadata", msg_type, seqid)
+        oprot.writeMessageBegin("start", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_getDocumentation(self, seqid, iprot, oprot):
-        args = getDocumentation_args()
+    def process_stop(self, seqid, iprot, oprot):
+        args = stop_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = getDocumentation_result()
+        result = stop_result()
         try:
-            result.success = self._handler.getDocumentation()
+            self._handler.stop(args.sessionId)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -286,38 +234,52 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("getDocumentation", msg_type, seqid)
+        oprot.writeMessageBegin("stop", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_shutdown(self, seqid, iprot, oprot):
-        args = shutdown_args()
+    def process_addAnnotations(self, seqid, iprot, oprot):
+        args = addAnnotations_args()
         args.read(iprot)
         iprot.readMessageEnd()
+        result = addAnnotations_result()
         try:
-            self._handler.shutdown()
+            self._handler.addAnnotations(args.sessionId, args.annotations)
+            msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
-        except:
-            pass
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("addAnnotations", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
 
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class annotate_args(object):
+class start_args(object):
     """
     Attributes:
-     - original
+     - sessionId
+     - task
+     - contact
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'original', (concrete.communication.ttypes.Communication, concrete.communication.ttypes.Communication.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (2, TType.STRUCT, 'task', (AnnotationTask, AnnotationTask.thrift_spec), None, ),  # 2
+        (3, TType.STRUCT, 'contact', (concrete.services.ttypes.AsyncContactInfo, concrete.services.ttypes.AsyncContactInfo.thrift_spec), None, ),  # 3
     )
 
-    def __init__(self, original=None,):
-        self.original = original
+    def __init__(self, sessionId=None, task=None, contact=None,):
+        self.sessionId = sessionId
+        self.task = task
+        self.contact = contact
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -330,77 +292,20 @@ class annotate_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.original = concrete.communication.ttypes.Communication()
-                    self.original.read(iprot)
+                    self.sessionId = concrete.uuid.ttypes.UUID()
+                    self.sessionId.read(iprot)
                 else:
                     iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('annotate_args')
-        if self.original is not None:
-            oprot.writeFieldBegin('original', TType.STRUCT, 1)
-            self.original.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class annotate_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-    """
-
-    thrift_spec = (
-        (0, TType.STRUCT, 'success', (concrete.communication.ttypes.Communication, concrete.communication.ttypes.Communication.thrift_spec), None, ),  # 0
-        (1, TType.STRUCT, 'ex', (concrete.exceptions.ttypes.ConcreteThriftException, concrete.exceptions.ttypes.ConcreteThriftException.thrift_spec), None, ),  # 1
-    )
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
+            elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self.success = concrete.communication.ttypes.Communication()
-                    self.success.read(iprot)
+                    self.task = AnnotationTask()
+                    self.task.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 1:
+            elif fid == 3:
                 if ftype == TType.STRUCT:
-                    self.ex = concrete.exceptions.ttypes.ConcreteThriftException()
-                    self.ex.read(iprot)
+                    self.contact = concrete.services.ttypes.AsyncContactInfo()
+                    self.contact.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -412,14 +317,18 @@ class annotate_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('annotate_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
+        oprot.writeStructBegin('start_args')
+        if self.sessionId is not None:
+            oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+            self.sessionId.write(oprot)
             oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
+        if self.task is not None:
+            oprot.writeFieldBegin('task', TType.STRUCT, 2)
+            self.task.write(oprot)
+            oprot.writeFieldEnd()
+        if self.contact is not None:
+            oprot.writeFieldBegin('contact', TType.STRUCT, 3)
+            self.contact.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -439,56 +348,14 @@ class annotate_result(object):
         return not (self == other)
 
 
-class getMetadata_args(object):
-
-    thrift_spec = (
-    )
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('getMetadata_args')
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class getMetadata_result(object):
+class start_result(object):
     """
     Attributes:
      - success
     """
 
     thrift_spec = (
-        (0, TType.STRUCT, 'success', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ),  # 0
+        (0, TType.BOOL, 'success', None, None, ),  # 0
     )
 
     def __init__(self, success=None,):
@@ -504,9 +371,8 @@ class getMetadata_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.STRUCT:
-                    self.success = concrete.metadata.ttypes.AnnotationMetadata()
-                    self.success.read(iprot)
+                if ftype == TType.BOOL:
+                    self.success = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             else:
@@ -518,10 +384,10 @@ class getMetadata_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('getMetadata_result')
+        oprot.writeStructBegin('start_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
+            oprot.writeFieldBegin('success', TType.BOOL, 0)
+            oprot.writeBool(self.success)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -541,60 +407,19 @@ class getMetadata_result(object):
         return not (self == other)
 
 
-class getDocumentation_args(object):
-
-    thrift_spec = (
-    )
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('getDocumentation_args')
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class getDocumentation_result(object):
+class stop_args(object):
     """
     Attributes:
-     - success
+     - sessionId
     """
 
     thrift_spec = (
-        (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
+        None,  # 0
+        (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, success=None,):
-        self.success = success
+    def __init__(self, sessionId=None,):
+        self.sessionId = sessionId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -605,9 +430,10 @@ class getDocumentation_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 0:
-                if ftype == TType.STRING:
-                    self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.sessionId = concrete.uuid.ttypes.UUID()
+                    self.sessionId.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -619,10 +445,10 @@ class getDocumentation_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('getDocumentation_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRING, 0)
-            oprot.writeString(self.success.encode('utf-8') if sys.version_info[0] == 2 else self.success)
+        oprot.writeStructBegin('stop_args')
+        if self.sessionId is not None:
+            oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+            self.sessionId.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -642,7 +468,7 @@ class getDocumentation_result(object):
         return not (self == other)
 
 
-class shutdown_args(object):
+class stop_result(object):
 
     thrift_spec = (
     )
@@ -665,7 +491,131 @@ class shutdown_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('shutdown_args')
+        oprot.writeStructBegin('stop_result')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class addAnnotations_args(object):
+    """
+    Attributes:
+     - sessionId
+     - annotations
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (2, TType.LIST, 'annotations', (TType.STRUCT, (Annotation, Annotation.thrift_spec), False), None, ),  # 2
+    )
+
+    def __init__(self, sessionId=None, annotations=None,):
+        self.sessionId = sessionId
+        self.annotations = annotations
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.sessionId = concrete.uuid.ttypes.UUID()
+                    self.sessionId.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.annotations = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = Annotation()
+                        _elem12.read(iprot)
+                        self.annotations.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('addAnnotations_args')
+        if self.sessionId is not None:
+            oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+            self.sessionId.write(oprot)
+            oprot.writeFieldEnd()
+        if self.annotations is not None:
+            oprot.writeFieldBegin('annotations', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRUCT, len(self.annotations))
+            for iter13 in self.annotations:
+                iter13.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class addAnnotations_result(object):
+
+    thrift_spec = (
+    )
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('addAnnotations_result')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 

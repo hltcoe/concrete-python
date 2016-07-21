@@ -26,6 +26,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('  void send(Communication communication)')
+    print('  ServiceInfo about()')
+    print('  bool alive()')
     print('')
     sys.exit(0)
 
@@ -87,6 +89,18 @@ if cmd == 'send':
         print('send requires 1 args')
         sys.exit(1)
     pp.pprint(client.send(eval(args[0]),))
+
+elif cmd == 'about':
+    if len(args) != 0:
+        print('about requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.about())
+
+elif cmd == 'alive':
+    if len(args) != 0:
+        print('alive requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.alive())
 
 else:
     print('Unrecognized method %s' % cmd)

@@ -17,7 +17,7 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from concrete.services import Sender
+from concrete.services import Service
 from concrete.services.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
@@ -25,7 +25,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  void send(Communication communication)')
+    print('  ServiceInfo about()')
+    print('  bool alive()')
     print('')
     sys.exit(0)
 
@@ -79,14 +80,20 @@ else:
     else:
         transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol(transport)
-client = Sender.Client(protocol)
+client = Service.Client(protocol)
 transport.open()
 
-if cmd == 'send':
-    if len(args) != 1:
-        print('send requires 1 args')
+if cmd == 'about':
+    if len(args) != 0:
+        print('about requires 0 args')
         sys.exit(1)
-    pp.pprint(client.send(eval(args[0]),))
+    pp.pprint(client.about())
+
+elif cmd == 'alive':
+    if len(args) != 0:
+        print('alive requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.alive())
 
 else:
     print('Unrecognized method %s' % cmd)

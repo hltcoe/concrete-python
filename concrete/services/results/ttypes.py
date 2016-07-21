@@ -11,15 +11,9 @@ from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplica
 from thrift.protocol import TProtocol
 from thrift.protocol.TProtocol import TProtocolException
 import sys
-import concrete.metadata.ttypes
-import concrete.language.ttypes
-import concrete.structure.ttypes
-import concrete.entities.ttypes
-import concrete.situations.ttypes
-import concrete.exceptions.ttypes
-import concrete.email.ttypes
-import concrete.twitter.ttypes
-import concrete.audio.ttypes
+import concrete.services.ttypes
+import concrete.uuid.ttypes
+import concrete.search.ttypes
 import concrete.communication.ttypes
 
 from thrift.transport import TTransport

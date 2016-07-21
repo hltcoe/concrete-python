@@ -19,64 +19,47 @@ from thrift.transport import TTransport
 
 class Iface(concrete.services.Service.Iface):
     """
-    A service that exists so that clients can send Concrete data
-    structures to implementing servers.
-
-    Implement this if you are creating an analytic that wishes to
-    send its results back to a server. That server may perform
-    validation, write the new layers to a database, and so forth.
+    The active learner client implements a method to accept new sorts of the annotation units
     """
-    def send(self, communication):
+    def submitSort(self, sessionId, unitIds):
         """
-        Send a communication to a server implementing this method.
-
-        The communication that is sent back should contain the new
-        analytic layers you wish to append. You may also wish to call
-        methods that unset annotations you feel the receiver would not
-        find useful in order to reduce network overhead.
+        Submit a new sort of communications to the broker
 
         Parameters:
-         - communication
+         - sessionId
+         - unitIds
         """
         pass
 
 
 class Client(concrete.services.Service.Client, Iface):
     """
-    A service that exists so that clients can send Concrete data
-    structures to implementing servers.
-
-    Implement this if you are creating an analytic that wishes to
-    send its results back to a server. That server may perform
-    validation, write the new layers to a database, and so forth.
+    The active learner client implements a method to accept new sorts of the annotation units
     """
     def __init__(self, iprot, oprot=None):
         concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-    def send(self, communication):
+    def submitSort(self, sessionId, unitIds):
         """
-        Send a communication to a server implementing this method.
-
-        The communication that is sent back should contain the new
-        analytic layers you wish to append. You may also wish to call
-        methods that unset annotations you feel the receiver would not
-        find useful in order to reduce network overhead.
+        Submit a new sort of communications to the broker
 
         Parameters:
-         - communication
+         - sessionId
+         - unitIds
         """
-        self.send_send(communication)
-        self.recv_send()
+        self.send_submitSort(sessionId, unitIds)
+        self.recv_submitSort()
 
-    def send_send(self, communication):
-        self._oprot.writeMessageBegin('send', TMessageType.CALL, self._seqid)
-        args = send_args()
-        args.communication = communication
+    def send_submitSort(self, sessionId, unitIds):
+        self._oprot.writeMessageBegin('submitSort', TMessageType.CALL, self._seqid)
+        args = submitSort_args()
+        args.sessionId = sessionId
+        args.unitIds = unitIds
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_send(self):
+    def recv_submitSort(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -84,18 +67,16 @@ class Client(concrete.services.Service.Client, Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = send_result()
+        result = submitSort_result()
         result.read(iprot)
         iprot.readMessageEnd()
-        if result.ex is not None:
-            raise result.ex
         return
 
 
 class Processor(concrete.services.Service.Processor, Iface, TProcessor):
     def __init__(self, handler):
         concrete.services.Service.Processor.__init__(self, handler)
-        self._processMap["send"] = Processor.process_send
+        self._processMap["submitSort"] = Processor.process_submitSort
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -112,24 +93,21 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_send(self, seqid, iprot, oprot):
-        args = send_args()
+    def process_submitSort(self, seqid, iprot, oprot):
+        args = submitSort_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = send_result()
+        result = submitSort_result()
         try:
-            self._handler.send(args.communication)
+            self._handler.submitSort(args.sessionId, args.unitIds)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
-        except concrete.services.ttypes.ServicesException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
         except Exception as ex:
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("send", msg_type, seqid)
+        oprot.writeMessageBegin("submitSort", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -137,19 +115,22 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class send_args(object):
+class submitSort_args(object):
     """
     Attributes:
-     - communication
+     - sessionId
+     - unitIds
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'communication', (concrete.communication.ttypes.Communication, concrete.communication.ttypes.Communication.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'sessionId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (2, TType.LIST, 'unitIds', (TType.STRUCT, (concrete.services.ttypes.AnnotationUnitIdentifier, concrete.services.ttypes.AnnotationUnitIdentifier.thrift_spec), False), None, ),  # 2
     )
 
-    def __init__(self, communication=None,):
-        self.communication = communication
+    def __init__(self, sessionId=None, unitIds=None,):
+        self.sessionId = sessionId
+        self.unitIds = unitIds
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -162,8 +143,19 @@ class send_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.communication = concrete.communication.ttypes.Communication()
-                    self.communication.read(iprot)
+                    self.sessionId = concrete.uuid.ttypes.UUID()
+                    self.sessionId.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.unitIds = []
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = concrete.services.ttypes.AnnotationUnitIdentifier()
+                        _elem19.read(iprot)
+                        self.unitIds.append(_elem19)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             else:
@@ -175,10 +167,17 @@ class send_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('send_args')
-        if self.communication is not None:
-            oprot.writeFieldBegin('communication', TType.STRUCT, 1)
-            self.communication.write(oprot)
+        oprot.writeStructBegin('submitSort_args')
+        if self.sessionId is not None:
+            oprot.writeFieldBegin('sessionId', TType.STRUCT, 1)
+            self.sessionId.write(oprot)
+            oprot.writeFieldEnd()
+        if self.unitIds is not None:
+            oprot.writeFieldBegin('unitIds', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRUCT, len(self.unitIds))
+            for iter20 in self.unitIds:
+                iter20.write(oprot)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -198,19 +197,10 @@ class send_args(object):
         return not (self == other)
 
 
-class send_result(object):
-    """
-    Attributes:
-     - ex
-    """
+class submitSort_result(object):
 
     thrift_spec = (
-        None,  # 0
-        (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
-
-    def __init__(self, ex=None,):
-        self.ex = ex
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -221,12 +211,6 @@ class send_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = concrete.services.ttypes.ServicesException()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -236,11 +220,7 @@ class send_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('send_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
+        oprot.writeStructBegin('submitSort_result')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 

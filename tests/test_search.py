@@ -9,7 +9,9 @@ from concrete.util.net import find_port
 from time import time
 
 from concrete.search import Search
-from concrete.search.ttypes import SearchQuery, SearchResults, SearchResult
+from concrete.search.ttypes import (
+    SearchType, SearchQuery, SearchResults, SearchResult
+)
 from concrete.uuid.ttypes import UUID
 from concrete.metadata.ttypes import AnnotationMetadata
 
@@ -17,7 +19,7 @@ from concrete.metadata.ttypes import AnnotationMetadata
 class FooSearch(Search.Iface):
     METADATA_TOOL = 'Foo Search'
 
-    def searchCommunications(self, search_query):
+    def search(self, search_query):
         return SearchResults(
             uuid=UUID(uuidString='12345678-1234-5678-1234-567812345678'),
             searchResults=[
@@ -27,9 +29,6 @@ class FooSearch(Search.Iface):
             metadata=AnnotationMetadata(tool=self.METADATA_TOOL,
                                         timestamp=int(time()))
         )
-
-    def searchSentences(self, search_query):
-        raise NotImplementedError()
 
     def shutdown(self):
         pass
@@ -42,7 +41,8 @@ def test_search_communications():
     timeout = 5
 
     terms = ['foo', 'bar']
-    query = SearchQuery(terms=[t for t in terms])
+    query = SearchQuery(type=SearchType.COMMUNICATIONS,
+                        terms=[t for t in terms])
 
     with SubprocessSearchServiceWrapper(impl, host, port, timeout=timeout):
         transport = TSocket.TSocket(host, port)
@@ -51,7 +51,7 @@ def test_search_communications():
 
         cli = Search.Client(protocol)
         transport.open()
-        res = cli.searchCommunications(query)
+        res = cli.search(query)
         transport.close()
 
         assert res.uuid.uuidString == '12345678-1234-5678-1234-567812345678'

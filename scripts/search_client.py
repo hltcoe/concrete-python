@@ -6,7 +6,7 @@ import codecs
 import requests
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util.search_wrapper import SearchClientWrapper
-from concrete.search.ttypes import SearchQuery
+from concrete.search.ttypes import SearchQuery, SearchType
 
 
 def main():
@@ -37,8 +37,9 @@ def main():
                 break
             if line:
                 terms = line.split()
-                query = SearchQuery(terms=terms)
-                results = client.searchCommunications(query)
+                query = SearchQuery(terms=terms,
+                                    type=SearchType.COMMUNICATIONS)
+                results = client.search(query)
                 for result in results.searchResults:
                     if ns.http_lookup_url:
                         out_f.write(requests.get(

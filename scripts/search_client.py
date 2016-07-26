@@ -23,6 +23,8 @@ def main():
                         help='Look up result communication text from HTTP '
                              'service via provided URL template, for '
                              'example, http://localhost:3000/comm/id/%%s')
+    parser.add_argument('--user-id', type=str,
+                        help='user id to send to search service')
     concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
@@ -38,7 +40,8 @@ def main():
             if line:
                 terms = line.split()
                 query = SearchQuery(terms=terms,
-                                    type=SearchType.COMMUNICATIONS)
+                                    type=SearchType.COMMUNICATIONS,
+                                    userId=ns.user_id)
                 results = client.search(query)
                 for result in results.searchResults:
                     if ns.http_lookup_url:

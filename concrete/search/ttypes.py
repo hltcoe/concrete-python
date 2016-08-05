@@ -75,6 +75,91 @@ class SearchFeedback(object):
   }
 
 
+class SearchCapability(object):
+  """
+  A search provider describes its capabilities with a list of search type and language pairs.
+
+  Attributes:
+   - type: A type of search supported by the search provider
+   - lang: Language that the search provider supports.
+  Use ISO 639-2/T three letter codes.
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'type', None, None, ), # 1
+    (2, TType.STRING, 'lang', None, None, ), # 2
+  )
+
+  def __init__(self, type=None, lang=None,):
+    self.type = type
+    self.lang = lang
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.type = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.lang = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('SearchCapability')
+    if self.type is not None:
+      oprot.writeFieldBegin('type', TType.I32, 1)
+      oprot.writeI32(self.type)
+      oprot.writeFieldEnd()
+    if self.lang is not None:
+      oprot.writeFieldBegin('lang', TType.STRING, 2)
+      oprot.writeString(self.lang.encode('utf-8'))
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.type is None:
+      raise TProtocol.TProtocolException(message='Required field type is unset!')
+    if self.lang is None:
+      raise TProtocol.TProtocolException(message='Required field lang is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.type)
+    value = (value * 31) ^ hash(self.lang)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class SearchQuery(object):
   """
   Wrapper for information relevant to a (possibly structured) search.
@@ -104,6 +189,9 @@ class SearchQuery(object):
   users for training. An example usage would be assigning the geographical region
   as a label ("spain"). User labels could be based on organizational units ("hltcoe").
    - type: This search is over this type of data (communications, sentences, entities)
+   - lang: The language of the corpus that the user wants to search.
+  Use ISO 639-2/T three letter codes.
+   - corpus: An identifier of the corpus that the search is to be performed over.
   """
 
   thrift_spec = (
@@ -118,9 +206,11 @@ class SearchQuery(object):
     (8, TType.STRING, 'name', None, None, ), # 8
     (9, TType.LIST, 'labels', (TType.STRING,None), None, ), # 9
     (10, TType.I32, 'type', None, None, ), # 10
+    (11, TType.STRING, 'lang', None, None, ), # 11
+    (12, TType.STRING, 'corpus', None, None, ), # 12
   )
 
-  def __init__(self, terms=None, questions=None, communicationId=None, tokens=None, rawQuery=None, auths=None, userId=None, name=None, labels=None, type=None,):
+  def __init__(self, terms=None, questions=None, communicationId=None, tokens=None, rawQuery=None, auths=None, userId=None, name=None, labels=None, type=None, lang=None, corpus=None,):
     self.terms = terms
     self.questions = questions
     self.communicationId = communicationId
@@ -131,6 +221,8 @@ class SearchQuery(object):
     self.name = name
     self.labels = labels
     self.type = type
+    self.lang = lang
+    self.corpus = corpus
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -207,6 +299,16 @@ class SearchQuery(object):
           self.type = iprot.readI32()
         else:
           iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.STRING:
+          self.lang = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.STRING:
+          self.corpus = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -266,6 +368,14 @@ class SearchQuery(object):
       oprot.writeFieldBegin('type', TType.I32, 10)
       oprot.writeI32(self.type)
       oprot.writeFieldEnd()
+    if self.lang is not None:
+      oprot.writeFieldBegin('lang', TType.STRING, 11)
+      oprot.writeString(self.lang.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.corpus is not None:
+      oprot.writeFieldBegin('corpus', TType.STRING, 12)
+      oprot.writeString(self.corpus.encode('utf-8'))
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -287,6 +397,8 @@ class SearchQuery(object):
     value = (value * 31) ^ hash(self.name)
     value = (value * 31) ^ hash(self.labels)
     value = (value * 31) ^ hash(self.type)
+    value = (value * 31) ^ hash(self.lang)
+    value = (value * 31) ^ hash(self.corpus)
     return value
 
   def __repr__(self):
@@ -431,6 +543,11 @@ class SearchResults(object):
    - metadata: The system that provided the response: likely use case for
   populating this field is for building training data.  Presumably
   a system will not need/want to return this object in live use.
+   - lang: The dominant language of the search results.
+  Use ISO 639-2/T three letter codes.
+  Search providers should set this when possible to support downstream processing.
+  Do not set if it is not known.
+  If multilingual, use the string "multilingual".
   """
 
   thrift_spec = (
@@ -439,13 +556,15 @@ class SearchResults(object):
     (2, TType.STRUCT, 'searchQuery', (SearchQuery, SearchQuery.thrift_spec), None, ), # 2
     (3, TType.LIST, 'searchResults', (TType.STRUCT,(SearchResult, SearchResult.thrift_spec)), None, ), # 3
     (4, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 4
+    (5, TType.STRING, 'lang', None, None, ), # 5
   )
 
-  def __init__(self, uuid=None, searchQuery=None, searchResults=None, metadata=None,):
+  def __init__(self, uuid=None, searchQuery=None, searchResults=None, metadata=None, lang=None,):
     self.uuid = uuid
     self.searchQuery = searchQuery
     self.searchResults = searchResults
     self.metadata = metadata
+    self.lang = lang
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -485,6 +604,11 @@ class SearchResults(object):
           self.metadata.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRING:
+          self.lang = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -514,6 +638,10 @@ class SearchResults(object):
       oprot.writeFieldBegin('metadata', TType.STRUCT, 4)
       self.metadata.write(oprot)
       oprot.writeFieldEnd()
+    if self.lang is not None:
+      oprot.writeFieldBegin('lang', TType.STRING, 5)
+      oprot.writeString(self.lang.encode('utf-8'))
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -531,6 +659,7 @@ class SearchResults(object):
     value = (value * 31) ^ hash(self.searchQuery)
     value = (value * 31) ^ hash(self.searchResults)
     value = (value * 31) ^ hash(self.metadata)
+    value = (value * 31) ^ hash(self.lang)
     return value
 
   def __repr__(self):

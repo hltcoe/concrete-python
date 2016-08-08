@@ -180,6 +180,40 @@ it (with Python library support only) to your home directory.
 If the build fails because of unsatisfied dependencies, commands to
 install those dependencies are provided for certain platforms:
 
+On the COE grid
+---------------
+
+Use `coe-install-fast-thrift-deps.bash` to download and install the
+dependencies on the COE grid.  For example, to install them to your
+home directory, first make sure you have the relevant paths in
+`~/.bashrc`:
+
+```
+export LIBRARY_PATH="$HOME/lib:$LIBRARY_PATH"
+export LIBRARY_PATH="$HOME/lib64:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="$HOME/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
+export C_INCLUDE_PATH="$HOME/include:$C_INCLUDE_PATH"
+export CPLUS_INCLUDE_PATH="$HOME/include:$CPLUS_INCLUDE_PATH"
+export PATH="$HOME/bin:$PATH"
+
+#export C_INCLUDE_PATH="$HOME/lib/libffi-3.2.1/include:$C_INCLUDE_PATH"
+#export CPLUS_INCLUDE_PATH="$HOME/lib/libffi-3.2.1/include:$CPLUS_INCLUDE_PATH"
+#export PKG_CONFIG_PATH="$HOME/libffi-3.2.1/x86_64-unknown-linux-gnu:$PKG_CONFIG_PATH"
+
+#export C_INCLUDE_PATH="$HOME/include/glib-2.0:$C_INCLUDE_PATH"
+#export CPLUS_INCLUDE_PATH="$HOME/include/glib-2.0:$CPLUS_INCLUDE_PATH"
+#export C_INCLUDE_PATH="$HOME/include/gio-unix-2.0:$C_INCLUDE_PATH"
+#export CPLUS_INCLUDE_PATH="$HOME/include/gio-unix-2.0:$CPLUS_INCLUDE_PATH"
+#export PKG_CONFIG_PATH="$HOME/glib-2.42.2:$PKG_CONFIG_PATH"
+```
+
+Start a new terminal session for these changes to take effect.  Then:
+
+```
+bash coe-install-fast-thrift-deps.bash --prefix=$HOME
+```
+
 On CentOS 7
 -----------
 

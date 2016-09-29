@@ -16,6 +16,7 @@ def tweet():
             u"id_str": TWEET_ID,
             u'created_at': 'Wed Aug 27 13:08:45 +0000 2008',
             u"user": {u"screen_name": "charman",
+                      u"lang": "ja",
                       u'verified': False},
             u'entities': {u"symbols": [],
                           u'hashtags': [],
@@ -43,6 +44,7 @@ def test_json_tweet_object_to_Communication_with_lang(tweet):
     assert 1 == len(comm.lidList)
     assert 1219842525 == comm.startTime
     assert 1219842525 == comm.endTime
+    assert "jpn" == comm.communicationMetadata.tweetInfo.user.lang
     kvm = comm.lidList[0].languageToProbabilityMap
     assert "eng" == kvm.keys()[0]
     assert 1.0 == kvm["eng"]

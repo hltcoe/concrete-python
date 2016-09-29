@@ -123,7 +123,11 @@ def json_tweet_object_to_TweetInfo(tweet):
     set_flat_fields(tweet_info, tweet)
 
     twitter_user = TwitterUser()
-    set_flat_fields(twitter_user, tweet[u'user'])
+    json_twitter_user = tweet[u'user']
+    set_flat_fields(twitter_user, json_twitter_user)
+    if json_twitter_user['lang']:
+        twitter_lid = json_twitter_user['lang']
+        twitter_user.lang = twitter_lid_to_iso639_3(twitter_lid)
     tweet_info.user = twitter_user
 
     if tweet[u'entities']:

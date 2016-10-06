@@ -5,6 +5,7 @@ build-test-deploy-accel:
   script:
     - docker build --pull=true -t concrete-python:accel .
     - docker run --rm concrete-python:accel bash check-style.bash
+    - docker run --rm concrete-python:accel python setup.py install --user
     - docker run --rm concrete-python:accel python setup.py test
     - docker run --rm concrete-python:accel python setup.py test --addopts integration-tests
     - # work around gitlab CI... only deploy on accel

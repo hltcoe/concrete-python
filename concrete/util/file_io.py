@@ -5,13 +5,10 @@ import cStringIO
 import gzip
 import bz2
 import mimetypes
-import os.path
 import tarfile
 import zipfile
 
 import os
-import pwd
-import grp
 import time
 
 from thrift import TSerialization
@@ -20,6 +17,36 @@ from thrift.transport import TTransport
 from concrete import Communication, TokenLattice
 from concrete.util.references import add_references_to_communication
 from concrete.util.thrift_factory import factory
+
+
+if os.name == 'nt':
+    def _get_uid():
+        return 0
+
+    def _get_gid():
+        return 0
+
+    def _get_username():
+        return ''
+
+    def _get_groupname():
+        return ''
+
+else:
+    import pwd
+    import grp
+
+    def _get_uid():
+        return os.getuid()
+
+    def _get_gid():
+        return os.getgid()
+
+    def _get_username():
+        return pwd.getpwuid(_get_uid()).pw_name
+
+    def _get_groupname():
+        return grp.getgrgid(_get_gid()).gr_name
 
 
 def read_thrift_from_file(thrift_obj, filename):
@@ -386,10 +413,10 @@ class CommunicationWriterTar(object):
         comm_tarinfo.size = len(thrift_bytes)
         comm_tarinfo.mode = 0644
         comm_tarinfo.mtime = time.time()
-        comm_tarinfo.uid = os.getuid()
-        comm_tarinfo.uname = pwd.getpwuid(os.getuid()).pw_name
-        comm_tarinfo.gid = os.getgid()
-        comm_tarinfo.gname = grp.getgrgid(os.getgid()).gr_name
+        comm_tarinfo.uid = _get_uid()
+        comm_tarinfo.uname = _get_username()
+        comm_tarinfo.gid = _get_gid()
+        comm_tarinfo.gname = _get_groupname()
 
         self.tarfile.addfile(comm_tarinfo, file_like_obj)
 

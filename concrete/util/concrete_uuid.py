@@ -30,6 +30,8 @@ def hex_to_bin(h):
 
 def bin_to_hex(b, n=None):
     h = hex(b)[2:]
+    if h.endswith('L'):
+        h = h[:-1]
     if n is None:
         n = len(h)
     elif len(h) > n:

@@ -2,8 +2,6 @@ import os
 import tarfile
 import unittest
 import time
-import pwd
-import grp
 
 from concrete.util.file_io import (
     CommunicationReader,
@@ -19,6 +17,29 @@ from tempfile import mkstemp
 
 
 @fixture
+def login_info():
+    if os.name == 'nt':
+        return dict(
+            uid=0,
+            gid=0,
+            username='',
+            groupname='',
+        )
+
+    else:
+        import pwd
+        import grp
+        uid = os.getuid()
+        gid = os.getgid()
+        return dict(
+            uid=uid,
+            gid=gid,
+            username=pwd.getpwuid(uid).pw_name,
+            groupname=grp.getgrgid(gid).gr_name,
+        )
+
+
+@fixture
 def output_file(request):
     (fd, path) = mkstemp()
     os.close(fd)
@@ -29,6 +50,10 @@ def output_file(request):
 
     request.addfinalizer(_remove)
     return path
+
+
+def test_output_file_finalizer_sanity(output_file):
+    assert True
 
 
 class TestCommunicationReader(unittest.TestCase):
@@ -372,9 +397,11 @@ def test_CommunicationWriter_fixed_point(output_file):
     comm = read_communication_from_file(input_file)
 
     writer = CommunicationWriter()
-    writer.open(output_file)
-    writer.write(comm)
-    writer.close()
+    try:
+        writer.open(output_file)
+        writer.write(comm)
+    finally:
+        writer.close()
 
     with open(input_file, 'rb') as expected_f:
         expected_data = expected_f.read()
@@ -414,12 +441,14 @@ def test_CommunicationWriter_fixed_point_unicode(output_file):
 TIME_MARGIN = 60 * 60 * 24
 
 
-def test_CommunicationWriterTar_single_file(output_file):
+def test_CommunicationWriterTar_single_file(output_file, login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     writer = CommunicationWriterTar()
-    writer.open(output_file)
-    writer.write(comm, "simple_1.concrete")
-    writer.close()
+    try:
+        writer.open(output_file)
+        writer.write(comm, "simple_1.concrete")
+    finally:
+        writer.close()
 
     assert tarfile.is_tarfile(output_file)
 
@@ -433,10 +462,10 @@ def test_CommunicationWriterTar_single_file(output_file):
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0644 == tarinfo.mode
-    assert os.getuid() == tarinfo.uid
-    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
-    assert os.getgid() == tarinfo.gid
-    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+    assert login_info['uid'] == tarinfo.uid
+    assert login_info['username'] == tarinfo.uname
+    assert login_info['gid'] == tarinfo.gid
+    assert login_info['groupname'] == tarinfo.gname
 
     tarinfo = f.next()
     assert tarinfo is None
@@ -444,7 +473,7 @@ def test_CommunicationWriterTar_single_file(output_file):
     f.close()
 
 
-def test_CommunicationWriterTar_single_file_ctx_mgr(output_file):
+def test_CommunicationWriterTar_single_file_ctx_mgr(output_file, login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     with CommunicationWriterTar(output_file) as writer:
         writer.write(comm, "simple_1.concrete")
@@ -461,10 +490,10 @@ def test_CommunicationWriterTar_single_file_ctx_mgr(output_file):
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0644 == tarinfo.mode
-    assert os.getuid() == tarinfo.uid
-    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
-    assert os.getgid() == tarinfo.gid
-    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+    assert login_info['uid'] == tarinfo.uid
+    assert login_info['username'] == tarinfo.uname
+    assert login_info['gid'] == tarinfo.gid
+    assert login_info['groupname'] == tarinfo.gname
 
     tarinfo = f.next()
     assert tarinfo is None
@@ -472,7 +501,8 @@ def test_CommunicationWriterTar_single_file_ctx_mgr(output_file):
     f.close()
 
 
-def test_CommunicationWriterTar_single_file_fixed_point(output_file):
+def test_CommunicationWriterTar_single_file_fixed_point(output_file,
+                                                        login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     with CommunicationWriterTar(output_file) as writer:
         writer.write(comm, "simple_1.concrete")
@@ -496,7 +526,8 @@ def test_CommunicationWriterTar_single_file_fixed_point(output_file):
     f.close()
 
 
-def test_CommunicationWriterTar_single_file_fixed_point_unicode(output_file):
+def test_CommunicationWriterTar_single_file_fixed_point_unicode(output_file,
+                                                                login_info):
     comm = read_communication_from_file(
         "tests/testdata/les-deux-chandeliers.concrete"
     )
@@ -523,12 +554,15 @@ def test_CommunicationWriterTar_single_file_fixed_point_unicode(output_file):
     f.close()
 
 
-def test_CommunicationWriterTar_single_file_default_name(output_file):
+def test_CommunicationWriterTar_single_file_default_name(output_file,
+                                                         login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     writer = CommunicationWriterTar()
-    writer.open(output_file)
-    writer.write(comm)
-    writer.close()
+    try:
+        writer.open(output_file)
+        writer.write(comm)
+    finally:
+        writer.close()
 
     assert tarfile.is_tarfile(output_file)
 
@@ -542,10 +576,10 @@ def test_CommunicationWriterTar_single_file_default_name(output_file):
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0644 == tarinfo.mode
-    assert os.getuid() == tarinfo.uid
-    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
-    assert os.getgid() == tarinfo.gid
-    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+    assert login_info['uid'] == tarinfo.uid
+    assert login_info['username'] == tarinfo.uname
+    assert login_info['gid'] == tarinfo.gid
+    assert login_info['groupname'] == tarinfo.gname
 
     tarinfo = f.next()
     assert tarinfo is None
@@ -553,12 +587,14 @@ def test_CommunicationWriterTar_single_file_default_name(output_file):
     f.close()
 
 
-def test_CommunicationWriterTGZ_single_file(output_file):
+def test_CommunicationWriterTGZ_single_file(output_file, login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     writer = CommunicationWriterTGZ()
-    writer.open(output_file)
-    writer.write(comm, "simple_1.concrete")
-    writer.close()
+    try:
+        writer.open(output_file)
+        writer.write(comm, "simple_1.concrete")
+    finally:
+        writer.close()
 
     assert tarfile.is_tarfile(output_file)
 
@@ -572,10 +608,10 @@ def test_CommunicationWriterTGZ_single_file(output_file):
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0644 == tarinfo.mode
-    assert os.getuid() == tarinfo.uid
-    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
-    assert os.getgid() == tarinfo.gid
-    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+    assert login_info['uid'] == tarinfo.uid
+    assert login_info['username'] == tarinfo.uname
+    assert login_info['gid'] == tarinfo.gid
+    assert login_info['groupname'] == tarinfo.gname
 
     tarinfo = f.next()
     assert tarinfo is None
@@ -583,7 +619,7 @@ def test_CommunicationWriterTGZ_single_file(output_file):
     f.close()
 
 
-def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file):
+def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file, login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     with CommunicationWriterTGZ(output_file) as writer:
         writer.write(comm, "simple_1.concrete")
@@ -600,10 +636,10 @@ def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file):
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0644 == tarinfo.mode
-    assert os.getuid() == tarinfo.uid
-    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
-    assert os.getgid() == tarinfo.gid
-    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+    assert login_info['uid'] == tarinfo.uid
+    assert login_info['username'] == tarinfo.uname
+    assert login_info['gid'] == tarinfo.gid
+    assert login_info['groupname'] == tarinfo.gname
 
     tarinfo = f.next()
     assert tarinfo is None
@@ -611,12 +647,15 @@ def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file):
     f.close()
 
 
-def test_CommunicationWriterTGZ_single_file_default_name(output_file):
+def test_CommunicationWriterTGZ_single_file_default_name(output_file,
+                                                         login_info):
     comm = read_communication_from_file("tests/testdata/simple_1.concrete")
     writer = CommunicationWriterTGZ()
-    writer.open(output_file)
-    writer.write(comm)
-    writer.close()
+    try:
+        writer.open(output_file)
+        writer.write(comm)
+    finally:
+        writer.close()
 
     assert tarfile.is_tarfile(output_file)
 
@@ -630,10 +669,10 @@ def test_CommunicationWriterTGZ_single_file_default_name(output_file):
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0644 == tarinfo.mode
-    assert os.getuid() == tarinfo.uid
-    assert pwd.getpwuid(os.getuid()).pw_name == tarinfo.uname
-    assert os.getgid() == tarinfo.gid
-    assert grp.getgrgid(os.getgid()).gr_name == tarinfo.gname
+    assert login_info['uid'] == tarinfo.uid
+    assert login_info['username'] == tarinfo.uname
+    assert login_info['gid'] == tarinfo.gid
+    assert login_info['groupname'] == tarinfo.gname
 
     tarinfo = f.next()
     assert tarinfo is None

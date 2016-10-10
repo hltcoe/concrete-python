@@ -7,7 +7,7 @@ before_script:
   - docker info
 
 script:
-  - docker build -t concrete-python .
-  - docker run --rm concrete-python bash check-style.bash
-  - docker run --rm concrete-python python setup.py test
-  - docker run --rm concrete-python python setup.py test --addopts integration-tests
+  - docker build -t concrete-python:accel .
+  - docker run --rm concrete-python:accel bash check-style.bash
+  - docker run --rm concrete-python:accel python setup.py test
+  - docker run --rm concrete-python:accel python setup.py test --addopts integration-tests

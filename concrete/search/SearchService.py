@@ -18,36 +18,24 @@ from thrift.transport import TTransport
 
 
 class Iface(concrete.services.Service.Iface):
-    def startFeedback(self, results):
+    def search(self, query):
         """
-        Start providing feedback for the specified SearchResults.
-        This causes the search and its results to be persisted.
+        Perform a search specified by the query
 
         Parameters:
-         - results
+         - query
         """
         pass
 
-    def addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
+    def getCapabilities(self):
         """
-        Provide feedback on the relevance of a particular communication to a search
-
-        Parameters:
-         - searchResultsId
-         - communicationId
-         - feedback
+        Get a list of search type-language pairs
         """
         pass
 
-    def addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
+    def getCorpora(self):
         """
-        Provide feedback on the relevance of a particular sentence to a search
-
-        Parameters:
-         - searchResultsId
-         - communicationId
-         - sentenceId
-         - feedback
+        Get a corpus list from the search provider
         """
         pass
 
@@ -56,26 +44,25 @@ class Client(concrete.services.Service.Client, Iface):
     def __init__(self, iprot, oprot=None):
         concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-    def startFeedback(self, results):
+    def search(self, query):
         """
-        Start providing feedback for the specified SearchResults.
-        This causes the search and its results to be persisted.
+        Perform a search specified by the query
 
         Parameters:
-         - results
+         - query
         """
-        self.send_startFeedback(results)
-        self.recv_startFeedback()
+        self.send_search(query)
+        return self.recv_search()
 
-    def send_startFeedback(self, results):
-        self._oprot.writeMessageBegin('startFeedback', TMessageType.CALL, self._seqid)
-        args = startFeedback_args()
-        args.results = results
+    def send_search(self, query):
+        self._oprot.writeMessageBegin('search', TMessageType.CALL, self._seqid)
+        args = search_args()
+        args.query = query
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_startFeedback(self):
+    def recv_search(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -83,36 +70,30 @@ class Client(concrete.services.Service.Client, Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = startFeedback_result()
+        result = search_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
         if result.ex is not None:
             raise result.ex
-        return
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "search failed: unknown result")
 
-    def addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
+    def getCapabilities(self):
         """
-        Provide feedback on the relevance of a particular communication to a search
-
-        Parameters:
-         - searchResultsId
-         - communicationId
-         - feedback
+        Get a list of search type-language pairs
         """
-        self.send_addCommunicationFeedback(searchResultsId, communicationId, feedback)
-        self.recv_addCommunicationFeedback()
+        self.send_getCapabilities()
+        return self.recv_getCapabilities()
 
-    def send_addCommunicationFeedback(self, searchResultsId, communicationId, feedback):
-        self._oprot.writeMessageBegin('addCommunicationFeedback', TMessageType.CALL, self._seqid)
-        args = addCommunicationFeedback_args()
-        args.searchResultsId = searchResultsId
-        args.communicationId = communicationId
-        args.feedback = feedback
+    def send_getCapabilities(self):
+        self._oprot.writeMessageBegin('getCapabilities', TMessageType.CALL, self._seqid)
+        args = getCapabilities_args()
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_addCommunicationFeedback(self):
+    def recv_getCapabilities(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -120,38 +101,30 @@ class Client(concrete.services.Service.Client, Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = addCommunicationFeedback_result()
+        result = getCapabilities_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
         if result.ex is not None:
             raise result.ex
-        return
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getCapabilities failed: unknown result")
 
-    def addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
+    def getCorpora(self):
         """
-        Provide feedback on the relevance of a particular sentence to a search
-
-        Parameters:
-         - searchResultsId
-         - communicationId
-         - sentenceId
-         - feedback
+        Get a corpus list from the search provider
         """
-        self.send_addSentenceFeedback(searchResultsId, communicationId, sentenceId, feedback)
-        self.recv_addSentenceFeedback()
+        self.send_getCorpora()
+        return self.recv_getCorpora()
 
-    def send_addSentenceFeedback(self, searchResultsId, communicationId, sentenceId, feedback):
-        self._oprot.writeMessageBegin('addSentenceFeedback', TMessageType.CALL, self._seqid)
-        args = addSentenceFeedback_args()
-        args.searchResultsId = searchResultsId
-        args.communicationId = communicationId
-        args.sentenceId = sentenceId
-        args.feedback = feedback
+    def send_getCorpora(self):
+        self._oprot.writeMessageBegin('getCorpora', TMessageType.CALL, self._seqid)
+        args = getCorpora_args()
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_addSentenceFeedback(self):
+    def recv_getCorpora(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -159,20 +132,22 @@ class Client(concrete.services.Service.Client, Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = addSentenceFeedback_result()
+        result = getCorpora_result()
         result.read(iprot)
         iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
         if result.ex is not None:
             raise result.ex
-        return
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getCorpora failed: unknown result")
 
 
 class Processor(concrete.services.Service.Processor, Iface, TProcessor):
     def __init__(self, handler):
         concrete.services.Service.Processor.__init__(self, handler)
-        self._processMap["startFeedback"] = Processor.process_startFeedback
-        self._processMap["addCommunicationFeedback"] = Processor.process_addCommunicationFeedback
-        self._processMap["addSentenceFeedback"] = Processor.process_addSentenceFeedback
+        self._processMap["search"] = Processor.process_search
+        self._processMap["getCapabilities"] = Processor.process_getCapabilities
+        self._processMap["getCorpora"] = Processor.process_getCorpora
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -189,13 +164,13 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_startFeedback(self, seqid, iprot, oprot):
-        args = startFeedback_args()
+    def process_search(self, seqid, iprot, oprot):
+        args = search_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = startFeedback_result()
+        result = search_result()
         try:
-            self._handler.startFeedback(args.results)
+            result.success = self._handler.search(args.query)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -206,18 +181,18 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("startFeedback", msg_type, seqid)
+        oprot.writeMessageBegin("search", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_addCommunicationFeedback(self, seqid, iprot, oprot):
-        args = addCommunicationFeedback_args()
+    def process_getCapabilities(self, seqid, iprot, oprot):
+        args = getCapabilities_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = addCommunicationFeedback_result()
+        result = getCapabilities_result()
         try:
-            self._handler.addCommunicationFeedback(args.searchResultsId, args.communicationId, args.feedback)
+            result.success = self._handler.getCapabilities()
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -228,18 +203,18 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("addCommunicationFeedback", msg_type, seqid)
+        oprot.writeMessageBegin("getCapabilities", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_addSentenceFeedback(self, seqid, iprot, oprot):
-        args = addSentenceFeedback_args()
+    def process_getCorpora(self, seqid, iprot, oprot):
+        args = getCorpora_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = addSentenceFeedback_result()
+        result = getCorpora_result()
         try:
-            self._handler.addSentenceFeedback(args.searchResultsId, args.communicationId, args.sentenceId, args.feedback)
+            result.success = self._handler.getCorpora()
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -250,7 +225,7 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("addSentenceFeedback", msg_type, seqid)
+        oprot.writeMessageBegin("getCorpora", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -258,19 +233,19 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class startFeedback_args(object):
+class search_args(object):
     """
     Attributes:
-     - results
+     - query
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'results', (SearchResults, SearchResults.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'query', (SearchQuery, SearchQuery.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, results=None,):
-        self.results = results
+    def __init__(self, query=None,):
+        self.query = query
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -283,8 +258,8 @@ class startFeedback_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.results = SearchResults()
-                    self.results.read(iprot)
+                    self.query = SearchQuery()
+                    self.query.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -296,10 +271,10 @@ class startFeedback_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('startFeedback_args')
-        if self.results is not None:
-            oprot.writeFieldBegin('results', TType.STRUCT, 1)
-            self.results.write(oprot)
+        oprot.writeStructBegin('search_args')
+        if self.query is not None:
+            oprot.writeFieldBegin('query', TType.STRUCT, 1)
+            self.query.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -319,18 +294,20 @@ class startFeedback_args(object):
         return not (self == other)
 
 
-class startFeedback_result(object):
+class search_result(object):
     """
     Attributes:
+     - success
      - ex
     """
 
     thrift_spec = (
-        None,  # 0
+        (0, TType.STRUCT, 'success', (SearchResult, SearchResult.thrift_spec), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, ex=None,):
+    def __init__(self, success=None, ex=None,):
+        self.success = success
         self.ex = ex
 
     def read(self, iprot):
@@ -342,7 +319,13 @@ class startFeedback_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = SearchResult()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
                 if ftype == TType.STRUCT:
                     self.ex = concrete.services.ttypes.ServicesException()
                     self.ex.read(iprot)
@@ -357,7 +340,11 @@ class startFeedback_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('startFeedback_result')
+        oprot.writeStructBegin('search_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -380,25 +367,10 @@ class startFeedback_result(object):
         return not (self == other)
 
 
-class addCommunicationFeedback_args(object):
-    """
-    Attributes:
-     - searchResultsId
-     - communicationId
-     - feedback
-    """
+class getCapabilities_args(object):
 
     thrift_spec = (
-        None,  # 0
-        (1, TType.STRUCT, 'searchResultsId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
-        (2, TType.STRING, 'communicationId', 'UTF8', None, ),  # 2
-        (3, TType.I32, 'feedback', None, None, ),  # 3
     )
-
-    def __init__(self, searchResultsId=None, communicationId=None, feedback=None,):
-        self.searchResultsId = searchResultsId
-        self.communicationId = communicationId
-        self.feedback = feedback
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -409,22 +381,6 @@ class addCommunicationFeedback_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.searchResultsId = concrete.uuid.ttypes.UUID()
-                    self.searchResultsId.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.communicationId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.feedback = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -434,19 +390,7 @@ class addCommunicationFeedback_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('addCommunicationFeedback_args')
-        if self.searchResultsId is not None:
-            oprot.writeFieldBegin('searchResultsId', TType.STRUCT, 1)
-            self.searchResultsId.write(oprot)
-            oprot.writeFieldEnd()
-        if self.communicationId is not None:
-            oprot.writeFieldBegin('communicationId', TType.STRING, 2)
-            oprot.writeString(self.communicationId.encode('utf-8') if sys.version_info[0] == 2 else self.communicationId)
-            oprot.writeFieldEnd()
-        if self.feedback is not None:
-            oprot.writeFieldBegin('feedback', TType.I32, 3)
-            oprot.writeI32(self.feedback)
-            oprot.writeFieldEnd()
+        oprot.writeStructBegin('getCapabilities_args')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -465,18 +409,20 @@ class addCommunicationFeedback_args(object):
         return not (self == other)
 
 
-class addCommunicationFeedback_result(object):
+class getCapabilities_result(object):
     """
     Attributes:
+     - success
      - ex
     """
 
     thrift_spec = (
-        None,  # 0
+        (0, TType.LIST, 'success', (TType.STRUCT, (SearchCapability, SearchCapability.thrift_spec), False), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, ex=None,):
+    def __init__(self, success=None, ex=None,):
+        self.success = success
         self.ex = ex
 
     def read(self, iprot):
@@ -488,7 +434,18 @@ class addCommunicationFeedback_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype31, _size28) = iprot.readListBegin()
+                    for _i32 in range(_size28):
+                        _elem33 = SearchCapability()
+                        _elem33.read(iprot)
+                        self.success.append(_elem33)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
                 if ftype == TType.STRUCT:
                     self.ex = concrete.services.ttypes.ServicesException()
                     self.ex.read(iprot)
@@ -503,7 +460,14 @@ class addCommunicationFeedback_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('addCommunicationFeedback_result')
+        oprot.writeStructBegin('getCapabilities_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRUCT, len(self.success))
+            for iter34 in self.success:
+                iter34.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -526,28 +490,10 @@ class addCommunicationFeedback_result(object):
         return not (self == other)
 
 
-class addSentenceFeedback_args(object):
-    """
-    Attributes:
-     - searchResultsId
-     - communicationId
-     - sentenceId
-     - feedback
-    """
+class getCorpora_args(object):
 
     thrift_spec = (
-        None,  # 0
-        (1, TType.STRUCT, 'searchResultsId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
-        (2, TType.STRING, 'communicationId', 'UTF8', None, ),  # 2
-        (3, TType.STRUCT, 'sentenceId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 3
-        (4, TType.I32, 'feedback', None, None, ),  # 4
     )
-
-    def __init__(self, searchResultsId=None, communicationId=None, sentenceId=None, feedback=None,):
-        self.searchResultsId = searchResultsId
-        self.communicationId = communicationId
-        self.sentenceId = sentenceId
-        self.feedback = feedback
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -558,28 +504,6 @@ class addSentenceFeedback_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.searchResultsId = concrete.uuid.ttypes.UUID()
-                    self.searchResultsId.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.communicationId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRUCT:
-                    self.sentenceId = concrete.uuid.ttypes.UUID()
-                    self.sentenceId.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.I32:
-                    self.feedback = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -589,23 +513,7 @@ class addSentenceFeedback_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('addSentenceFeedback_args')
-        if self.searchResultsId is not None:
-            oprot.writeFieldBegin('searchResultsId', TType.STRUCT, 1)
-            self.searchResultsId.write(oprot)
-            oprot.writeFieldEnd()
-        if self.communicationId is not None:
-            oprot.writeFieldBegin('communicationId', TType.STRING, 2)
-            oprot.writeString(self.communicationId.encode('utf-8') if sys.version_info[0] == 2 else self.communicationId)
-            oprot.writeFieldEnd()
-        if self.sentenceId is not None:
-            oprot.writeFieldBegin('sentenceId', TType.STRUCT, 3)
-            self.sentenceId.write(oprot)
-            oprot.writeFieldEnd()
-        if self.feedback is not None:
-            oprot.writeFieldBegin('feedback', TType.I32, 4)
-            oprot.writeI32(self.feedback)
-            oprot.writeFieldEnd()
+        oprot.writeStructBegin('getCorpora_args')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -624,18 +532,20 @@ class addSentenceFeedback_args(object):
         return not (self == other)
 
 
-class addSentenceFeedback_result(object):
+class getCorpora_result(object):
     """
     Attributes:
+     - success
      - ex
     """
 
     thrift_spec = (
-        None,  # 0
+        (0, TType.LIST, 'success', (TType.STRING, 'UTF8', False), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, ex=None,):
+    def __init__(self, success=None, ex=None,):
+        self.success = success
         self.ex = ex
 
     def read(self, iprot):
@@ -647,7 +557,17 @@ class addSentenceFeedback_result(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype38, _size35) = iprot.readListBegin()
+                    for _i39 in range(_size35):
+                        _elem40 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.success.append(_elem40)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
                 if ftype == TType.STRUCT:
                     self.ex = concrete.services.ttypes.ServicesException()
                     self.ex.read(iprot)
@@ -662,7 +582,14 @@ class addSentenceFeedback_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('addSentenceFeedback_result')
+        oprot.writeStructBegin('getCorpora_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRING, len(self.success))
+            for iter41 in self.success:
+                oprot.writeString(iter41.encode('utf-8') if sys.version_info[0] == 2 else iter41)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)

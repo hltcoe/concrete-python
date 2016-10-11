@@ -17,17 +17,23 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from concrete.learn import ActiveLearnerServer
-from concrete.learn.ttypes import *
+from concrete.services.results import ResultsServerService
+from concrete.services.results.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  bool start(UUID sessionId, AnnotationTask task, AsyncContactInfo contact)')
-    print('  void stop(UUID sessionId)')
-    print('  void addAnnotations(UUID sessionId,  annotations)')
+    print('  void registerSearchResult(SearchResult result, AnnotationTaskType taskType)')
+    print('   getSearchResults(AnnotationTaskType taskType, i32 limit)')
+    print('   getSearchResultsByUser(AnnotationTaskType taskType, string userId, i32 limit)')
+    print('  SearchResult getLatestSearchResult(string userId)')
+    print('  SearchResult getSearchResult(UUID searchResultId)')
+    print('  UUID startSession(UUID searchResultId, AnnotationTaskType taskType)')
+    print('  void stopSession(UUID sessionId)')
+    print('   getNextChunk(UUID sessionId)')
+    print('  void submitAnnotation(UUID sessionId, AnnotationUnitIdentifier unitId, Communication communication)')
     print('  ServiceInfo about()')
     print('  bool alive()')
     print('')
@@ -83,26 +89,62 @@ else:
     else:
         transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol(transport)
-client = ActiveLearnerServer.Client(protocol)
+client = ResultsServerService.Client(protocol)
 transport.open()
 
-if cmd == 'start':
-    if len(args) != 3:
-        print('start requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.start(eval(args[0]), eval(args[1]), eval(args[2]),))
-
-elif cmd == 'stop':
-    if len(args) != 1:
-        print('stop requires 1 args')
-        sys.exit(1)
-    pp.pprint(client.stop(eval(args[0]),))
-
-elif cmd == 'addAnnotations':
+if cmd == 'registerSearchResult':
     if len(args) != 2:
-        print('addAnnotations requires 2 args')
+        print('registerSearchResult requires 2 args')
         sys.exit(1)
-    pp.pprint(client.addAnnotations(eval(args[0]), eval(args[1]),))
+    pp.pprint(client.registerSearchResult(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'getSearchResults':
+    if len(args) != 2:
+        print('getSearchResults requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.getSearchResults(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'getSearchResultsByUser':
+    if len(args) != 3:
+        print('getSearchResultsByUser requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.getSearchResultsByUser(eval(args[0]), args[1], eval(args[2]),))
+
+elif cmd == 'getLatestSearchResult':
+    if len(args) != 1:
+        print('getLatestSearchResult requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getLatestSearchResult(args[0],))
+
+elif cmd == 'getSearchResult':
+    if len(args) != 1:
+        print('getSearchResult requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getSearchResult(eval(args[0]),))
+
+elif cmd == 'startSession':
+    if len(args) != 2:
+        print('startSession requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.startSession(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'stopSession':
+    if len(args) != 1:
+        print('stopSession requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.stopSession(eval(args[0]),))
+
+elif cmd == 'getNextChunk':
+    if len(args) != 1:
+        print('getNextChunk requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getNextChunk(eval(args[0]),))
+
+elif cmd == 'submitAnnotation':
+    if len(args) != 3:
+        print('submitAnnotation requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.submitAnnotation(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'about':
     if len(args) != 0:

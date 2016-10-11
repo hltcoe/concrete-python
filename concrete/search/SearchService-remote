@@ -17,7 +17,7 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from concrete.search import Search
+from concrete.search import SearchService
 from concrete.search.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
@@ -25,7 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  SearchResults search(SearchQuery query)')
+    print('  SearchResult search(SearchQuery query)')
     print('   getCapabilities()')
     print('   getCorpora()')
     print('  ServiceInfo about()')
@@ -83,7 +83,7 @@ else:
     else:
         transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol(transport)
-client = Search.Client(protocol)
+client = SearchService.Client(protocol)
 transport.open()
 
 if cmd == 'search':

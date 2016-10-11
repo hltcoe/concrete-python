@@ -18,7 +18,7 @@ from thrift.transport import TTransport
 
 
 class Iface(concrete.services.Service.Iface):
-    def registerSearchResult(self, results, taskType):
+    def registerSearchResult(self, result, taskType):
         """
         Register the specified search result for annotation.
 
@@ -26,7 +26,7 @@ class Iface(concrete.services.Service.Iface):
         This service also requires that the user_id field be populated in the SearchQuery.
 
         Parameters:
-         - results
+         - result
          - taskType
         """
         pass
@@ -63,22 +63,23 @@ class Iface(concrete.services.Service.Iface):
         """
         pass
 
-    def getSearchResult(self, searchResultsId):
+    def getSearchResult(self, searchResultId):
         """
-        Get a search results object
+        Get a search result object
 
         Parameters:
-         - searchResultsId
+         - searchResultId
         """
         pass
 
-    def startSession(self, searchResultsId):
+    def startSession(self, searchResultId, taskType):
         """
         Start an annotation session
         Returns a session id used in future session calls
 
         Parameters:
-         - searchResultsId
+         - searchResultId
+         - taskType
         """
         pass
 
@@ -117,7 +118,7 @@ class Client(concrete.services.Service.Client, Iface):
     def __init__(self, iprot, oprot=None):
         concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-    def registerSearchResult(self, results, taskType):
+    def registerSearchResult(self, result, taskType):
         """
         Register the specified search result for annotation.
 
@@ -125,16 +126,16 @@ class Client(concrete.services.Service.Client, Iface):
         This service also requires that the user_id field be populated in the SearchQuery.
 
         Parameters:
-         - results
+         - result
          - taskType
         """
-        self.send_registerSearchResult(results, taskType)
+        self.send_registerSearchResult(result, taskType)
         self.recv_registerSearchResult()
 
-    def send_registerSearchResult(self, results, taskType):
+    def send_registerSearchResult(self, result, taskType):
         self._oprot.writeMessageBegin('registerSearchResult', TMessageType.CALL, self._seqid)
         args = registerSearchResult_args()
-        args.results = results
+        args.result = result
         args.taskType = taskType
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -268,20 +269,20 @@ class Client(concrete.services.Service.Client, Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getLatestSearchResult failed: unknown result")
 
-    def getSearchResult(self, searchResultsId):
+    def getSearchResult(self, searchResultId):
         """
-        Get a search results object
+        Get a search result object
 
         Parameters:
-         - searchResultsId
+         - searchResultId
         """
-        self.send_getSearchResult(searchResultsId)
+        self.send_getSearchResult(searchResultId)
         return self.recv_getSearchResult()
 
-    def send_getSearchResult(self, searchResultsId):
+    def send_getSearchResult(self, searchResultId):
         self._oprot.writeMessageBegin('getSearchResult', TMessageType.CALL, self._seqid)
         args = getSearchResult_args()
-        args.searchResultsId = searchResultsId
+        args.searchResultId = searchResultId
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -303,21 +304,23 @@ class Client(concrete.services.Service.Client, Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getSearchResult failed: unknown result")
 
-    def startSession(self, searchResultsId):
+    def startSession(self, searchResultId, taskType):
         """
         Start an annotation session
         Returns a session id used in future session calls
 
         Parameters:
-         - searchResultsId
+         - searchResultId
+         - taskType
         """
-        self.send_startSession(searchResultsId)
+        self.send_startSession(searchResultId, taskType)
         return self.recv_startSession()
 
-    def send_startSession(self, searchResultsId):
+    def send_startSession(self, searchResultId, taskType):
         self._oprot.writeMessageBegin('startSession', TMessageType.CALL, self._seqid)
         args = startSession_args()
-        args.searchResultsId = searchResultsId
+        args.searchResultId = searchResultId
+        args.taskType = taskType
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -480,7 +483,7 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
         iprot.readMessageEnd()
         result = registerSearchResult_result()
         try:
-            self._handler.registerSearchResult(args.results, args.taskType)
+            self._handler.registerSearchResult(args.result, args.taskType)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -568,7 +571,7 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
         iprot.readMessageEnd()
         result = getSearchResult_result()
         try:
-            result.success = self._handler.getSearchResult(args.searchResultsId)
+            result.success = self._handler.getSearchResult(args.searchResultId)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -590,7 +593,7 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
         iprot.readMessageEnd()
         result = startSession_result()
         try:
-            result.success = self._handler.startSession(args.searchResultsId)
+            result.success = self._handler.startSession(args.searchResultId, args.taskType)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -678,18 +681,18 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
 class registerSearchResult_args(object):
     """
     Attributes:
-     - results
+     - result
      - taskType
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'results', (concrete.search.ttypes.SearchResults, concrete.search.ttypes.SearchResults.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'result', (concrete.search.ttypes.SearchResult, concrete.search.ttypes.SearchResult.thrift_spec), None, ),  # 1
         (2, TType.I32, 'taskType', None, None, ),  # 2
     )
 
-    def __init__(self, results=None, taskType=None,):
-        self.results = results
+    def __init__(self, result=None, taskType=None,):
+        self.result = result
         self.taskType = taskType
 
     def read(self, iprot):
@@ -703,8 +706,8 @@ class registerSearchResult_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.results = concrete.search.ttypes.SearchResults()
-                    self.results.read(iprot)
+                    self.result = concrete.search.ttypes.SearchResult()
+                    self.result.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -722,9 +725,9 @@ class registerSearchResult_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('registerSearchResult_args')
-        if self.results is not None:
-            oprot.writeFieldBegin('results', TType.STRUCT, 1)
-            self.results.write(oprot)
+        if self.result is not None:
+            oprot.writeFieldBegin('result', TType.STRUCT, 1)
+            self.result.write(oprot)
             oprot.writeFieldEnd()
         if self.taskType is not None:
             oprot.writeFieldBegin('taskType', TType.I32, 2)
@@ -889,7 +892,7 @@ class getSearchResults_result(object):
     """
 
     thrift_spec = (
-        (0, TType.LIST, 'success', (TType.STRUCT, (concrete.search.ttypes.SearchResults, concrete.search.ttypes.SearchResults.thrift_spec), False), None, ),  # 0
+        (0, TType.LIST, 'success', (TType.STRUCT, (concrete.search.ttypes.SearchResult, concrete.search.ttypes.SearchResult.thrift_spec), False), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
@@ -911,7 +914,7 @@ class getSearchResults_result(object):
                     self.success = []
                     (_etype3, _size0) = iprot.readListBegin()
                     for _i4 in range(_size0):
-                        _elem5 = concrete.search.ttypes.SearchResults()
+                        _elem5 = concrete.search.ttypes.SearchResult()
                         _elem5.read(iprot)
                         self.success.append(_elem5)
                     iprot.readListEnd()
@@ -1054,7 +1057,7 @@ class getSearchResultsByUser_result(object):
     """
 
     thrift_spec = (
-        (0, TType.LIST, 'success', (TType.STRUCT, (concrete.search.ttypes.SearchResults, concrete.search.ttypes.SearchResults.thrift_spec), False), None, ),  # 0
+        (0, TType.LIST, 'success', (TType.STRUCT, (concrete.search.ttypes.SearchResult, concrete.search.ttypes.SearchResult.thrift_spec), False), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
@@ -1076,7 +1079,7 @@ class getSearchResultsByUser_result(object):
                     self.success = []
                     (_etype10, _size7) = iprot.readListBegin()
                     for _i11 in range(_size7):
-                        _elem12 = concrete.search.ttypes.SearchResults()
+                        _elem12 = concrete.search.ttypes.SearchResult()
                         _elem12.read(iprot)
                         self.success.append(_elem12)
                     iprot.readListEnd()
@@ -1195,7 +1198,7 @@ class getLatestSearchResult_result(object):
     """
 
     thrift_spec = (
-        (0, TType.STRUCT, 'success', (concrete.search.ttypes.SearchResults, concrete.search.ttypes.SearchResults.thrift_spec), None, ),  # 0
+        (0, TType.STRUCT, 'success', (concrete.search.ttypes.SearchResult, concrete.search.ttypes.SearchResult.thrift_spec), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
@@ -1214,7 +1217,7 @@ class getLatestSearchResult_result(object):
                 break
             if fid == 0:
                 if ftype == TType.STRUCT:
-                    self.success = concrete.search.ttypes.SearchResults()
+                    self.success = concrete.search.ttypes.SearchResult()
                     self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1263,16 +1266,16 @@ class getLatestSearchResult_result(object):
 class getSearchResult_args(object):
     """
     Attributes:
-     - searchResultsId
+     - searchResultId
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'searchResultsId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'searchResultId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, searchResultsId=None,):
-        self.searchResultsId = searchResultsId
+    def __init__(self, searchResultId=None,):
+        self.searchResultId = searchResultId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1285,8 +1288,8 @@ class getSearchResult_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.searchResultsId = concrete.uuid.ttypes.UUID()
-                    self.searchResultsId.read(iprot)
+                    self.searchResultId = concrete.uuid.ttypes.UUID()
+                    self.searchResultId.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -1299,9 +1302,9 @@ class getSearchResult_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('getSearchResult_args')
-        if self.searchResultsId is not None:
-            oprot.writeFieldBegin('searchResultsId', TType.STRUCT, 1)
-            self.searchResultsId.write(oprot)
+        if self.searchResultId is not None:
+            oprot.writeFieldBegin('searchResultId', TType.STRUCT, 1)
+            self.searchResultId.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1329,7 +1332,7 @@ class getSearchResult_result(object):
     """
 
     thrift_spec = (
-        (0, TType.STRUCT, 'success', (concrete.search.ttypes.SearchResults, concrete.search.ttypes.SearchResults.thrift_spec), None, ),  # 0
+        (0, TType.STRUCT, 'success', (concrete.search.ttypes.SearchResult, concrete.search.ttypes.SearchResult.thrift_spec), None, ),  # 0
         (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ),  # 1
     )
 
@@ -1348,7 +1351,7 @@ class getSearchResult_result(object):
                 break
             if fid == 0:
                 if ftype == TType.STRUCT:
-                    self.success = concrete.search.ttypes.SearchResults()
+                    self.success = concrete.search.ttypes.SearchResult()
                     self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1397,16 +1400,19 @@ class getSearchResult_result(object):
 class startSession_args(object):
     """
     Attributes:
-     - searchResultsId
+     - searchResultId
+     - taskType
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'searchResultsId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'searchResultId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (2, TType.I32, 'taskType', None, None, ),  # 2
     )
 
-    def __init__(self, searchResultsId=None,):
-        self.searchResultsId = searchResultsId
+    def __init__(self, searchResultId=None, taskType=None,):
+        self.searchResultId = searchResultId
+        self.taskType = taskType
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1419,8 +1425,13 @@ class startSession_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.searchResultsId = concrete.uuid.ttypes.UUID()
-                    self.searchResultsId.read(iprot)
+                    self.searchResultId = concrete.uuid.ttypes.UUID()
+                    self.searchResultId.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.taskType = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             else:
@@ -1433,9 +1444,13 @@ class startSession_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('startSession_args')
-        if self.searchResultsId is not None:
-            oprot.writeFieldBegin('searchResultsId', TType.STRUCT, 1)
-            self.searchResultsId.write(oprot)
+        if self.searchResultId is not None:
+            oprot.writeFieldBegin('searchResultId', TType.STRUCT, 1)
+            self.searchResultId.write(oprot)
+            oprot.writeFieldEnd()
+        if self.taskType is not None:
+            oprot.writeFieldBegin('taskType', TType.I32, 2)
+            oprot.writeI32(self.taskType)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

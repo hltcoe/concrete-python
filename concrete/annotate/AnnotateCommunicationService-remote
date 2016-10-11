@@ -17,7 +17,7 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from concrete.annotate import Annotator
+from concrete.annotate import AnnotateCommunicationService
 from concrete.annotate.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
@@ -82,7 +82,7 @@ else:
     else:
         transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol(transport)
-client = Annotator.Client(protocol)
+client = AnnotateCommunicationService.Client(protocol)
 transport.open()
 
 if cmd == 'annotate':

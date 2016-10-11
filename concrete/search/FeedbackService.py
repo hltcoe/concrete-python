@@ -269,7 +269,7 @@ class startFeedback_args(object):
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'results', (SearchResults, SearchResults.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'results', (SearchResult, SearchResult.thrift_spec), None, ), # 1
   )
 
   def __init__(self, results=None,):
@@ -286,7 +286,7 @@ class startFeedback_args(object):
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.results = SearchResults()
+          self.results = SearchResult()
           self.results.read(iprot)
         else:
           iprot.skip(ftype)

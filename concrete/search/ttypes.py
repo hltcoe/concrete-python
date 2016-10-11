@@ -412,7 +412,7 @@ class SearchQuery(object):
   def __ne__(self, other):
     return not (self == other)
 
-class SearchResult(object):
+class SearchResultItem(object):
   """
   An individual element returned from a search.  Most/all methods
   will return a communicationId, possibly with an associated score.
@@ -486,7 +486,7 @@ class SearchResult(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('SearchResult')
+    oprot.writeStructBegin('SearchResultItem')
     if self.communicationId is not None:
       oprot.writeFieldBegin('communicationId', TType.STRING, 1)
       oprot.writeString(self.communicationId.encode('utf-8'))
@@ -529,7 +529,7 @@ class SearchResult(object):
   def __ne__(self, other):
     return not (self == other)
 
-class SearchResults(object):
+class SearchResult(object):
   """
   Single wrapper for results from all the various Search* services.
 
@@ -537,7 +537,7 @@ class SearchResults(object):
    - uuid: Unique identifier for the results of this search.
    - searchQuery: The query that led to this result.
   Useful for capturing feedback or building training data.
-   - searchResults: The list is assumed sorted best to worst, which should be
+   - searchResultItems: The list is assumed sorted best to worst, which should be
   reflected by the values contained in the score field of each
   SearchResult, if that field is populated.
    - metadata: The system that provided the response: likely use case for
@@ -554,15 +554,15 @@ class SearchResults(object):
     None, # 0
     (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'searchQuery', (SearchQuery, SearchQuery.thrift_spec), None, ), # 2
-    (3, TType.LIST, 'searchResults', (TType.STRUCT,(SearchResult, SearchResult.thrift_spec)), None, ), # 3
+    (3, TType.LIST, 'searchResultItems', (TType.STRUCT,(SearchResultItem, SearchResultItem.thrift_spec)), None, ), # 3
     (4, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ), # 4
     (5, TType.STRING, 'lang', None, None, ), # 5
   )
 
-  def __init__(self, uuid=None, searchQuery=None, searchResults=None, metadata=None, lang=None,):
+  def __init__(self, uuid=None, searchQuery=None, searchResultItems=None, metadata=None, lang=None,):
     self.uuid = uuid
     self.searchQuery = searchQuery
-    self.searchResults = searchResults
+    self.searchResultItems = searchResultItems
     self.metadata = metadata
     self.lang = lang
 
@@ -589,12 +589,12 @@ class SearchResults(object):
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.LIST:
-          self.searchResults = []
+          self.searchResultItems = []
           (_etype24, _size21) = iprot.readListBegin()
           for _i25 in xrange(_size21):
-            _elem26 = SearchResult()
+            _elem26 = SearchResultItem()
             _elem26.read(iprot)
-            self.searchResults.append(_elem26)
+            self.searchResultItems.append(_elem26)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -618,7 +618,7 @@ class SearchResults(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('SearchResults')
+    oprot.writeStructBegin('SearchResult')
     if self.uuid is not None:
       oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
       self.uuid.write(oprot)
@@ -627,10 +627,10 @@ class SearchResults(object):
       oprot.writeFieldBegin('searchQuery', TType.STRUCT, 2)
       self.searchQuery.write(oprot)
       oprot.writeFieldEnd()
-    if self.searchResults is not None:
-      oprot.writeFieldBegin('searchResults', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRUCT, len(self.searchResults))
-      for iter27 in self.searchResults:
+    if self.searchResultItems is not None:
+      oprot.writeFieldBegin('searchResultItems', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRUCT, len(self.searchResultItems))
+      for iter27 in self.searchResultItems:
         iter27.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -657,7 +657,7 @@ class SearchResults(object):
     value = 17
     value = (value * 31) ^ hash(self.uuid)
     value = (value * 31) ^ hash(self.searchQuery)
-    value = (value * 31) ^ hash(self.searchResults)
+    value = (value * 31) ^ hash(self.searchResultItems)
     value = (value * 31) ^ hash(self.metadata)
     value = (value * 31) ^ hash(self.lang)
     return value

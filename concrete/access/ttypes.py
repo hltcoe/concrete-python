@@ -21,9 +21,9 @@ except:
 
 
 
-class RetrieveResults(object):
+class FetchResult(object):
   """
-  Struct representing results from the Retriever service.
+  Struct containing Communications from the FetchCommunicationService service.
 
   Attributes:
    - communications: a list of Communication objects that represent the results of the request
@@ -66,7 +66,7 @@ class RetrieveResults(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('RetrieveResults')
+    oprot.writeStructBegin('FetchResult')
     if self.communications is not None:
       oprot.writeFieldBegin('communications', TType.LIST, 1)
       oprot.writeListBegin(TType.STRUCT, len(self.communications))
@@ -99,9 +99,9 @@ class RetrieveResults(object):
   def __ne__(self, other):
     return not (self == other)
 
-class RetrieveRequest(object):
+class FetchRequest(object):
   """
-  Struct representing a request for the Retriever service.
+  Struct representing a request for FetchCommunicationService.
 
   Attributes:
    - communicationIds: a list of Communication IDs
@@ -151,7 +151,7 @@ class RetrieveRequest(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('RetrieveRequest')
+    oprot.writeStructBegin('FetchRequest')
     if self.communicationIds is not None:
       oprot.writeFieldBegin('communicationIds', TType.LIST, 1)
       oprot.writeListBegin(TType.STRING, len(self.communicationIds))

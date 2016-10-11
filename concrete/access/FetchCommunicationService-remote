@@ -17,18 +17,17 @@ from thrift.transport import TSSLSocket
 from thrift.transport import THttpClient
 from thrift.protocol import TBinaryProtocol
 
-from concrete.annotate import Annotator
-from concrete.annotate.ttypes import *
+from concrete.access import FetchCommunicationService
+from concrete.access.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('')
   print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
   print('')
   print('Functions:')
-  print('  Communication annotate(Communication original)')
-  print('  AnnotationMetadata getMetadata()')
-  print('  string getDocumentation()')
-  print('  void shutdown()')
+  print('  FetchResult fetch(FetchRequest request)')
+  print('  ServiceInfo about()')
+  print('  bool alive()')
   print('')
   sys.exit(0)
 
@@ -82,32 +81,26 @@ else:
   else:
     transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol.TBinaryProtocol(transport)
-client = Annotator.Client(protocol)
+client = FetchCommunicationService.Client(protocol)
 transport.open()
 
-if cmd == 'annotate':
+if cmd == 'fetch':
   if len(args) != 1:
-    print('annotate requires 1 args')
+    print('fetch requires 1 args')
     sys.exit(1)
-  pp.pprint(client.annotate(eval(args[0]),))
+  pp.pprint(client.fetch(eval(args[0]),))
 
-elif cmd == 'getMetadata':
+elif cmd == 'about':
   if len(args) != 0:
-    print('getMetadata requires 0 args')
+    print('about requires 0 args')
     sys.exit(1)
-  pp.pprint(client.getMetadata())
+  pp.pprint(client.about())
 
-elif cmd == 'getDocumentation':
+elif cmd == 'alive':
   if len(args) != 0:
-    print('getDocumentation requires 0 args')
+    print('alive requires 0 args')
     sys.exit(1)
-  pp.pprint(client.getDocumentation())
-
-elif cmd == 'shutdown':
-  if len(args) != 0:
-    print('shutdown requires 0 args')
-    sys.exit(1)
-  pp.pprint(client.shutdown())
+  pp.pprint(client.alive())
 
 else:
   print('Unrecognized method %s' % cmd)

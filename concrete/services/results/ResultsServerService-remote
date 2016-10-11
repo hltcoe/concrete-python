@@ -17,18 +17,23 @@ from thrift.transport import TSSLSocket
 from thrift.transport import THttpClient
 from thrift.protocol import TBinaryProtocol
 
-from concrete.search import SearchProxy
-from concrete.search.ttypes import *
+from concrete.services.results import ResultsServerService
+from concrete.services.results.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('')
   print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
   print('')
   print('Functions:')
-  print('  SearchResults search(SearchQuery query, string provider)')
-  print('   getProviders()')
-  print('   getCapabilities(string provider)')
-  print('   getCorpora(string provider)')
+  print('  void registerSearchResult(SearchResult result, AnnotationTaskType taskType)')
+  print('   getSearchResults(AnnotationTaskType taskType, i32 limit)')
+  print('   getSearchResultsByUser(AnnotationTaskType taskType, string userId, i32 limit)')
+  print('  SearchResult getLatestSearchResult(string userId)')
+  print('  SearchResult getSearchResult(UUID searchResultId)')
+  print('  UUID startSession(UUID searchResultId, AnnotationTaskType taskType)')
+  print('  void stopSession(UUID sessionId)')
+  print('   getNextChunk(UUID sessionId)')
+  print('  void submitAnnotation(UUID sessionId, AnnotationUnitIdentifier unitId, Communication communication)')
   print('  ServiceInfo about()')
   print('  bool alive()')
   print('')
@@ -84,32 +89,62 @@ else:
   else:
     transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol.TBinaryProtocol(transport)
-client = SearchProxy.Client(protocol)
+client = ResultsServerService.Client(protocol)
 transport.open()
 
-if cmd == 'search':
+if cmd == 'registerSearchResult':
   if len(args) != 2:
-    print('search requires 2 args')
+    print('registerSearchResult requires 2 args')
     sys.exit(1)
-  pp.pprint(client.search(eval(args[0]),args[1],))
+  pp.pprint(client.registerSearchResult(eval(args[0]),eval(args[1]),))
 
-elif cmd == 'getProviders':
-  if len(args) != 0:
-    print('getProviders requires 0 args')
+elif cmd == 'getSearchResults':
+  if len(args) != 2:
+    print('getSearchResults requires 2 args')
     sys.exit(1)
-  pp.pprint(client.getProviders())
+  pp.pprint(client.getSearchResults(eval(args[0]),eval(args[1]),))
 
-elif cmd == 'getCapabilities':
+elif cmd == 'getSearchResultsByUser':
+  if len(args) != 3:
+    print('getSearchResultsByUser requires 3 args')
+    sys.exit(1)
+  pp.pprint(client.getSearchResultsByUser(eval(args[0]),args[1],eval(args[2]),))
+
+elif cmd == 'getLatestSearchResult':
   if len(args) != 1:
-    print('getCapabilities requires 1 args')
+    print('getLatestSearchResult requires 1 args')
     sys.exit(1)
-  pp.pprint(client.getCapabilities(args[0],))
+  pp.pprint(client.getLatestSearchResult(args[0],))
 
-elif cmd == 'getCorpora':
+elif cmd == 'getSearchResult':
   if len(args) != 1:
-    print('getCorpora requires 1 args')
+    print('getSearchResult requires 1 args')
     sys.exit(1)
-  pp.pprint(client.getCorpora(args[0],))
+  pp.pprint(client.getSearchResult(eval(args[0]),))
+
+elif cmd == 'startSession':
+  if len(args) != 2:
+    print('startSession requires 2 args')
+    sys.exit(1)
+  pp.pprint(client.startSession(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'stopSession':
+  if len(args) != 1:
+    print('stopSession requires 1 args')
+    sys.exit(1)
+  pp.pprint(client.stopSession(eval(args[0]),))
+
+elif cmd == 'getNextChunk':
+  if len(args) != 1:
+    print('getNextChunk requires 1 args')
+    sys.exit(1)
+  pp.pprint(client.getNextChunk(eval(args[0]),))
+
+elif cmd == 'submitAnnotation':
+  if len(args) != 3:
+    print('submitAnnotation requires 3 args')
+    sys.exit(1)
+  pp.pprint(client.submitAnnotation(eval(args[0]),eval(args[1]),eval(args[2]),))
 
 elif cmd == 'about':
   if len(args) != 0:

@@ -22,40 +22,64 @@ except:
 
 class Iface(concrete.services.Service.Iface):
   """
-  Service to retrieve particular communications.
+  A service that exists so that clients can store Concrete data
+  structures to implementing servers.
+
+  Implement this if you are creating an analytic that wishes to
+  store its results back to a server. That server may perform
+  validation, write the new layers to a database, and so forth.
   """
-  def retrieve(self, request):
+  def store(self, communication):
     """
+    Store a communication to a server implementing this method.
+
+    The communication that is stored should contain the new
+    analytic layers you wish to append. You may also wish to call
+    methods that unset annotations you feel the receiver would not
+    find useful in order to reduce network overhead.
+
     Parameters:
-     - request
+     - communication
     """
     pass
 
 
 class Client(concrete.services.Service.Client, Iface):
   """
-  Service to retrieve particular communications.
+  A service that exists so that clients can store Concrete data
+  structures to implementing servers.
+
+  Implement this if you are creating an analytic that wishes to
+  store its results back to a server. That server may perform
+  validation, write the new layers to a database, and so forth.
   """
   def __init__(self, iprot, oprot=None):
     concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-  def retrieve(self, request):
+  def store(self, communication):
     """
-    Parameters:
-     - request
-    """
-    self.send_retrieve(request)
-    return self.recv_retrieve()
+    Store a communication to a server implementing this method.
 
-  def send_retrieve(self, request):
-    self._oprot.writeMessageBegin('retrieve', TMessageType.CALL, self._seqid)
-    args = retrieve_args()
-    args.request = request
+    The communication that is stored should contain the new
+    analytic layers you wish to append. You may also wish to call
+    methods that unset annotations you feel the receiver would not
+    find useful in order to reduce network overhead.
+
+    Parameters:
+     - communication
+    """
+    self.send_store(communication)
+    self.recv_store()
+
+  def send_store(self, communication):
+    self._oprot.writeMessageBegin('store', TMessageType.CALL, self._seqid)
+    args = store_args()
+    args.communication = communication
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_retrieve(self):
+  def recv_store(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -63,20 +87,18 @@ class Client(concrete.services.Service.Client, Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = retrieve_result()
+    result = store_result()
     result.read(iprot)
     iprot.readMessageEnd()
-    if result.success is not None:
-      return result.success
     if result.ex is not None:
       raise result.ex
-    raise TApplicationException(TApplicationException.MISSING_RESULT, "retrieve failed: unknown result")
+    return
 
 
 class Processor(concrete.services.Service.Processor, Iface, TProcessor):
   def __init__(self, handler):
     concrete.services.Service.Processor.__init__(self, handler)
-    self._processMap["retrieve"] = Processor.process_retrieve
+    self._processMap["store"] = Processor.process_store
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -93,13 +115,13 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
       self._processMap[name](self, seqid, iprot, oprot)
     return True
 
-  def process_retrieve(self, seqid, iprot, oprot):
-    args = retrieve_args()
+  def process_store(self, seqid, iprot, oprot):
+    args = store_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = retrieve_result()
+    result = store_result()
     try:
-      result.success = self._handler.retrieve(args.request)
+      self._handler.store(args.communication)
       msg_type = TMessageType.REPLY
     except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
       raise
@@ -110,7 +132,7 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
       msg_type = TMessageType.EXCEPTION
       logging.exception(ex)
       result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-    oprot.writeMessageBegin("retrieve", msg_type, seqid)
+    oprot.writeMessageBegin("store", msg_type, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -118,19 +140,19 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-class retrieve_args(object):
+class store_args(object):
   """
   Attributes:
-   - request
+   - communication
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'request', (RetrieveRequest, RetrieveRequest.thrift_spec), None, ), # 1
+    (1, TType.STRUCT, 'communication', (concrete.communication.ttypes.Communication, concrete.communication.ttypes.Communication.thrift_spec), None, ), # 1
   )
 
-  def __init__(self, request=None,):
-    self.request = request
+  def __init__(self, communication=None,):
+    self.communication = communication
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -143,8 +165,8 @@ class retrieve_args(object):
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.request = RetrieveRequest()
-          self.request.read(iprot)
+          self.communication = concrete.communication.ttypes.Communication()
+          self.communication.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -156,10 +178,10 @@ class retrieve_args(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('retrieve_args')
-    if self.request is not None:
-      oprot.writeFieldBegin('request', TType.STRUCT, 1)
-      self.request.write(oprot)
+    oprot.writeStructBegin('store_args')
+    if self.communication is not None:
+      oprot.writeFieldBegin('communication', TType.STRUCT, 1)
+      self.communication.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -170,7 +192,7 @@ class retrieve_args(object):
 
   def __hash__(self):
     value = 17
-    value = (value * 31) ^ hash(self.request)
+    value = (value * 31) ^ hash(self.communication)
     return value
 
   def __repr__(self):
@@ -184,20 +206,18 @@ class retrieve_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class retrieve_result(object):
+class store_result(object):
   """
   Attributes:
-   - success
    - ex
   """
 
   thrift_spec = (
-    (0, TType.STRUCT, 'success', (RetrieveResults, RetrieveResults.thrift_spec), None, ), # 0
+    None, # 0
     (1, TType.STRUCT, 'ex', (concrete.services.ttypes.ServicesException, concrete.services.ttypes.ServicesException.thrift_spec), None, ), # 1
   )
 
-  def __init__(self, success=None, ex=None,):
-    self.success = success
+  def __init__(self, ex=None,):
     self.ex = ex
 
   def read(self, iprot):
@@ -209,13 +229,7 @@ class retrieve_result(object):
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
-      if fid == 0:
-        if ftype == TType.STRUCT:
-          self.success = RetrieveResults()
-          self.success.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 1:
+      if fid == 1:
         if ftype == TType.STRUCT:
           self.ex = concrete.services.ttypes.ServicesException()
           self.ex.read(iprot)
@@ -230,11 +244,7 @@ class retrieve_result(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('retrieve_result')
-    if self.success is not None:
-      oprot.writeFieldBegin('success', TType.STRUCT, 0)
-      self.success.write(oprot)
-      oprot.writeFieldEnd()
+    oprot.writeStructBegin('store_result')
     if self.ex is not None:
       oprot.writeFieldBegin('ex', TType.STRUCT, 1)
       self.ex.write(oprot)
@@ -248,7 +258,6 @@ class retrieve_result(object):
 
   def __hash__(self):
     value = 17
-    value = (value * 31) ^ hash(self.success)
     value = (value * 31) ^ hash(self.ex)
     return value
 

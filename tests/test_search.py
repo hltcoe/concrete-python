@@ -8,22 +8,22 @@ from concrete.util.net import find_port
 
 from time import time
 
-from concrete.search import Search
+from concrete.search import SearchService
 from concrete.search.ttypes import (
-    SearchType, SearchQuery, SearchResults, SearchResult
+    SearchType, SearchQuery, SearchResult, SearchResultItem
 )
 from concrete.uuid.ttypes import UUID
 from concrete.metadata.ttypes import AnnotationMetadata
 
 
-class FooSearch(Search.Iface):
+class FooSearch(SearchService.Iface):
     METADATA_TOOL = 'Foo Search'
 
     def search(self, search_query):
-        return SearchResults(
+        return SearchResult(
             uuid=UUID(uuidString='12345678-1234-5678-1234-567812345678'),
-            searchResults=[
-                SearchResult(communicationId=term, score=42.)
+            searchResultItems=[
+                SearchResultItem(communicationId=term, score=42.)
                 for term in search_query.terms
             ],
             metadata=AnnotationMetadata(tool=self.METADATA_TOOL,
@@ -49,15 +49,15 @@ def test_search_communications():
         transport = TTransport.TFramedTransport(transport)
         protocol = TCompactProtocol.TCompactProtocol(transport)
 
-        cli = Search.Client(protocol)
+        cli = SearchService.Client(protocol)
         transport.open()
         res = cli.search(query)
         transport.close()
 
         assert res.uuid.uuidString == '12345678-1234-5678-1234-567812345678'
-        assert len(res.searchResults) == 2
-        assert res.searchResults[0].communicationId == 'foo'
-        assert res.searchResults[0].score == 42.
-        assert res.searchResults[1].communicationId == 'bar'
-        assert res.searchResults[1].score == 42.
+        assert len(res.searchResultItems) == 2
+        assert res.searchResultItems[0].communicationId == 'foo'
+        assert res.searchResultItems[0].score == 42.
+        assert res.searchResultItems[1].communicationId == 'bar'
+        assert res.searchResultItems[1].score == 42.
         assert res.metadata.tool == 'Foo Search'

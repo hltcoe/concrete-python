@@ -2,7 +2,7 @@ from multiprocessing import Process
 from time import sleep
 from socket import create_connection
 
-from concrete.search import Search
+from concrete.search import SearchService
 from concrete.util.thrift_factory import factory
 
 
@@ -22,7 +22,7 @@ class SearchClientWrapper(object):
         self.transport = factory.createTransport(socket)
         protocol = factory.createProtocol(self.transport)
 
-        cli = Search.Client(protocol)
+        cli = SearchService.Client(protocol)
 
         self.transport.open()
         return cli
@@ -39,7 +39,7 @@ class SearchServiceWrapper(object):
     """
 
     def __init__(self, implementation):
-        self.processor = Search.Processor(implementation)
+        self.processor = SearchService.Processor(implementation)
 
     def serve(self, host, port):
         server = factory.createServer(self.processor, host, port)

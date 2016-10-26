@@ -130,6 +130,13 @@ def json_tweet_object_to_TweetInfo(tweet):
         twitter_user.lang = twitter_lid_to_iso639_3(twitter_lid)
     tweet_info.user = twitter_user
 
+    if u'retweeted_status' in tweet and tweet[u'retweeted_status']:
+        tweet_info.retweetedStatusId = tweet[u'retweeted_status']['id']
+        tweet_info.retweetedUserId = tweet[u'retweeted_status']['user']['id']
+        tweet_info.retweetedScreenName = tweet[u'retweeted_status']['user'][
+            'screen_name'
+        ]
+
     if u'entities' in tweet and tweet[u'entities']:
         twitter_entities = TwitterEntities()
         if tweet[u'entities'][u'hashtags']:

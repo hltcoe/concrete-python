@@ -50,7 +50,7 @@ if __name__ == '__main__':
             'testfixtures',
             'thrift>=1.0.0.dev0',
             'redis>=2.10.0',
-            'pycountry>=1.20'
+            'pycountry==1.20'
         ],
 
         url="https://github.com/hltcoe/concrete-python",

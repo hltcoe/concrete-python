@@ -130,13 +130,22 @@ def json_tweet_object_to_TweetInfo(tweet):
         twitter_user.lang = twitter_lid_to_iso639_3(twitter_lid)
     tweet_info.user = twitter_user
 
-    if tweet[u'entities']:
+    if u'retweeted_status' in tweet and tweet[u'retweeted_status']:
+        tweet_info.retweetedStatusId = tweet[u'retweeted_status']['id']
+        tweet_info.retweetedUserId = tweet[u'retweeted_status']['user']['id']
+        tweet_info.retweetedScreenName = tweet[u'retweeted_status']['user'][
+            'screen_name'
+        ]
+
+    if u'entities' in tweet and tweet[u'entities']:
         twitter_entities = TwitterEntities()
         if tweet[u'entities'][u'hashtags']:
             twitter_entities.hashtagList = []
             for hashtag_dict in tweet[u'entities'][u'hashtags']:
                 hashtag = HashTag()
                 set_flat_fields(hashtag, hashtag_dict)
+                hashtag.startOffset = hashtag_dict[u'indices'][0]
+                hashtag.endOffset = hashtag_dict[u'indices'][1]
                 twitter_entities.hashtagList.append(hashtag)
         if tweet[u'entities'][u'urls']:
             twitter_entities.urlList = []
@@ -152,29 +161,35 @@ def json_tweet_object_to_TweetInfo(tweet):
                 twitter_entities.userMentionList.append(user_mention)
         tweet_info.entities = twitter_entities
 
-        if tweet[u'coordinates']:
-            tweet_coordinates = TwitterCoordinates()
-            tweet_coordinates.type = tweet[u'coordinates']['type']
-            tweet_coordinates.coordinates = TwitterLatLong(
-                latitude=tweet[u'coordinates'][u'coordinates'][0],
-                longitude=tweet[u'coordinates'][u'coordinates'][1])
-            tweet_info.coordinates = tweet_coordinates
+    if u'coordinates' in tweet and tweet[u'coordinates']:
+        tweet_coordinates = TwitterCoordinates()
+        tweet_coordinates.type = tweet[u'coordinates']['type']
+        tweet_coordinates.coordinates = TwitterLatLong(
+            longitude=tweet[u'coordinates'][u'coordinates'][0],
+            latitude=tweet[u'coordinates'][u'coordinates'][1])
+        tweet_info.coordinates = tweet_coordinates
 
-        if tweet[u'place']:
-            twitter_place = TwitterPlace()
-            set_flat_fields(twitter_place, tweet[u'place'])
-            if tweet[u'place'][u'bounding_box']:
-                bounding_box = BoundingBox()
-                set_flat_fields(bounding_box, tweet[u'place'][u'bounding_box'])
-                if bounding_box.coordinateList is None:
-                    bounding_box.coordinateList = []
-                twitter_place.boundingBox = bounding_box
-            if tweet[u'place'][u'attributes']:
-                place_attributes = PlaceAttributes()
-                set_flat_fields(place_attributes,
-                                tweet[u'place'][u'attributes'])
-                twitter_place.attributes = place_attributes
-            tweet_info.place = twitter_place
+    if u'place' in tweet and tweet[u'place']:
+        twitter_place = TwitterPlace()
+        set_flat_fields(twitter_place, tweet[u'place'])
+        if tweet[u'place'][u'bounding_box']:
+            bounding_box = BoundingBox()
+            bb_dict = tweet[u'place'][u'bounding_box']
+            set_flat_fields(bounding_box, bb_dict)
+            if bounding_box.coordinateList is None:
+                bounding_box.coordinateList = []
+            if u'coordinates' in bb_dict and bb_dict[u'coordinates']:
+                for [longitude, latitude] in bb_dict[u'coordinates'][0]:
+                    bounding_box.coordinateList.append(TwitterLatLong(
+                        longitude=longitude,
+                        latitude=latitude))
+            twitter_place.boundingBox = bounding_box
+        if tweet[u'place'][u'attributes']:
+            place_attributes = PlaceAttributes()
+            set_flat_fields(place_attributes,
+                            tweet[u'place'][u'attributes'])
+            twitter_place.attributes = place_attributes
+        tweet_info.place = twitter_place
 
     tweet_info.lid = capture_tweet_lid(tweet)
     return tweet_info

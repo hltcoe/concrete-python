@@ -1173,6 +1173,9 @@ class TweetInfo(object):
      - inReplyToScreenName
      - inReplyToStatusId
      - inReplyToUserId
+     - retweetedScreenName
+     - retweetedStatusId
+     - retweetedUserId
     """
 
     thrift_spec = (
@@ -1195,9 +1198,12 @@ class TweetInfo(object):
         (16, TType.I64, 'inReplyToStatusId', None, None, ),  # 16
         None,  # 17
         (18, TType.I64, 'inReplyToUserId', None, None, ),  # 18
+        (19, TType.STRING, 'retweetedScreenName', 'UTF8', None, ),  # 19
+        (20, TType.I64, 'retweetedStatusId', None, None, ),  # 20
+        (21, TType.I64, 'retweetedUserId', None, None, ),  # 21
     )
 
-    def __init__(self, id=None, text=None, createdAt=None, user=None, truncated=None, entities=None, source=None, coordinates=None, place=None, favorited=None, retweeted=None, retweetCount=None, inReplyToScreenName=None, inReplyToStatusId=None, inReplyToUserId=None,):
+    def __init__(self, id=None, text=None, createdAt=None, user=None, truncated=None, entities=None, source=None, coordinates=None, place=None, favorited=None, retweeted=None, retweetCount=None, inReplyToScreenName=None, inReplyToStatusId=None, inReplyToUserId=None, retweetedScreenName=None, retweetedStatusId=None, retweetedUserId=None,):
         self.id = id
         self.text = text
         self.createdAt = createdAt
@@ -1213,6 +1219,9 @@ class TweetInfo(object):
         self.inReplyToScreenName = inReplyToScreenName
         self.inReplyToStatusId = inReplyToStatusId
         self.inReplyToUserId = inReplyToUserId
+        self.retweetedScreenName = retweetedScreenName
+        self.retweetedStatusId = retweetedStatusId
+        self.retweetedUserId = retweetedUserId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1302,6 +1311,21 @@ class TweetInfo(object):
                     self.inReplyToUserId = iprot.readI64()
                 else:
                     iprot.skip(ftype)
+            elif fid == 19:
+                if ftype == TType.STRING:
+                    self.retweetedScreenName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 20:
+                if ftype == TType.I64:
+                    self.retweetedStatusId = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 21:
+                if ftype == TType.I64:
+                    self.retweetedUserId = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1371,6 +1395,18 @@ class TweetInfo(object):
         if self.inReplyToUserId is not None:
             oprot.writeFieldBegin('inReplyToUserId', TType.I64, 18)
             oprot.writeI64(self.inReplyToUserId)
+            oprot.writeFieldEnd()
+        if self.retweetedScreenName is not None:
+            oprot.writeFieldBegin('retweetedScreenName', TType.STRING, 19)
+            oprot.writeString(self.retweetedScreenName.encode('utf-8') if sys.version_info[0] == 2 else self.retweetedScreenName)
+            oprot.writeFieldEnd()
+        if self.retweetedStatusId is not None:
+            oprot.writeFieldBegin('retweetedStatusId', TType.I64, 20)
+            oprot.writeI64(self.retweetedStatusId)
+            oprot.writeFieldEnd()
+        if self.retweetedUserId is not None:
+            oprot.writeFieldBegin('retweetedUserId', TType.I64, 21)
+            oprot.writeI64(self.retweetedUserId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -15,6 +15,9 @@ RT_TWEET_TXT = 'Barber tells me'
 RT_TWEET_ID = 238426131689242623
 RT_TWEET_ID_STR = u'238426131689242623'
 
+REPLY_TWEET_ID = 238426131689242622
+REPLY_TWEET_ID_STR = u'238426131689242622'
+
 
 @fixture
 def tweet():
@@ -64,6 +67,11 @@ def tweet():
                                                 u'hashtags': [],
                                                 u'user_mentions': [],
                                                 u'urls': []}},
+            u'in_reply_to_status_id': REPLY_TWEET_ID,
+            u'in_reply_to_status_id_str': REPLY_TWEET_ID_STR,
+            u'in_reply_to_screen_name': 'charman3',
+            u'in_reply_to_user_id': 1236,
+            u'in_reply_to_user_id_str': u'1236',
             u'lang': u'en'}
 
 
@@ -95,6 +103,10 @@ def test_json_tweet_object_to_Communication(tweet):
     assert RT_TWEET_ID == tweet_info.retweetedStatusId
     assert 1235 == tweet_info.retweetedUserId
     assert 'charman2' == tweet_info.retweetedScreenName
+
+    assert REPLY_TWEET_ID == tweet_info.inReplyToStatusId
+    assert 1236 == tweet_info.inReplyToUserId
+    assert 'charman3' == tweet_info.inReplyToScreenName
 
     assert 1 == len(tweet_info.entities.hashtagList)
     assert u'lol' == tweet_info.entities.hashtagList[0].text
@@ -150,6 +162,10 @@ def test_json_tweet_object_to_Communication_missing_lid(tweet):
     assert 1235 == tweet_info.retweetedUserId
     assert 'charman2' == tweet_info.retweetedScreenName
 
+    assert REPLY_TWEET_ID == tweet_info.inReplyToStatusId
+    assert 1236 == tweet_info.inReplyToUserId
+    assert 'charman3' == tweet_info.inReplyToScreenName
+
     assert 1 == len(tweet_info.entities.hashtagList)
     assert u'lol' == tweet_info.entities.hashtagList[0].text
     assert 32 == tweet_info.entities.hashtagList[0].startOffset
@@ -200,6 +216,10 @@ def test_json_tweet_object_to_Communication_missing_coordinates(tweet):
     assert RT_TWEET_ID == tweet_info.retweetedStatusId
     assert 1235 == tweet_info.retweetedUserId
     assert 'charman2' == tweet_info.retweetedScreenName
+
+    assert REPLY_TWEET_ID == tweet_info.inReplyToStatusId
+    assert 1236 == tweet_info.inReplyToUserId
+    assert 'charman3' == tweet_info.inReplyToScreenName
 
     assert 1 == len(tweet_info.entities.hashtagList)
     assert u'lol' == tweet_info.entities.hashtagList[0].text
@@ -253,6 +273,10 @@ def test_json_tweet_object_to_Communication_missing_place(tweet):
     assert 1235 == tweet_info.retweetedUserId
     assert 'charman2' == tweet_info.retweetedScreenName
 
+    assert REPLY_TWEET_ID == tweet_info.inReplyToStatusId
+    assert 1236 == tweet_info.inReplyToUserId
+    assert 'charman3' == tweet_info.inReplyToScreenName
+
     assert 1 == len(tweet_info.entities.hashtagList)
     assert u'lol' == tweet_info.entities.hashtagList[0].text
     assert 32 == tweet_info.entities.hashtagList[0].startOffset
@@ -290,6 +314,72 @@ def test_json_tweet_object_to_Communication_missing_retweeted_status(tweet):
     assert tweet_info.retweetedStatusId is None
     assert tweet_info.retweetedUserId is None
     assert tweet_info.retweetedScreenName is None
+
+    assert REPLY_TWEET_ID == tweet_info.inReplyToStatusId
+    assert 1236 == tweet_info.inReplyToUserId
+    assert 'charman3' == tweet_info.inReplyToScreenName
+
+    assert 1 == len(tweet_info.entities.hashtagList)
+    assert u'lol' == tweet_info.entities.hashtagList[0].text
+    assert 32 == tweet_info.entities.hashtagList[0].startOffset
+    assert 36 == tweet_info.entities.hashtagList[0].endOffset
+
+    assert u'Point' == tweet_info.coordinates.type
+    assert -75.5 == tweet_info.coordinates.coordinates.longitude
+    assert 40.25 == tweet_info.coordinates.coordinates.latitude
+
+    assert u'Polygon' == tweet_info.place.boundingBox.type
+    assert -77.25 == tweet_info.place.boundingBox.coordinateList[0].longitude
+    assert 38.5 == tweet_info.place.boundingBox.coordinateList[0].latitude
+    assert -76.0 == tweet_info.place.boundingBox.coordinateList[1].longitude
+    assert 38.5 == tweet_info.place.boundingBox.coordinateList[1].latitude
+    assert -76.0 == tweet_info.place.boundingBox.coordinateList[2].longitude
+    assert 38.125 == tweet_info.place.boundingBox.coordinateList[2].latitude
+    assert -77.25 == tweet_info.place.boundingBox.coordinateList[3].longitude
+    assert 38.125 == tweet_info.place.boundingBox.coordinateList[3].latitude
+    assert u'United States' == tweet_info.place.country
+    assert u'US' == tweet_info.place.countryCode
+    assert u'Washington, DC' == tweet_info.place.fullName
+    assert u'01fbe706f872cb32' == tweet_info.place.id
+    assert u'Washington' == tweet_info.place.name
+    assert u'city' == tweet_info.place.placeType
+    assert u'http://api.twitter.com/1/geo/id/01fbe706f872cb32.json' == \
+        tweet_info.place.url
+
+    assert 1 == len(comm.lidList)
+    kvm = comm.lidList[0].languageToProbabilityMap
+    assert 'eng' == kvm.keys()[0]
+    assert 1.0 == kvm['eng']
+
+
+def test_json_tweet_object_to_Communication_missing_in_reply_to(tweet):
+    del tweet['in_reply_to_status_id']
+    del tweet['in_reply_to_status_id_str']
+    del tweet['in_reply_to_user_id']
+    del tweet['in_reply_to_user_id_str']
+    del tweet['in_reply_to_screen_name']
+
+    comm = json_tweet_object_to_Communication(tweet)
+    tweet_info = comm.communicationMetadata.tweetInfo
+
+    assert TWEET_ID_STR == comm.id
+    assert TWEET_TXT == comm.text
+    assert 1219842525 == comm.startTime
+    assert 1219842525 == comm.endTime
+
+    assert TWEET_ID == tweet_info.id
+    assert 'jpn' == tweet_info.user.lang
+    assert 'charman' == tweet_info.user.screenName
+    assert 'C Harman' == tweet_info.user.name
+    assert 1234 == tweet_info.user.id
+
+    assert RT_TWEET_ID == tweet_info.retweetedStatusId
+    assert 1235 == tweet_info.retweetedUserId
+    assert 'charman2' == tweet_info.retweetedScreenName
+
+    assert tweet_info.inReplyToStatusId is None
+    assert tweet_info.inReplyToUserId is None
+    assert tweet_info.inReplyToScreenName is None
 
     assert 1 == len(tweet_info.entities.hashtagList)
     assert u'lol' == tweet_info.entities.hashtagList[0].text

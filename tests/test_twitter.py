@@ -30,15 +30,38 @@ def tweet():
                       u'lang': 'ja',
                       u'verified': False,
                       u'id': 1234,
-                      u'id_str': '1234'},
-            u'entities': {u'symbols': [],
-                          u'hashtags': [{u'indices': [32, 36],
+                      u'id_str': '1234',
+                      u'geo_enabled': True,
+                      u'created_at': 'Wed Aug 27 13:08:05 +0000 2008',
+                      u'friends_count': 37,
+                      u'statuses_count': 38,
+                      u'listed_count': 39,
+                      u'favourites_count': 41,
+                      u'followers_count': 42,
+                      u'location': 'San Francisco, CA',
+                      u'time_zone': 'Pacific Time (US & Canada)',
+                      u'description': 'The Real Twitter API.',
+                      u'url': 'http://dev.twitter.com',
+                      u'utc_offset': -18000},
+            u'entities': {u'hashtags': [{u'indices': [32, 36],
                                          u'text': u'lol'}],
-                          u'user_mentions': [],
-                          u'urls': []},
+                          u'user_mentions': [{u'name': u'Twitter API',
+                                              u'indices': [4, 15],
+                                              u'screen_name': u'twitterapi',
+                                              u'id': 6253282,
+                                              u'id_str': u'6253282'}],
+                          u'urls': [{u'indices': [32, 52],
+                                     u'url': u'http://t.co/IOwBrTZR',
+                                     u'display_url': u'youtube.com/watch?'
+                                                     u'v=oHg5SJ\u2026',
+                                     u'expanded_url': u'http://www.youtube.'
+                                                      u'com/watch?'
+                                                      u'v=oHg5SJYRHA0'}]},
             u'coordinates': {u'coordinates': [-75.5, 40.25],
                              u'type': u'Point'},
-            u'place': {u'attributes': {},
+            u'place': {u'attributes': {u'street_address': u'795 Folsom St',
+                                       u'region': u'Mid Atlantic',
+                                       u'locality': u'Washington, DC'},
                        u'bounding_box': {u'coordinates': [[[-77.25, 38.5],
                                                            [-76.0, 38.5],
                                                            [-76.0, 38.125],
@@ -63,8 +86,7 @@ def tweet():
                                             u'verified': False,
                                             u'id': 1235,
                                             u'id_str': '1235'},
-                                  u'entities': {u'symbols': [],
-                                                u'hashtags': [],
+                                  u'entities': {u'hashtags': [],
                                                 u'user_mentions': [],
                                                 u'urls': []}},
             u'in_reply_to_status_id': REPLY_TWEET_ID,
@@ -72,6 +94,11 @@ def tweet():
             u'in_reply_to_screen_name': 'charman3',
             u'in_reply_to_user_id': 1236,
             u'in_reply_to_user_id_str': u'1236',
+            u'retweeted': False,
+            u'retweet_count': 1585,
+            u'truncated': True,
+            u'source': u'<a href="http://itunes.apple.com/us/app/twitter/'
+                       u'id409789998?mt=12" >Twitter for Mac</a>',
             u'lang': u'en'}
 
 
@@ -111,10 +138,30 @@ def test_json_tweet_object_to_Communication(tweet, omitted_fields,
     assert 1219842525 == comm.endTime
 
     assert TWEET_ID == tweet_info.id
+    assert TWEET_TXT == tweet_info.text
+    assert 'Wed Aug 27 13:08:45 +0000 2008' == tweet_info.createdAt
+    assert tweet_info.retweeted is False
+    assert 1585 == tweet_info.retweetCount
+    assert tweet_info.truncated is True
+    assert u'<a href="http://itunes.apple.com/us/app/twitter/' \
+           u'id409789998?mt=12" >Twitter for Mac</a>' == tweet_info.source
+
     assert 'jpn' == tweet_info.user.lang
     assert 'charman' == tweet_info.user.screenName
     assert 'C Harman' == tweet_info.user.name
     assert 1234 == tweet_info.user.id
+    assert tweet_info.user.geoEnabled is True
+    assert 'Wed Aug 27 13:08:05 +0000 2008' == tweet_info.user.createdAt
+    assert 37 == tweet_info.user.friendsCount
+    assert 38 == tweet_info.user.statusesCount
+    assert 39 == tweet_info.user.listedCount
+    assert 41 == tweet_info.user.favouritesCount
+    assert 42 == tweet_info.user.followersCount
+    assert 'San Francisco, CA' == tweet_info.user.location
+    assert 'Pacific Time (US & Canada)' == tweet_info.user.timeZone
+    assert 'The Real Twitter API.' == tweet_info.user.description
+    assert 'http://dev.twitter.com' == tweet_info.user.url
+    assert -18000 == tweet_info.user.utcOffset
 
     if 'retweet' in omitted_assertions:
         omitted_assertions.remove('retweet')
@@ -144,6 +191,22 @@ def test_json_tweet_object_to_Communication(tweet, omitted_fields,
         assert u'lol' == tweet_info.entities.hashtagList[0].text
         assert 32 == tweet_info.entities.hashtagList[0].startOffset
         assert 36 == tweet_info.entities.hashtagList[0].endOffset
+        assert 1 == len(tweet_info.entities.userMentionList)
+        assert 6253282 == tweet_info.entities.userMentionList[0].id
+        assert u'Twitter API' == tweet_info.entities.userMentionList[0].name
+        assert u'twitterapi' == \
+            tweet_info.entities.userMentionList[0].screenName
+        assert 4 == tweet_info.entities.userMentionList[0].startOffset
+        assert 15 == tweet_info.entities.userMentionList[0].endOffset
+        assert 1 == len(tweet_info.entities.urlList)
+        assert u'http://t.co/IOwBrTZR' == \
+            tweet_info.entities.urlList[0].url
+        assert u'youtube.com/watch?v=oHg5SJ\u2026' == \
+            tweet_info.entities.urlList[0].displayUrl
+        assert u'http://www.youtube.com/watch?v=oHg5SJYRHA0' == \
+            tweet_info.entities.urlList[0].expandedUrl
+        assert 32 == tweet_info.entities.urlList[0].startOffset
+        assert 52 == tweet_info.entities.urlList[0].endOffset
 
     if 'coordinates' in omitted_assertions:
         omitted_assertions.remove('coordinates')
@@ -157,6 +220,9 @@ def test_json_tweet_object_to_Communication(tweet, omitted_fields,
         omitted_assertions.remove('place')
         assert tweet_info.place is None
     else:
+        assert u'Mid Atlantic' == tweet_info.place.attributes.region
+        assert u'Washington, DC' == tweet_info.place.attributes.locality
+        assert u'795 Folsom St' == tweet_info.place.attributes.streetAddress
         assert u'Polygon' == tweet_info.place.boundingBox.type
         assert -77.25 == \
             tweet_info.place.boundingBox.coordinateList[0].longitude

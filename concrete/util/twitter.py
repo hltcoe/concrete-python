@@ -152,12 +152,16 @@ def json_tweet_object_to_TweetInfo(tweet):
             for url_dict in tweet[u'entities'][u'urls']:
                 url = URL()
                 set_flat_fields(url, url_dict)
+                url.startOffset = url_dict[u'indices'][0]
+                url.endOffset = url_dict[u'indices'][1]
                 twitter_entities.urlList.append(url)
         if tweet[u'entities'][u'user_mentions']:
             twitter_entities.userMentionList = []
             for user_mention_dict in tweet[u'entities'][u'user_mentions']:
                 user_mention = UserMention()
                 set_flat_fields(user_mention, user_mention_dict)
+                user_mention.startOffset = user_mention_dict[u'indices'][0]
+                user_mention.endOffset = user_mention_dict[u'indices'][1]
                 twitter_entities.userMentionList.append(user_mention)
         tweet_info.entities = twitter_entities
 

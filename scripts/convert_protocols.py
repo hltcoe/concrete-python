@@ -118,6 +118,7 @@ def convert_communication(input_bytes, input_protocol_factory,
         comm, protocol_factory=output_protocol_factory())
     return output_bytes
 
+
 if __name__ == '__main__':
     parser = make_parser()
     args = parser.parse_args()

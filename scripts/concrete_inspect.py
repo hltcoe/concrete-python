@@ -119,7 +119,7 @@ def main():
 
     comm_num = 0
 
-    for comm in comms:
+    for (comm, _) in comms:
         if (args.char_offsets or args.dependency or args.lemmas or args.ner or
                 args.pos):
             concrete.inspect.print_conll_style_tags_for_communication(

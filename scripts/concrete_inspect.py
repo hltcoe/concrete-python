@@ -12,7 +12,7 @@ import sys
 
 import concrete.version
 import concrete.inspect
-import concrete.util
+from concrete.util import CommunicationReader
 
 
 def main():
@@ -25,6 +25,8 @@ def main():
                     " communication from file; otherwise, read from standard"
                     " input.",
     )
+    parser.add_argument('--count', type=int,
+                        help='Print at most this many communications.')
     parser.add_argument("--char-offsets",
                         help="Print token text extracted from character offset"
                              "s (not the text stored in the tokenization) in '"
@@ -100,37 +102,50 @@ def main():
     add_references = not args.no_references
 
     if args.communication_filename is not None:
-        comm = concrete.util.read_communication_from_file(
-            args.communication_filename, add_references=add_references)
+        comms = CommunicationReader(args.communication_filename,
+                                    add_references=add_references)
     else:
-        comm = concrete.util.read_communication_from_buffer(
-            sys.stdin.read(), add_references=add_references)
+        comms = CommunicationReader('/dev/fd/0', add_references=add_references)
 
-    if (args.char_offsets or args.dependency or args.lemmas or args.ner or
-            args.pos):
-        concrete.inspect.print_conll_style_tags_for_communication(
-            comm, char_offsets=args.char_offsets, dependency=args.dependency,
-            lemmas=args.lemmas, ner=args.ner, pos=args.pos)
-    elif args.entities:
-        concrete.inspect.print_entities(comm)
-    elif args.mentions:
-        concrete.inspect.print_tokens_with_entityMentions(comm)
-    elif args.metadata:
-        concrete.inspect.print_metadata(comm)
-    elif args.sections:
-        concrete.inspect.print_sections(comm)
-    elif args.situation_mentions:
-        concrete.inspect.print_situation_mentions(comm)
-    elif args.situations:
-        concrete.inspect.print_situations(comm)
-    elif args.text:
-        concrete.inspect.print_text_for_communication(comm)
-    elif args.tokens:
-        concrete.inspect.print_tokens_for_communication(comm)
-    elif args.treebank:
-        concrete.inspect.print_penn_treebank_for_communication(comm)
-    else:
+    if not (args.char_offsets or args.dependency or args.lemmas or args.ner or
+            args.pos or args.entities or args.mentions or args.metadata or
+            args.sections or args.situation_mentions or args.situations or
+            args.text or args.tokens or args.treebank):
         parser.print_help()
+        sys.exit(1)
+
+    comm_num = 0
+
+    for comm in comms:
+        if (args.char_offsets or args.dependency or args.lemmas or args.ner or
+                args.pos):
+            concrete.inspect.print_conll_style_tags_for_communication(
+                comm, char_offsets=args.char_offsets,
+                dependency=args.dependency,
+                lemmas=args.lemmas, ner=args.ner, pos=args.pos)
+        elif args.entities:
+            concrete.inspect.print_entities(comm)
+        elif args.mentions:
+            concrete.inspect.print_tokens_with_entityMentions(comm)
+        elif args.metadata:
+            concrete.inspect.print_metadata(comm)
+        elif args.sections:
+            concrete.inspect.print_sections(comm)
+        elif args.situation_mentions:
+            concrete.inspect.print_situation_mentions(comm)
+        elif args.situations:
+            concrete.inspect.print_situations(comm)
+        elif args.text:
+            concrete.inspect.print_text_for_communication(comm)
+        elif args.tokens:
+            concrete.inspect.print_tokens_for_communication(comm)
+        elif args.treebank:
+            concrete.inspect.print_penn_treebank_for_communication(comm)
+
+        comm_num += 1
+
+        if args.count is not None and comm_num == args.count:
+            break
 
 
 if __name__ == "__main__":

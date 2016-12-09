@@ -15,6 +15,11 @@ import concrete.inspect
 from concrete.util import CommunicationReader
 
 
+def print_header(header):
+    print '-' * len(header)
+    print header
+
+
 def main():
     # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -27,6 +32,8 @@ def main():
     )
     parser.add_argument('--count', type=int,
                         help='Print at most this many communications.')
+    parser.add_argument('--annotation-headers', action='store_true',
+                        help='Print annotation type headers.')
     parser.add_argument("--char-offsets",
                         help="Print token text extracted from character offset"
                              "s (not the text stored in the tokenization) in '"
@@ -120,32 +127,54 @@ def main():
     comm_num = 0
 
     for (comm, _) in comms:
+        if args.id:
+            if args.annotation_headers:
+                print_header('id')
+            concrete.inspect.print_id_for_communication(comm)
         if (args.char_offsets or args.dependency or args.lemmas or args.ner or
                 args.pos):
+            if args.annotation_headers:
+                print_header('conll')
             concrete.inspect.print_conll_style_tags_for_communication(
                 comm, char_offsets=args.char_offsets,
                 dependency=args.dependency,
                 lemmas=args.lemmas, ner=args.ner, pos=args.pos)
         if args.entities:
+            if args.annotation_headers:
+                print_header('entities')
             concrete.inspect.print_entities(comm)
         if args.mentions:
+            if args.annotation_headers:
+                print_header('mentions')
             concrete.inspect.print_tokens_with_entityMentions(comm)
         if args.metadata:
+            if args.annotation_headers:
+                print_header('metadata')
             concrete.inspect.print_metadata(comm)
         if args.sections:
+            if args.annotation_headers:
+                print_header('sections')
             concrete.inspect.print_sections(comm)
         if args.situation_mentions:
+            if args.annotation_headers:
+                print_header('situation mentions')
             concrete.inspect.print_situation_mentions(comm)
         if args.situations:
+            if args.annotation_headers:
+                print_header('situations')
             concrete.inspect.print_situations(comm)
         if args.text:
+            if args.annotation_headers:
+                print_header('text')
             concrete.inspect.print_text_for_communication(comm)
         if args.tokens:
+            if args.annotation_headers:
+                print_header('tokens')
             concrete.inspect.print_tokens_for_communication(comm)
         if args.treebank:
+            if args.annotation_headers:
+                print_header('treebank')
             concrete.inspect.print_penn_treebank_for_communication(comm)
-        if args.id:
-            concrete.inspect.print_id_for_communication(comm)
 
         comm_num += 1
 

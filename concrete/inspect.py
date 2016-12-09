@@ -277,6 +277,10 @@ def print_text_for_communication(comm):
     print comm.text
 
 
+def print_id_for_communication(comm):
+    print comm.id
+
+
 def print_tokens_with_entityMentions(comm):
     em_by_tkzn_id = get_entityMentions_by_tokenizationId(
         comm)

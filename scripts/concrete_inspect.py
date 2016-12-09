@@ -86,6 +86,9 @@ def main():
                         help="Print Penn-Treebank style parse trees for *all* "
                              "Constituent Parses in the Communication",
                         action="store_true")
+    parser.add_argument('--id',
+                        help='Print communication id',
+                        action='store_true')
     parser.add_argument("--no-references",
                         help="Don't add references to communication (may preve"
                              "nt 'NoneType' errors)",
@@ -110,7 +113,7 @@ def main():
     if not (args.char_offsets or args.dependency or args.lemmas or args.ner or
             args.pos or args.entities or args.mentions or args.metadata or
             args.sections or args.situation_mentions or args.situations or
-            args.text or args.tokens or args.treebank):
+            args.text or args.tokens or args.treebank or args.id):
         parser.print_help()
         sys.exit(1)
 
@@ -141,6 +144,8 @@ def main():
             concrete.inspect.print_tokens_for_communication(comm)
         elif args.treebank:
             concrete.inspect.print_penn_treebank_for_communication(comm)
+        elif args.id:
+            concrete.inspect.print_id_for_communication(comm)
 
         comm_num += 1
 

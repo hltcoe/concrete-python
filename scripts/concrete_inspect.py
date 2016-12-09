@@ -126,25 +126,25 @@ def main():
                 comm, char_offsets=args.char_offsets,
                 dependency=args.dependency,
                 lemmas=args.lemmas, ner=args.ner, pos=args.pos)
-        elif args.entities:
+        if args.entities:
             concrete.inspect.print_entities(comm)
-        elif args.mentions:
+        if args.mentions:
             concrete.inspect.print_tokens_with_entityMentions(comm)
-        elif args.metadata:
+        if args.metadata:
             concrete.inspect.print_metadata(comm)
-        elif args.sections:
+        if args.sections:
             concrete.inspect.print_sections(comm)
-        elif args.situation_mentions:
+        if args.situation_mentions:
             concrete.inspect.print_situation_mentions(comm)
-        elif args.situations:
+        if args.situations:
             concrete.inspect.print_situations(comm)
-        elif args.text:
+        if args.text:
             concrete.inspect.print_text_for_communication(comm)
-        elif args.tokens:
+        if args.tokens:
             concrete.inspect.print_tokens_for_communication(comm)
-        elif args.treebank:
+        if args.treebank:
             concrete.inspect.print_penn_treebank_for_communication(comm)
-        elif args.id:
+        if args.id:
             concrete.inspect.print_id_for_communication(comm)
 
         comm_num += 1

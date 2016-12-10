@@ -46,8 +46,8 @@ def main():
                              "ConLL-style' format",
                         action="store_true")
     parser.add_argument("--dependency",
-                        help="Print HEAD tags for first dependency parse in 'C"
-                             "onLL-style' format",
+                        help="Print HEAD and DEPREL tags for first dependency "
+                             "parse in 'ConLL-style' format",
                         action="store_true")
     parser.add_argument("--entities",
                         help="Print info about all Entities and their EntityMe"

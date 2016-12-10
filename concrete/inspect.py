@@ -37,6 +37,7 @@ def print_conll_style_tags_for_communication(
         header_fields.append(u"NER")
     if dependency:
         header_fields.append(u"HEAD")
+        header_fields.append(u"DEPREL")
     print u"\t".join(header_fields)
     dashes = ["-" * len(fieldname) for fieldname in header_fields]
     print u"\t".join(dashes)
@@ -57,6 +58,8 @@ def print_conll_style_tags_for_communication(
         if dependency:
             token_tag_lists.append(
                 get_conll_head_tags_for_tokenization(tokenization))
+            token_tag_lists.append(
+                get_conll_deprel_tags_for_tokenization(tokenization))
         print_conll_style_tags_for_tokenization(tokenization, token_tag_lists)
         print
 
@@ -419,6 +422,49 @@ def get_conll_head_tags_for_tokenization(tokenization,
                 else:
                     head_list[dependency.dep] = dependency.gov + 1
         return head_list
+    else:
+        return []
+
+
+def get_conll_deprel_tags_for_tokenization(tokenization,
+                                         dependency_parse_index=0):
+    """Get a list of ConLL 'DEPREL tags' for a tokenization
+
+    In the ConLL data format:
+
+        http://ufal.mff.cuni.cz/conll2009-st/task-description.html
+
+    the DEPREL for a token is the type of that token's dependency with
+    its parent.
+
+    Args:
+
+    - `tokenization`: A Concrete Tokenization object
+
+    Returns:
+
+    - A list of ConLL 'DEPREL tag' strings, with one DEPREL tag for each
+      token in the supplied tokenization.  If a token does not have
+      a DEPREL tag (e.g. punctuation tokens), the DEPREL tag is an empty
+      string.
+
+      If the tokenization does not have a Dependency Parse, this
+      function returns a list of empty strings for each token in the
+      supplied tokenization.
+    """
+    if tokenization.tokenList:
+        # Tokens that are not part of the dependency parse
+        # (e.g. punctuation) are represented using an empty string
+        deprel_list = [""] * len(tokenization.tokenList.tokenList)
+
+        if tokenization.dependencyParseList:
+            dpl = tokenization.dependencyParseList[dependency_parse_index]
+            for dependency in dpl.dependencyList:
+                if dependency.edgeType is None:
+                    deprel_list[dependency.dep] = ''
+                else:
+                    deprel_list[dependency.dep] = dependency.edgeType
+        return deprel_list
     else:
         return []
 

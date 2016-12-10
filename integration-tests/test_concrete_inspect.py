@@ -26,39 +26,39 @@ def test_print_conll_style_tags_for_communication(comm_path, args,
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
     expected_output = output_prefix + '''\
-INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD
------\t-----\t----\t-----\t---\t---\t----
-1\tJohn\tJohn\t\tNNP\tPER\t
-2\tSmith\tSmith\t\tNNP\tPER\t
-3\t,\t,\t\t,\t\t
-4\tmanager\tmanager\t\tNN\t\t
-5\tof\tof\t\tIN\t\t
-6\tACME\tACME\t\tNNP\tORG\t
-7\tINC\tINC\t\tNNP\tORG\t
-8\t,\t,\t\t,\t\t
-9\twas\twas\t\tVBD\t\t
-10\tbit\tbit\t\tNN\t\t
-11\tby\tby\t\tIN\t\t
-12\ta\ta\t\tDT\t\t
-13\tdog\tdog\t\tNN\t\t
-14\ton\ton\t\tIN\t\t
-15\tMarch\tMarch\t\tDATE-NNP\t\t
-16\t10th\t10th\t\tJJ\t\t
-17\t,\t,\t\t,\t\t
-18\t2013\t2013\t\tCD\t\t
-19\t.\t.\t\t.\t\t
+INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
+-----\t-----\t----\t-----\t---\t---\t----\t------
+1\tJohn\tJohn\t\tNNP\tPER\t\t
+2\tSmith\tSmith\t\tNNP\tPER\t\t
+3\t,\t,\t\t,\t\t\t
+4\tmanager\tmanager\t\tNN\t\t\t
+5\tof\tof\t\tIN\t\t\t
+6\tACME\tACME\t\tNNP\tORG\t\t
+7\tINC\tINC\t\tNNP\tORG\t\t
+8\t,\t,\t\t,\t\t\t
+9\twas\twas\t\tVBD\t\t\t
+10\tbit\tbit\t\tNN\t\t\t
+11\tby\tby\t\tIN\t\t\t
+12\ta\ta\t\tDT\t\t\t
+13\tdog\tdog\t\tNN\t\t\t
+14\ton\ton\t\tIN\t\t\t
+15\tMarch\tMarch\t\tDATE-NNP\t\t\t
+16\t10th\t10th\t\tJJ\t\t\t
+17\t,\t,\t\t,\t\t\t
+18\t2013\t2013\t\tCD\t\t\t
+19\t.\t.\t\t.\t\t\t
 
-1\tHe\tHe\t\tPRP\t\t
-2\tdied\tdied\t\tVBD\t\t
-3\t!\t!\t\t.\t\t
+1\tHe\tHe\t\tPRP\t\t\t
+2\tdied\tdied\t\tVBD\t\t\t
+3\t!\t!\t\t.\t\t\t
 
-1\tJohn\tJohn\t\tNNP\tPER\t
-2\t's\t's\t\tPOS\t\t
-3\tdaughter\tdaughter\t\tNN\t\t
-4\tMary\tMary\t\tNNP\tPER\t
-5\texpressed\texpressed\t\tVBD\t\t
-6\tsorrow\tsorrow\t\tNN\t\t
-7\t.\t.\t\t.\t\t
+1\tJohn\tJohn\t\tNNP\tPER\t\t
+2\t's\t's\t\tPOS\t\t\t
+3\tdaughter\tdaughter\t\tNN\t\t\t
+4\tMary\tMary\t\tNNP\tPER\t\t
+5\texpressed\texpressed\t\tVBD\t\t\t
+6\tsorrow\tsorrow\t\tNN\t\t\t
+7\t.\t.\t\t.\t\t\t
 
 '''
     assert 0 == p.returncode

@@ -427,7 +427,7 @@ def get_conll_head_tags_for_tokenization(tokenization,
 
 
 def get_conll_deprel_tags_for_tokenization(tokenization,
-                                         dependency_parse_index=0):
+                                           dependency_parse_index=0):
     """Get a list of ConLL 'DEPREL tags' for a tokenization
 
     In the ConLL data format:

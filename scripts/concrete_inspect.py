@@ -16,8 +16,14 @@ from concrete.util import CommunicationReader
 
 
 def print_header(header):
-    print '-' * len(header)
+    print
     print header
+    print '-' * len(header)
+
+
+def print_header_if(header, condition):
+    if condition:
+        print_header(header)
 
 
 def main():
@@ -128,53 +134,42 @@ def main():
 
     for (comm, _) in comms:
         if args.id:
-            if args.annotation_headers:
-                print_header('id')
+            print_header_if('id', args.annotation_headers)
             concrete.inspect.print_id_for_communication(comm)
+        if args.text:
+            print_header_if('text', args.annotation_headers)
+            concrete.inspect.print_text_for_communication(comm)
+        if args.sections:
+            print_header_if('sections', args.annotation_headers)
+            concrete.inspect.print_sections(comm)
+        if args.tokens:
+            print_header_if('tokens', args.annotation_headers)
+            concrete.inspect.print_tokens_for_communication(comm)
+        if args.treebank:
+            print_header_if('treebank', args.annotation_headers)
+            concrete.inspect.print_penn_treebank_for_communication(comm)
         if (args.char_offsets or args.dependency or args.lemmas or args.ner or
                 args.pos):
-            if args.annotation_headers:
-                print_header('conll')
+            print_header_if('conll', args.annotation_headers)
             concrete.inspect.print_conll_style_tags_for_communication(
                 comm, char_offsets=args.char_offsets,
                 dependency=args.dependency,
                 lemmas=args.lemmas, ner=args.ner, pos=args.pos)
         if args.entities:
-            if args.annotation_headers:
-                print_header('entities')
+            print_header_if('entities', args.annotation_headers)
             concrete.inspect.print_entities(comm)
         if args.mentions:
-            if args.annotation_headers:
-                print_header('mentions')
+            print_header_if('mentions', args.annotation_headers)
             concrete.inspect.print_tokens_with_entityMentions(comm)
-        if args.metadata:
-            if args.annotation_headers:
-                print_header('metadata')
-            concrete.inspect.print_metadata(comm)
-        if args.sections:
-            if args.annotation_headers:
-                print_header('sections')
-            concrete.inspect.print_sections(comm)
-        if args.situation_mentions:
-            if args.annotation_headers:
-                print_header('situation mentions')
-            concrete.inspect.print_situation_mentions(comm)
         if args.situations:
-            if args.annotation_headers:
-                print_header('situations')
+            print_header_if('situations', args.annotation_headers)
             concrete.inspect.print_situations(comm)
-        if args.text:
-            if args.annotation_headers:
-                print_header('text')
-            concrete.inspect.print_text_for_communication(comm)
-        if args.tokens:
-            if args.annotation_headers:
-                print_header('tokens')
-            concrete.inspect.print_tokens_for_communication(comm)
-        if args.treebank:
-            if args.annotation_headers:
-                print_header('treebank')
-            concrete.inspect.print_penn_treebank_for_communication(comm)
+        if args.situation_mentions:
+            print_header_if('situation mentions', args.annotation_headers)
+            concrete.inspect.print_situation_mentions(comm)
+        if args.metadata:
+            print_header_if('metadata', args.annotation_headers)
+            concrete.inspect.print_metadata(comm)
 
         comm_num += 1
 

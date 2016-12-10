@@ -1,22 +1,31 @@
-import unittest
-
 import sys
+from pytest import fixture, mark
 from subprocess import Popen, PIPE
 
 
-class TestConcreteInspect(unittest.TestCase):
+@fixture
+def comm_path(request):
+    return 'tests/testdata/serif_dog-bites-man.concrete'
 
-    def setUp(self):
-        self.comm_path = "tests/testdata/serif_dog-bites-man.concrete"
 
-    def test_print_conll_style_tags_for_communication(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--char-offsets', '--dependency', '--lemmas', '--ner', '--pos',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nconll\n-----\n'),
+])
+def test_print_conll_style_tags_for_communication(comm_path, args,
+                                                  output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--char-offsets',
+        '--dependency',
+        '--lemmas',
+        '--ner',
+        '--pos',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD
 -----\t-----\t----\t-----\t---\t---\t----
 1\tJohn\tJohn\t\tNNP\tPER\t
@@ -52,18 +61,24 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD
 7\t.\t.\t\t.\t\t
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_entities(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--entities',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nentities\n--------\n'),
+])
+def test_print_entities(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--entities',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 Entity Set 0 (Serif: doc-entities):
   Entity 0-0:
       EntityMention 0-0-0:
@@ -122,18 +137,24 @@ Entity Set 1 (Serif: doc-values):
 
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_situation_mentions(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--situation-mentions',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nsituation mentions\n------------------\n'),
+])
+def test_print_situation_mentions(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--situation-mentions',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 Situation Set 0 (Serif: relations):
   SituationMention 0-0:
           situationType:      ORG-AFF.Employment
@@ -164,18 +185,24 @@ Situation Set 1 (Serif: events):
 
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_situations(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--situations',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nsituations\n----------\n'),
+])
+def test_print_situations(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--situations',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 Situation Set 0 (Serif: relations):
 
 Situation Set 1 (Serif: events):
@@ -184,18 +211,24 @@ Situation Set 1 (Serif: events):
 
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_text_for_communication(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--text',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\ntext\n----\n'),
+])
+def test_print_text_for_communication(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--text',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 <DOC id="dog-bites-man" type="other">
 <HEADLINE>
 Dog Bites Man
@@ -214,18 +247,24 @@ John's daughter Mary expressed sorrow.
 </DOC>
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_tokens_with_entityMentions(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--mentions',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nmentions\n--------\n'),
+])
+def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--mentions',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''
 <ENTITY ID=0><ENTITY ID=0>John Smith</ENTITY> , <ENTITY ID=0>manager of \
 <ENTITY ID=1>ACME INC</ENTITY></ENTITY> ,</ENTITY> was bit by a dog on \
 <ENTITY ID=3>March 10th , 2013</ENTITY> .
@@ -236,18 +275,24 @@ John's daughter Mary expressed sorrow.
 Mary</ENTITY> expressed sorrow .
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_tokens_for_communication(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--tokens',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\ntokens\n------\n'),
+])
+def test_print_tokens_for_communication(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--tokens',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''
 John Smith , manager of ACME INC , was bit by a dog on March 10th , 2013 .
 
 He died !
@@ -255,18 +300,24 @@ He died !
 John 's daughter Mary expressed sorrow .
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_penn_treebank_for_communication(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--treebank',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\ntreebank\n--------\n'),
+])
+def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--treebank',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 (S (NP (NPP (NNP john)
             (NNP smith))
        (, ,)
@@ -303,18 +354,24 @@ John 's daughter Mary expressed sorrow .
 
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
 
-    def test_print_sections_for_communication(self):
-        p = Popen([
-            sys.executable, 'scripts/concrete_inspect.py',
-            '--sections',
-            self.comm_path
-        ], stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = p.communicate()
-        expected_output = '''\
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nsections\n--------\n'),
+])
+def test_print_sections_for_communication(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--sections',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
 Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05), from 81 to 82:
 
 
@@ -339,6 +396,26 @@ John's daughter Mary expressed sorrow.
 
 
 '''
-        self.assertEquals(0, p.returncode)
-        self.assertEquals(expected_output, stdout)
-        self.assertEquals('', stderr)
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
+
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\nid\n--\n'),
+])
+def test_print_id_for_communication(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--id',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + '''\
+tests/testdata/serif_dog-bites-man.xml
+'''
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr

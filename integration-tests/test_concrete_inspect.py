@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 import sys
 from pytest import fixture, mark
 from subprocess import Popen, PIPE
@@ -25,7 +28,7 @@ def test_print_conll_style_tags_for_communication(comm_path, args,
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 -----\t-----\t----\t-----\t---\t---\t----\t------
 1\tJohn\tJohn\t\tNNP\tPER\t\t
@@ -33,7 +36,7 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 3\t,\t,\t\t,\t\t\t
 4\tmanager\tmanager\t\tNN\t\t\t
 5\tof\tof\t\tIN\t\t\t
-6\tACME\tACME\t\tNNP\tORG\t\t
+6\tACMÉ\tACMÉ\t\tNNP\tORG\t\t
 7\tINC\tINC\t\tNNP\tORG\t\t
 8\t,\t,\t\t,\t\t\t
 9\twas\twas\t\tVBD\t\t\t
@@ -60,7 +63,7 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 6\tsorrow\tsorrow\t\tNN\t\t\t
 7\t.\t.\t\t.\t\t\t
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -78,7 +81,7 @@ def test_print_entities(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 Entity Set 0 (Serif: doc-entities):
   Entity 0-0:
       EntityMention 0-0-0:
@@ -87,13 +90,13 @@ Entity Set 0 (Serif: doc-entities):
           entityType: PER
           phraseType: PhraseType.NAME
       EntityMention 0-0-1:
-          tokens:     John Smith , manager of ACME INC ,
-          text:       John Smith, manager of ACME INC,
+          tokens:     John Smith , manager of ACMÉ INC ,
+          text:       John Smith, manager of ACMÉ INC,
           entityType: PER
           phraseType: PhraseType.APPOSITIVE
       EntityMention 0-0-2:
-          tokens:     manager of ACME INC
-          text:       manager of ACME INC
+          tokens:     manager of ACMÉ INC
+          text:       manager of ACMÉ INC
           entityType: PER
           phraseType: PhraseType.COMMON_NOUN
       EntityMention 0-0-3:
@@ -109,8 +112,8 @@ Entity Set 0 (Serif: doc-entities):
 
   Entity 0-1:
       EntityMention 0-1-0:
-          tokens:     ACME INC
-          text:       ACME INC
+          tokens:     ACMÉ INC
+          text:       ACMÉ INC
           entityType: ORG
           phraseType: PhraseType.NAME
 
@@ -136,7 +139,7 @@ Entity Set 1 (Serif: doc-values):
           phraseType: PhraseType.OTHER
 
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -154,16 +157,16 @@ def test_print_situation_mentions(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 Situation Set 0 (Serif: relations):
   SituationMention 0-0:
           situationType:      ORG-AFF.Employment
           Argument 0:
               role:           Role.RELATION_SOURCE_ROLE
-              entityMention:  manager of ACME INC
+              entityMention:  manager of ACMÉ INC
           Argument 1:
               role:           Role.RELATION_TARGET_ROLE
-              entityMention:  ACME INC
+              entityMention:  ACMÉ INC
 
   SituationMention 0-1:
           situationType:      PER-SOC.Family
@@ -184,7 +187,7 @@ Situation Set 1 (Serif: events):
               entityMention:  He
 
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -202,7 +205,7 @@ def test_print_situations(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 Situation Set 0 (Serif: relations):
 
 Situation Set 1 (Serif: events):
@@ -210,7 +213,7 @@ Situation Set 1 (Serif: events):
       situationType:    Life.Die
 
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -228,14 +231,14 @@ def test_print_text_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 <DOC id="dog-bites-man" type="other">
 <HEADLINE>
 Dog Bites Man
 </HEADLINE>
 <TEXT>
 <P>
-John Smith, manager of ACME INC, was bit by a dog on March 10th, 2013.
+John Smith, manager of ACMÉ INC, was bit by a dog on March 10th, 2013.
 </P>
 <P>
 He died!
@@ -246,7 +249,7 @@ John's daughter Mary expressed sorrow.
 </TEXT>
 </DOC>
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -264,9 +267,9 @@ def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''
+    expected_output = output_prefix + u'''
 <ENTITY ID=0><ENTITY ID=0>John Smith</ENTITY> , <ENTITY ID=0>manager of \
-<ENTITY ID=1>ACME INC</ENTITY></ENTITY> ,</ENTITY> was bit by a dog on \
+<ENTITY ID=1>ACMÉ INC</ENTITY></ENTITY> ,</ENTITY> was bit by a dog on \
 <ENTITY ID=3>March 10th , 2013</ENTITY> .
 
 <ENTITY ID=0>He</ENTITY> died !
@@ -274,7 +277,7 @@ def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
 <ENTITY ID=2><ENTITY ID=0>John</ENTITY> 's <ENTITY ID=2>daughter</ENTITY> \
 Mary</ENTITY> expressed sorrow .
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -292,14 +295,14 @@ def test_print_tokens_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''
-John Smith , manager of ACME INC , was bit by a dog on March 10th , 2013 .
+    expected_output = output_prefix + u'''
+John Smith , manager of ACMÉ INC , was bit by a dog on March 10th , 2013 .
 
 He died !
 
 John 's daughter Mary expressed sorrow .
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -317,7 +320,7 @@ def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 (S (NP (NPP (NNP john)
             (NNP smith))
        (, ,)
@@ -353,7 +356,7 @@ def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
    (. .))
 
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -371,14 +374,14 @@ def test_print_sections_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05), from 81 to 82:
 
 
 
 Section 1 (54902d75-1841-4d8d-b4c5-390d4ef1a47a), from 85 to 162:
 
-John Smith, manager of ACME INC, was bit by a dog on March 10th, 2013.
+John Smith, manager of ACMÉ INC, was bit by a dog on March 10th, 2013.
 </P>
 
 
@@ -395,7 +398,7 @@ John's daughter Mary expressed sorrow.
 
 
 
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr
@@ -413,9 +416,9 @@ def test_print_id_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
+    expected_output = output_prefix + u'''\
 tests/testdata/serif_dog-bites-man.xml
-'''
+'''.encode('utf-8')
     assert 0 == p.returncode
     assert expected_output == stdout
     assert '' == stderr

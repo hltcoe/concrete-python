@@ -133,6 +133,9 @@ def main():
     comm_num = 0
 
     for (comm, _) in comms:
+        if args.count is not None and comm_num == args.count:
+            break
+
         if args.id:
             print_header_if('id', args.annotation_headers)
             concrete.inspect.print_id_for_communication(comm)
@@ -172,9 +175,6 @@ def main():
             concrete.inspect.print_metadata(comm)
 
         comm_num += 1
-
-        if args.count is not None and comm_num == args.count:
-            break
 
 
 if __name__ == "__main__":

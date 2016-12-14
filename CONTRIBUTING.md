@@ -153,3 +153,8 @@ git push gitlab accel v4.9.5
 
 accel versions are not currently released to PyPI due to the complexity
 of building the accelerated thrift Python library.
+
+The script `release.bash` can automate the release process.  It should
+be run after all changes are committed to master and accel, but the
+versions (in `concrete/version.py`) have not yet been incremented.
+Run `bash release.bash -h` for usage information.

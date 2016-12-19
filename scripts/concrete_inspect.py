@@ -106,6 +106,8 @@ def main():
                         help="Don't add references to communication (may preve"
                              "nt 'NoneType' errors)",
                         action="store_true")
+    parser.add_argument('--tool', type=str,
+                        help='Only print annotations for specified tool')
     parser.add_argument('communication_filename',
                         nargs='?',
                         type=str,
@@ -138,41 +140,44 @@ def main():
 
         if args.id:
             print_header_if('id', args.annotation_headers)
-            concrete.inspect.print_id_for_communication(comm)
+            concrete.inspect.print_id_for_communication(comm, tool=args.tool)
         if args.text:
             print_header_if('text', args.annotation_headers)
-            concrete.inspect.print_text_for_communication(comm)
+            concrete.inspect.print_text_for_communication(comm, tool=args.tool)
         if args.sections:
             print_header_if('sections', args.annotation_headers)
-            concrete.inspect.print_sections(comm)
+            concrete.inspect.print_sections(comm, tool=args.tool)
         if args.tokens:
             print_header_if('tokens', args.annotation_headers)
-            concrete.inspect.print_tokens_for_communication(comm)
+            concrete.inspect.print_tokens_for_communication(
+                comm, tool=args.tool)
         if args.treebank:
             print_header_if('treebank', args.annotation_headers)
-            concrete.inspect.print_penn_treebank_for_communication(comm)
+            concrete.inspect.print_penn_treebank_for_communication(
+                comm, tool=args.tool)
         if (args.char_offsets or args.dependency or args.lemmas or args.ner or
                 args.pos):
             print_header_if('conll', args.annotation_headers)
             concrete.inspect.print_conll_style_tags_for_communication(
                 comm, char_offsets=args.char_offsets,
                 dependency=args.dependency,
-                lemmas=args.lemmas, ner=args.ner, pos=args.pos)
+                lemmas=args.lemmas, ner=args.ner, pos=args.pos, tool=args.tool)
         if args.entities:
             print_header_if('entities', args.annotation_headers)
-            concrete.inspect.print_entities(comm)
+            concrete.inspect.print_entities(comm, tool=args.tool)
         if args.mentions:
             print_header_if('mentions', args.annotation_headers)
-            concrete.inspect.print_tokens_with_entityMentions(comm)
+            concrete.inspect.print_tokens_with_entityMentions(
+                comm, tool=args.tool)
         if args.situations:
             print_header_if('situations', args.annotation_headers)
-            concrete.inspect.print_situations(comm)
+            concrete.inspect.print_situations(comm, tool=args.tool)
         if args.situation_mentions:
             print_header_if('situation mentions', args.annotation_headers)
-            concrete.inspect.print_situation_mentions(comm)
+            concrete.inspect.print_situation_mentions(comm, tool=args.tool)
         if args.metadata:
             print_header_if('metadata', args.annotation_headers)
-            concrete.inspect.print_metadata(comm)
+            concrete.inspect.print_metadata(comm, tool=args.tool)
 
         comm_num += 1
 

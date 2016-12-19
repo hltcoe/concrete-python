@@ -193,25 +193,26 @@ def print_metadata(comm, tool=None):
         print
 
 
-def print_sections(comm):
+def print_sections(comm, tool=None):
     """Print information for all Sections, according to their spans.
 
     Args:
 
     - `comm`: A Concrete Communication
     """
-    text = comm.text
-    for sect_idx, sect in enumerate(lun(comm.sectionList)):
-        ts = sect.textSpan
-        if ts is None:
-            print u"Section %s does not have a textSpan "
-            "field set" % (sect.uuid.uuidString)
-            continue
-        print u"Section %d (%s), from %d to %d:" % (
-            sect_idx, sect.uuid.uuidString, ts.start, ts.ending)
-        print u"%s" % (text[ts.start:ts.ending])
+    if tool is None or comm.metadata.tool == tool:
+        text = comm.text
+        for sect_idx, sect in enumerate(lun(comm.sectionList)):
+            ts = sect.textSpan
+            if ts is None:
+                print u"Section %s does not have a textSpan "
+                "field set" % (sect.uuid.uuidString)
+                continue
+            print u"Section %d (%s), from %d to %d:" % (
+                sect_idx, sect.uuid.uuidString, ts.start, ts.ending)
+            print u"%s" % (text[ts.start:ts.ending])
+            print
         print
-    print
 
 
 def print_situation_mentions(comm, tool=None):
@@ -290,12 +291,14 @@ def _p(indent_level, justified_width, fieldname, content):
     )
 
 
-def print_text_for_communication(comm):
-    print comm.text
+def print_text_for_communication(comm, tool=None):
+    if tool is None or comm.metadata.tool == tool:
+        print comm.text
 
 
-def print_id_for_communication(comm):
-    print comm.id
+def print_id_for_communication(comm, tool=None):
+    if tool is None or comm.metadata.tool == tool:
+        print comm.id
 
 
 def print_tokens_with_entityMentions(comm, tool=None):

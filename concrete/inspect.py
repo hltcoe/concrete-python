@@ -354,7 +354,7 @@ def print_penn_treebank_for_communication(comm, tool=None):
 
     - `comm`: A Concrete Communication object
     """
-    tokenizations = get_tokenizations(comm, tool=tool)
+    tokenizations = get_tokenizations(comm)
 
     for tokenization in tokenizations:
         if tokenization.parseList:

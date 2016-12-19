@@ -232,6 +232,8 @@ Situation Set 1 (Serif: events):
 @mark.parametrize('args,output_prefix', [
     ((), ''),
     (('--annotation-headers',), '\ntext\n----\n'),
+    (('--tool', 'concrete_serif v3.10.1pre'), ''),
+    (('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
 ])
 def test_print_text_for_communication(comm_path, args, output_prefix):
     p = Popen([
@@ -296,6 +298,8 @@ Mary</ENTITY> expressed sorrow .
 @mark.parametrize('args,output_prefix', [
     ((), ''),
     (('--annotation-headers',), '\ntokens\n------\n'),
+    (('--tool', 'Serif: tokens',), ''),
+    (('--tool', 'Serif: tokens', '--annotation-headers',), '\ntokens\n------\n'),
 ])
 def test_print_tokens_for_communication(comm_path, args, output_prefix):
     p = Popen([
@@ -321,6 +325,8 @@ John 's daughter Mary expressed sorrow .
 @mark.parametrize('args,output_prefix', [
     ((), ''),
     (('--annotation-headers',), '\ntreebank\n--------\n'),
+    (('--tool', 'Serif: parse',), ''),
+    (('--tool', 'Serif: parse', '--annotation-headers',), '\ntreebank\n--------\n'),
 ])
 def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
     p = Popen([
@@ -418,6 +424,8 @@ Communication:  concrete_serif v3.10.1pre
 @mark.parametrize('args,output_prefix', [
     ((), ''),
     (('--annotation-headers',), '\nsections\n--------\n'),
+    (('--tool', 'concrete_serif v3.10.1pre',), ''),
+    (('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nsections\n--------\n'),
 ])
 def test_print_sections_for_communication(comm_path, args, output_prefix):
     p = Popen([
@@ -460,6 +468,8 @@ John's daughter Mary expressed sorrow.
 @mark.parametrize('args,output_prefix', [
     ((), ''),
     (('--annotation-headers',), '\nid\n--\n'),
+    (('--tool', 'concrete_serif v3.10.1pre'), ''),
+    (('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nid\n--\n'),
 ])
 def test_print_id_for_communication(comm_path, args, output_prefix):
     p = Popen([
@@ -477,11 +487,14 @@ tests/testdata/serif_dog-bites-man.xml
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\ntext\n----\n'),
+@mark.parametrize('first,second,args,output_prefix', [
+    (True, True, (), ''),
+    (True, True, ('--annotation-headers',), '\ntext\n----\n'),
+    (True, False, ('--tool', 'concrete_serif v3.10.1pre'), ''),
+    (True, False, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
 ])
-def test_print_multiple_communications(comms_path, args, output_prefix):
+def test_print_multiple_communications(comms_path, first, second, args,
+                                       output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--text',
@@ -489,7 +502,9 @@ def test_print_multiple_communications(comms_path, args, output_prefix):
         comms_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 <DOC id="dog-bites-man" type="other">
 <HEADLINE>
 Dog Bites Man
@@ -507,7 +522,10 @@ John's daughter Mary expressed sorrow.
 </TEXT>
 </DOC>
 
-'''.encode('utf-8') + output_prefix + u'''\
+'''.encode('utf-8')
+    expected_output += output_prefix
+    if second:
+        expected_output += u'''\
 Madame Magloire comprit, et elle alla chercher sur la cheminée de la \
 chambre à coucher de monseigneur les deux chandeliers d'argent \
 qu'elle posa sur la table tout allumés.
@@ -523,11 +541,13 @@ malheureux.
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\ntext\n----\n'),
+@mark.parametrize('first,second,args,output_prefix', [
+    (True, True, (), ''),
+    (True, True, ('--annotation-headers',), '\ntext\n----\n'),
+    (True, False, ('--tool', 'concrete_serif v3.10.1pre'), ''),
+    (True, False, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
 ])
-def test_print_multiple_communications_tgz(comms_tgz_path, args,
+def test_print_multiple_communications_tgz(comms_tgz_path, first, second, args,
                                            output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
@@ -536,7 +556,9 @@ def test_print_multiple_communications_tgz(comms_tgz_path, args,
         comms_tgz_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 <DOC id="dog-bites-man" type="other">
 <HEADLINE>
 Dog Bites Man
@@ -554,7 +576,10 @@ John's daughter Mary expressed sorrow.
 </TEXT>
 </DOC>
 
-'''.encode('utf-8') + output_prefix + u'''\
+'''.encode('utf-8')
+    expected_output += output_prefix
+    if second:
+        expected_output += u'''\
 Madame Magloire comprit, et elle alla chercher sur la cheminée de la \
 chambre à coucher de monseigneur les deux chandeliers d'argent \
 qu'elle posa sur la table tout allumés.

@@ -74,9 +74,9 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 7\t.\t.\t\t.\t\t\t
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -150,9 +150,9 @@ Entity Set 1 (Serif: doc-values):
 
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -198,9 +198,9 @@ Situation Set 1 (Serif: events):
 
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -224,9 +224,9 @@ Situation Set 1 (Serif: events):
 
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -260,9 +260,9 @@ John's daughter Mary expressed sorrow.
 </DOC>
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -288,9 +288,9 @@ def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
 Mary</ENTITY> expressed sorrow .
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -313,9 +313,9 @@ He died !
 John 's daughter Mary expressed sorrow .
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -367,9 +367,9 @@ def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
 
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -409,9 +409,9 @@ John's daughter Mary expressed sorrow.
 
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -429,9 +429,9 @@ def test_print_id_for_communication(comm_path, args, output_prefix):
     expected_output = output_prefix + u'''\
 tests/testdata/serif_dog-bites-man.xml
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -475,9 +475,9 @@ Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
 
 
 @mark.parametrize('args,output_prefix', [
@@ -522,6 +522,6 @@ Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
 '''.encode('utf-8')
-    assert 0 == p.returncode
-    assert expected_output == stdout
     assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode

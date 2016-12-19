@@ -374,6 +374,49 @@ def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
 
 @mark.parametrize('args,output_prefix', [
     ((), ''),
+    (('--annotation-headers',), '\nmetadata\n--------\n'),
+])
+def test_print_metadata_for_communication(comm_path, args, output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--metadata',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + u'''\
+Communication:  concrete_serif v3.10.1pre
+
+  Tokenization:  Serif: tokens
+
+    Dependency Parse:  Stanford
+
+    Parse:  Serif: parse
+
+    TokenTagging:  Serif: names
+    TokenTagging:  Serif: part-of-speech
+
+  EntityMentionSet #0:  Serif: names
+  EntityMentionSet #1:  Serif: values
+  EntityMentionSet #2:  Serif: mentions
+
+  EntitySet #0:  Serif: doc-entities
+  EntitySet #1:  Serif: doc-values
+
+  SituationMentionSet #0:  Serif: relations
+  SituationMentionSet #1:  Serif: events
+
+  SituationSet #0:  Serif: relations
+  SituationSet #1:  Serif: events
+
+'''.encode('utf-8')
+    assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
+
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
     (('--annotation-headers',), '\nsections\n--------\n'),
 ])
 def test_print_sections_for_communication(comm_path, args, output_prefix):

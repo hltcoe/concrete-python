@@ -16,6 +16,11 @@ def comms_path(request):
     return 'tests/testdata/serif_les-deux_concatenated.concrete'
 
 
+@fixture
+def comms_tgz_path(request):
+    return 'tests/testdata/serif_les-deux.tar.gz'
+
+
 @mark.parametrize('args,output_prefix', [
     ((), ''),
     (('--annotation-headers',), '\nconll\n-----\n'),
@@ -439,6 +444,53 @@ def test_print_multiple_communications(comms_path, args, output_prefix):
         '--text',
     ] + list(args) + [
         comms_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix + u'''\
+<DOC id="dog-bites-man" type="other">
+<HEADLINE>
+Dog Bites Man
+</HEADLINE>
+<TEXT>
+<P>
+John Smith, manager of ACMÉ INC, was bit by a dog on March 10th, 2013.
+</P>
+<P>
+He died!
+</P>
+<P>
+John's daughter Mary expressed sorrow.
+</P>
+</TEXT>
+</DOC>
+
+'''.encode('utf-8') + output_prefix + u'''\
+Madame Magloire comprit, et elle alla chercher sur la cheminée de la \
+chambre à coucher de monseigneur les deux chandeliers d'argent \
+qu'elle posa sur la table tout allumés.
+
+—Monsieur le curé, dit l'homme, vous êtes bon. Vous ne me méprisez \
+pas. Vous me recevez chez vous. Vous allumez vos cierges pour moi. \
+Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
+malheureux.
+
+'''.encode('utf-8')
+    assert 0 == p.returncode
+    assert expected_output == stdout
+    assert '' == stderr
+
+
+@mark.parametrize('args,output_prefix', [
+    ((), ''),
+    (('--annotation-headers',), '\ntext\n----\n'),
+])
+def test_print_multiple_communications_tgz(comms_tgz_path, args,
+                                           output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--text',
+    ] + list(args) + [
+        comms_tgz_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
     expected_output = output_prefix + u'''\

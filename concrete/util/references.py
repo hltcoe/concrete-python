@@ -83,6 +83,7 @@ def add_references_to_communication(comm):
                 # and not part of the Concrete schema
                 entityMention.childMentionList = []
                 entityMention.parentMention = None
+                entityMention.entityMentionSet = entityMentionSet
             for entityMention in entityMentionSet.mentionList:
                 if entityMention.childMentionIdList:
                     for childMentionId in entityMention.childMentionIdList:
@@ -99,6 +100,7 @@ def add_references_to_communication(comm):
                 for mentionId in entity.mentionIdList:
                     entity.mentionList.append(
                         comm.entityMentionForUUID[mentionId.uuidString])
+                entity.entitySet = entitySet
 
     if comm.situationMentionSetList:
         for situationMentionSet in comm.situationMentionSetList:
@@ -130,6 +132,7 @@ def add_references_to_communication(comm):
                             ]
                     except KeyError:
                         situationMention.tokens.tokenization = None
+                situationMention.situationMentionSet = situationMentionSet
 
     if comm.situationSetList:
         for situationSet in comm.situationSetList:
@@ -142,3 +145,4 @@ def add_references_to_communication(comm):
                             comm.situationMentionForUUID[mentionId.uuidString])
                 else:
                     situation.mentionList = None
+                situation.situationSet = situationSet

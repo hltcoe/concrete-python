@@ -21,11 +21,19 @@ def comms_tgz_path(request):
     return 'tests/testdata/serif_les-deux.tar.gz'
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nconll\n-----\n'),
+@mark.parametrize('which,args,output_prefix', [
+    (range(8), (), ''),
+    (range(8), ('--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2), ('--tool', 'fake'), ''),
+    ((0, 1, 2), ('--tool', 'fake', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 4), ('--tool', 'Serif: part-of-speech'), ''),
+    ((0, 1, 2, 4), ('--tool', 'Serif: part-of-speech', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 5), ('--tool', 'Serif: names'), ''),
+    ((0, 1, 2, 5), ('--tool', 'Serif: names', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 6, 7), ('--tool', 'Stanford'), ''),
+    ((0, 1, 2, 6, 7), ('--tool', 'Stanford', '--annotation-headers',), '\nconll\n-----\n'),
 ])
-def test_print_conll_style_tags_for_communication(comm_path, args,
+def test_print_conll_style_tags_for_communication(comm_path, which, args,
                                                   output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
@@ -38,52 +46,60 @@ def test_print_conll_style_tags_for_communication(comm_path, args,
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix + '''\
 INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 -----\t-----\t----\t-----\t---\t---\t----\t------
-1\tJohn\tJohn\t\tNNP\tPER\t2\tcompound
-2\tSmith\tSmith\t\tNNP\tPER\t10\tnsubjpass
-3\t,\t,\t\t,\t\t\t
-4\tmanager\tmanager\t\tNN\t\t2\tappos
-5\tof\tof\t\tIN\t\t7\tcase
-6\tACMÉ\tACMÉ\t\tNNP\tORG\t7\tcompound
-7\tINC\tINC\t\tNNP\tORG\t4\tnmod
-8\t,\t,\t\t,\t\t\t
-9\twas\twas\t\tVBD\t\t10\tauxpass
-10\tbit\tbit\t\tNN\t\t0\tROOT
-11\tby\tby\t\tIN\t\t13\tcase
-12\ta\ta\t\tDT\t\t13\tdet
-13\tdog\tdog\t\tNN\t\t10\tnmod
-14\ton\ton\t\tIN\t\t15\tcase
-15\tMarch\tMarch\t\tDATE-NNP\t\t13\tnmod
-16\t10th\t10th\t\tJJ\t\t15\tamod
-17\t,\t,\t\t,\t\t\t
-18\t2013\t2013\t\tCD\t\t13\tamod
-19\t.\t.\t\t.\t\t\t
-
-1\tHe\tHe\t\tPRP\t\t2\tnsubj
-2\tdied\tdied\t\tVBD\t\t0\tROOT
-3\t!\t!\t\t.\t\t\t
-
-1\tJohn\tJohn\t\tNNP\tPER\t3\tnmod:poss
-2\t's\t's\t\tPOS\t\t1\tcase
-3\tdaughter\tdaughter\t\tNN\t\t5\tdep
-4\tMary\tMary\t\tNNP\tPER\t5\tnsubj
-5\texpressed\texpressed\t\tVBD\t\t0\tROOT
-6\tsorrow\tsorrow\t\tNN\t\t5\tdobj
-7\t.\t.\t\t.\t\t\t
-
-'''.encode('utf-8')
+''' + u'\n'.join(
+        u'\t'.join((w if i in which else '') for (i, w) in enumerate(row))
+        for row in (
+            ('1', 'John', 'John', '', 'NNP', 'PER', '2', 'compound'),
+            ('2', 'Smith', 'Smith', '', 'NNP', 'PER', '10', 'nsubjpass'),
+            ('3', ',', ',', '', ',', '', '', ''),
+            ('4', 'manager', 'manager', '', 'NN', '', '2', 'appos'),
+            ('5', 'of', 'of', '', 'IN', '', '7', 'case'),
+            ('6', u'ACMÉ', u'ACMÉ', '', 'NNP', 'ORG', '7', 'compound'),
+            ('7', 'INC', 'INC', '', 'NNP', 'ORG', '4', 'nmod'),
+            ('8', ',', ',', '', ',', '', '', ''),
+            ('9', 'was', 'was', '', 'VBD', '', '10', 'auxpass'),
+            ('10', 'bit', 'bit', '', 'NN', '', '0', 'ROOT'),
+            ('11', 'by', 'by', '', 'IN', '', '13', 'case'),
+            ('12', 'a', 'a', '', 'DT', '', '13', 'det'),
+            ('13', 'dog', 'dog', '', 'NN', '', '10', 'nmod'),
+            ('14', 'on', 'on', '', 'IN', '', '15', 'case'),
+            ('15', 'March', 'March', '', 'DATE-NNP', '', '13', 'nmod'),
+            ('16', '10th', '10th', '', 'JJ', '', '15', 'amod'),
+            ('17', ',', ',', '', ',', '', '', ''),
+            ('18', '2013', '2013', '', 'CD', '', '13', 'amod'),
+            ('19', '.', '.', '', '.', '', '', ''),
+            (),
+            ('1', 'He', 'He', '', 'PRP', '', '2', 'nsubj'),
+            ('2', 'died', 'died', '', 'VBD', '', '0', 'ROOT'),
+            ('3', '!', '!', '', '.', '', '', ''),
+            (),
+            ('1', 'John', 'John', '', 'NNP', 'PER', '3', 'nmod:poss'),
+            ('2', '\'s', '\'s', '', 'POS', '', '1', 'case'),
+            ('3', 'daughter', 'daughter', '', 'NN', '', '5', 'dep'),
+            ('4', 'Mary', 'Mary', '', 'NNP', 'PER', '5', 'nsubj'),
+            ('5', 'expressed', 'expressed', '', 'VBD', '', '0', 'ROOT'),
+            ('6', 'sorrow', 'sorrow', '', 'NN', '', '5', 'dobj'),
+            ('7', '.', '.', '', '.', '', '', ''),
+            (),
+        )
+    ).encode('utf-8') + '\n'
     assert '' == stderr
     assert expected_output == stdout
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nentities\n--------\n'),
+@mark.parametrize('first,second,args,output_prefix', [
+    (True, True, (), ''),
+    (True, True, ('--annotation-headers',), '\nentities\n--------\n'),
+    (True, False, ('--tool', 'Serif: doc-entities'), ''),
+    (True, False, ('--tool', 'Serif: doc-entities', '--annotation-headers',), '\nentities\n--------\n'),
+    (False, True, ('--tool', 'Serif: doc-values'), ''),
+    (False, True, ('--tool', 'Serif: doc-values', '--annotation-headers',), '\nentities\n--------\n'),
 ])
-def test_print_entities(comm_path, args, output_prefix):
+def test_print_entities(comm_path, first, second, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--entities',
@@ -91,7 +107,9 @@ def test_print_entities(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 Entity Set 0 (Serif: doc-entities):
   Entity 0-0:
       EntityMention 0-0-0:
@@ -140,6 +158,9 @@ Entity Set 0 (Serif: doc-entities):
           phraseType: PhraseType.COMMON_NOUN
 
 
+'''.encode('utf-8')
+    if second:
+        expected_output += u'''\
 Entity Set 1 (Serif: doc-values):
   Entity 1-0:
       EntityMention 1-0-0:
@@ -155,11 +176,15 @@ Entity Set 1 (Serif: doc-values):
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nsituation mentions\n------------------\n'),
+@mark.parametrize('first,second,args,output_prefix', [
+    (True, True, (), ''),
+    (True, True, ('--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (True, False, ('--tool', 'Serif: relations'), ''),
+    (True, False, ('--tool', 'Serif: relations', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (False, True, ('--tool', 'Serif: events'), ''),
+    (False, True, ('--tool', 'Serif: events', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
 ])
-def test_print_situation_mentions(comm_path, args, output_prefix):
+def test_print_situation_mentions(comm_path, first, second, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--situation-mentions',
@@ -167,7 +192,9 @@ def test_print_situation_mentions(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 Situation Set 0 (Serif: relations):
   SituationMention 0-0:
           situationType:      ORG-AFF.Employment
@@ -188,6 +215,9 @@ Situation Set 0 (Serif: relations):
               entityMention:  daughter
 
 
+'''.encode('utf-8')
+    if second:
+        expected_output += u'''\
 Situation Set 1 (Serif: events):
   SituationMention 1-0:
           text:               died
@@ -203,11 +233,15 @@ Situation Set 1 (Serif: events):
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nsituations\n----------\n'),
+@mark.parametrize('first,second,args,output_prefix', [
+    (True, True, (), ''),
+    (True, True, ('--annotation-headers',), '\nsituations\n----------\n'),
+    (True, False, ('--tool', 'Serif: relations'), ''),
+    (True, False, ('--tool', 'Serif: relations', '--annotation-headers',), '\nsituations\n----------\n'),
+    (False, True, ('--tool', 'Serif: events'), ''),
+    (False, True, ('--tool', 'Serif: events', '--annotation-headers',), '\nsituations\n----------\n'),
 ])
-def test_print_situations(comm_path, args, output_prefix):
+def test_print_situations(comm_path, first, second, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--situations',
@@ -215,9 +249,14 @@ def test_print_situations(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 Situation Set 0 (Serif: relations):
 
+'''.encode('utf-8')
+    if second:
+        expected_output += u'''\
 Situation Set 1 (Serif: events):
   Situation 1-0:
       situationType:    Life.Die
@@ -267,11 +306,18 @@ John's daughter Mary expressed sorrow.
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nmentions\n--------\n'),
+@mark.parametrize('first,second,third,args,output_prefix', [
+    (True, True, True, (), ''),
+    (True, True, True, ('--annotation-headers',), '\nmentions\n--------\n'),
+    (True, False, False, ('--tool', 'Serif: names'), ''),
+    (True, False, False, ('--tool', 'Serif: names', '--annotation-headers',), '\nmentions\n--------\n'),
+    (False, True, False, ('--tool', 'Serif: values'), ''),
+    (False, True, False, ('--tool', 'Serif: values', '--annotation-headers',), '\nmentions\n--------\n'),
+    (False, False, True, ('--tool', 'Serif: mentions'), ''),
+    (False, False, True, ('--tool', 'Serif: mentions', '--annotation-headers',), '\nmentions\n--------\n'),
 ])
-def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
+def test_print_tokens_with_entityMentions(comm_path, first, second, third,
+                                          args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--mentions',
@@ -279,10 +325,11 @@ def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''
+    if third:
+        expected_output = output_prefix + u'''
 <ENTITY ID=0><ENTITY ID=0>John Smith</ENTITY> , <ENTITY ID=0>manager of \
 <ENTITY ID=1>ACMÉ INC</ENTITY></ENTITY> ,</ENTITY> was bit by a dog on \
-<ENTITY ID=3>March 10th , 2013</ENTITY> .
+%sMarch 10th , 2013%s .
 
 <ENTITY ID=0>He</ENTITY> died !
 
@@ -290,6 +337,21 @@ def test_print_tokens_with_entityMentions(comm_path, args, output_prefix):
 Mary</ENTITY> expressed sorrow .
 
 '''.encode('utf-8')
+    else:
+        expected_output = output_prefix + u'''
+John Smith , manager of \
+ACMÉ INC , was bit by a dog on \
+%sMarch 10th , 2013%s .
+
+He died !
+
+John 's daughter \
+Mary expressed sorrow .
+
+'''.encode('utf-8')
+    expected_output = expected_output % (
+        '<ENTITY ID=3>' if second else '',
+        '</ENTITY>' if second else '')
     assert '' == stderr
     assert expected_output == stdout
     assert 0 == p.returncode
@@ -378,11 +440,35 @@ def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nmetadata\n--------\n'),
+@mark.parametrize('which,args,output_prefix', [
+    (range(15), (), ''),
+    (range(15), ('--annotation-headers',), '\nmetadata\n--------\n'),
+    ((0,), ('--tool', 'concrete_serif v3.10.1pre'), ''),
+    ((0,), ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((1,), ('--tool', 'Serif: tokens'), ''),
+    ((1,), ('--tool', 'Serif: tokens', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((2,), ('--tool', 'Stanford'), ''),
+    ((2,), ('--tool', 'Stanford', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((3,), ('--tool', 'Serif: parse'), ''),
+    ((3,), ('--tool', 'Serif: parse', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((4, 6), ('--tool', 'Serif: names'), ''),
+    ((4, 6), ('--tool', 'Serif: names', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((5,), ('--tool', 'Serif: part-of-speech'), ''),
+    ((5,), ('--tool', 'Serif: part-of-speech', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((7,), ('--tool', 'Serif: values'), ''),
+    ((7,), ('--tool', 'Serif: values', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((8,), ('--tool', 'Serif: mentions'), ''),
+    ((8,), ('--tool', 'Serif: mentions', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((9,), ('--tool', 'Serif: doc-entities'), ''),
+    ((9,), ('--tool', 'Serif: doc-entities', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((10,), ('--tool', 'Serif: doc-values'), ''),
+    ((10,), ('--tool', 'Serif: doc-values', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((11, 13), ('--tool', 'Serif: relations'), ''),
+    ((11, 13), ('--tool', 'Serif: relations', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((12, 14), ('--tool', 'Serif: events'), ''),
+    ((12, 14), ('--tool', 'Serif: events', '--annotation-headers',), '\nmetadata\n--------\n'),
 ])
-def test_print_metadata_for_communication(comm_path, args, output_prefix):
+def test_print_metadata_for_communication(comm_path, which, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--metadata',
@@ -390,32 +476,47 @@ def test_print_metadata_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
-Communication:  concrete_serif v3.10.1pre
-
-  Tokenization:  Serif: tokens
-
-    Dependency Parse:  Stanford
-
-    Parse:  Serif: parse
-
-    TokenTagging:  Serif: names
-    TokenTagging:  Serif: part-of-speech
-
-  EntityMentionSet #0:  Serif: names
-  EntityMentionSet #1:  Serif: values
-  EntityMentionSet #2:  Serif: mentions
-
-  EntitySet #0:  Serif: doc-entities
-  EntitySet #1:  Serif: doc-values
-
-  SituationMentionSet #0:  Serif: relations
-  SituationMentionSet #1:  Serif: events
-
-  SituationSet #0:  Serif: relations
-  SituationSet #1:  Serif: events
-
-'''.encode('utf-8')
+    expected_output = output_prefix
+    if 0 in which:
+        expected_output += u'Communication:  concrete_serif v3.10.1pre\n'
+        expected_output += '\n'
+    if 1 in which:
+        expected_output += '  Tokenization:  Serif: tokens\n'
+        expected_output += '\n'
+    if 2 in which:
+        expected_output += '    Dependency Parse:  Stanford\n'
+        expected_output += '\n'
+    if 3 in which:
+        expected_output += '    Parse:  Serif: parse\n'
+        expected_output += '\n'
+    if 4 in which:
+        expected_output += '    TokenTagging:  Serif: names\n'
+    if 5 in which:
+        expected_output += '    TokenTagging:  Serif: part-of-speech\n'
+    if 4 in which or 5 in which:
+        expected_output += '\n'
+    if 6 in which:
+        expected_output += '  EntityMentionSet #0:  Serif: names\n'
+    if 7 in which:
+        expected_output += '  EntityMentionSet #1:  Serif: values\n'
+    if 8 in which:
+        expected_output += '  EntityMentionSet #2:  Serif: mentions\n'
+    expected_output += '\n'
+    if 9 in which:
+        expected_output += '  EntitySet #0:  Serif: doc-entities\n'
+    if 10 in which:
+        expected_output += '  EntitySet #1:  Serif: doc-values\n'
+    expected_output += '\n'
+    if 11 in which:
+        expected_output += '  SituationMentionSet #0:  Serif: relations\n'
+    if 12 in which:
+        expected_output += '  SituationMentionSet #1:  Serif: events\n'
+    expected_output += '\n'
+    if 13 in which:
+        expected_output += '  SituationSet #0:  Serif: relations\n'
+    if 14 in which:
+        expected_output += '  SituationSet #1:  Serif: events\n'
+    expected_output += '\n'
     assert '' == stderr
     assert expected_output == stdout
     assert 0 == p.returncode

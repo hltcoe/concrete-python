@@ -42,32 +42,31 @@ def print_conll_style_tags_for_communication(
     dashes = ["-" * len(fieldname) for fieldname in header_fields]
     print u"\t".join(dashes)
 
-    for tokenization in get_tokenizations(comm, tool=tool):
-        if tool is None or tokenization.metadata.tool == tool:
-            token_tag_lists = []
+    for tokenization in get_tokenizations(comm):
+        token_tag_lists = []
 
-            if char_offsets:
-                token_tag_lists.append(
-                    get_char_offset_tags_for_tokenization(comm, tokenization))
-            if lemmas:
-                token_tag_lists.append(
-                    get_lemma_tags_for_tokenization(tokenization, tool=tool))
-            if pos:
-                token_tag_lists.append(
-                    get_pos_tags_for_tokenization(tokenization, tool=tool))
-            if ner:
-                token_tag_lists.append(
-                    get_ner_tags_for_tokenization(tokenization, tool=tool))
-            if dependency:
-                token_tag_lists.append(
-                    get_conll_head_tags_for_tokenization(tokenization,
-                                                         tool=tool))
-                token_tag_lists.append(
-                    get_conll_deprel_tags_for_tokenization(tokenization,
-                                                           tool=tool))
-            print_conll_style_tags_for_tokenization(tokenization,
-                                                    token_tag_lists)
-            print
+        if char_offsets:
+            token_tag_lists.append(
+                get_char_offset_tags_for_tokenization(comm, tokenization))
+        if lemmas:
+            token_tag_lists.append(
+                get_lemma_tags_for_tokenization(tokenization, tool=tool))
+        if pos:
+            token_tag_lists.append(
+                get_pos_tags_for_tokenization(tokenization, tool=tool))
+        if ner:
+            token_tag_lists.append(
+                get_ner_tags_for_tokenization(tokenization, tool=tool))
+        if dependency:
+            token_tag_lists.append(
+                get_conll_head_tags_for_tokenization(tokenization,
+                                                     tool=tool))
+            token_tag_lists.append(
+                get_conll_deprel_tags_for_tokenization(tokenization,
+                                                       tool=tool))
+        print_conll_style_tags_for_tokenization(tokenization,
+                                                token_tag_lists)
+        print
 
 
 def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
@@ -127,7 +126,8 @@ def print_metadata(comm, tool=None):
                             tokenizations.append(sentence.tokenization)
         return tokenizations
 
-    print u"Communication:  %s\n" % comm.metadata.tool
+    if tool is None or comm.metadata.tool == tool:
+        print u"Communication:  %s\n" % comm.metadata.tool
 
     dependency_parse_tools = set()
     parse_tools = set()
@@ -305,8 +305,7 @@ def print_tokens_with_entityMentions(comm, tool=None):
     em_by_tkzn_id = get_entityMentions_by_tokenizationId(
         comm, tool=tool)
     em_entity_num = get_entity_number_for_entityMention_uuid(comm, tool=tool)
-    tokenizations_by_section = get_tokenizations_grouped_by_section(
-        comm, tool=tool)
+    tokenizations_by_section = get_tokenizations_grouped_by_section(comm)
 
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
@@ -510,9 +509,10 @@ def get_entityMentions_by_tokenizationId(comm, tool=None):
     """
     mentions_by_tkzn_id = defaultdict(list)
     for entitySet in lun(comm.entitySetList):
-        if tool is None or entitySet.metadata.tool == tool:
-            for entity in entitySet.entityList:
-                for entityMention in entity.mentionList:
+        for entity in entitySet.entityList:
+            for entityMention in entity.mentionList:
+                if (tool is None or
+                        entityMention.entityMentionSet.metadata.tool == tool):
                     u = entityMention.tokens.tokenizationId.uuidString
                     mentions_by_tkzn_id[u].append(entityMention)
     return mentions_by_tkzn_id
@@ -538,12 +538,17 @@ def get_entity_number_for_entityMention_uuid(comm, tool=None):
 
     if comm.entitySetList:
         for entitySet in comm.entitySetList:
-            if tool is None or entitySet.metadata.tool == tool:
-                for entity in entitySet.entityList:
-                    for entityMention in entity.mentionList:
+            for entity in entitySet.entityList:
+                any_mention = False
+                for entityMention in entity.mentionList:
+                    if (tool is None or
+                            entityMention.entityMentionSet.metadata.tool ==
+                            tool):
                         entity_number_for_entityMention_uuid[
                             entityMention.uuid.uuidString
                         ] = entity_number_counter
+                    any_mention = True
+                if any_mention:
                     entity_number_counter += 1
     return entity_number_for_entityMention_uuid
 

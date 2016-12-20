@@ -94,6 +94,8 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\nentities\n--------\n'),
+    (False, False, ('--tool', 'fake'), ''),
+    (False, False, ('--tool', 'fake', '--annotation-headers',), '\nentities\n--------\n'),
     (True, False, ('--tool', 'Serif: doc-entities'), ''),
     (True, False, ('--tool', 'Serif: doc-entities', '--annotation-headers',), '\nentities\n--------\n'),
     (False, True, ('--tool', 'Serif: doc-values'), ''),
@@ -179,6 +181,8 @@ Entity Set 1 (Serif: doc-values):
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (False, False, ('--tool', 'fake'), ''),
+    (False, False, ('--tool', 'fake', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
     (True, False, ('--tool', 'Serif: relations'), ''),
     (True, False, ('--tool', 'Serif: relations', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
     (False, True, ('--tool', 'Serif: events'), ''),
@@ -236,6 +240,8 @@ Situation Set 1 (Serif: events):
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\nsituations\n----------\n'),
+    (False, False, ('--tool', 'fake'), ''),
+    (False, False, ('--tool', 'fake', '--annotation-headers',), '\nsituations\n----------\n'),
     (True, False, ('--tool', 'Serif: relations'), ''),
     (True, False, ('--tool', 'Serif: relations', '--annotation-headers',), '\nsituations\n----------\n'),
     (False, True, ('--tool', 'Serif: events'), ''),
@@ -268,13 +274,15 @@ Situation Set 1 (Serif: events):
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\ntext\n----\n'),
-    (('--tool', 'concrete_serif v3.10.1pre'), ''),
-    (('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
+@mark.parametrize('first,args,output_prefix', [
+    (True, (), ''),
+    (True, ('--annotation-headers',), '\ntext\n----\n'),
+    (False, ('--tool', 'fake'), ''),
+    (False, ('--tool', 'fake', '--annotation-headers',), '\ntext\n----\n'),
+    (True, ('--tool', 'concrete_serif v3.10.1pre'), ''),
+    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
 ])
-def test_print_text_for_communication(comm_path, args, output_prefix):
+def test_print_text_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--text',
@@ -282,7 +290,9 @@ def test_print_text_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 <DOC id="dog-bites-man" type="other">
 <HEADLINE>
 Dog Bites Man
@@ -309,6 +319,8 @@ John's daughter Mary expressed sorrow.
 @mark.parametrize('first,second,third,args,output_prefix', [
     (True, True, True, (), ''),
     (True, True, True, ('--annotation-headers',), '\nmentions\n--------\n'),
+    (False, False, False, ('--tool', 'fake'), ''),
+    (False, False, False, ('--tool', 'fake', '--annotation-headers',), '\nmentions\n--------\n'),
     (True, False, False, ('--tool', 'Serif: names'), ''),
     (True, False, False, ('--tool', 'Serif: names', '--annotation-headers',), '\nmentions\n--------\n'),
     (False, True, False, ('--tool', 'Serif: values'), ''),
@@ -357,13 +369,15 @@ Mary expressed sorrow .
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\ntokens\n------\n'),
-    (('--tool', 'Serif: tokens',), ''),
-    (('--tool', 'Serif: tokens', '--annotation-headers',), '\ntokens\n------\n'),
+@mark.parametrize('first,args,output_prefix', [
+    (True, (), ''),
+    (True, ('--annotation-headers',), '\ntokens\n------\n'),
+    (False, ('--tool', 'fake',), ''),
+    (False, ('--tool', 'fake', '--annotation-headers',), '\ntokens\n------\n'),
+    (True, ('--tool', 'Serif: tokens',), ''),
+    (True, ('--tool', 'Serif: tokens', '--annotation-headers',), '\ntokens\n------\n'),
 ])
-def test_print_tokens_for_communication(comm_path, args, output_prefix):
+def test_print_tokens_for_communication(comm_path, first,args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--tokens',
@@ -371,26 +385,37 @@ def test_print_tokens_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''
 John Smith , manager of ACMÉ INC , was bit by a dog on March 10th , 2013 .
-
-He died !
-
-John 's daughter Mary expressed sorrow .
-
 '''.encode('utf-8')
+    expected_output += '\n'
+    if first:
+        expected_output += '''\
+He died !
+'''
+    expected_output += '\n'
+    if first:
+        expected_output += '''\
+John 's daughter Mary expressed sorrow .\
+'''
+    expected_output += '\n\n'
     assert '' == stderr
     assert expected_output == stdout
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\ntreebank\n--------\n'),
-    (('--tool', 'Serif: parse',), ''),
-    (('--tool', 'Serif: parse', '--annotation-headers',), '\ntreebank\n--------\n'),
+@mark.parametrize('first,args,output_prefix', [
+    (True, (), ''),
+    (True, ('--annotation-headers',), '\ntreebank\n--------\n'),
+    (False, ('--tool', 'fake',), ''),
+    (False, ('--tool', 'fake', '--annotation-headers',), '\ntreebank\n--------\n'),
+    (True, ('--tool', 'Serif: parse',), ''),
+    (True, ('--tool', 'Serif: parse', '--annotation-headers',), '\ntreebank\n--------\n'),
 ])
-def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
+def test_print_penn_treebank_for_communication(comm_path, first, args,
+                                               output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--treebank',
@@ -398,7 +423,9 @@ def test_print_penn_treebank_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 (S (NP (NPP (NNP john)
             (NNP smith))
        (, ,)
@@ -522,13 +549,15 @@ def test_print_metadata_for_communication(comm_path, which, args, output_prefix)
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nsections\n--------\n'),
-    (('--tool', 'concrete_serif v3.10.1pre',), ''),
-    (('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nsections\n--------\n'),
+@mark.parametrize('first,args,output_prefix', [
+    (True, (), ''),
+    (True, ('--annotation-headers',), '\nsections\n--------\n'),
+    (False, ('--tool', 'fake',), ''),
+    (False, ('--tool', 'fake', '--annotation-headers',), '\nsections\n--------\n'),
+    (True, ('--tool', 'concrete_serif v3.10.1pre',), ''),
+    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nsections\n--------\n'),
 ])
-def test_print_sections_for_communication(comm_path, args, output_prefix):
+def test_print_sections_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--sections',
@@ -536,7 +565,9 @@ def test_print_sections_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05), from 81 to 82:
 
 
@@ -566,13 +597,15 @@ John's daughter Mary expressed sorrow.
     assert 0 == p.returncode
 
 
-@mark.parametrize('args,output_prefix', [
-    ((), ''),
-    (('--annotation-headers',), '\nid\n--\n'),
-    (('--tool', 'concrete_serif v3.10.1pre'), ''),
-    (('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nid\n--\n'),
+@mark.parametrize('first,args,output_prefix', [
+    (True, (), ''),
+    (True, ('--annotation-headers',), '\nid\n--\n'),
+    (False, ('--tool', 'fake'), ''),
+    (False, ('--tool', 'fake', '--annotation-headers',), '\nid\n--\n'),
+    (True, ('--tool', 'concrete_serif v3.10.1pre'), ''),
+    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nid\n--\n'),
 ])
-def test_print_id_for_communication(comm_path, args, output_prefix):
+def test_print_id_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--id',
@@ -580,7 +613,9 @@ def test_print_id_for_communication(comm_path, args, output_prefix):
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + u'''\
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
 tests/testdata/serif_dog-bites-man.xml
 '''.encode('utf-8')
     assert '' == stderr
@@ -591,6 +626,8 @@ tests/testdata/serif_dog-bites-man.xml
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),
+    (False, True, ('--tool', 'concrete-python'), ''),
+    (False, True, ('--tool', 'concrete-python', '--annotation-headers',), '\ntext\n----\n'),
     (True, False, ('--tool', 'concrete_serif v3.10.1pre'), ''),
     (True, False, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
 ])
@@ -645,6 +682,8 @@ malheureux.
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),
+    (False, True, ('--tool', 'concrete-python'), ''),
+    (False, True, ('--tool', 'concrete-python', '--annotation-headers',), '\ntext\n----\n'),
     (True, False, ('--tool', 'concrete_serif v3.10.1pre'), ''),
     (True, False, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
 ])

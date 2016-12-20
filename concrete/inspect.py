@@ -11,7 +11,8 @@ from operator import attrgetter
 
 def print_conll_style_tags_for_communication(
         comm, char_offsets=False, dependency=False, lemmas=False, ner=False,
-        pos=False, tool=None):
+        pos=False,
+        dependency_tool=None, lemmas_tool=None, ner_tool=None, pos_tool=None):
 
     """Print 'ConLL-style' tags for the tokens in a Communication
 
@@ -50,20 +51,21 @@ def print_conll_style_tags_for_communication(
                 get_char_offset_tags_for_tokenization(comm, tokenization))
         if lemmas:
             token_tag_lists.append(
-                get_lemma_tags_for_tokenization(tokenization, tool=tool))
+                get_lemma_tags_for_tokenization(tokenization,
+                                                tool=lemmas_tool))
         if pos:
             token_tag_lists.append(
-                get_pos_tags_for_tokenization(tokenization, tool=tool))
+                get_pos_tags_for_tokenization(tokenization, tool=pos_tool))
         if ner:
             token_tag_lists.append(
-                get_ner_tags_for_tokenization(tokenization, tool=tool))
+                get_ner_tags_for_tokenization(tokenization, tool=ner_tool))
         if dependency:
             token_tag_lists.append(
                 get_conll_head_tags_for_tokenization(tokenization,
-                                                     tool=tool))
+                                                     tool=dependency_tool))
             token_tag_lists.append(
                 get_conll_deprel_tags_for_tokenization(tokenization,
-                                                       tool=tool))
+                                                       tool=dependency_tool))
         print_conll_style_tags_for_tokenization(tokenization,
                                                 token_tag_lists)
         print

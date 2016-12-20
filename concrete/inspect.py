@@ -62,29 +62,29 @@ def print_conll_style_tags_for_communication(
     dashes = ["-" * len(fieldname) for fieldname in header_fields]
     print u"\t".join(dashes)
 
-    for tokenization in get_tokenizations(comm):
+    for tokenization in _get_tokenizations(comm):
         token_tag_lists = []
 
         if char_offsets:
             token_tag_lists.append(
-                get_char_offset_tags_for_tokenization(comm, tokenization))
+                _get_char_offset_tags_for_tokenization(comm, tokenization))
         if lemmas:
             token_tag_lists.append(
-                get_lemma_tags_for_tokenization(tokenization,
-                                                tool=lemmas_tool))
+                _get_lemma_tags_for_tokenization(tokenization,
+                                                 tool=lemmas_tool))
         if pos:
             token_tag_lists.append(
-                get_pos_tags_for_tokenization(tokenization, tool=pos_tool))
+                _get_pos_tags_for_tokenization(tokenization, tool=pos_tool))
         if ner:
             token_tag_lists.append(
-                get_ner_tags_for_tokenization(tokenization, tool=ner_tool))
+                _get_ner_tags_for_tokenization(tokenization, tool=ner_tool))
         if dependency:
             token_tag_lists.append(
-                get_conll_head_tags_for_tokenization(tokenization,
-                                                     tool=dependency_tool))
+                _get_conll_head_tags_for_tokenization(tokenization,
+                                                      tool=dependency_tool))
             token_tag_lists.append(
-                get_conll_deprel_tags_for_tokenization(tokenization,
-                                                       tool=dependency_tool))
+                _get_conll_deprel_tags_for_tokenization(tokenization,
+                                                        tool=dependency_tool))
         print_conll_style_tags_for_tokenization(tokenization,
                                                 token_tag_lists)
         print
@@ -125,7 +125,7 @@ def print_entities(comm, tool=None):
                         print u"      EntityMention %d-%d-%d:" % (
                             entitySet_index, entity_index, em_index)
                         print u"          tokens:     %s" % (
-                            u" ".join(get_tokens_for_entityMention(em)))
+                            u" ".join(_get_tokens_for_entityMention(em)))
                         if em.text:
                             print u"          text:       %s" % em.text
                         print u"          entityType: %s" % em.entityType
@@ -289,7 +289,7 @@ def _print_situation_mention(situationMention):
             _p(14, 16, u"role", ma.role)
         if ma.entityMention:
             _p(14, 16, u"entityMention",
-                u" ".join(get_tokens_for_entityMention(ma.entityMention)))
+                u" ".join(_get_tokens_for_entityMention(ma.entityMention)))
         # A SituationMention can have an argumentList with a
         # MentionArgument that points to another SituationMention---
         # which could conceivably lead to loops.  We currently don't
@@ -323,10 +323,10 @@ def print_id_for_communication(comm, tool=None):
 
 
 def print_tokens_with_entityMentions(comm, tool=None):
-    em_by_tkzn_id = get_entityMentions_by_tokenizationId(
+    em_by_tkzn_id = _get_entityMentions_by_tokenizationId(
         comm, tool=tool)
-    em_entity_num = get_entity_number_for_entityMention_uuid(comm, tool=tool)
-    tokenizations_by_section = get_tokenizations_grouped_by_section(comm)
+    em_entity_num = _get_entity_number_for_entityMention_uuid(comm, tool=tool)
+    tokenizations_by_section = _get_tokenizations_grouped_by_section(comm)
 
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
@@ -354,7 +354,7 @@ def print_tokens_with_entityMentions(comm, tool=None):
 def print_tokens_for_communication(comm, tool=None):
     """
     """
-    tokenizations_by_section = get_tokenizations_grouped_by_section(
+    tokenizations_by_section = _get_tokenizations_grouped_by_section(
         comm, tool=tool)
 
     for tokenizations_in_section in tokenizations_by_section:
@@ -374,7 +374,7 @@ def print_penn_treebank_for_communication(comm, tool=None):
 
     - `comm`: A Concrete Communication object
     """
-    tokenizations = get_tokenizations(comm)
+    tokenizations = _get_tokenizations(comm)
 
     for tokenization in tokenizations:
         if tokenization.parseList:
@@ -412,7 +412,7 @@ def penn_treebank_for_parse(parse):
     return _traverse_parse(sorted_nodes, 0)
 
 
-def get_char_offset_tags_for_tokenization(comm, tokenization):
+def _get_char_offset_tags_for_tokenization(comm, tokenization):
     if tokenization.tokenList:
         char_offset_tags = [None] * len(tokenization.tokenList.tokenList)
 
@@ -424,9 +424,9 @@ def get_char_offset_tags_for_tokenization(comm, tokenization):
         return char_offset_tags
 
 
-def get_conll_head_tags_for_tokenization(tokenization,
-                                         dependency_parse_index=0,
-                                         tool=None):
+def _get_conll_head_tags_for_tokenization(tokenization,
+                                          dependency_parse_index=0,
+                                          tool=None):
     """Get a list of ConLL 'HEAD tags' for a tokenization
 
     In the ConLL data format:
@@ -472,9 +472,9 @@ def get_conll_head_tags_for_tokenization(tokenization,
         return []
 
 
-def get_conll_deprel_tags_for_tokenization(tokenization,
-                                           dependency_parse_index=0,
-                                           tool=None):
+def _get_conll_deprel_tags_for_tokenization(tokenization,
+                                            dependency_parse_index=0,
+                                            tool=None):
     """Get a list of ConLL 'DEPREL tags' for a tokenization
 
     In the ConLL data format:
@@ -519,7 +519,7 @@ def get_conll_deprel_tags_for_tokenization(tokenization,
         return []
 
 
-def get_entityMentions_by_tokenizationId(comm, tool=None):
+def _get_entityMentions_by_tokenizationId(comm, tool=None):
     """Get entity mentions for a Communication grouped by Tokenization
     UUID string
 
@@ -543,7 +543,7 @@ def get_entityMentions_by_tokenizationId(comm, tool=None):
     return mentions_by_tkzn_id
 
 
-def get_entity_number_for_entityMention_uuid(comm, tool=None):
+def _get_entity_number_for_entityMention_uuid(comm, tool=None):
     """Create mapping from EntityMention UUID to (zero-indexed)
     'Entity Number'
 
@@ -578,8 +578,8 @@ def get_entity_number_for_entityMention_uuid(comm, tool=None):
     return entity_number_for_entityMention_uuid
 
 
-def get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0,
-                                    tool=None):
+def _get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0,
+                                     tool=None):
     """Get lemma tags for a tokenization
 
     Args:
@@ -592,8 +592,8 @@ def get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0,
     """
     if tokenization.tokenList:
         lemma_tags = [""] * len(tokenization.tokenList.tokenList)
-        lemma_tts = get_tokentaggings_of_type(tokenization, u"lemma",
-                                              tool=tool)
+        lemma_tts = _get_tokentaggings_of_type(tokenization, u"lemma",
+                                               tool=tool)
         if (lemma_tts and
                 len(lemma_tts) > lemma_tokentagging_index):
             tag_for_tokenIndex = {}
@@ -606,8 +606,8 @@ def get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0,
         return lemma_tags
 
 
-def get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0,
-                                  tool=None):
+def _get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0,
+                                   tool=None):
     """Get Named Entity Recognition tags for a tokenization
 
     Args:
@@ -620,7 +620,7 @@ def get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0,
     """
     if tokenization.tokenList:
         ner_tags = [""] * len(tokenization.tokenList.tokenList)
-        ner_tts = get_tokentaggings_of_type(tokenization, u"NER", tool=tool)
+        ner_tts = _get_tokentaggings_of_type(tokenization, u"NER", tool=tool)
         if (ner_tts and
                 len(ner_tts) > ner_tokentagging_index):
             tag_for_tokenIndex = {}
@@ -636,8 +636,8 @@ def get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0,
         return ner_tags
 
 
-def get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
-                                  tool=None):
+def _get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
+                                   tool=None):
     """Get Part-of-Speech tags for a tokenization
 
     Args:
@@ -650,7 +650,7 @@ def get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
     """
     if tokenization.tokenList:
         pos_tags = [""] * len(tokenization.tokenList.tokenList)
-        pos_tts = get_tokentaggings_of_type(tokenization, u"POS", tool=tool)
+        pos_tts = _get_tokentaggings_of_type(tokenization, u"POS", tool=tool)
         if pos_tts and len(pos_tts) > pos_tokentagging_index:
             tag_for_tokenIndex = {}
             for taggedToken in pos_tts[pos_tokentagging_index].taggedTokenList:
@@ -661,7 +661,7 @@ def get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
         return pos_tags
 
 
-def get_tokenizations(comm, tool=None):
+def _get_tokenizations(comm, tool=None):
     """Returns a flat list of all Tokenization objects in a Communication
 
     Args:
@@ -685,7 +685,7 @@ def get_tokenizations(comm, tool=None):
     return tokenizations
 
 
-def get_tokenizations_grouped_by_section(comm, tool=None):
+def _get_tokenizations_grouped_by_section(comm, tool=None):
     """Returns a list of lists of Tokenization objects in a Communication
 
     Args:
@@ -714,7 +714,7 @@ def get_tokenizations_grouped_by_section(comm, tool=None):
     return tokenizations_by_section
 
 
-def get_tokens_for_entityMention(entityMention):
+def _get_tokens_for_entityMention(entityMention):
     """Get list of token strings for an EntityMention
 
     Args:
@@ -732,7 +732,7 @@ def get_tokens_for_entityMention(entityMention):
     return tokens
 
 
-def get_tokentaggings_of_type(tokenization, taggingType, tool=None):
+def _get_tokentaggings_of_type(tokenization, taggingType, tool=None):
     """Returns a list of TokenTagging objects with the specified taggingType
 
     Args:

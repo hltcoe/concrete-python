@@ -709,6 +709,149 @@ tests/testdata/serif_dog-bites-man.xml
     assert 0 == p.returncode
 
 
+@mark.parametrize(
+    'first,second,third,args,first_output_prefix,second_output_prefix', [
+        (True, True, True,
+            ('--id', '--situation-mentions'),
+            '', ''),
+        (True, True, True,
+            ('--id', '--situation-mentions',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (False, True, True,
+            ('--id', '--situation-mentions', '--id-tool', 'fake'),
+            '', ''),
+        (False, True, True,
+            ('--id', '--situation-mentions', '--id-tool', 'fake',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (True, True, True,
+            ('--id', '--situation-mentions',
+                '--id-tool', 'concrete_serif v3.10.1pre'),
+            '', ''),
+        (True, True, True,
+            ('--id', '--situation-mentions',
+                '--id-tool', 'concrete_serif v3.10.1pre',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (True, True, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'Serif: relations'),
+            '', ''),
+        (True, True, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'Serif: relations',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (False, True, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'Serif: relations',
+                '--id-tool', 'fake'),
+            '', ''),
+        (False, True, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'Serif: relations',
+                '--id-tool', 'fake',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (True, True, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'Serif: relations',
+                '--id-tool', 'concrete_serif v3.10.1pre'),
+            '', ''),
+        (True, True, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'Serif: relations',
+                '--id-tool', 'concrete_serif v3.10.1pre',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (True, False, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'fake'),
+            '', ''),
+        (True, False, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'fake',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (False, False, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'fake',
+                '--id-tool', 'fake'),
+            '', ''),
+        (False, False, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'fake',
+                '--id-tool', 'fake',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+        (True, False, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'fake',
+                '--id-tool', 'concrete_serif v3.10.1pre'),
+            '', ''),
+        (True, False, False,
+            ('--id', '--situation-mentions',
+                '--situation-mentions-tool', 'fake',
+                '--id-tool', 'concrete_serif v3.10.1pre',
+                '--annotation-headers',),
+            '\nid\n--\n', '\nsituation mentions\n------------------\n'),
+    ])
+def test_print_multiple_for_communication(comm_path, first, second, third,
+                                          args, first_output_prefix,
+                                          second_output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = first_output_prefix
+    if first:
+        expected_output += u'''\
+tests/testdata/serif_dog-bites-man.xml
+'''.encode('utf-8')
+    expected_output += second_output_prefix
+    if second:
+        expected_output += u'''\
+Situation Set 0 (Serif: relations):
+  SituationMention 0-0:
+          situationType:      ORG-AFF.Employment
+          Argument 0:
+              role:           Role.RELATION_SOURCE_ROLE
+              entityMention:  manager of ACMÉ INC
+          Argument 1:
+              role:           Role.RELATION_TARGET_ROLE
+              entityMention:  ACMÉ INC
+
+  SituationMention 0-1:
+          situationType:      PER-SOC.Family
+          Argument 0:
+              role:           Role.RELATION_SOURCE_ROLE
+              entityMention:  John
+          Argument 1:
+              role:           Role.RELATION_TARGET_ROLE
+              entityMention:  daughter
+
+
+'''.encode('utf-8')
+    if third:
+        expected_output += u'''\
+Situation Set 1 (Serif: events):
+  SituationMention 1-0:
+          text:               died
+          situationType:      Life.Die
+          Argument 0:
+              role:           Victim
+              entityMention:  He
+
+
+'''.encode('utf-8')
+    assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
+
+
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),

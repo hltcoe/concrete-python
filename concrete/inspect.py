@@ -4,9 +4,28 @@ The function implementations provide useful examples of how to
 interact with many different Concrete datastructures.
 """
 
+from concrete.util.metadata import get_index_of_tool
 from concrete.util.unnone import lun
 from collections import defaultdict
 from operator import attrgetter
+
+
+def reconcile_index_and_tool(lst_of_conc, given_idx, tool):
+    idx = given_idx
+    if tool is not None:
+        idx = get_index_of_tool(lst_of_conc, tool)
+    return idx
+
+    
+def valid_index_lun(lst, idx):
+    """Return True iff `idx` is a valid index into
+    the given (non-None) list. If `lst` is None,
+    return False.
+    """
+
+    if lst is None or len(lst) == 0:
+        return False
+    return idx >= 0 and idx < len(lst)
 
 
 def print_conll_style_tags_for_communication(
@@ -437,15 +456,17 @@ def get_conll_head_tags_for_tokenization(tokenization,
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
         head_list = [""] * len(tokenization.tokenList.tokenList)
+        dep_idx = reconcile_index_and_tool(tokenization.dependencyParseList,
+                                           dependency_parse_index,
+                                           tool)
 
-        if tokenization.dependencyParseList:
-            dp = tokenization.dependencyParseList[dependency_parse_index]
-            if tool is None or dp.metadata.tool == tool:
-                for dependency in dp.dependencyList:
-                    if dependency.gov is None:
-                        head_list[dependency.dep] = 0
-                    else:
-                        head_list[dependency.dep] = dependency.gov + 1
+        if valid_index_lun(tokenization.dependencyParseList, dep_idx):
+            dp = tokenization.dependencyParseList[dep_idx]
+            for dependency in dp.dependencyList:
+                if dependency.gov is None:
+                    head_list[dependency.dep] = 0
+                else:
+                    head_list[dependency.dep] = dependency.gov + 1
         return head_list
     else:
         return []
@@ -482,9 +503,11 @@ def get_conll_deprel_tags_for_tokenization(tokenization,
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
         deprel_list = [""] * len(tokenization.tokenList.tokenList)
-
-        if tokenization.dependencyParseList:
-            dp = tokenization.dependencyParseList[dependency_parse_index]
+        dep_idx = reconcile_index_and_tool(tokenization.dependencyParseList,
+                                           dependency_parse_index,
+                                           tool)
+        if valid_index_lun(tokenization.dependencyParseList, dep_idx):
+            dp = tokenization.dependencyParseList[dep_idx]
             if tool is None or dp.metadata.tool == tool:
                 for dependency in dp.dependencyList:
                     if dependency.edgeType is None:

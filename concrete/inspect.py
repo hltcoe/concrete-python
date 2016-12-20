@@ -10,14 +10,14 @@ from collections import defaultdict
 from operator import attrgetter
 
 
-def reconcile_index_and_tool(lst_of_conc, given_idx, tool):
+def _reconcile_index_and_tool(lst_of_conc, given_idx, tool):
     idx = given_idx
     if tool is not None:
         idx = get_index_of_tool(lst_of_conc, tool)
     return idx
 
-    
-def valid_index_lun(lst, idx):
+
+def _valid_index_lun(lst, idx):
     """Return True iff `idx` is a valid index into
     the given (non-None) list. If `lst` is None,
     return False.
@@ -456,11 +456,11 @@ def _get_conll_head_tags_for_tokenization(tokenization,
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
         head_list = [""] * len(tokenization.tokenList.tokenList)
-        dep_idx = reconcile_index_and_tool(tokenization.dependencyParseList,
-                                           dependency_parse_index,
-                                           tool)
+        dep_idx = _reconcile_index_and_tool(tokenization.dependencyParseList,
+                                            dependency_parse_index,
+                                            tool)
 
-        if valid_index_lun(tokenization.dependencyParseList, dep_idx):
+        if _valid_index_lun(tokenization.dependencyParseList, dep_idx):
             dp = tokenization.dependencyParseList[dep_idx]
             for dependency in dp.dependencyList:
                 if dependency.gov is None:
@@ -503,10 +503,10 @@ def _get_conll_deprel_tags_for_tokenization(tokenization,
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
         deprel_list = [""] * len(tokenization.tokenList.tokenList)
-        dep_idx = reconcile_index_and_tool(tokenization.dependencyParseList,
-                                           dependency_parse_index,
-                                           tool)
-        if valid_index_lun(tokenization.dependencyParseList, dep_idx):
+        dep_idx = _reconcile_index_and_tool(tokenization.dependencyParseList,
+                                            dependency_parse_index,
+                                            tool)
+        if _valid_index_lun(tokenization.dependencyParseList, dep_idx):
             dp = tokenization.dependencyParseList[dep_idx]
             if tool is None or dp.metadata.tool == tool:
                 for dependency in dp.dependencyList:

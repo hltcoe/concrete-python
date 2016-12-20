@@ -7,12 +7,12 @@ def get_index_of_tool(lst_of_conc, tool):
     whose tool name matches tool.
 
     If tool is None, return the first valid index into `lst_of_conc`.
-    
+
     This returns -1 if:
       * `lst_of_conc` is None, or
       * `lst_of_conc` has no entries, or
       * no object in `lst_of_conc` matches `tool`.
-    
+
     Args:
 
     - `lst_of_conc`: A list of Concrete objects, each of which

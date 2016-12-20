@@ -25,13 +25,18 @@ def comms_tgz_path(request):
     (range(8), (), ''),
     (range(8), ('--annotation-headers',), '\nconll\n-----\n'),
     ((0, 1, 2), ('--tool', 'fake'), ''),
-    ((0, 1, 2), ('--tool', 'fake', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2), ('--tool', 'fake', '--annotation-headers',),
+        '\nconll\n-----\n'),
     ((0, 1, 2, 4), ('--tool', 'Serif: part-of-speech'), ''),
-    ((0, 1, 2, 4), ('--tool', 'Serif: part-of-speech', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 4),
+        ('--tool', 'Serif: part-of-speech', '--annotation-headers',),
+        '\nconll\n-----\n'),
     ((0, 1, 2, 5), ('--tool', 'Serif: names'), ''),
-    ((0, 1, 2, 5), ('--tool', 'Serif: names', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 5), ('--tool', 'Serif: names', '--annotation-headers',),
+        '\nconll\n-----\n'),
     ((0, 1, 2, 6, 7), ('--tool', 'Stanford'), ''),
-    ((0, 1, 2, 6, 7), ('--tool', 'Stanford', '--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 6, 7), ('--tool', 'Stanford', '--annotation-headers',),
+        '\nconll\n-----\n'),
 ])
 def test_print_conll_style_tags_for_communication(comm_path, which, args,
                                                   output_prefix):
@@ -95,11 +100,14 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\nentities\n--------\n'),
     (False, False, ('--tool', 'fake'), ''),
-    (False, False, ('--tool', 'fake', '--annotation-headers',), '\nentities\n--------\n'),
+    (False, False, ('--tool', 'fake', '--annotation-headers',),
+        '\nentities\n--------\n'),
     (True, False, ('--tool', 'Serif: doc-entities'), ''),
-    (True, False, ('--tool', 'Serif: doc-entities', '--annotation-headers',), '\nentities\n--------\n'),
+    (True, False, ('--tool', 'Serif: doc-entities', '--annotation-headers',),
+        '\nentities\n--------\n'),
     (False, True, ('--tool', 'Serif: doc-values'), ''),
-    (False, True, ('--tool', 'Serif: doc-values', '--annotation-headers',), '\nentities\n--------\n'),
+    (False, True, ('--tool', 'Serif: doc-values', '--annotation-headers',),
+        '\nentities\n--------\n'),
 ])
 def test_print_entities(comm_path, first, second, args, output_prefix):
     p = Popen([
@@ -180,15 +188,20 @@ Entity Set 1 (Serif: doc-values):
 
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
-    (True, True, ('--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (True, True, ('--annotation-headers',),
+        '\nsituation mentions\n------------------\n'),
     (False, False, ('--tool', 'fake'), ''),
-    (False, False, ('--tool', 'fake', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (False, False, ('--tool', 'fake', '--annotation-headers',),
+        '\nsituation mentions\n------------------\n'),
     (True, False, ('--tool', 'Serif: relations'), ''),
-    (True, False, ('--tool', 'Serif: relations', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (True, False, ('--tool', 'Serif: relations', '--annotation-headers',),
+        '\nsituation mentions\n------------------\n'),
     (False, True, ('--tool', 'Serif: events'), ''),
-    (False, True, ('--tool', 'Serif: events', '--annotation-headers',), '\nsituation mentions\n------------------\n'),
+    (False, True, ('--tool', 'Serif: events', '--annotation-headers',),
+        '\nsituation mentions\n------------------\n'),
 ])
-def test_print_situation_mentions(comm_path, first, second, args, output_prefix):
+def test_print_situation_mentions(comm_path, first, second, args,
+                                  output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--situation-mentions',
@@ -239,13 +252,17 @@ Situation Set 1 (Serif: events):
 
 @mark.parametrize('first,second,args,output_prefix', [
     (True, True, (), ''),
-    (True, True, ('--annotation-headers',), '\nsituations\n----------\n'),
+    (True, True, ('--annotation-headers',),
+        '\nsituations\n----------\n'),
     (False, False, ('--tool', 'fake'), ''),
-    (False, False, ('--tool', 'fake', '--annotation-headers',), '\nsituations\n----------\n'),
+    (False, False, ('--tool', 'fake', '--annotation-headers',),
+        '\nsituations\n----------\n'),
     (True, False, ('--tool', 'Serif: relations'), ''),
-    (True, False, ('--tool', 'Serif: relations', '--annotation-headers',), '\nsituations\n----------\n'),
+    (True, False, ('--tool', 'Serif: relations', '--annotation-headers',),
+        '\nsituations\n----------\n'),
     (False, True, ('--tool', 'Serif: events'), ''),
-    (False, True, ('--tool', 'Serif: events', '--annotation-headers',), '\nsituations\n----------\n'),
+    (False, True, ('--tool', 'Serif: events', '--annotation-headers',),
+        '\nsituations\n----------\n'),
 ])
 def test_print_situations(comm_path, first, second, args, output_prefix):
     p = Popen([
@@ -280,7 +297,8 @@ Situation Set 1 (Serif: events):
     (False, ('--tool', 'fake'), ''),
     (False, ('--tool', 'fake', '--annotation-headers',), '\ntext\n----\n'),
     (True, ('--tool', 'concrete_serif v3.10.1pre'), ''),
-    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
+    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
+        '\ntext\n----\n'),
 ])
 def test_print_text_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
@@ -318,15 +336,21 @@ John's daughter Mary expressed sorrow.
 
 @mark.parametrize('first,second,third,args,output_prefix', [
     (True, True, True, (), ''),
-    (True, True, True, ('--annotation-headers',), '\nmentions\n--------\n'),
+    (True, True, True, ('--annotation-headers',),
+        '\nmentions\n--------\n'),
     (False, False, False, ('--tool', 'fake'), ''),
-    (False, False, False, ('--tool', 'fake', '--annotation-headers',), '\nmentions\n--------\n'),
+    (False, False, False, ('--tool', 'fake', '--annotation-headers',),
+        '\nmentions\n--------\n'),
     (True, False, False, ('--tool', 'Serif: names'), ''),
-    (True, False, False, ('--tool', 'Serif: names', '--annotation-headers',), '\nmentions\n--------\n'),
+    (True, False, False, ('--tool', 'Serif: names', '--annotation-headers',),
+        '\nmentions\n--------\n'),
     (False, True, False, ('--tool', 'Serif: values'), ''),
-    (False, True, False, ('--tool', 'Serif: values', '--annotation-headers',), '\nmentions\n--------\n'),
+    (False, True, False, ('--tool', 'Serif: values', '--annotation-headers',),
+        '\nmentions\n--------\n'),
     (False, False, True, ('--tool', 'Serif: mentions'), ''),
-    (False, False, True, ('--tool', 'Serif: mentions', '--annotation-headers',), '\nmentions\n--------\n'),
+    (False, False, True,
+        ('--tool', 'Serif: mentions', '--annotation-headers',),
+        '\nmentions\n--------\n'),
 ])
 def test_print_tokens_with_entityMentions(comm_path, first, second, third,
                                           args, output_prefix):
@@ -371,13 +395,16 @@ Mary expressed sorrow .
 
 @mark.parametrize('first,args,output_prefix', [
     (True, (), ''),
-    (True, ('--annotation-headers',), '\ntokens\n------\n'),
+    (True, ('--annotation-headers',),
+        '\ntokens\n------\n'),
     (False, ('--tool', 'fake',), ''),
-    (False, ('--tool', 'fake', '--annotation-headers',), '\ntokens\n------\n'),
+    (False, ('--tool', 'fake', '--annotation-headers',),
+        '\ntokens\n------\n'),
     (True, ('--tool', 'Serif: tokens',), ''),
-    (True, ('--tool', 'Serif: tokens', '--annotation-headers',), '\ntokens\n------\n'),
+    (True, ('--tool', 'Serif: tokens', '--annotation-headers',),
+        '\ntokens\n------\n'),
 ])
-def test_print_tokens_for_communication(comm_path, first,args, output_prefix):
+def test_print_tokens_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--tokens',
@@ -410,9 +437,11 @@ John 's daughter Mary expressed sorrow .\
     (True, (), ''),
     (True, ('--annotation-headers',), '\ntreebank\n--------\n'),
     (False, ('--tool', 'fake',), ''),
-    (False, ('--tool', 'fake', '--annotation-headers',), '\ntreebank\n--------\n'),
+    (False, ('--tool', 'fake', '--annotation-headers',),
+        '\ntreebank\n--------\n'),
     (True, ('--tool', 'Serif: parse',), ''),
-    (True, ('--tool', 'Serif: parse', '--annotation-headers',), '\ntreebank\n--------\n'),
+    (True, ('--tool', 'Serif: parse', '--annotation-headers',),
+        '\ntreebank\n--------\n'),
 ])
 def test_print_penn_treebank_for_communication(comm_path, first, args,
                                                output_prefix):
@@ -471,31 +500,44 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
     (range(15), (), ''),
     (range(15), ('--annotation-headers',), '\nmetadata\n--------\n'),
     ((0,), ('--tool', 'concrete_serif v3.10.1pre'), ''),
-    ((0,), ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((0,), ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((1,), ('--tool', 'Serif: tokens'), ''),
-    ((1,), ('--tool', 'Serif: tokens', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((1,), ('--tool', 'Serif: tokens', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((2,), ('--tool', 'Stanford'), ''),
-    ((2,), ('--tool', 'Stanford', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((2,), ('--tool', 'Stanford', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((3,), ('--tool', 'Serif: parse'), ''),
-    ((3,), ('--tool', 'Serif: parse', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((3,), ('--tool', 'Serif: parse', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((4, 6), ('--tool', 'Serif: names'), ''),
-    ((4, 6), ('--tool', 'Serif: names', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((4, 6), ('--tool', 'Serif: names', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((5,), ('--tool', 'Serif: part-of-speech'), ''),
-    ((5,), ('--tool', 'Serif: part-of-speech', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((5,), ('--tool', 'Serif: part-of-speech', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((7,), ('--tool', 'Serif: values'), ''),
-    ((7,), ('--tool', 'Serif: values', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((7,), ('--tool', 'Serif: values', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((8,), ('--tool', 'Serif: mentions'), ''),
-    ((8,), ('--tool', 'Serif: mentions', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((8,), ('--tool', 'Serif: mentions', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((9,), ('--tool', 'Serif: doc-entities'), ''),
-    ((9,), ('--tool', 'Serif: doc-entities', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((9,), ('--tool', 'Serif: doc-entities', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((10,), ('--tool', 'Serif: doc-values'), ''),
-    ((10,), ('--tool', 'Serif: doc-values', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((10,), ('--tool', 'Serif: doc-values', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((11, 13), ('--tool', 'Serif: relations'), ''),
-    ((11, 13), ('--tool', 'Serif: relations', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((11, 13), ('--tool', 'Serif: relations', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
     ((12, 14), ('--tool', 'Serif: events'), ''),
-    ((12, 14), ('--tool', 'Serif: events', '--annotation-headers',), '\nmetadata\n--------\n'),
+    ((12, 14), ('--tool', 'Serif: events', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
 ])
-def test_print_metadata_for_communication(comm_path, which, args, output_prefix):
+def test_print_metadata_for_communication(comm_path, which, args,
+                                          output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--metadata',
@@ -553,11 +595,14 @@ def test_print_metadata_for_communication(comm_path, which, args, output_prefix)
     (True, (), ''),
     (True, ('--annotation-headers',), '\nsections\n--------\n'),
     (False, ('--tool', 'fake',), ''),
-    (False, ('--tool', 'fake', '--annotation-headers',), '\nsections\n--------\n'),
+    (False, ('--tool', 'fake', '--annotation-headers',),
+        '\nsections\n--------\n'),
     (True, ('--tool', 'concrete_serif v3.10.1pre',), ''),
-    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nsections\n--------\n'),
+    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
+        '\nsections\n--------\n'),
 ])
-def test_print_sections_for_communication(comm_path, first, args, output_prefix):
+def test_print_sections_for_communication(comm_path, first, args,
+                                          output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete_inspect.py',
         '--sections',
@@ -603,7 +648,8 @@ John's daughter Mary expressed sorrow.
     (False, ('--tool', 'fake'), ''),
     (False, ('--tool', 'fake', '--annotation-headers',), '\nid\n--\n'),
     (True, ('--tool', 'concrete_serif v3.10.1pre'), ''),
-    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\nid\n--\n'),
+    (True, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
+        '\nid\n--\n'),
 ])
 def test_print_id_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
@@ -627,9 +673,12 @@ tests/testdata/serif_dog-bites-man.xml
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),
     (False, True, ('--tool', 'concrete-python'), ''),
-    (False, True, ('--tool', 'concrete-python', '--annotation-headers',), '\ntext\n----\n'),
+    (False, True, ('--tool', 'concrete-python', '--annotation-headers',),
+        '\ntext\n----\n'),
     (True, False, ('--tool', 'concrete_serif v3.10.1pre'), ''),
-    (True, False, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
+    (True, False,
+        ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
+        '\ntext\n----\n'),
 ])
 def test_print_multiple_communications(comms_path, first, second, args,
                                        output_prefix):
@@ -683,9 +732,12 @@ malheureux.
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),
     (False, True, ('--tool', 'concrete-python'), ''),
-    (False, True, ('--tool', 'concrete-python', '--annotation-headers',), '\ntext\n----\n'),
+    (False, True, ('--tool', 'concrete-python', '--annotation-headers',),
+        '\ntext\n----\n'),
     (True, False, ('--tool', 'concrete_serif v3.10.1pre'), ''),
-    (True, False, ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',), '\ntext\n----\n'),
+    (True, False,
+        ('--tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
+        '\ntext\n----\n'),
 ])
 def test_print_multiple_communications_tgz(comms_tgz_path, first, second, args,
                                            output_prefix):

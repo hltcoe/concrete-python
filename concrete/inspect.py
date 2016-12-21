@@ -433,6 +433,47 @@ def _get_char_offset_tags_for_tokenization(comm, tokenization):
         return char_offset_tags
 
 
+def _deps_for_tokenization(tokenization,
+                           dependency_parse_index=0,
+                           tool=None):
+    '''
+    Return a generator of the dependencies (Dependency objects) for
+    a tokenization under the given tool.
+    '''
+    if tokenization.tokenList is not None:
+        # Tokens that are not part of the dependency parse
+        # (e.g. punctuation) are represented using an empty string
+        dp_idx = _reconcile_index_and_tool(tokenization.dependencyParseList,
+                                           dependency_parse_index,
+                                           tool)
+
+        if _valid_index_lun(tokenization.dependencyParseList, dp_idx):
+            dp = tokenization.dependencyParseList[dp_idx]
+            if tool is None or dp.metadata.tool == tool:
+                for dependency in dp.dependencyList:
+                    yield dependency
+
+
+def _sorted_dep_list_for_tokenization(tokenization,
+                                      dependency_parse_index=0,
+                                      tool=None):
+    '''
+    Return output of _deps_for_tokenization in a list whose length
+    is equal to the number of tokens in this tokenization's token list,
+    where the element at index i is a dependency if there is a
+    dependency whose dep field is i and None otherwise.
+    '''
+    if tokenization.tokenList is not None:
+        dep_list = [None] * len(tokenization.tokenList.tokenList)
+        for dep in _deps_for_tokenization(
+                tokenization, dependency_parse_index=dependency_parse_index,
+                tool=tool):
+            dep_list[dep.dep] = dep
+        return dep_list
+    else:
+        return []
+
+
 def _get_conll_head_tags_for_tokenization(tokenization,
                                           dependency_parse_index=0,
                                           tool=None):
@@ -461,24 +502,12 @@ def _get_conll_head_tags_for_tokenization(tokenization,
       function returns a list of empty strings for each token in the
       supplied tokenization.
     """
-    if tokenization.tokenList:
-        # Tokens that are not part of the dependency parse
-        # (e.g. punctuation) are represented using an empty string
-        head_list = [""] * len(tokenization.tokenList.tokenList)
-        dep_idx = _reconcile_index_and_tool(tokenization.dependencyParseList,
-                                            dependency_parse_index,
-                                            tool)
-
-        if _valid_index_lun(tokenization.dependencyParseList, dep_idx):
-            dp = tokenization.dependencyParseList[dep_idx]
-            for dependency in dp.dependencyList:
-                if dependency.gov is None:
-                    head_list[dependency.dep] = 0
-                else:
-                    head_list[dependency.dep] = dependency.gov + 1
-        return head_list
-    else:
-        return []
+    return map(
+        lambda dep: '' if dep is None else (
+            0 if dep.gov is None else dep.gov + 1),
+        _sorted_dep_list_for_tokenization(
+            tokenization, dependency_parse_index=dependency_parse_index,
+            tool=tool))
 
 
 def _get_conll_deprel_tags_for_tokenization(tokenization,
@@ -508,24 +537,12 @@ def _get_conll_deprel_tags_for_tokenization(tokenization,
       function returns a list of empty strings for each token in the
       supplied tokenization.
     """
-    if tokenization.tokenList:
-        # Tokens that are not part of the dependency parse
-        # (e.g. punctuation) are represented using an empty string
-        deprel_list = [""] * len(tokenization.tokenList.tokenList)
-        dep_idx = _reconcile_index_and_tool(tokenization.dependencyParseList,
-                                            dependency_parse_index,
-                                            tool)
-        if _valid_index_lun(tokenization.dependencyParseList, dep_idx):
-            dp = tokenization.dependencyParseList[dep_idx]
-            if tool is None or dp.metadata.tool == tool:
-                for dependency in dp.dependencyList:
-                    if dependency.edgeType is None:
-                        deprel_list[dependency.dep] = ''
-                    else:
-                        deprel_list[dependency.dep] = dependency.edgeType
-        return deprel_list
-    else:
-        return []
+    return map(
+        lambda dep: '' if dep is None else (
+            '' if dep.edgeType is None else dep.edgeType),
+        _sorted_dep_list_for_tokenization(
+            tokenization, dependency_parse_index=dependency_parse_index,
+            tool=tool))
 
 
 def _get_entityMentions_by_tokenizationId(comm, tool=None):

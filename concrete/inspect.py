@@ -11,7 +11,16 @@ from operator import attrgetter
 
 
 def _reconcile_index_and_tool(lst_of_conc, given_idx, tool):
-    idx = given_idx
+    """Given a list of Concrete objects with metadata (e.g., `DependencyParse`s)
+    and a default index, find the index of the object whose `.metadata.tool`
+    matches the provided query tool name `tool`.
+
+    When no tool is provided (but with an iterable list), this returns the
+    provided default index (even if it\'s not a valid index).
+    If the tool isn't found, the list is None or empty, this returns -1.
+    """
+    valid_lst = lst_of_conc is not None and len(lst_of_conc) > 0
+    idx = given_idx if valid_lst else -1
     if tool is not None:
         idx = get_index_of_tool(lst_of_conc, tool)
     return idx

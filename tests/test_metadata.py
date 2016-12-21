@@ -9,6 +9,7 @@ import string
 import time
 import unittest
 
+
 class HasMetadata:
 
     def __init__(self, tool=None):
@@ -21,7 +22,8 @@ class HasMetadata:
     def gen_tool(cls, tool=None, size=6,
                  chars=string.ascii_uppercase + string.digits):
         return tool if (tool is not None) else \
-        u''.join(random.choice(chars) for _ in xrange(size))
+            u''.join(random.choice(chars) for _ in xrange(size))
+
 
 class TestFindToolInList(unittest.TestCase):
 
@@ -49,7 +51,7 @@ class TestFindToolInList(unittest.TestCase):
         self.assertEqual(get_index_of_tool(lst, None), 0)
         self.assertEqual(get_index_of_tool(lst, ""), -1)
         self.assertEqual(get_index_of_tool(lst, "My awesome tool"), 2)
-        
+
     def test_nonempty_list_no_contains(self):
         lst = [
             HasMetadata(),
@@ -59,4 +61,3 @@ class TestFindToolInList(unittest.TestCase):
         self.assertEqual(get_index_of_tool(lst, None), 0)
         self.assertEqual(get_index_of_tool(lst, ""), -1)
         self.assertEqual(get_index_of_tool(lst, "My awesome tool"), -1)
-

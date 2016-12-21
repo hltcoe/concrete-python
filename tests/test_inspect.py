@@ -20,7 +20,7 @@ import unittest
 class ReconcileIndexAndTool:
 
     default_tool = "My awesome tool"
-    
+
     def __init__(self, num, t=default_tool):
         self.lst = [
             DependencyParse(
@@ -32,6 +32,7 @@ class ReconcileIndexAndTool:
                 dependencyList=[]
             ) for i in xrange(num)
         ] if num is not None else None
+
 
 class TestReconcileIndexAndTool(unittest.TestCase):
 
@@ -52,7 +53,7 @@ class TestReconcileIndexAndTool(unittest.TestCase):
                                                    0,
                                                    "My awesome tool"),
                          -1)
-        
+
     def test_singleton_list(self):
         lst = ReconcileIndexAndTool(1).lst
         self.assertEqual(_reconcile_index_and_tool(lst, 0, None), 0)
@@ -94,6 +95,7 @@ class TestReconcileIndexAndTool(unittest.TestCase):
                                                    "Your awesome tool"),
                          -1)
 
+
 class TestValidIndexLUn(unittest.TestCase):
 
     def test_none_list(self):
@@ -105,16 +107,17 @@ class TestValidIndexLUn(unittest.TestCase):
         self.assertFalse(_valid_index_lun([], 0))
         self.assertFalse(_valid_index_lun([], -2))
         self.assertFalse(_valid_index_lun([], 0))
-        
+
     def test_singleton_list(self):
         self.assertTrue(_valid_index_lun(xrange(1), 0))
         self.assertFalse(_valid_index_lun(xrange(1), -2))
         self.assertFalse(_valid_index_lun(xrange(1), 1))
 
+
 class FakeTokenizationAndDependency:
 
     default_tool = "My awesome tool"
-    
+
     def __init__(self, num, num_dp=1, t=default_tool):
         self.tokenization = Tokenization(
             uuid=UUID(uuidString=u"id"),
@@ -135,17 +138,20 @@ class FakeTokenizationAndDependency:
                     uuid=UUID(uuidString=u"depparse_" + unicode(num)),
                     metadata=AnnotationMetadata(
                         timestamp=int(time.time()),
-                        tool=t if dp_idx == 0 else (u"dptool" + unicode(dp_idx))
+                        tool=t if dp_idx == 0 else
+                        (u"dptool" + unicode(dp_idx))
                     ),
                     dependencyList=[
                         Dependency(
                             gov=i-1, dep=i,
-                            edgeType=u"edge_" + unicode(i) + "/" + unicode(dp_idx)
+                            edgeType=u"edge_" + unicode(i) +
+                            "/" + unicode(dp_idx)
                         ) for i in xrange(num)
                     ]
                 ) for dp_idx in xrange(num_dp)
             ]
-        
+
+
 class TestGetCoNLLDeprelTags(unittest.TestCase):
 
     def test_none_tokens(self):
@@ -164,94 +170,116 @@ class TestGetCoNLLDeprelTags(unittest.TestCase):
         tokenization=FakeTokenizationAndDependency(1).tokenization
         self.assertEqual(cdt(tokenization, 0, None),
                          [u"edge_0/0"])
-        self.assertEqual(cdt(tokenization, 0, FakeTokenizationAndDependency.default_tool),
+        self.assertEqual(cdt(tokenization, 0,
+                             FakeTokenizationAndDependency.default_tool),
                          [u"edge_0/0"])
         self.assertEqual(cdt(tokenization, 0, ""), [""])
 
         for tool in (None, ""):
             self.assertEqual(cdt(tokenization, -1, tool), [""])
 
-        self.assertEqual(cdt(tokenization, -1, FakeTokenizationAndDependency.default_tool),
+        self.assertEqual(cdt(tokenization, -1,
+                             FakeTokenizationAndDependency.default_tool),
                          [u"edge_0/0"])
-        
-        self.assertEqual(cdt(tokenization, 1,  FakeTokenizationAndDependency.default_tool),
+
+        self.assertEqual(cdt(tokenization, 1,
+                             FakeTokenizationAndDependency.default_tool),
                          [u"edge_0/0"])
         for tool in (None, ""):
             self.assertEqual(cdt(tokenization, 1, tool), [""])
 
     def test_arbitrary_num_tokens_not_found(self):
+        t="Other great tool"
         for num_tokens in xrange(1, 10):
-            tokenization=FakeTokenizationAndDependency(num_tokens, \
-                                                       t="Other great tool").tokenization
+            tokenization=FakeTokenizationAndDependency(num_tokens,
+                                                       t=t).tokenization
             self.assertEqual(cdt(tokenization, 0, None),
-                             [u"edge_" + unicode(i) + "/0" for i in xrange(num_tokens)])
-            self.assertEqual(cdt(tokenization, 0, FakeTokenizationAndDependency.default_tool),
+                             [u"edge_" + unicode(i) + "/0"
+                              for i in xrange(num_tokens)])
+            self.assertEqual(cdt(tokenization, 0,
+                                 FakeTokenizationAndDependency.default_tool),
                              [""]*num_tokens)
             self.assertEqual(cdt(tokenization, 0, ""), [""]*num_tokens)
 
-            self.assertEqual(cdt(tokenization, -1, None), \
+            self.assertEqual(cdt(tokenization, -1, None),
                              [""] * num_tokens)
             self.assertTrue(tokenization.tokenList)
 
-            self.assertEqual(cdt(tokenization, 0, None), \
-                             [u"edge_" + unicode(j) + "/0" for j in xrange(num_tokens)])
+            self.assertEqual(cdt(tokenization, 0, None),
+                             [u"edge_" + unicode(j) + "/0"
+                              for j in xrange(num_tokens)])
             for tool in ("", FakeTokenizationAndDependency.default_tool):
                 self.assertEqual(cdt(tokenization, 0, tool), [""] * num_tokens)
-            
+
             for i in xrange(1, num_tokens+1):
-                for tool in (None, "", FakeTokenizationAndDependency.default_tool):
-                    self.assertEqual(cdt(tokenization, i, tool), [""] * num_tokens)
+                for tool in (None, "",
+                             FakeTokenizationAndDependency.default_tool):
+                    self.assertEqual(cdt(tokenization, i, tool),
+                                     [""] * num_tokens)
 
     def test_arbitrary_num_tokens_num_dp_not_found(self):
+        t="Other great tool"
+        # without this memoization, style fails
+        style_tool=FakeTokenizationAndDependency.default_tool
         for num_dp in xrange(1, 4):
             for num_tokens in xrange(1, 10):
-                tokenization=FakeTokenizationAndDependency(num_tokens, \
+                tokenization=FakeTokenizationAndDependency(num_tokens,
                                                            num_dp=num_dp,
-                                                           t="Other great tool").tokenization
+                                                           t=t).tokenization
 
                 # no tool given, with valid index: return indexed parse
                 self.assertEqual(cdt(tokenization, 0, None),
-                                 [u"edge_" + unicode(i) + "/0" for i in xrange(num_tokens)])
+                                 [u"edge_" + unicode(i) + "/0"
+                                  for i in xrange(num_tokens)])
                 # tools given, with valid index, but not found
                 self.assertEqual(cdt(tokenization, 0,
-                                     FakeTokenizationAndDependency.default_tool),
+                                     style_tool),
                                  [""] * num_tokens)
                 self.assertEqual(cdt(tokenization, 0, ""), [""] * num_tokens)
 
                 # invalid index, no tool given: return empty
-                self.assertEqual(cdt(tokenization, -1, None), \
+                self.assertEqual(cdt(tokenization, -1, None),
                                  [""] * num_tokens)
 
                 for i in xrange(num_dp):
                     # no tool given, valid index: return specified parse
-                    self.assertEqual(cdt(tokenization, i, None), \
+                    self.assertEqual(cdt(tokenization, i, None),
                                      [u"edge_" + unicode(j) + "/" + unicode(i)
                                       for j in xrange(num_tokens)])
                     # tool given, valid index, not found: return empty
-                    for tool in ("", FakeTokenizationAndDependency.default_tool):
-                        self.assertEqual(cdt(tokenization, i, tool), [""] * num_tokens)
+                    for tool in ("",
+                                 FakeTokenizationAndDependency.default_tool):
+                        self.assertEqual(cdt(tokenization, i, tool),
+                                         [""] * num_tokens)
 
                 # invalid index: return empty
-                for tool in (None, "", FakeTokenizationAndDependency.default_tool):
-                    self.assertEqual(cdt(tokenization, num_dp, tool), [""] * num_tokens)
+                for tool in (None, "",
+                             FakeTokenizationAndDependency.default_tool):
+                    self.assertEqual(cdt(tokenization, num_dp, tool),
+                                     [""] * num_tokens)
 
     def test_arbitrary_num_tokens_num_dp_found(self):
+        # sigh... memoize to let style checks pass
+        style_tool=FakeTokenizationAndDependency.default_tool
         for num_dp in xrange(1, 4):
             for num_tokens in xrange(1, 10):
-                tokenization=FakeTokenizationAndDependency(num_tokens,
-                                                           num_dp=num_dp).tokenization
+                tokenization=FakeTokenizationAndDependency(
+                    num_tokens,
+                    num_dp=num_dp).tokenization
 
                 # no tool given, with valid index: return indexed parse
                 self.assertEqual(cdt(tokenization, 0, None),
-                                 [u"edge_" + unicode(i) + "/0" for i in xrange(num_tokens)])
+                                 [u"edge_" + unicode(i) + "/0"
+                                  for i in xrange(num_tokens)])
                 # tool given, with valid index, not found
                 self.assertEqual(cdt(tokenization, 0,
-                                     FakeTokenizationAndDependency.default_tool),
-                                 [u"edge_" + unicode(i) + "/0" for i in xrange(num_tokens)])
+                                     style_tool),
+                                 [u"edge_" + unicode(i) + "/0"
+                                  for i in xrange(num_tokens)])
                 self.assertEqual(cdt(tokenization, 0, ""), [""] * num_tokens)
 
                 # invalid index, no tool given: return empty
-                self.assertEqual(cdt(tokenization, -1, None), \
+                self.assertEqual(cdt(tokenization, -1, None),
                                  [""] * num_tokens)
 
                 for i in xrange(num_dp):
@@ -264,15 +292,16 @@ class TestGetCoNLLDeprelTags(unittest.TestCase):
                                       for j in xrange(num_tokens)])
                     # tool given, valid index, found: return correct
                     self.assertEqual(cdt(tokenization, i,
-                                     FakeTokenizationAndDependency.default_tool),
+                                         style_tool),
                                      [u"edge_" + unicode(j) + "/0"
                                       for j in xrange(num_tokens)])
 
                 # invalid index: return empty
                 for tool in (None, ""):
-                    self.assertEqual(cdt(tokenization, num_dp, tool), [""] * num_tokens)
+                    self.assertEqual(cdt(tokenization, num_dp, tool),
+                                     [""] * num_tokens)
 
                 self.assertEqual(cdt(tokenization, num_dp,
-                                     FakeTokenizationAndDependency.default_tool),
+                                     style_tool),
                                  [u"edge_" + unicode(j) + "/0"
                                   for j in xrange(num_tokens)])

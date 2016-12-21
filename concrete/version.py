@@ -1,4 +1,4 @@
-__version__ = '4.11.7b0'
+__version__ = '4.11.7'
 
 
 def concrete_library_version():

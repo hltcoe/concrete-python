@@ -42,15 +42,15 @@ def main():
                 query = SearchQuery(terms=terms,
                                     type=SearchType.COMMUNICATIONS,
                                     userId=ns.user_id)
-                results = client.search(query)
-                for result in results.searchResults:
+                result = client.search(query)
+                for result_item in result.searchResultItems:
                     if ns.http_lookup_url:
                         out_f.write(requests.get(
                             ns.http_lookup_url %
-                            result.communicationId
+                            result_item.communicationId
                         ).text + u'\n')
                     else:
-                        out_f.write(result.communicationId + u'\n')
+                        out_f.write(result_item.communicationId + u'\n')
 
 
 if __name__ == '__main__':

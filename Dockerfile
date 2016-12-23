@@ -10,10 +10,10 @@ RUN pip install --upgrade pip && \
     pip install --upgrade setuptools && \
     pip install --upgrade setuptools && \
     pip install --upgrade \
+        flake8 \
         pytest \
         pytest-cov \
         pytest-mock \
-        flake8 \
         redis
 
 WORKDIR /tmp

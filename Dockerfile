@@ -10,15 +10,18 @@ RUN yum install -y \
         libtool \
         m4 \
         make \
+        numpy \
         pkgconfig \
         python \
         python-devel \
+        scipy \
         tar
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
     pip install --upgrade setuptools && \
     pip install --upgrade setuptools && \
     pip install --upgrade \
+        numpy \
         pytest \
         pytest-cov \
         pytest-mock \

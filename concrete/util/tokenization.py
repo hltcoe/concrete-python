@@ -179,7 +179,9 @@ def compute_lattice_expected_counts(lattice):
     Given an object of type TokenLattice in which the
     dst, src, token, and weight fields are set in each arc,
     compute and return a list of expected token log-probabilities.
-    Return type is
+    Return type is a list of floats (expected log-probabilities)
+    with the float at position i corresponding to the token with
+    tokenIndex i.
     Input arc weights are treated as unnormalized log-probabilities.
     '''
 

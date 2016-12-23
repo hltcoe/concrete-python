@@ -1,9 +1,8 @@
 Copyright 2012-2016 Johns Hopkins University HLTCOE. All rights
 reserved.  This software is released under the 2-clause BSD license.
-See LICENSE.md in the project root directory.
+See [LICENSE.md](LICENSE.md).
 
-Concrete - Python
-=================
+# Concrete - Python
 
 Python modules and scripts for working with
 [Concrete](https://github.com/hltcoe/concrete), an HLT data
@@ -20,8 +19,7 @@ pure Python protocols.  To take advantage of them, check out the
 `accel` branch from the Concrete-Python Git repository and follow the
 README there to install.
 
-Requirements
-------------
+## Requirements
 
 Concrete-Python requires Python 2.7 and the Thrift Python library, among
 other Python libraries.  These are installed automatically by `setup.py`
@@ -34,8 +32,7 @@ Python.org](https://www.python.org/downloads/windows/) (32 and 64-bit
 versions) on 64-bit Windows.  The 'thrift' package does work using the
 version of Python that comes with 64-bit Cygwin on 64-bit Windows.
 
-Installation
-------------
+## Installation
 
 You can install Concrete using the `pip` package manager:
 
@@ -52,8 +49,7 @@ python setup.py test
 python setup.py install
 ```
 
-Useful Scripts
---------------
+## Useful Scripts
 
 The Concrete Python package comes with three scripts:
 
@@ -76,8 +72,7 @@ Use the `--help` flag for details about the scripts' command line
 arguments.
 
 
-Using the code in your project
-------------------------------
+## Using the code in your project
 
 Compiled Python classes end up in the `concrete` namespace. You can
 use them by importing them as follows:
@@ -91,8 +86,7 @@ foo.text = 'hello world'
 ```
 
 
-Validating Concrete Communications
-----------------------------------
+## Validating Concrete Communications
 
 The Python version of the Thrift Libraries does not perform any
 validation of Thrift objects.  You should use the
@@ -130,11 +124,21 @@ Communication object for required fields, plus additional checks for
 UUID mismatches.
 
 
-Building from Thrift definitions
-================================
+## Development
 
-To rebuild the `concrete-python` sources from the concrete thrift
-definitions, use `build.bash`.  This script takes the path to the
-`thrift` subdirectory of the `concrete` repository as an optional
-argument, generates the Python sources from the thrift definitions
-in that subdirectory, and patches to the generated code as necessary.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for information about
+contributing to concrete-python.
+
+### Contributors
+
+* Craig Harman
+* Low Kian Seong
+* Frank Ferraro
+* Max Thomas
+* Adrian Benton
+* Joel Coffman
+* Chandler May
+* Tom Lippincott
+
+Please contact us if you have contributed to concrete-python but are
+not on this list.

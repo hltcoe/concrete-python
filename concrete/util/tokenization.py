@@ -3,6 +3,8 @@ import logging
 from concrete.structure.ttypes import TokenizationKind
 from concrete.util.unnone import lun
 
+from collections import deque
+
 
 def get_tokens(tokenization, suppress_warnings=False):
     '''
@@ -100,23 +102,32 @@ def get_comm_tokenizations(comm, tool=None):
                 yield sentence.tokenization
 
 
-def latticeToFsm(lattice, is_cost=True):
-    '''
-    Author: Adrian Benton
-    '''
+def _lattice_to_fsm(lattice):
     fsm = {}
     bkFsm = {}
 
     tokens = set()
     states = set()
     for arc in lattice.arcList:
-        src, dst, token, wt = arc.src, arc.dst, arc.token.text, arc.weight
+        if arc.src is None:
+            raise ValueError('Arc.src must be set')
+        src = arc.src
+
+        if arc.dst is None:
+            raise ValueError('Arc.dst must be set')
+        dst = arc.dst
+
+        if arc.token is None:
+            raise ValueError('Arc.token must be set')
+        token = arc.token.tokenIndex
+
+        if arc.weight is None:
+            raise ValueError('Arc.weight must be set')
+        wt = arc.weight
+
         tokens.add(token)
         states.add(src)
         states.add(dst)
-
-        if is_cost:  # Treat as log-probs instead
-            wt = -wt
 
         if src not in fsm:
             fsm[src] = {}
@@ -130,14 +141,12 @@ def latticeToFsm(lattice, is_cost=True):
             bkFsm[dst][src] = []
         bkFsm[dst][src].append((token, wt))
 
-    return fsm, bkFsm, tokens, states
+    return (fsm, bkFsm, tokens, states)
 
 
-def calc_alpha(fsm, states, start, end):
+def _calc_marginal_in_log_prob(fsm, states, start, end):
     '''
-    Calculates total in-probability of each state.  Assumes weights are
-    log-probbish
-    Author: Adrian Benton
+    Calculate marginal in-log-probability of each state.
     '''
 
     from scipy.misc import logsumexp
@@ -145,16 +154,19 @@ def calc_alpha(fsm, states, start, end):
     alpha = {}
     alpha[start] = 0.
 
-    for state in states:
-        currState = state
+    state_queue = deque([start])
+
+    while state_queue:
+        currState = state_queue.popleft()
 
         if currState == end:
             continue
 
         arcs = fsm[currState]
 
-        for dst, tokenWts in arcs.items():
+        for (dst, tokenWts) in arcs.items():
             if dst not in alpha:
+                state_queue.append(dst)
                 alpha[dst] = float('-inf')
             for token, wt in tokenWts:
                 alpha[dst] = logsumexp([alpha[dst], alpha[currState] + wt])
@@ -162,55 +174,23 @@ def calc_alpha(fsm, states, start, end):
     return alpha
 
 
-def calc_beta(bkFsm, states, end, start):
+def compute_lattice_expected_counts(lattice):
     '''
-    Calculates total out-probability of each state.  Assumes weights are
-    log-probbish
-    Author: Adrian Benton
-    '''
-
-    from scipy.misc import logsumexp
-
-    beta = {}
-    beta[end] = 0.
-
-    for state in sorted(states, reverse=True):
-        currState = state
-
-        if currState == start:
-            continue
-
-        arcs = bkFsm[currState]
-
-        for src, tokenWts in arcs.items():
-            if src not in beta:
-                beta[src] = float('-inf')
-            for token, wt in tokenWts:
-                beta[src] = logsumexp([beta[src], beta[currState] + wt])
-
-    return beta
-
-
-def get_norm(alpha, beta, start, end):
-    '''
-    Author: Adrian Benton
-    '''
-    return alpha[end]
-
-
-def compute_lattice_expected_counts(lattice, is_cost=True):
-    '''
-    Assumes that edge weights are in log-space (may be + or -).
-    Author: Adrian Benton
+    Given an object of type TokenLattice in which the
+    dst, src, token, and weight fields are set in each arc,
+    compute and return a list of expected token log-probabilities.
+    Return type is
+    Input arc weights are treated as unnormalized log-probabilities.
     '''
 
     from scipy.misc import logsumexp
 
-    fsm, bkFsm, tokens, states = latticeToFsm(lattice, is_cost=is_cost)
-    states = sorted(list(states))
-    alpha = calc_alpha(fsm, states, lattice.startState, lattice.endState)
-    beta = calc_beta(bkFsm, states, lattice.endState, lattice.startState)
-    norm = get_norm(alpha, beta, lattice.startState, lattice.endState)
+    (fsm, bkFsm, tokens, states) = _lattice_to_fsm(lattice)
+    alpha = _calc_marginal_in_log_prob(fsm, states,
+                                       lattice.startState, lattice.endState)
+    beta = _calc_marginal_in_log_prob(bkFsm, states,
+                                      lattice.endState, lattice.startState)
+    norm = alpha[lattice.endState]
 
     expectedCounts = {}
 
@@ -229,7 +209,10 @@ def compute_lattice_expected_counts(lattice, is_cost=True):
                 expectedCounts[token].append(
                     alpha[currState] + beta[dst] + wt - norm)
 
-    for token in expectedCounts:
-        expectedCounts[token] = logsumexp(expectedCounts[token])
-
-    return expectedCounts
+    if expectedCounts:
+        return [
+            (logsumexp(expectedCounts[idx]) if idx in expectedCounts else None)
+            for idx in xrange(max(expectedCounts) + 1)
+        ]
+    else:
+        return []

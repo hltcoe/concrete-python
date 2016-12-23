@@ -21,6 +21,11 @@ def comms_tgz_path(request):
     return 'tests/testdata/serif_les-deux.tar.gz'
 
 
+@fixture
+def simple_comms_tgz_path(request):
+    return 'tests/testdata/simple.tar.gz'
+
+
 @mark.parametrize('which,args,output_prefix', [
     (range(8), (), ''),
     (range(8), ('--annotation-headers',), '\nconll\n-----\n'),
@@ -1018,6 +1023,47 @@ Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
 '''.encode('utf-8')
+    assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
+
+
+@mark.parametrize('first,second,third,args,output_prefix', [
+    (True, True, True, (), ''),
+    (True, True, True, ('--annotation-headers',), '\nid\n--\n'),
+    (False, False, False, ('--count', '0'), ''),
+    (False, False, False, ('--count', '0', '--annotation-headers',),
+        '\nid\n--\n'),
+    (True, False, False, ('--count', '1'), ''),
+    (True, False, False, ('--count', '1', '--annotation-headers',),
+        '\nid\n--\n'),
+    (True, True, False, ('--count', '2'), ''),
+    (True, True, False, ('--count', '2', '--annotation-headers',),
+        '\nid\n--\n'),
+    (True, True, True, ('--count', '3'), ''),
+    (True, True, True, ('--count', '3', '--annotation-headers',),
+        '\nid\n--\n'),
+])
+def test_print_multiple_communications_count(simple_comms_tgz_path, first,
+                                             second, third, args,
+                                             output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--id',
+    ] + list(args) + [
+        simple_comms_tgz_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = ''
+    if first:
+        expected_output += output_prefix
+        expected_output += 'one\n'
+    if second:
+        expected_output += output_prefix
+        expected_output += 'two\n'
+    if third:
+        expected_output += output_prefix
+        expected_output += 'three\n'
     assert '' == stderr
     assert expected_output == stdout
     assert 0 == p.returncode

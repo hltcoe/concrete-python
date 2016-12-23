@@ -1,13 +1,9 @@
-import sys
-
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
 from concrete.structure.ttypes import TokenLattice
 
 import math
-
-from Queue import Queue
 
 from numpy import logaddexp
 from scipy.misc import logsumexp
@@ -33,15 +29,12 @@ def load_lattice(input_path):
 
 
 def latticeToFsm(lattice, isCost=True):
-    # Easier to work with this way.
     fsm = {}
     bkFsm = {}
 
     tokens = set()
     states = set()
     for arc in lattice.arcList:
-        #import pdb; pdb.set_trace()
-
         src, dst, token, wt = arc.src, arc.dst, arc.token.text, arc.weight
         tokens.add(token)
         states.add(src)
@@ -81,7 +74,6 @@ def calc_alpha(fsm, states, start, end):
 
         for dst, tokenWts in arcs.items():
             if dst not in alpha:
-                # stateQueue.put(dst)
                 alpha[dst] = float('-inf')
             for token, wt in tokenWts:
                 alpha[dst] = log_sum(alpha[dst], alpha[currState] + wt)
@@ -96,8 +88,6 @@ def calc_beta(bkFsm, states, end, start):
     beta[end] = 0.
 
     for state in sorted(states, reverse=True):
-        # while not stateQueue.empty():
-        #currState = stateQueue.get()
         currState = state
 
         if currState == start:
@@ -152,16 +142,15 @@ def compute_lattice_expected_counts(lattice, IS_COST, printOut=True):
         for wt, token in sortedTokens:
             print '%.9f\t%s' % (math.exp(expectedCounts[token]), token)
 
-    #import pdb; pdb.set_trace()
-
     return expectedCounts
 
 
 def test():
     test_lattice = load_lattice(
-        '/export/a01/abenton/mono0a_test_lattices/19960605_CNN_HDL-00589876-00604409.lat')
-    #test_lattice = load_lattice('gten_2502_9.concrete')
-    #test_lattice = load_lattice('testLattice2.concrete')
+        '/export/a01/abenton/mono0a_test_lattices/'
+        '19960605_CNN_HDL-00589876-00604409.lat')
+    # test_lattice = load_lattice('gten_2502_9.concrete')
+    # test_lattice = load_lattice('testLattice2.concrete')
     compute_lattice_expected_counts(test_lattice, IS_COST=False, printOut=True)
 
 
@@ -177,6 +166,7 @@ def main():
 
     lattice = load_lattice(args.input_path)
     compute_lattice_expected_counts(lattice, args.cost)
+
 
 if __name__ == '__main__':
     # test()

@@ -1,9 +1,7 @@
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from concrete.structure.ttypes import TokenLattice, Token, LatticePath
-
-import math
+from concrete.structure.ttypes import TokenLattice, LatticePath
 
 
 def load_lattice(input_path):

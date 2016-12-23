@@ -1,0 +1,16 @@
+before_script:
+  - docker info
+
+build-test-deploy:
+  script:
+    - docker build -t concrete-python .
+    - docker run --rm concrete-python bash check-style.bash
+    - docker run --rm concrete-python python setup.py install --user
+    - docker run --rm concrete-python python setup.py test
+    - docker run --rm concrete-python python setup.py test --addopts integration-tests
+    - # work around gitlab CI... only deploy on master
+      bash -c "[[ $CI_BUILD_REF_NAME != master ]] ||
+      (docker tag concrete-python r8n01:5000/concrete-python:latest &&
+      docker push r8n01:5000/concrete-python:latest)"
+  tags:
+    - shell

@@ -1,13 +1,11 @@
-"""
-Libary to (partially) validate a Concrete Communication
+"""Library to validate a Concrete Communication
 
 Current validation checks:
-  - do all sentenceSegmentation.sectionId's match the uuid of the
-    enclosing section?
+
   - for each constituent parse, do any of the constituent ID's for
     that parse repeat?
   - is each dependency and constituent parse a fully connected graph?
-  - is each dependency and constituent parse "tree" really a tree?
+  - is each constituent parse "tree" really a tree?
   - for each dependency parse, are there any nodes with a null
     governer node whose edgeType is not root?
   - for each entityMention, does entityMention.tokens.tokenizationId
@@ -16,66 +14,58 @@ Current validation checks:
     valid entityMention uuid?
   - for each TokenRefSequence, are the token indices valid indices
     into the corresponding tokenization?
+  - for each MentionArgument, there are fields that can point to an
+    EntityMention, SituationMention or TokenRefSequence, but the
+    MentionArgument should point to exactly one of these objects
 """
 
 import logging
 
 import networkx as nx
-from thrift import TSerialization
 from thrift.protocol import TProtocol
 from thrift.Thrift import TType
 
-from concrete import Communication
-
+from concrete.util.file_io import read_communication_from_file
+from concrete.util.unnone import lun
 
 
 def validate_communication_file(communication_filename):
-    logging.info(ilm(0, "Opening Concrete Communication with filename '%s'" % communication_filename))
-    comm = Communication()
-    comm_bytestring = open(communication_filename).read()
-    TSerialization.deserialize(comm, comm_bytestring)
+    logging.info(_ilm(
+        0, "Opening Concrete Communication with filename '%s'"
+           % communication_filename))
+    comm = read_communication_from_file(communication_filename)
     validate_communication(comm)
 
 
 def validate_communication(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      bool: True if Communication is valid, False otherwise
+
+    - `True` if Communication is valid, `False` otherwise
     """
     valid = True
 
-    logging.info(ilm(0, "Validating Communication with ID '%s'" % comm.id))
+    logging.info(_ilm(0, "Validating Communication with ID '%s'" % comm.id))
 
-    valid &= validate_thrift_object_required_fields_recursively(comm)
+    valid &= validate_thrift_deep(comm)
 
-    if comm.sectionSegmentations:
-        logging.debug(ilm(1, "Communication '%s' has %d sectionSegmentations" %
-                          (comm.id, len(comm.sectionSegmentations))))
-        for sectionSegmentation in comm.sectionSegmentations:
-            logging.debug(ilm(2, "sectionSegmentation '%s' has %d sections" %
-                              (sectionSegmentation.uuid, len(sectionSegmentation.sectionList))))
-            for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentation:
-                    valid &= validate_token_offsets_for_section(section)
-                    logging.debug(ilm(3, "section '%s' has %d sentenceSegmentations" %
-                                      (section.uuid, len(section.sentenceSegmentation))))
-                    for sentenceSegmentation in section.sentenceSegmentation:
-                        logging.debug(ilm(4, "sentenceSegmentation '%s' has %d sentences" %
-                                          (sentenceSegmentation.uuid, len(sentenceSegmentation.sentenceList))))
-                        if sentenceSegmentation.sectionId != section.uuid:
-                            valid = False
-                            logging.error(ilm(5, "sentenceSegmentation.sectionId '%s' does not match section.uuid '%s'" %
-                                              (sentenceSegmentation.sectionId, sentenceSegmentation.uuid)))
-                        for sentence in sentenceSegmentation.sentenceList:
-                            logging.debug(ilm(5, "sentence '%s' has %d tokenizations" %
-                                              (sentence.uuid, len(sentence.tokenizationList))))
-                            valid &= validate_token_offsets_for_sentence(sentence)
-                            for tokenization in sentence.tokenizationList:
-                                valid &= validate_constituency_parse(comm, tokenization)
-                                valid &= validate_dependency_parses(tokenization)
+    for section in lun(comm.sectionList):
+        valid &= validate_token_offsets_for_section(section)
+        if section.sentenceList:
+            logging.debug(_ilm(4, "section '%s' has %d sentences" %
+                               (section.uuid, len(section.sentenceList))))
+            for sentence in section.sentenceList:
+                valid &= validate_token_offsets_for_sentence(sentence)
+                if sentence.tokenization:
+                    valid &= validate_constituency_parses(
+                        comm, sentence.tokenization)
+                    valid &= validate_dependency_parses(
+                        sentence.tokenization)
+                    valid &= validate_token_taggings(sentence.tokenization)
 
     valid &= validate_entity_mention_ids(comm)
     valid &= validate_entity_mention_tokenization_ids(comm)
@@ -84,123 +74,147 @@ def validate_communication(comm):
     valid &= validate_situation_mentions(comm)
 
     if not valid:
-        logging.error(ilm(0, "The Communication with ID '%s' IS NOT valid" % comm.id))
+        logging.error(
+            _ilm(0, "The Communication with ID '%s' IS NOT valid" % comm.id))
     else:
-        logging.info(ilm(0, "The Communication with ID '%s' is valid" % comm.id))
+        logging.info(
+            _ilm(0, "The Communication with ID '%s' is valid" % comm.id))
 
     return valid
 
 
-def get_entity_uuidString_set(comm):
+def _get_entity_uuidString_set(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      set of strings: uuidStrings for all Entities in the Communication
+
+    - set of strings: uuidStrings for all Entities in the Communication
     """
     entity_uuidString_set = set()
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
-            if entitySet.entityList:
-                for entity in entitySet.entityList:
-                    entity_uuidString_set.add(entity.uuid.uuidString)
+    for entitySet in lun(comm.entitySetList):
+        for entity in lun(entitySet.entityList):
+            entity_uuidString_set.add(entity.uuid.uuidString)
     return entity_uuidString_set
 
 
-def get_entity_mention_uuidString_set(comm):
+def _get_entity_mention_uuidString_set(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      set of strings: uuidStrings for all EntityMentions in the Communication
+
+    - set of strings: uuidStrings for all EntityMentions in the Communication
     """
     entity_mention_uuidString_set = set()
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            if entityMentionSet.mentionSet:
-                for entityMention in entityMentionSet.mentionSet:
-                    entity_mention_uuidString_set.add(entityMention.uuid.uuidString)
+    for entityMentionSet in lun(comm.entityMentionSetList):
+        for entityMention in lun(entityMentionSet.mentionList):
+            entity_mention_uuidString_set.add(
+                entityMention.uuid.uuidString)
     return entity_mention_uuidString_set
 
 
-def get_situation_uuidString_set(comm):
+def _get_sentence_for_tokenization_uuidString_dict(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      set of strings: uuidStrings for all Situations in the Communication
+
+    - dictionary mapping of Tokenization uuidStrings to Sentences
+    """
+    if not hasattr(comm, 'sentence_for_tokenization_uuidString_dict'):
+        comm.sentence_for_tokenization_uuidString_dict = {}
+        for section in lun(comm.sectionList):
+            for sentence in lun(section.sentenceList):
+                if sentence.tokenization:
+                    comm.sentence_for_tokenization_uuidString_dict[
+                        sentence.tokenization.uuid.uuidString] = sentence
+    return comm.sentence_for_tokenization_uuidString_dict
+
+
+def _get_situation_uuidString_set(comm):
+    """
+    Args:
+
+    - `comm` (`Communication`)
+
+    Returns:
+
+    - set of strings: uuidStrings for all Situations in the Communication
     """
     situation_uuidString_set = set()
-    if comm.situationSets:
-        for situationSet in comm.situationSets:
-            if situationSet.situationList:
-                for situation in situationSet.situationList:
-                    situation_uuidString_set.add(situation.uuid.uuidString)
+    for situationSet in lun(comm.situationSetList):
+        for situation in lun(situationSet.situationList):
+            situation_uuidString_set.add(situation.uuid.uuidString)
     return situation_uuidString_set
 
 
-def get_situation_mention_uuidString_set(comm):
+def _get_situation_mention_uuidString_set(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      set of strings: uuidStrings for all SituationMentions in the Communication
+
+    - set of strings: uuidStrings for all SituationMentions in the
+                      Communication
     """
     situation_mention_uuidString_set = set()
-    if comm.situationMentionSets:
-        for situationMentionSet in comm.situationMentionSets:
-            if situationMentionSet.mentionList:
-                for situationMention in situationMentionSet.mentionList:
-                    situation_mention_uuidString_set.add(situationMention.uuid.uuidString)
+    for situationMentionSet in lun(comm.situationMentionSetList):
+        for situationMention in lun(situationMentionSet.mentionList):
+            situation_mention_uuidString_set.add(
+                situationMention.uuid.uuidString)
     return situation_mention_uuidString_set
 
 
-def get_tokenization_uuidString_dict(comm):
+def _get_tokenization_uuidString_dict(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      dictionary mapping uuidStrings to Tokenizations
+
+    - dictionary mapping uuidStrings to Tokenizations
     """
     if not hasattr(comm, '_tokenization_uuidString_dict'):
         comm._tokenization_uuidString_dict = {}
-        if comm.sectionSegmentations:
-            for sectionSegmentation in comm.sectionSegmentations:
-                for section in sectionSegmentation.sectionList:
-                    if section.sentenceSegmentation:
-                        for sentenceSegmentation in section.sentenceSegmentation:
-                            for sentence in sentenceSegmentation.sentenceList:
-                                for tokenization in sentence.tokenizationList:
-                                    comm._tokenization_uuidString_dict[tokenization.uuid.uuidString] = tokenization
+        for section in lun(comm.sectionList):
+            for sentence in lun(section.sentenceList):
+                tkzn = sentence.tokenization
+                if tkzn:
+                    u = tkzn.uuid.uuidString
+                    comm._tokenization_uuidString_dict[u] = tkzn
     return comm._tokenization_uuidString_dict
 
 
-def get_tokenization_uuidString_set(comm):
+def _get_tokenization_uuidString_set(comm):
     """
     Args:
-      comm (concrete.structure.ttypes.Communication)
+
+    - `comm` (`Communication`)
 
     Returns:
-      set of strings: uuidStrings for all Tokenizations in the Communication
+
+    - set of strings: uuidStrings for all Tokenizations in the Communication
     """
     tokenization_uuidString_set = set()
-    if comm.sectionSegmentations:
-        for sectionSegmentation in comm.sectionSegmentations:
-            for section in sectionSegmentation.sectionList:
-                if section.sentenceSegmentation:
-                    for sentenceSegmentation in section.sentenceSegmentation:
-                        for sentence in sentenceSegmentation.sentenceList:
-                            for tokenization in sentence.tokenizationList:
-                                tokenization_uuidString_set.add(tokenization.uuid.uuidString)
+    for section in lun(comm.sectionList):
+        for sentence in lun(section.sentenceList):
+            if sentence.tokenization:
+                tokenization_uuidString_set.add(
+                    sentence.tokenization.uuid.uuidString)
     return tokenization_uuidString_set
 
 
-def ilm(indent_level, log_message):
+def _ilm(indent_level, log_message):
     """
     ilm = Indented Log Message
 
@@ -208,72 +222,78 @@ def ilm(indent_level, log_message):
     printed in a hierarchical list
 
     Args:
-      log_message (string): Log message tob e indented
-      indent_level (int): Indentation level
+
+    - `log_message` (string): Log message to be indented
+    - `indent_level` (int): Indentation level
 
     Returns:
-      string: Indented log message
+
+    - string: Indented log message
     """
     return "  " * indent_level + log_message
 
 
-def validate_constituency_parse(comm, tokenization):
+def validate_constituency_parses(comm, tokenization):
     """
     Args:
-      tokenization (concrete.structure.ttypes.Tokenization)
+
+    - `comm` (`Communication`)
+    - `tokenization` (`Tokenization`)
 
     Returns:
-      bool: True if tokenization's constituency parse is valid, False otherwise
+
+    - `True` if tokenization's constituency parse is valid, `False` otherwise
     """
     valid = True
 
-    if tokenization.parse:
-        total_constituents = len(tokenization.parse.constituentList)
-        logging.debug(ilm(6, "tokenization '%s' has %d constituents" % (tokenization.uuid, total_constituents)))
+    if tokenization.parseList:
+        for parse in tokenization.parseList:
+            total_constituents = len(parse.constituentList)
+            logging.debug(_ilm(6, "tokenization '%s' has %d constituents" % (
+                tokenization.uuid, total_constituents)))
 
-        total_uuid_mismatches = 0
-        constituent_id_set = set()
-        constituent_parse_tree = nx.DiGraph()
+            constituent_id_set = set()
+            constituent_parse_tree = nx.DiGraph()
 
-        for constituent in tokenization.parse.constituentList:
-            # Add nodes to parse tree
-            constituent_parse_tree.add_node(constituent.id)
+            for constituent in parse.constituentList:
+                # Add nodes to parse tree
+                constituent_parse_tree.add_node(constituent.id)
 
-            if constituent.id not in constituent_id_set:
-                constituent_id_set.add(constituent.id)
-            else:
+                if constituent.id not in constituent_id_set:
+                    constituent_id_set.add(constituent.id)
+                else:
+                    valid = False
+                    logging.error(_ilm(
+                        7, ("constituent ID %d has already been used in this"
+                            " sentence's tokenization") % constituent.id))
+
+            # Add edges to constituent parse tree
+            for constituent in parse.constituentList:
+                if constituent.childList:
+                    for child_id in constituent.childList:
+                        constituent_parse_tree.add_edge(
+                            constituent.id, child_id)
+
+            # Check if constituent parse "tree" is a fully connected graph
+            undirected_graph = constituent_parse_tree.to_undirected()
+            if not nx.is_connected(undirected_graph):
                 valid = False
-                logging.error(ilm(7, "constituent ID %d has already been used in this sentence's tokenization" % constituent.id))
+                logging.error(_ilm(
+                    6,
+                    "The constituent parse \"tree\" is not a fully"
+                    " connected graph - the graph has %d components" %
+                    nx.number_connected_components(undirected_graph)))
 
-            # Per the Concrete 'structure.thrift' file, tokenSequence may not be defined:
-            #   "Typically, this field will only be defined for leaf constituents (i.e., constituents with no children)."
-            if constituent.tokenSequence and constituent.tokenSequence.tokenizationId != tokenization.uuid:
-                total_uuid_mismatches += 1
-
-            if constituent.tokenSequence:
-                valid &= validate_token_ref_sequence(comm, constituent.tokenSequence)
-
-        if total_uuid_mismatches > 0:
-            valid = False
-            logging.error(ilm(6, "tokenization '%s' has UUID mismatch for %d/%d constituents" %
-                              (tokenization.uuid, total_uuid_mismatches, total_constituents)))
-
-        # Add edges to constituent parse tree
-        for constituent in tokenization.parse.constituentList:
-            if constituent.childList:
-                for child_id in constituent.childList:
-                    constituent_parse_tree.add_edge(constituent.id, child_id)
-
-        # Check if constituent parse "tree" is actually a tree
-        undirected_graph = constituent_parse_tree.to_undirected()
-        if not nx.is_connected(undirected_graph):
-            valid = False
-            logging.error(ilm(6, "The constituent parse \"tree\" is not a fully connected graph - the graph has %d components" %
-                len(nx.connected_components(undirected_graph))))
-        if nx.number_of_nodes(constituent_parse_tree) != nx.number_of_edges(constituent_parse_tree) + 1:
-            valid = False
-            logging.error(ilm(6, "The constituent parse \"tree\" is not a tree.  |V| != |E|+1  (|V|=%d, |E|=%d)" %
-                (nx.number_of_nodes(constituent_parse_tree), nx.number_of_edges(constituent_parse_tree))))
+            # Check if constituent parse "tree" is actually a tree
+            if (nx.number_of_nodes(constituent_parse_tree) !=
+                    nx.number_of_edges(constituent_parse_tree) + 1):
+                valid = False
+                logging.error(_ilm(
+                    6,
+                    "The constituent parse \"tree\" is not a tree."
+                    "  |V| != |E|+1  (|V|=%d, |E|=%d)" %
+                    (nx.number_of_nodes(constituent_parse_tree),
+                     nx.number_of_edges(constituent_parse_tree))))
 
     return valid
 
@@ -281,146 +301,216 @@ def validate_constituency_parse(comm, tokenization):
 def validate_dependency_parses(tokenization):
     """
     Args:
-      tokenization (concrete.structure.ttypes.Tokenization)
+
+    - `tokenization` (`Tokenization`)
 
     Returns:
-      bool: True if all of a tokenization's dependency parses are valid, False otherwise
+
+    -  `True` if all of a tokenization's dependency parses are valid,
+       `False` otherwise
     """
     valid = True
 
-    # Verify that each dependency parse "tree" is actually a tree
     if tokenization.dependencyParseList:
+        total_tokens = len(tokenization.tokenList.tokenList)
         for dependencyParse in tokenization.dependencyParseList:
             dependency_parse_tree = nx.DiGraph()
 
             # Add nodes to dependency parse tree
             for dependency in dependencyParse.dependencyList:
-                if dependency.gov is None and dependency.edgeType != "root":
+                if (dependency.gov is None and
+                        dependency.edgeType.lower() != "root"):
                     valid = False
-                    logging.error(ilm(6, "Found a null dependency parse node with governer whose edgeType is '%s' instead of 'root'" %
-                                          dependency.edgeType))
+                    logging.error(_ilm(
+                        7,
+                        "Found a null dependency parse node with governer"
+                        " whose edgeType is '%s' instead of 'root'" %
+                        dependency.edgeType))
                 if dependency.gov is not None:
+                    if dependency.gov < -1 or dependency.gov > total_tokens:
+                        valid = False
+                        logging.error(_ilm(
+                            7,
+                            "Found a null dependency parse node with invalid"
+                            " governer of '%d'" %
+                            dependency.gov))
                     dependency_parse_tree.add_node(dependency.gov)
                 dependency_parse_tree.add_node(dependency.dep)
 
             # Add edges to dependency parse tree
             for dependency in dependencyParse.dependencyList:
                 if dependency.gov is not None:
-                    dependency_parse_tree.add_edge(dependency.gov, dependency.dep)
+                    dependency_parse_tree.add_edge(
+                        dependency.gov, dependency.dep)
 
-            # Check if dependency parse tree is actually a tree
+            # Check if dependency parse "tree" is a fully connected graph
             undirected_graph = dependency_parse_tree.to_undirected()
             try:
                 if not nx.is_connected(undirected_graph):
                     valid = False
-                    logging.error(ilm(6, "The dependency parse \"tree\" is not a fully connected graph - the graph has %d components" %
-                                      len(nx.connected_components(undirected_graph))))
+                    logging.error(_ilm(
+                        7,
+                        ("The dependency parse graph created by '%s' is not"
+                         " a fully connected graph - the graph has %d"
+                         " components") %
+                        (dependencyParse.metadata.tool,
+                         nx.number_connected_components(undirected_graph))))
             except nx.exception.NetworkXPointlessConcept:
-                logging.warning(ilm(6, "The dependency parse \"tree\" does not have any nodes"))
+                logging.warning(_ilm(
+                    7,
+                    ("The dependency parse graph created by '%s' does not have"
+                     " any nodes") % dependencyParse.metadata.tool))
     return valid
 
 
 def validate_entity_mention_ids(comm):
     valid = True
-    entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
+    entity_mention_uuidString_set = _get_entity_mention_uuidString_set(comm)
 
-    if comm.entitySets:
-        for entitySet in comm.entitySets:
-            if entitySet.entityList:
-                for entity in entitySet.entityList:
-                    for entityMentionId in entity.mentionIdList:
-                        if entityMentionId.uuidString not in entity_mention_uuidString_set:
-                            valid = False
-                            logging.error(ilm(2, "Entity '%s' has an invalid entityMentionId (%s)" % (entity.uuid, entityMentionId)))
+    for entitySet in lun(comm.entitySetList):
+        for entity in lun(entitySet.entityList):
+            for entityMentionId in entity.mentionIdList:
+                if (entityMentionId.uuidString not in
+                        entity_mention_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        "Entity '%s' has an invalid entityMentionId (%s)" %
+                        (entity.uuid, entityMentionId)))
     return valid
 
 
 def validate_entity_mention_tokenization_ids(comm):
     valid = True
-    tokenization_uuidString_set = get_tokenization_uuidString_set(comm)
+    tokenization_uuidString_set = _get_tokenization_uuidString_set(comm)
 
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            if entityMentionSet.mentionSet:
-                for entityMention in entityMentionSet.mentionSet:
-                    if entityMention.tokens.tokenizationId.uuidString not in tokenization_uuidString_set:
-                        valid = False
-                        logging.error(ilm(2, "Mention '%s' has an invalid tokenizationId (%s)" % (entityMention.uuid, entityMention.tokens.tokenizationId)))
+    for entityMentionSet in lun(comm.entityMentionSetList):
+        for entityMention in lun(entityMentionSet.mentionList):
+            if (entityMention.tokens.tokenizationId.uuidString not in
+                    tokenization_uuidString_set):
+                valid = False
+                logging.error(_ilm(
+                    2,
+                    "Mention '%s' has an invalid tokenizationId (%s)" %
+                    (entityMention.uuid, entityMention.tokens.tokenizationId)))
     return valid
 
 
 def validate_entity_mention_token_ref_sequences(comm):
     valid = True
-    if comm.entityMentionSets:
-        for entityMentionSet in comm.entityMentionSets:
-            if entityMentionSet.mentionSet:
-                for entityMention in entityMentionSet.mentionSet:
-                    valid &= validate_token_ref_sequence(comm, entityMention.tokens)
+    for entityMentionSet in lun(comm.entityMentionSetList):
+        for entityMention in lun(entityMentionSet.mentionList):
+            valid &= validate_token_ref_sequence(
+                comm, entityMention.tokens)
     return valid
 
 
 def validate_situation_mentions(comm):
     valid = True
-    entity_mention_uuidString_set = get_entity_mention_uuidString_set(comm)
-    situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
+    entity_mention_uuidString_set = _get_entity_mention_uuidString_set(comm)
+    situation_mention_uuidString_set = _get_situation_mention_uuidString_set(
+        comm)
 
-    if comm.situationMentionSets:
-        for situationMentionSet in comm.situationMentionSets:
-            if situationMentionSet.mentionList:
-                for situationMention in situationMentionSet.mentionList:
-                    if situationMention.tokens:
-                        valid &= validate_token_ref_sequence(comm, situationMention.tokens)
-                    for mentionArgument in situationMention.argumentList:
-                        if mentionArgument.entityMentionId and \
-                           mentionArgument.entityMentionId.uuidString not in entity_mention_uuidString_set:
-                            valid = False
-                            logging.error(ilm(2, "MentionArgument for SituationMention '%s' has an invalid entityMentionId (%s). Tool='%s'" %
-                                              (situationMention.uuid, mentionArgument.entityMentionId, situationMentionSet.metadata.tool)))
-                        if mentionArgument.situationMentionId and \
-                           mentionArgument.situationMentionId.uuidString not in situation_mention_uuidString_set:
-                            valid = False
-                            logging.error(ilm(2, "SituationArgument for SituationMention '%s' has an invalid situationMentionId (%s). Tool='%s'" %
-                                              (situationMention.uuid, mentionArgument.situationMentionId, situationMentionSet.metadata.tool)))
+    for situationMentionSet in lun(comm.situationMentionSetList):
+        for situationMention in lun(situationMentionSet.mentionList):
+            if situationMention.tokens:
+                valid &= validate_token_ref_sequence(
+                    comm, situationMention.tokens)
+            for (m_idx, m_arg) in enumerate(situationMention.argumentList):
+                if (m_arg.entityMentionId and
+                        m_arg.entityMentionId.uuidString not in
+                        entity_mention_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("MentionArgument for SituationMention '%s' has an"
+                         " invalid entityMentionId (%s). Tool='%s'") %
+                        (situationMention.uuid.uuidString,
+                         m_arg.entityMentionId,
+                         situationMentionSet.metadata.tool)))
+                if (m_arg.situationMentionId and
+                        m_arg.situationMentionId.uuidString not in
+                        situation_mention_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("MentionArgument for SituationMention '%s' has an"
+                         " invalid situationMentionId (%s). Tool='%s'") %
+                        (situationMention.uuid,
+                         m_arg.situationMentionId,
+                         situationMentionSet.metadata.tool)))
+                total_args = (
+                    bool(m_arg.tokens) +
+                    bool(m_arg.entityMentionId) +
+                    bool(m_arg.situationMentionId)
+                )
+                if total_args != 1:
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("MentionArgument #%d for SituationMention '%s'"
+                         " should have exactly one EntityMention|"
+                         "SituationMention|TokenRefSequence, but found %d") %
+                        (m_idx, situationMention.uuid.uuidString,
+                         total_args)))
     return valid
 
 
 def validate_situations(comm):
     valid = True
 
-    entity_uuidString_set = get_entity_uuidString_set(comm)
-    situation_mention_uuidString_set = get_situation_mention_uuidString_set(comm)
-    situation_uuidString_set = get_situation_uuidString_set(comm)
+    entity_uuidString_set = _get_entity_uuidString_set(comm)
+    situation_mention_uuidString_set = _get_situation_mention_uuidString_set(
+        comm)
+    situation_uuidString_set = _get_situation_uuidString_set(comm)
 
-    if comm.situationSets:
-        for situationSet in comm.situationSets:
-            if situationSet.situationList:
-                for situation in situationSet.situationList:
-                    if situation.argumentList:
-                        for argument in situation.argumentList:
-                            if argument.situationId and \
-                               argument.situationId.uuidString not in situation_uuidString_set:
-                                valid = False
-                                logging.error(ilm(2, "Argument for Situation '%s' has an invalid situationId (%s). Tool='%s'" %
-                                                  (situation.uuid, argument.situationId, situationSet.metadata.tool)))
-                            if argument.entityId and \
-                               argument.entityId.uuidString not in entity_uuidString_set:
-                                valid = False
-                                logging.error(ilm(2, "Argument for Situation '%s' has an invalid entityId (%s). Tool='%s'" %
-                                                  (situation.uuid, argument.entityId, situationSet.metadata.tool)))
-                    if situation.justificationList:
-                        for justification in situation.justificationList:
-                            if justification.mentionId.uuidString not in situation_mention_uuidString_set:
-                                valid = False
-                                logging.error(ilm(2, "Justification for Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
-                                                  (situation.uuid, justification.mentionId, situationSet.metadata.tool)))
-                            if justification.tokens:
-                                valid &= validate_token_ref_sequence(comm, justification.tokens)
-                    if situation.mentionIdList:
-                        for mentionId in situation.mentionIdList:
-                            if mentionId.uuidString not in situation_mention_uuidString_set:
-                                valid = False
-                                logging.error(ilm(2, "Situation '%s' has an invalid [situation] mentionId (%s). Tool='%s'" %
-                                                  (situation.uuid, mentionId, situationSet.metadata.tool)))
+    for situationSet in lun(comm.situationSetList):
+        for situation in lun(situationSet.situationList):
+            for argument in lun(situation.argumentList):
+                if (argument.situationId and
+                        argument.situationId.uuidString not in
+                        situation_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("Argument for Situation '%s' has an invalid"
+                         " situationId (%s). Tool='%s'") %
+                        (situation.uuid, argument.situationId,
+                         situationSet.metadata.tool)))
+                if (argument.entityId and
+                        argument.entityId.uuidString not in
+                        entity_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("Argument for Situation '%s' has an invalid entityId"
+                         " (%s). Tool='%s'") %
+                        (situation.uuid, argument.entityId,
+                         situationSet.metadata.tool)))
+            for justification in lun(situation.justificationList):
+                if (justification.mentionId.uuidString not in
+                        situation_mention_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("Justification for Situation '%s' has an invalid"
+                         " [situation] mentionId (%s). Tool='%s'") %
+                        (situation.uuid, justification.mentionId,
+                         situationSet.metadata.tool)))
+                if justification.tokenRefSeqList:
+                    for tokenRefSeq in justification.tokenRefSeqList:
+                        valid &= validate_token_ref_sequence(
+                            comm, tokenRefSeq)
+            for mentionId in lun(situation.mentionIdList):
+                if (mentionId.uuidString not in
+                        situation_mention_uuidString_set):
+                    valid = False
+                    logging.error(_ilm(
+                        2,
+                        ("Situation '%s' has an invalid [situation] mentionId"
+                         " (%s). Tool='%s'") %
+                        (situation.uuid, mentionId,
+                         situationSet.metadata.tool)))
     return valid
 
 
@@ -431,30 +521,40 @@ def validate_token_offsets_for_section(section):
     """
     valid = True
 
-    if section.textSpan == None:
+    if section.textSpan is None:
         return valid
 
     if section.textSpan.start > section.textSpan.ending:
         valid = False
-        logging.error(ilm(2, "Section '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
-                          (section.uuid, section.textSpan.start, section.textSpan.ending)))
+        logging.error(_ilm(
+            2,
+            ("Section '%s' has a TextSpan with a start offset (%d) > end"
+             " offset (%d)") %
+            (section.uuid, section.textSpan.start, section.textSpan.ending)))
 
-    if section.sentenceSegmentation:
-        for sentenceSegmentation in section.sentenceSegmentation:
-            for sentence in sentenceSegmentation.sentenceList:
-                if sentence.textSpan == None:
-                    continue
-                if sentence.textSpan.start > sentence.textSpan.ending:
-                    valid = False
-                    logging.error(ilm(2, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
-                                      (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
-                elif (sentence.textSpan.start < section.textSpan.start) or \
-                     (sentence.textSpan.start > section.textSpan.ending) or \
-                     (sentence.textSpan.ending < section.textSpan.start) or \
-                     (sentence.textSpan.ending > section.textSpan.ending):
-                    valid = False
-                    logging.error(ilm(2, "Sentence '%s' in Section '%s' has a TextSpan [%d, %d] that does not fit within the Section TextSpan [%d, %d]" %
-                                      (sentence.uuid, section.uuid, sentence.textSpan.start, sentence.textSpan.ending, section.textSpan.start, section.textSpan.ending)))
+    for sentence in lun(section.sentenceList):
+        if sentence.textSpan is None:
+            continue
+        if sentence.textSpan.start > sentence.textSpan.ending:
+            valid = False
+            logging.error(_ilm(
+                2,
+                ("Sentence '%s' has a TextSpan with a start offset (%d) > end"
+                 " offset (%d)") %
+                (sentence.uuid, sentence.textSpan.start,
+                 sentence.textSpan.ending)))
+        elif ((sentence.textSpan.start < section.textSpan.start) or
+                (sentence.textSpan.start > section.textSpan.ending) or
+                (sentence.textSpan.ending < section.textSpan.start) or
+                (sentence.textSpan.ending > section.textSpan.ending)):
+            valid = False
+            logging.error(_ilm(
+                2,
+                ("Sentence '%s' in Section '%s' has a TextSpan [%d, %d] that"
+                 " does not fit within the Section TextSpan [%d, %d]") %
+                (sentence.uuid, section.uuid, sentence.textSpan.start,
+                 sentence.textSpan.ending, section.textSpan.start,
+                 section.textSpan.ending)))
 
     return valid
 
@@ -466,28 +566,41 @@ def validate_token_offsets_for_sentence(sentence):
     """
     valid = True
 
-    if sentence.textSpan == None:
+    if sentence.textSpan is None:
         return valid
 
     if sentence.textSpan.start > sentence.textSpan.ending:
         valid = False
-        logging.error(ilm(7, "Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
-                          (sentence.uuid, sentence.textSpan.start, sentence.textSpan.ending)))
-    for tokenization in sentence.tokenizationList:
-        for token in tokenization.tokenList.tokens:
-            if token.textSpan == None:
+        logging.error(_ilm(
+            7,
+            ("Sentence '%s' has a TextSpan with a start offset (%d) > end"
+             " offset (%d)") %
+            (sentence.uuid, sentence.textSpan.start,
+             sentence.textSpan.ending)))
+    if sentence.tokenization:
+        for token in sentence.tokenization.tokenList.tokenList:
+            if token.textSpan is None:
                 continue
             if token.textSpan.start > token.textSpan.ending:
                 valid = False
-                logging.error(ilm(7, "Token in Sentence '%s' has a TextSpan with a start offset (%d) > end offset (%d)" %
-                                  (sentence.uuid, token.textSpan.start, token.textSpan.ending)))
-            elif (token.textSpan.start < sentence.textSpan.start) or \
-                 (token.textSpan.start > sentence.textSpan.ending) or \
-                 (token.textSpan.ending < sentence.textSpan.start) or \
-                 (token.textSpan.ending > sentence.textSpan.ending):
+                logging.error(_ilm(
+                    7,
+                    ("Token in Sentence '%s' has a TextSpan with a start"
+                     " offset (%d) > end offset (%d)") %
+                    (sentence.uuid, token.textSpan.start,
+                     token.textSpan.ending)))
+            elif ((token.textSpan.start < sentence.textSpan.start) or
+                    (token.textSpan.start > sentence.textSpan.ending) or
+                    (token.textSpan.ending < sentence.textSpan.start) or
+                    (token.textSpan.ending > sentence.textSpan.ending)):
                 valid = False
-                logging.error(ilm(7, "Token in Sentence '%s' has a TextSpan [%d, %d] that does not fit within the Sentence TextSpan [%d, %d]" %
-                                  (sentence.uuid, token.textSpan.start, token.textSpan.ending, sentence.textSpan.start, sentence.textSpan.ending)))
+                logging.error(_ilm(
+                    7,
+                    ("Token in Sentence '%s' has a TextSpan [%d, %d] that does"
+                     " not fit within the Sentence TextSpan [%d, %d]") %
+                    (sentence.uuid, token.textSpan.start,
+                     token.textSpan.ending, sentence.textSpan.start,
+                     sentence.textSpan.ending)))
 
     return valid
 
@@ -495,95 +608,149 @@ def validate_token_offsets_for_sentence(sentence):
 def validate_token_ref_sequence(comm, token_ref_sequence):
     valid = True
 
-    tokenization_mapping = get_tokenization_uuidString_dict(comm)
+    tkzn_map = _get_tokenization_uuidString_dict(comm)
+    tkzn_map_sent = _get_sentence_for_tokenization_uuidString_dict(comm)
 
-    if token_ref_sequence.tokenizationId.uuidString not in tokenization_mapping:
+    if token_ref_sequence.tokenizationId.uuidString not in tkzn_map:
         valid = False
-        logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenizationId (%s)" %
-                          (token_ref_sequence.uuid.uuidString, token_ref_sequence.tokenizationId.uuidString)))
+        logging.error(_ilm(
+            3,
+            "TokenRefSequence has an invalid tokenizationId (%s)" %
+            token_ref_sequence.tokenizationId.uuidString))
     else:
-        tokenization = tokenization_mapping[token_ref_sequence.tokenizationId.uuidString]
+        tokenization = tkzn_map[token_ref_sequence.tokenizationId.uuidString]
         for tokenIndex in token_ref_sequence.tokenIndexList:
             try:
-                tokenization.tokenList.tokens[tokenIndex]
+                tokenization.tokenList.tokenList[tokenIndex]
             except IndexError:
                 valid = False
-                logging.error(ilm(3, "TokenRefSequence '%s' has an invalid tokenIndex (%d)" %
-                                  (token_ref_sequence.tokenizationId.uuidString, tokenIndex)))
+                logging.error(_ilm(
+                    3,
+                    "TokenRefSequence '%s' has an invalid tokenIndex (%d)" %
+                    (token_ref_sequence.tokenizationId.uuidString,
+                     tokenIndex)))
+    if token_ref_sequence.tokenizationId.uuidString in tkzn_map_sent:
+        sentence = tkzn_map_sent[
+            token_ref_sequence.tokenizationId.uuidString]
+        if sentence.textSpan and token_ref_sequence.textSpan:
+            if ((token_ref_sequence.textSpan.start <
+                 sentence.textSpan.start) or
+                    (token_ref_sequence.textSpan.start >
+                     sentence.textSpan.ending) or
+                    (token_ref_sequence.textSpan.ending <
+                     sentence.textSpan.start) or
+                    (token_ref_sequence.textSpan.ending >
+                     sentence.textSpan.ending)):
+                valid = False
+                logging.error(_ilm(
+                    2,
+                    ("TokenRefSequence has a TextSpan [%d, %d] that does not"
+                     " fit within the Sentence TextSpan [%d, %d]") %
+                    (token_ref_sequence.textSpan.start,
+                     token_ref_sequence.textSpan.ending,
+                     sentence.textSpan.start, sentence.textSpan.ending)))
     return valid
 
 
-def validate_thrift_object_required_fields(thrift_object, indent_level=0):
+def validate_token_taggings(tokenization):
+    """
+    Test if a Tokenization has any TokenTaggings with invalid token indices
+    """
+    valid = True
+    if tokenization and tokenization.tokenTaggingList:
+        total_tokens = len(tokenization.tokenList.tokenList)
+        for token_tagging in tokenization.tokenTaggingList:
+            for tagged_token in token_tagging.taggedTokenList:
+                if (tagged_token.tokenIndex >= total_tokens or
+                        tagged_token.tokenIndex < 0):
+                    valid = False
+                    logging.error(_ilm(
+                        7,
+                        ("TokenTagging '%s' has a tokenIndex '%d' that is out"
+                         " of bounds.") %
+                        (token_tagging.uuid.uuidString,
+                         tagged_token.tokenIndex)))
+    return valid
+
+
+def validate_thrift(thrift_object, indent_level=0):
     """
     Test if a thrift object has all required fields.
 
-    This function calls the thrift object's validate() function, and
-    if an exception is raised because of missing required fields, the
-    function catches the exception and logs the exception error
-    message.
+    This function calls the thrift object's `validate()` function.
+    If an exception is raised because of missing required fields, the
+    function catches the exception and logs the exception's error
+    message using the Python standard library's `logging` module.
 
     Args:
-      thrift_object
+
+    - `thrift_object`
+    - `indent_level`: Indentation level for logging error message
 
     Returns:
-      bool: True if the thrift object has all required fields, False otherwise
+
+    - `True` if the Thrift object has all required fields, `False` otherwise
     """
     try:
         thrift_object.validate()
     except TProtocol.TProtocolException as e:
-        thrift_object_name = str(thrift_object.__class__).split('.')[-1].split("'")[0]
+        thrift_object_name = str(thrift_object.__class__).split(
+            '.')[-1].split("'")[0]
         if hasattr(thrift_object, 'uuid') and thrift_object.uuid is not None:
             thrift_object_name += " '%s'" % thrift_object.uuid
         # For readability, add quotes around field name, changing:
         #   Required field id is unset!
         # to:
         #   Required field 'id' is unset!
-        em = e.message.replace("Required field ", "Required Field '").replace(" is unset", "' is unset")
-        logging.error(ilm(indent_level, "%s: %s" % (thrift_object_name, em)))
+        em = e.message.replace("Required field ", "Required Field '").replace(
+            " is unset", "' is unset")
+        logging.error(_ilm(indent_level, "%s: %s" % (thrift_object_name, em)))
         return False
     else:
         return True
 
 
+def validate_thrift_object_required_fields(thrift_object, indent_level=0):
+    logging.warning(
+        'this rather long name is deprecated and will be removed;'
+        ' switch to validate_thrift'
+    )
+    return validate_thrift(thrift_object, indent_level=indent_level)
 
-########################################################################################################
-# The Python version of Thrift 0.9.1 does not support deep (recursive)
-# validation, and none of the Thrift serialization/deserialization
-# code calls even the shallow validation functions provided by Thrift.
-#
-# The code below implements deep validation.  The code is adapted from:
-#
-#   https://raw.githubusercontent.com/flamholz/py-thrift-validation-example/master/util/validation.py
-#
-# See this blog post for more information:
-#
-#   http://techblog.ridewithvia.com/post/38231652492/recursive-validation-of-python-thrift-structures
-#
-# A patch to implement deep validation was submitted to the Thrift
-# repository in February of 2013:
-#
-#   https://issues.apache.org/jira/browse/THRIFT-1732
-#
-# but Thrift 0.9.1 - which was released on 2013-08-21 - does not
-# include this functionality.
 
-RECURSE_ON = frozenset([TType.STRUCT,
-                        TType.LIST,
-                        TType.MAP,
-                        TType.SET])
-
-def _ShouldRecurse(ttype):
-    """Returns True if this ttype is one we recurse on for validation."""
-    return ttype in RECURSE_ON
-
-def validate_thrift_object_required_fields_recursively(msg, indent_level=0, valid=True):
+def validate_thrift_deep(msg, valid=True):
     """Deep validation of thrift messages.
 
     Args:
-        msg: a Thrift message.
+
+    -   `msg`: a Thrift message
+
+    -----
+
+    The Python version of Thrift 0.9.1 does not support deep (recursive)
+    validation, and none of the Thrift serialization/deserialization
+    code calls even the shallow validation functions provided by Thrift.
+
+    This function implements deep validation.  The code is adapted from:
+
+      https://raw.githubusercontent.com/flamholz/py-thrift-validation-example/
+          master/util/validation.py
+
+    See this blog post for more information:
+
+      http://techblog.ridewithvia.com/post/38231652492/
+          recursive-validation-of-python-thrift-structures
+
+    A patch to implement deep validation was submitted to the Thrift
+    repository in February of 2013:
+
+      https://issues.apache.org/jira/browse/THRIFT-1732
+
+    but Thrift 0.9.1 - which was released on 2013-08-21 - does not
+    include this functionality.
     """
     assert msg is not None
-    valid &= validate_thrift_object_required_fields(msg, indent_level)
+    valid &= validate_thrift(msg)
 
     # Introspect the structure specification.
     # For each field, check type and decide whether to recurse.
@@ -605,21 +772,39 @@ def validate_thrift_object_required_fields_recursively(msg, indent_level=0, vali
 
         # Field is set and it's a message or collection, so we validate.
         if mtype == TType.STRUCT:
-            valid &= validate_thrift_object_required_fields_recursively(attr, indent_level+1, valid)
+            valid &= validate_thrift_deep(attr, valid)
         elif mtype in (TType.LIST, TType.SET):
             subtype = spec_tuple[3][0]
             if _ShouldRecurse(subtype):
                 for submsg in attr:
-                    valid &= validate_thrift_object_required_fields_recursively(submsg, indent_level+1, valid)
+                    valid &= validate_thrift_deep(submsg, valid)
         elif mtype == TType.MAP:
             subtype = spec_tuple[3]
             key_type = subtype[0]
             val_type = subtype[2]
             for key, val in attr.iteritems():
                 if _ShouldRecurse(key_type):
-                    valid &= validate_thrift_object_required_fields_recursively(key, indent_level+1, valid)
+                    valid &= validate_thrift_deep(key, valid)
                 if _ShouldRecurse(val_type):
-                    valid &= validate_thrift_object_required_fields_recursively(val, indent_level+1, valid)
+                    valid &= validate_thrift_deep(val, valid)
 
     return valid
-########################################################################################################
+
+
+def validate_thrift_object_required_fields_recursively(msg, valid=True):
+    logging.warning(
+        'this incredibly long name is deprecated and will be removed;'
+        ' switch to validate_thrift_deep'
+    )
+    return validate_thrift_deep(msg, valid=valid)
+
+
+_RECURSE_ON = frozenset([TType.STRUCT,
+                         TType.LIST,
+                         TType.MAP,
+                         TType.SET])
+
+
+def _ShouldRecurse(ttype):
+    """Returns True if this ttype is one we recurse on for validation."""
+    return ttype in _RECURSE_ON

@@ -1,0 +1,14 @@
+clone_depth: 1
+version: '{build}-{branch}'
+skip_branch_with_pr: false
+
+branches:
+  except:
+    - accel
+
+install:
+- set PATH=C:\Python27-x64\scripts;C:\Python27-x64;%PATH%
+- pip install pytest
+
+build_script:
+- python setup.py test

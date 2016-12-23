@@ -1,0 +1,26 @@
+--- a/structure/ttypes.py	2015-11-21 01:50:42.186154970 +0000
++++ b/structure/ttypes.py	2015-11-21 01:50:11.118231222 +0000
+@@ -2124,16 +2124,22 @@
+     value = (value * 31) ^ hash(self.tokenTaggingList)
+     value = (value * 31) ^ hash(self.parseList)
+     value = (value * 31) ^ hash(self.dependencyParseList)
+     value = (value * 31) ^ hash(self.spanLinkList)
+     return value
+ 
+   def __repr__(self):
++    # The implementation of this function is NOT auto-generated
++    # Prevent infinite recursion caused by backpointer added by
++    #   concrete.util.references.add_references_to_communication()
++    dict_without_backpointer = self.__dict__.copy()
++    if 'sentence' in dict_without_backpointer:
++      dict_without_backpointer.pop('sentence')
+     L = ['%s=%r' % (key, value)
+-      for key, value in self.__dict__.iteritems()]
++      for key, value in dict_without_backpointer.iteritems()]
+     return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+ 
+   def __eq__(self, other):
+     return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+ 
+   def __ne__(self, other):
+     return not (self == other)

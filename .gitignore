@@ -1,10 +1,14 @@
 *~
 *.pyc
+.*.swp
 
-build/
-concrete.egg-info/
-dist/
-gen-py/
-setuptools*.zip
-setuptools*.egg
-testfixtures*.egg
+/.cache/
+/.tox/
+/.eggs/
+/.coverage
+/build/
+/concrete.egg-info/
+/dist/
+/setuptools*.zip
+/setuptools*.egg
+/testfixtures*.egg

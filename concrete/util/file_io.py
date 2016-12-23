@@ -175,33 +175,43 @@ FileType = _FileTypeClass(
 )
 
 
-class CommunicationReader(object):
-    """Iterator/generator class for reading one or more Communications from a
-    file
+class ThriftReader(object):
+    """Iterator/generator class for reading one or more Thrift structures
+    from a file
 
-    The iterator returns a `(Communication, filename)` tuple
+    The iterator returns a `(obj, filename)` tuple where obj is an object
+    of type thrift_type.
 
     Supported filetypes are:
 
-    - a file with a single Communication
-    - a file with multiple Communications concatenated together
-    - a gzipped file with a single Communication
-    - a gzipped file with multiple Communications concatenated together
-    - a .tar.gz file with one or more Communications
-    - a .zip file with one or more Communications
+    - a file with a single Thrift structure
+    - a file with multiple Thrift structures concatenated together
+    - a gzipped file with a single Thrift structure
+    - a gzipped file with multiple Thrift structures concatenated
+      together
+    - a .tar.gz file with one or more Thrift structures
+    - a .zip file with one or more Thrift structures
 
     -----
 
     Sample usage:
 
-        for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
+        for (comm, filename) in ThriftReader(Communication,
+                                             'multiple_comms.tar.gz'):
             do_something(comm)
     """
 
-    def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
+    def __init__(self, thrift_type, filename,
+                 postprocess=None, filetype=FileType.AUTO):
         filetype = FileType.lookup(filetype)
 
-        self._add_references = add_references
+        self._thrift_type = thrift_type
+        if postprocess is None:
+            def _noop(obj):
+                return
+            self._postprocess = _noop
+        else:
+            self._postprocess = postprocess
         self._source_filename = filename
 
         if filetype == FileType.TAR:
@@ -274,15 +284,16 @@ class CommunicationReader(object):
         return self
 
     def next(self):
-        """Returns a `(Communication, filename)` tuple
+        """Returns a `(obj, filename)` tuple where obj is an object
+        of type thrift_type.
 
-        If the CommunicationReader is reading from an archive, then
-        `filename` will be set to the name of the Communication file in
-        the archive (e.g. `foo.concrete`), and not the name of the archive
-        file (e.g. `bar.zip`).  If the CommunicationReader is reading from
-        a concatenated file (instead of an archive), then all
-        Communications extracted from the concatenated file will have the
-        same value for the `filename` field.
+        If the ThriftReader is reading from an archive, then
+        `filename` will be set to the name of the Thrift entry in
+        the archive (e.g. `foo.concrete`), and not the name of the
+        archive file (e.g. `bar.zip`).  If the ThriftReader is reading
+        from a concatenated file (instead of an archive), then all
+        Thrift structures extracted from the concatenated file will have
+        the same value for the `filename` field.
         """
         if self.filetype is 'stream':
             return self._next_from_stream()
@@ -293,10 +304,9 @@ class CommunicationReader(object):
 
     def _next_from_stream(self):
         try:
-            comm = Communication()
+            comm = self._thrift_type()
             comm.read(self.protocol)
-            if self._add_references:
-                add_references_to_communication(comm)
+            self._postprocess(comm)
             return (comm, self._source_filename)
         except EOFError:
             self.transport.close()
@@ -315,11 +325,10 @@ class CommunicationReader(object):
                 # Ignore attribute files created by OS X tar
                 continue
             comm = TSerialization.deserialize(
-                Communication(),
+                self._thrift_type(),
                 self.tar.extractfile(tarinfo).read(),
                 protocol_factory=factory.protocolFactory)
-            if self._add_references:
-                add_references_to_communication(comm)
+            self._postprocess(comm)
             # hack to keep memory usage O(1)
             # (...but the real hack is tarfile :)
             self.tar.members = []
@@ -331,12 +340,57 @@ class CommunicationReader(object):
         zipinfo = self.zip_infolist[self.zip_infolist_index]
         self.zip_infolist_index += 1
         comm = TSerialization.deserialize(
-            Communication(),
+            self._thrift_type(),
             self.zip.open(zipinfo).read(),
             protocol_factory=factory.protocolFactory)
-        if self._add_references:
-            add_references_to_communication(comm)
+        self._postprocess(comm)
         return (comm, zipinfo.filename)
+
+
+class CommunicationReader(ThriftReader):
+    """Iterator/generator class for reading one or more Communications from a
+    file
+
+    The iterator returns a `(Communication, filename)` tuple
+
+    Supported filetypes are:
+
+    - a file with a single Communication
+    - a file with multiple Communications concatenated together
+    - a gzipped file with a single Communication
+    - a gzipped file with multiple Communications concatenated together
+    - a .tar.gz file with one or more Communications
+    - a .zip file with one or more Communications
+
+    -----
+
+    Sample usage:
+
+        for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
+            do_something(comm)
+    """
+
+    def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
+        super(CommunicationReader, self).__init__(
+            Communication,
+            filename,
+            postprocess=(add_references_to_communication
+                         if add_references
+                         else None),
+            filetype=filetype)
+
+    def next(self):
+        """Returns a `(Communication, filename)` tuple
+
+        If the CommunicationReader is reading from an archive, then
+        `filename` will be set to the name of the Communication file in
+        the archive (e.g. `foo.concrete`), and not the name of the archive
+        file (e.g. `bar.zip`).  If the CommunicationReader is reading from
+        a concatenated file (instead of an archive), then all
+        Communications extracted from the concatenated file will have the
+        same value for the `filename` field.
+        """
+        return super(CommunicationReader, self).next()
 
 
 class CommunicationWriter(object):

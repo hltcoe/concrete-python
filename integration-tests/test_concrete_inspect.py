@@ -531,8 +531,8 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
 
 
 @mark.parametrize('which,args,output_prefix', [
-    (range(15), (), ''),
-    (range(15), ('--annotation-headers',), '\nmetadata\n--------\n'),
+    (range(17), (), ''),
+    (range(17), ('--annotation-headers',), '\nmetadata\n--------\n'),
     ((0,), ('--metadata-tool', 'concrete_serif v3.10.1pre'), ''),
     ((0,),
         ('--metadata-tool', 'concrete_serif v3.10.1pre',
@@ -572,6 +572,12 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
         '\nmetadata\n--------\n'),
     ((12, 14), ('--metadata-tool', 'Serif: events'), ''),
     ((12, 14), ('--metadata-tool', 'Serif: events', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
+    ((15,), ('--metadata-tool', 'lda'), ''),
+    ((15,), ('--metadata-tool', 'lda', '--annotation-headers',),
+        '\nmetadata\n--------\n'),
+    ((16,), ('--metadata-tool', 'urgency'), ''),
+    ((16,), ('--metadata-tool', 'urgency', '--annotation-headers',),
         '\nmetadata\n--------\n'),
 ])
 def test_print_metadata_for_communication(comm_path, which, args,
@@ -624,6 +630,12 @@ def test_print_metadata_for_communication(comm_path, which, args,
     if 14 in which:
         expected_output += '  SituationSet #1:  Serif: events\n'
     expected_output += '\n'
+    if 15 in which:
+        expected_output += '  CommunicationTagging:  lda\n'
+    if 16 in which:
+        expected_output += '  CommunicationTagging:  urgency\n'
+    if 15 in which or 16 in which:
+        expected_output += '\n'
     assert '' == stderr
     assert expected_output == stdout
     assert 0 == p.returncode
@@ -703,6 +715,47 @@ def test_print_id_for_communication(comm_path, first, args, output_prefix):
     if first:
         expected_output += u'''\
 tests/testdata/serif_dog-bites-man.xml
+'''.encode('utf-8')
+    assert '' == stderr
+    assert expected_output == stdout
+    assert 0 == p.returncode
+
+
+@mark.parametrize('first,second,args,output_prefix', [
+    (True, True, (), ''),
+    (True, True, ('--annotation-headers',),
+        '\ncommunication taggings\n----------------------\n'),
+    (True, False, ('--communication-taggings-tool', 'lda'), ''),
+    (True, False,
+        ('--communication-taggings-tool', 'lda', '--annotation-headers',),
+        '\ncommunication taggings\n----------------------\n'),
+    (False, True, ('--communication-taggings-tool', 'urgency'), ''),
+    (False, True,
+        ('--communication-taggings-tool', 'urgency', '--annotation-headers',),
+        '\ncommunication taggings\n----------------------\n'),
+    (False, False, ('--communication-taggings-tool', 'fake'), ''),
+    (False, False,
+        ('--communication-taggings-tool', 'fake', '--annotation-headers',),
+        '\ncommunication taggings\n----------------------\n'),
+])
+def test_print_communication_taggings_for_communication(comm_path, first,
+                                                        second, args,
+                                                        output_prefix):
+    p = Popen([
+        sys.executable, 'scripts/concrete_inspect.py',
+        '--communication-taggings',
+    ] + list(args) + [
+        comm_path
+    ], stdout=PIPE, stderr=PIPE)
+    (stdout, stderr) = p.communicate()
+    expected_output = output_prefix
+    if first:
+        expected_output += u'''\
+topic: animals:-1.500 crime:-3.000 humanity:-4.000
+'''.encode('utf-8')
+    if second:
+        expected_output += u'''\
+urgency: low:0.750
 '''.encode('utf-8')
     assert '' == stderr
     assert expected_output == stdout

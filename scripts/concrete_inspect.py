@@ -77,6 +77,14 @@ def main():
                         type=str,
                         help='Filter --metadata output to specified '
                              'tool (requires --metadata)')
+    parser.add_argument("--communication-taggings",
+                        help="Print communication taggings",
+                        action="store_true")
+    parser.add_argument("--communication-taggings-tool",
+                        type=str,
+                        help='Filter --communication-taggings output to '
+                             'specified tool (requires '
+                             '--communication-taggings)')
     parser.add_argument("--mentions",
                         help="Print whitespace-separated tokens, with entity m"
                              "entions wrapped using <ENTITY ID=x> tags, where "
@@ -183,7 +191,8 @@ def main():
     if not (args.char_offsets or args.dependency or args.lemmas or args.ner or
             args.pos or args.entities or args.mentions or args.metadata or
             args.sections or args.situation_mentions or args.situations or
-            args.text or args.tokens or args.treebank or args.id):
+            args.text or args.tokens or args.treebank or args.id or
+            args.communication_taggings):
         parser.print_help()
         sys.exit(1)
 
@@ -200,7 +209,9 @@ def main():
             (args.text_tool and not args.text) or
             (args.tokens_tool and not args.tokens) or
             (args.treebank_tool and not args.treebank) or
-            (args.id_tool and not args.id)):
+            (args.id_tool and not args.id) or
+            (args.communication_taggings_tool and
+                not args.communication_taggings)):
         parser.print_help()
         sys.exit(1)
 
@@ -254,6 +265,10 @@ def main():
             print_header_if('situation mentions', args.annotation_headers)
             concrete.inspect.print_situation_mentions(
                 comm, tool=args.situation_mentions_tool)
+        if args.communication_taggings:
+            print_header_if('communication taggings', args.annotation_headers)
+            concrete.inspect.print_communication_taggings_for_communication(
+                comm, tool=args.communication_taggings_tool)
         if args.metadata:
             print_header_if('metadata', args.annotation_headers)
             concrete.inspect.print_metadata(comm, tool=args.metadata_tool)

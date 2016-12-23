@@ -37,6 +37,10 @@ def _valid_index_lun(lst, idx):
     return idx >= 0 and idx < len(lst)
 
 
+def _filter_by_tool(lst, tool):
+    return filter(lambda x: tool is None or x.metadata.tool == tool, lst)
+
+
 def print_conll_style_tags_for_communication(
         comm, char_offsets=False, dependency=False, lemmas=False, ner=False,
         pos=False,
@@ -174,11 +178,18 @@ def print_metadata(comm, tool=None):
         if tokenization.parseList:
             for parse in tokenization.parseList:
                 parse_tools.add(parse.metadata.tool)
+
+    communication_tagging_tools = set()
+    for communication_tagging in lun(comm.communicationTaggingList):
+        communication_tagging_tools.add(communication_tagging.metadata.tool)
+
     if tool is not None:
         dependency_parse_tools = dependency_parse_tools.intersection([tool])
         parse_tools = parse_tools.intersection([tool])
         tokenization_tools = tokenization_tools.intersection([tool])
         token_tagging_tools = token_tagging_tools.intersection([tool])
+        communication_tagging_tools = communication_tagging_tools.intersection(
+            [tool])
 
     if tokenization_tools:
         for toolname in sorted(tokenization_tools):
@@ -220,6 +231,11 @@ def print_metadata(comm, tool=None):
             if tool is None or situationSet.metadata.tool == tool:
                 print u"  SituationSet #%d:  %s" % (
                     i, situationSet.metadata.tool)
+        print
+
+    if communication_tagging_tools:
+        for toolname in sorted(communication_tagging_tools):
+            print u"  CommunicationTagging:  %s" % toolname
         print
 
 
@@ -329,6 +345,17 @@ def print_text_for_communication(comm, tool=None):
 def print_id_for_communication(comm, tool=None):
     if tool is None or comm.metadata.tool == tool:
         print comm.id
+
+
+def print_communication_taggings_for_communication(comm, tool=None):
+    communication_taggings = _filter_by_tool(
+        lun(comm.communicationTaggingList), tool)
+    for tagging in communication_taggings:
+        print '%s: %s' % (
+            tagging.taggingType,
+            ' '.join('%s:%.3f' % p for p in
+                     zip(tagging.tagList, tagging.confidenceList))
+        )
 
 
 def print_tokens_with_entityMentions(comm, tool=None):

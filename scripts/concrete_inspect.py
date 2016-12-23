@@ -12,7 +12,7 @@ import sys
 
 import concrete.version
 import concrete.inspect
-from concrete.util import CommunicationReader
+from concrete.util import CommunicationReader, FileType
 
 
 def print_header(header):
@@ -177,7 +177,8 @@ def main():
         comms = CommunicationReader(args.communication_filename,
                                     add_references=add_references)
     else:
-        comms = CommunicationReader('/dev/fd/0', add_references=add_references)
+        comms = CommunicationReader('/dev/fd/0', add_references=add_references,
+                                    filetype=FileType.STREAM)
 
     if not (args.char_offsets or args.dependency or args.lemmas or args.ner or
             args.pos or args.entities or args.mentions or args.metadata or

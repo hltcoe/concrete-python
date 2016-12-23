@@ -2,7 +2,7 @@
 
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from concrete.util import CommunicationReader, CommunicationWriter
+from concrete.util import CommunicationReader, CommunicationWriter, FileType
 from concrete.util.annotator_wrapper import AnnotatorClientWrapper
 
 
@@ -26,10 +26,15 @@ def main():
     args = parser.parse_args()
 
     # Won't work on Windows... but that use case is very unlikely
-    input_path = '/dev/fd/0' if (args.input) == '-' else args.input
-    output_path = '/dev/fd/1' if (args.output) == '-' else args.output
+    if args.input == '-':
+        reader_kwargs = dict(filetype=FileType.STREAM)
+        input_path = '/dev/fd/0'
+    else:
+        reader_kwargs = dict()
+        input_path = args.input
+    output_path = '/dev/fd/1' if args.output == '-' else args.output
 
-    reader = CommunicationReader(input_path)
+    reader = CommunicationReader(input_path, **reader_kwargs)
     with AnnotatorClientWrapper(args.host, args.port) as client:
         with CommunicationWriter(output_path) as writer:
             for (comm, _) in reader:

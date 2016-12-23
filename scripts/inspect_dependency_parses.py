@@ -12,24 +12,36 @@ import logging
 
 import networkx as nx
 
-import concrete.inspect
+from concrete.util.tokenization import get_comm_tokenizations
 import concrete.version
-from concrete.util import CommunicationReader
+from concrete.util.file_io import CommunicationReader, FileType
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Inspect empty dependency parses")
-    parser.add_argument('communication_file')
+        description="Check dependency parse graph for errors")
+    parser.add_argument('communication_file',
+                        nargs='?',
+                        type=str,
+                        help='file to read communications from '
+                             '(if not specified, read from standard input)')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    # Won't work on Windows... but that use case is very unlikely
+    if args.communication_file is None:
+        reader_kwargs = dict(filetype=FileType.STREAM)
+        input_path = '/dev/fd/0'
+    else:
+        reader_kwargs = dict()
+        input_path = args.communication_file
 
     logging.basicConfig(
         format='%(levelname)7s:  %(message)s', level=logging.INFO)
 
-    for (comm, filename) in CommunicationReader(args.communication_file):
+    for (comm, filename) in CommunicationReader(input_path, **reader_kwargs):
         logging.info(u"Inspecting Communication with ID '%s" % comm.id)
-        for tokenization in concrete.inspect.get_tokenizations(comm):
+        for tokenization in get_comm_tokenizations(comm):
             inspect_dependency_parses(tokenization)
 
 

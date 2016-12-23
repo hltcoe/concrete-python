@@ -21,11 +21,10 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
     pip install --upgrade setuptools && \
     pip install --upgrade setuptools && \
     pip install --upgrade \
-        numpy \
+        flake8 \
         pytest \
         pytest-cov \
         pytest-mock \
-        flake8 \
         redis
 
 WORKDIR /tmp

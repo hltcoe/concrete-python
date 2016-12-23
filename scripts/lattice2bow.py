@@ -27,11 +27,11 @@ def group_arcs_by_src(lattice):
 
 
 def find_best_path(arcs_by_src):
-    subpath_weight_pairs = {0: ([], 0.)} # indexed by dst
+    subpath_weight_pairs = {0: ([], 0.)}  # indexed by dst
     farthest_reachable_dst = 0
 
     for i in xrange(len(arcs_by_src)):
-        if i in subpath_weight_pairs: # reachable
+        if i in subpath_weight_pairs:  # reachable
             (subpath, weight) = subpath_weight_pairs[i]
             for arc in arcs_by_src[i]:
                 new_subpath = subpath + [arc]

@@ -10,11 +10,9 @@ RUN yum install -y \
         libtool \
         m4 \
         make \
-        numpy \
         pkgconfig \
         python \
         python-devel \
-        scipy \
         tar
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
@@ -22,10 +20,12 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
     pip install --upgrade setuptools && \
     pip install --upgrade \
         flake8 \
+        numpy \
         pytest \
         pytest-cov \
         pytest-mock \
-        redis
+        redis \
+        scipy
 
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}

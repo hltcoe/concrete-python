@@ -1,5 +1,11 @@
 FROM cjmay/thrift:latest
 
+RUN yum update -y && yum clean all
+
+RUN yum install -y \
+        numpy \
+        scipy
+
 RUN pip install --upgrade pip && \
     pip install --upgrade setuptools && \
     pip install --upgrade setuptools && \

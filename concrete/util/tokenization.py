@@ -1,6 +1,7 @@
 import logging
 
 from concrete.structure.ttypes import TokenizationKind
+from concrete.util.unnone import lun
 
 
 def get_tokens(tokenization, suppress_warnings=False):
@@ -90,3 +91,10 @@ def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
         filter(sect_pred, comm.sectionList)
         if (sect_pred is not None) else comm.sectionList
     ))
+
+
+def get_comm_tokenizations(comm, tool=None):
+    for section in lun(comm.sectionList):
+        for sentence in lun(section.sentenceList):
+            if tool is None or sentence.tokenization.metadata.tool == tool:
+                yield sentence.tokenization

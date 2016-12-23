@@ -12,7 +12,7 @@ import logging
 
 import networkx as nx
 
-import concrete.inspect
+from concrete.util.tokenization import get_comm_tokenizations
 import concrete.version
 from concrete.util.file_io import CommunicationReader, FileType
 
@@ -41,7 +41,7 @@ def main():
 
     for (comm, filename) in CommunicationReader(input_path, **reader_kwargs):
         logging.info(u"Inspecting Communication with ID '%s" % comm.id)
-        for tokenization in concrete.inspect.get_tokenizations(comm):
+        for tokenization in get_comm_tokenizations(comm):
             inspect_dependency_parses(tokenization)
 
 

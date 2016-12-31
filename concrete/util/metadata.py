@@ -1,5 +1,15 @@
-"""Code for manipulating objects based on metadata matching.
-"""
+from datetime import datetime
+
+
+EPOCH = datetime.utcfromtimestamp(0)
+
+
+def datetime_to_timestamp(dt):
+    '''
+    Source:
+    http://stackoverflow.com/questions/6999726/how-can-i-convert-a-datetime-object-to-milliseconds-since-epoch-unix-time-in-p
+    '''
+    return int((dt - EPOCH).total_seconds())
 
 
 def get_index_of_tool(lst_of_conc, tool):

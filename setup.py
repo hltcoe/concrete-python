@@ -48,7 +48,7 @@ if __name__ == '__main__':
         install_requires=[
             'networkx',
             'testfixtures',
-            'thrift>=1.0.0.dev0',
+            'thrift==1.0.0.dev0',
             'redis>=2.10.0',
             'pycountry==1.20',
             'requests',

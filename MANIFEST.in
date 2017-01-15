@@ -2,9 +2,9 @@ recursive-include tests *
 exclude tests/testdata/create_simple_communications.py
 recursive-include examples *
 recursive-include integration-tests *
-include LICENSE.md
+include LICENSE
 include pytest.ini
-include README.md
+include README.rst
 include requirements.txt
 include test-requirements.txt
 include tox.ini

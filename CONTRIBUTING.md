@@ -27,78 +27,46 @@ How to contribute code
 9. Create a merge request for your feature branch into `master`,
    referencing the Gitlab issue.
 
-Note concrete-python releases use a parallel versioning scheme: even
-micro versions (e.g., the 10 in 4.8.10) are pure-python thrift protocol
-builds while odd micro versions (e.g., 4.8.11) are the corresponding
-accelerated thrift protocol builds.  These versions are released from
-the `master` and `accel` branches, respectively.
-
 For maintainers
 ===============
 
-Branch maintenance
-------------------
+Branches, versions, and releases
+--------------------------------
 
-The master and accel branches are kept stable at all times.  Before
-a commit is pushed to master (or accel), it should be pushed to a
-temporary commit on gitlab (such as `m` for master, `a` for accel,
-or an issue designator for commits addressing gitlab issues) so that
-CI can be performed.  Only after all tests pass should it be pushed to
-master (or accel).  Example:
+The master branch is kept stable at all times.  Before a commit is
+pushed to master, it should be checked by CI on another branch.  The
+recommended way of maintaining this is to do all work in feature
+branches that are kept up-to-date with master and pushed to Gitlab,
+waiting for CI to finish before merging.
 
-```shell
-git push gitlab master:m
-# ... wait for CI to succeed ...
-# assuming all CI jobs passed:
-git push gitlab master :m
-```
+All stable versions can be (and are) released to PyPI.  In between
+these, beta versions are used to denote significant changes to the code
+that we wish to deploy to users tracking master.
 
-### accel
+The script `release.bash` can automate the release process.  It should
+be run after all changes are committed to master and CI has passed,
+but before the version (in `concrete/version.py`) has been incremented
+to a stable version.
 
-The accel branch tracks the master branch with few exceptions.
-(Exceptions include accelerated protocol handling code and
-accel-specific README edits.)  When a commit is made to master it
-should be merged into accel.  Typical commits are merged using
-`git merge` as usual; when updating the generated thrift code from
-concrete, however, the following workflow is
-used (simplified for illustration):
+For example, if the version in `concrete/version.py` is 4.13.4b7, to
+release 4.13.4, `release.bash` does the following:
+* `git reset --hard`
+* `git clean -f -d -x`
+* Increase master version to 4.13.4 and commit
+* `python setup.py sdist`
+* `twine upload dist/*`
+* `git tag -am v4.13.4 v4.13.4`
+* Increase master version to 4.13.5b0 and commit
+* `git push gitlab master v4.13.4`
 
-```shell
-git merge -n -s ours master
-bash build.bash
-git add concrete
-git commit
-```
+In words, we clean the repository, update to a stable version number
+and commit, build the release tarball, upload the release tarball to
+PyPI, tag the release, update to the next beta version number and
+commit (so that subsequent development on master is linked to the next
+version), and push the release tag and the new development version of
+master to Gitlab.
 
-Here we make a nominal merge into accel from master by using the `ours`
-strategy, discarding the changes from master.  We do not commit
-immediately.  Instead, we do a fresh build from the concrete schema
-(this time using the `thrift 1.0.0-dev` compiler) and commit those
-freshly-generated files to accel.  (If any manual edits were made on
-master they should be made again on accel, as appropriate.)
-
-Version specification
----------------------
-
-As mentioned previously concrete-python uses a parallel versioning
-scheme with odd micro versions corresponding to the accel branch.  In
-this scheme each accel commit corresponding to a master commit is
-exactly one micro version *ahead* of that master commit.  This way a
-user who wishes to upgrade to the accelerated thrift protocol can do so
-without manually clearing out old installations of concrete-python
-(that is, the accel version is automatically preferred).
-
-Micro releases are released to PyPI.  In between these releases
-beta versions are used to denote significant changes to the code that
-we wish to deploy to users tracking master (or accel).  For example,
-after version `4.9.4` is released, the next commit on master should
-increase the version (in `concrete/version.py`) to `4.9.6b0`, and the
-parallel commit on accel should increase the accel version to
-`4.9.7b0`.  Another significant commit to master would increase the
-master version to `4.9.6b1`, and so on.  When a PyPI release is desired
-again, the master and accel versions should be increased to `4.9.6` and
-`4.9.7` respectively.  (beta versions are equally as stable as
-non-beta versions, but by convention they are not released to PyPI.)
+Run `bash release.bash -h` for usage information.
 
 (Re)generating code from concrete
 ---------------------------------
@@ -106,11 +74,12 @@ non-beta versions, but by convention they are not released to PyPI.)
 The Python code generated by the thrift compiler on the schema defined
 in the concrete project is checked in to concrete-python manually after
 applying necessary patches.  For *trivial* modifications to the schema
-this process is automated by `build.bash`, which assumes `concrete` has
-been cloned alongside `concrete-python` (in the same parent directory):
+this process is automated by `generate.bash`, which assumes concrete
+has been cloned alongside `oncrete-python (in the same parent
+directory):
 
 ```shell
-bash build.bash
+bash generate.bash
 ```
 
 After this succeeds, tests should be run and the changes should be
@@ -118,42 +87,11 @@ manually inspected (`git diff`) for sanity.  Note that this will not
 delete previously-generated files that are no longer produced by
 thrift (whose entries were removed from the schema).
 
-Often `build.bash` is not sufficient: the patches (in `patches/`)
+Often `generate.bash` is not sufficient: the patches (in `patches/`)
 document where it (thrift) falls short on the previously-compiled
-schema.  If `build.bash` throws an error, the necessary modifications
+schema.  If `generate.bash` throws an error, the necessary changes
 should be performed manually and checked in to the index, at which
 point the generated code should be removed from the working tree,
 raw (unpatched) generated code should be generated, and new patches
 should be produced and stored in `patches/` using `git diff`.  See
-the arguments to `build.bash` for generating the unpatched code.
-
-Releasing versions
-------------------
-
-Non-beta versions should be tagged, pushed to gitlab, and released to
-PyPI.  A simplified sketch of this procedure follows.  On master, to
-release version 4.9.4:
-
-```shell
-git tag -am v4.9.4 v4.9.4
-git push gitlab master v4.9.4
-git clean -f -d -x
-python setup.py sdist
-twine upload dist/*
-```
-
-Note we remove all files not known to git before building the release
-tarball.  Now on accel, once master has been merged in:
-
-```shell
-git tag -am v4.9.5 v4.9.5
-git push gitlab accel v4.9.5
-```
-
-accel versions are not currently released to PyPI due to the complexity
-of building the accelerated thrift Python library.
-
-The script `release.bash` can automate the release process.  It should
-be run after all changes are committed to master and accel, but the
-versions (in `concrete/version.py`) have not yet been incremented.
-Run `bash release.bash -h` for usage information.
+the arguments to `generate.bash` for generating the unpatched code.

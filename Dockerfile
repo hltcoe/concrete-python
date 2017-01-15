@@ -6,6 +6,7 @@ RUN yum install -y \
         autoconf \
         automake \
         gcc \
+        gcc-c++ \
         git \
         libtool \
         m4 \
@@ -38,7 +39,7 @@ RUN curl http://download.redis.io/releases/redis-3.2.0.tar.gz | tar -xz && \
     make install && \
     popd && \
     popd && \
-    rm -rf redis-3.2.0*
+    rm -rf redis-3.2.0
 
 RUN ldconfig -v
 

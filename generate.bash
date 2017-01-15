@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright 2012-2016 Johns Hopkins University HLTCOE. All rights reserved.
+# Copyright 2012-2017 Johns Hopkins University HLTCOE. All rights reserved.
 # This software is released under the 2-clause BSD license.
 # See LICENSE in the project root directory.
 #
@@ -83,7 +83,7 @@ set -e
 echo 'Generating Python classes from thrift definitions...'
 rm -rf gen-py
 find $concrete_thrift_dir -name '*.thrift' -exec \
-    thrift --gen py:new_style,utf8strings,coding=utf-8 \
+    thrift --gen py:coding=utf-8 \
         -I $concrete_thrift_dir {} \;
 
 echo 'Deleting generated files we do not want...'
@@ -106,7 +106,7 @@ then
     echo 'Applying our modifications to generated classes...'
     for P in patches/*.patch
     do
-        patch -d "$output_dir" -p1 < $P
+        patch -p1 < $P
     done
 fi
 

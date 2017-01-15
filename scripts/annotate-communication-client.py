@@ -3,19 +3,19 @@
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util import CommunicationReader, CommunicationWriter, FileType
-from concrete.util.annotator_wrapper import AnnotateCommunicationClientWrapper
+from concrete.util.annotate_wrapper import AnnotateCommunicationClientWrapper
 
 
 def main():
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
-        description="Interface with a Concrete Annotator service"
+        description="Interface with a Concrete AnnotateCommunicationService"
     )
     parser.add_argument('host',
-                        help="Hostname of annotator service to which to"
+                        help="Hostname of annotate service to which to"
                              " connect.")
     parser.add_argument('port', type=int,
-                        help="Port of annotator service to which to connect.")
+                        help="Port of annotate service to which to connect.")
     parser.add_argument('--input', default='-',
                         help="Input source to use. '-' for stdin; otherwise"
                              " takes a path to a file.")

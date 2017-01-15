@@ -2,7 +2,7 @@
 
 import argparse
 
-from concrete.util.annotator_wrapper import AnnotateCommunicationServiceWrapper
+from concrete.util.annotate_wrapper import AnnotateCommunicationServiceWrapper
 from concrete.util.net import find_port
 
 

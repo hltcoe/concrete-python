@@ -33,4 +33,4 @@ class ThriftFactory(object):
 
 
 factory = ThriftFactory(TTransport.TFramedTransportFactory(),
-                        TCompactProtocol.TCompactProtocolFactory())
+                        TCompactProtocol.TCompactProtocolAcceleratedFactory())

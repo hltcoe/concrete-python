@@ -24,8 +24,8 @@ The known conversions are stored in a dictionary KNOWN_CONVERSIONS:
   * keys are the conversion name, e.g., 'binary-to-compact'
   * values are pairs of callable factory methods
     (callable-input-factory, callable-output-factory), e.g.,
-    (TBinaryProtocol.TBinaryProtocolFactory,
-     TCompactProtocol.TCompactProtocolFactory)
+    (TBinaryProtocol.TBinaryProtocolAcceleratedFactory,
+     TCompactProtocol.TCompactProtocolAcceleratedFactory)
 
 Therefore, adding to the conversions is simple: just add to the
 KNOWN_CONVERSIONS mapping.
@@ -43,8 +43,8 @@ import concrete.version
 import mimetypes
 
 PROTOCOLS = {
-    "binary": TBinaryProtocol.TBinaryProtocolFactory,
-    "compact": TCompactProtocol.TCompactProtocolFactory,
+    "binary": TBinaryProtocol.TBinaryProtocolAcceleratedFactory,
+    "compact": TCompactProtocol.TCompactProtocolAcceleratedFactory,
     "json": TJSONProtocol.TJSONProtocolFactory
 }
 
@@ -83,9 +83,9 @@ def convert(input_file_path, output_file_path, input_protocol_factory,
     * input_file_path: Path to the input file (on disk)
     * output_file_path: Path the output file (on disk)
     * input_protocol_factory: Callable factory function for input
-      encoding, e.g., TBinaryProtocol.TBinaryProtocolFactory.
+      encoding, e.g., TBinaryProtocol.TBinaryProtocolAcceleratedFactory.
     * output_protocol_factory: Callable factory function for output
-      encoding, e.g., TCompactProtocol.TCompactProtocolFactory.
+      encoding, e.g., TCompactProtocol.TCompactProtocolAcceleratedFactory.
     """
     input_file = open(input_file_path, 'r')
     input_bytes = input_file.read()
@@ -106,9 +106,9 @@ def convert_communication(input_bytes, input_protocol_factory,
 
     * input_bytes: Input file byte stream
     * input_protocol_factory: Callable factory function for input
-      encoding, e.g., TBinaryProtocol.TBinaryProtocolFactory.
+      encoding, e.g., TBinaryProtocol.TBinaryProtocolAcceleratedFactory.
     * output_protocol_factory: Callable factory function for output
-      encoding, e.g., TCompactProtocol.TCompactProtocolFactory.
+      encoding, e.g., TCompactProtocol.TCompactProtocolAcceleratedFactory.
     """
     comm = Communication()
     TSerialization.deserialize(comm,

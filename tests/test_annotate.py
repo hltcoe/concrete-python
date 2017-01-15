@@ -56,7 +56,7 @@ class TestAnnotateCommunicationService(unittest.TestCase):
                                                            timeout=timeout):
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
-            protocol = TCompactProtocol.TCompactProtocol(transport)
+            protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
 
             cli = AnnotateCommunicationService.Client(protocol)
             transport.open()
@@ -78,7 +78,7 @@ class TestAnnotateCommunicationService(unittest.TestCase):
                                                            timeout=timeout):
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
-            protocol = TCompactProtocol.TCompactProtocol(transport)
+            protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
 
             cli = AnnotateCommunicationService.Client(protocol)
             transport.open()

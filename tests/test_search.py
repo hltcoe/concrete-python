@@ -47,7 +47,7 @@ def test_search_communications():
     with SubprocessSearchServiceWrapper(impl, host, port, timeout=timeout):
         transport = TSocket.TSocket(host, port)
         transport = TTransport.TFramedTransport(transport)
-        protocol = TCompactProtocol.TCompactProtocol(transport)
+        protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
 
         cli = SearchService.Client(protocol)
         transport.open()

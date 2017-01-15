@@ -2,9 +2,9 @@ import mock
 from mock import sentinel
 from pytest import fixture
 
-from concrete.services import Annotator
-from concrete.util.annotator_wrapper import (
-    AnnotatorServiceWrapper, AnnotatorClientWrapper
+from concrete.annotate import AnnotateCommunicationService
+from concrete.util.annotate_wrapper import (
+    AnnotateCommunicationServiceWrapper, AnnotateCommunicationClientWrapper
 )
 from concrete.util.thrift_factory import ThriftFactory
 
@@ -13,12 +13,12 @@ from concrete.util.thrift_factory import ThriftFactory
 def annotator_client_wrapper_triple():
     host = 'fake-host'
     port = 'fake-port'
-    return (host, port, AnnotatorClientWrapper(host, port))
+    return (host, port, AnnotateCommunicationClientWrapper(host, port))
 
 
 @fixture
 def annotator_service_wrapper():
-    class Implementation(Annotator.Iface):
+    class Implementation(AnnotateCommunicationService.Iface):
         def annotate(communication):
             raise NotImplementedError
 
@@ -33,10 +33,10 @@ def annotator_service_wrapper():
 
     implementation = Implementation()
 
-    return AnnotatorServiceWrapper(implementation)
+    return AnnotateCommunicationServiceWrapper(implementation)
 
 
-@mock.patch('concrete.services.Annotator.Client')
+@mock.patch('concrete.annotate.AnnotateCommunicationService.Client')
 @mock.patch.object(ThriftFactory, 'createProtocol',
                    return_value=sentinel.protocol)
 @mock.patch.object(ThriftFactory, 'createTransport')
@@ -50,7 +50,8 @@ def test_enter(mock_create_socket, mock_create_transport,
     # create additional mocks for transport.open call...
     mock_transport = mock.Mock()
     mock_create_transport.return_value = mock_transport
-    # ...and to verify the instantiation of the Annotator.Client
+    # ...and to verify the instantiation of the
+    # AnnotateCommunicationService.Client
     mock_client.return_value = sentinel.client
 
     client = annotator_client_wrapper.__enter__()

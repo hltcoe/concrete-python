@@ -3,7 +3,7 @@
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util import CommunicationReader, CommunicationWriter, FileType
-from concrete.util.annotator_wrapper import AnnotatorClientWrapper
+from concrete.util.annotator_wrapper import AnnotateCommunicationClientWrapper
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
     output_path = '/dev/fd/1' if args.output == '-' else args.output
 
     reader = CommunicationReader(input_path, **reader_kwargs)
-    with AnnotatorClientWrapper(args.host, args.port) as client:
+    with AnnotateCommunicationClientWrapper(args.host, args.port) as client:
         with CommunicationWriter(output_path) as writer:
             for (comm, _) in reader:
                 writer.write(client.annotate(comm))

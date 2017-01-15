@@ -34,3 +34,12 @@ class ThriftFactory(object):
 
 factory = ThriftFactory(TTransport.TFramedTransportFactory(),
                         TCompactProtocol.TCompactProtocolAcceleratedFactory())
+
+
+def is_accelerated():
+    try:
+        transport = TTransport.TMemoryBuffer()
+        TCompactProtocol.TCompactProtocolAccelerated(transport, fallback=False)
+        return True
+    except:
+        return False

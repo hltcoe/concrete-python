@@ -6,12 +6,16 @@ def concrete_library_version():
 
 
 def concrete_schema_version():
-    return ".".join(__version__.split(".")[0:2])
+    return '.'.join(__version__.split('.')[0:2])
 
 
 def add_argparse_argument(parser):
-    parser.add_argument("--version", action="version",
-                        version=("Concrete schema version: %s, "
-                                 "Concrete python library version: %s") %
-                                (concrete_schema_version(),
-                                 concrete_library_version()))
+    from concrete.util.thrift_factory import is_accelerated
+    parser.add_argument(
+        '--version', action='version',
+        version='concrete-python %s (schema %s) (%s)' % (
+            concrete_library_version(),
+            concrete_schema_version(),
+            'accelerated' if is_accelerated() else 'unaccelerated'
+        )
+    )

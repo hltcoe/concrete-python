@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-
 """
-Deprecated: please use inspect-dependency-parses.py instead.
-
 Command line script to (partially) validate a Concrete Communication
 
 This script is a thin wrapper around the functionality in the
@@ -12,19 +9,12 @@ concrete.validate library.
 
 import argparse
 import logging
-import sys
 
 import networkx as nx
 
 from concrete.util.tokenization import get_comm_tokenizations
 import concrete.version
 from concrete.util.file_io import CommunicationReader, FileType
-
-
-sys.stderr.write(
-    'inspect_dependency_parses.py is deprecated '
-    'and will be removed in the future.\n')
-sys.stderr.write('Please use inspect-dependency-parses.py instead.\n')
 
 
 def main():

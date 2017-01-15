@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-
 """
-Deprecated: please use validate-communication.py instead.
-
 Command line script to (partially) validate a Concrete Communication
 
 This script is a thin wrapper around the functionality in the
@@ -12,16 +9,9 @@ concrete.validate library.
 
 import argparse
 import logging
-import sys
 
 import concrete.version
 from concrete.validate import validate_communication_file
-
-
-sys.stderr.write(
-    'validate_communication.py is deprecated '
-    'and will be removed in the future.\n')
-sys.stderr.write('Please use validate-communication.py instead.\n')
 
 
 def main():

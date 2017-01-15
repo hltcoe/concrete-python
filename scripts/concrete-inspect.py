@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-
-"""
-Deprecated: please use concrete-inspect.py instead.
-
-Print human-readable information about a Communication to stdout
+"""Print human-readable information about a Communication to stdout
 
 concrete_inspect.py is a command-line script for printing out information
 about a Concrete Communication.
@@ -17,11 +13,6 @@ import sys
 import concrete.version
 import concrete.inspect
 from concrete.util import CommunicationReader, FileType
-
-
-sys.stderr.write(
-    'concrete_inspect.py is deprecated and will be removed in the future.\n')
-sys.stderr.write('Please use concrete-inspect.py instead.\n')
 
 
 def print_header(header):

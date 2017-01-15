@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-
 """
-Deprecated: please use concrete-diff.py instead.
-
 Compare two Concrete files by converting to JSON then running the Git
 diff command
 """
@@ -12,16 +9,11 @@ import concrete.version
 import argparse
 import codecs
 import os
-import sys
+import os.path
 import subprocess
 import tempfile
 
 from concrete.util import communication_file_to_json
-
-
-sys.stderr.write(
-    'concrete_diff.py is deprecated and will be removed in the future.\n')
-sys.stderr.write('Please use concrete-diff.py instead.\n')
 
 
 def main():

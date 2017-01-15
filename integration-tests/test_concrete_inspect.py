@@ -67,7 +67,7 @@ def simple_comms_tgz_path(request):
 def test_print_conll_style_tags_for_communication(comm_path, which, args,
                                                   output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--char-offsets',
         '--dependency',
         '--lemmas',
@@ -139,7 +139,7 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
 ])
 def test_print_entities(comm_path, first, second, args, output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--entities',
     ] + list(args) + [
         comm_path
@@ -236,7 +236,7 @@ Entity Set 1 (Serif: doc-values):
 def test_print_situation_mentions(comm_path, first, second, args,
                                   output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--situation-mentions',
     ] + list(args) + [
         comm_path
@@ -301,7 +301,7 @@ Situation Set 1 (Serif: events):
 ])
 def test_print_situations(comm_path, first, second, args, output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--situations',
     ] + list(args) + [
         comm_path
@@ -339,7 +339,7 @@ Situation Set 1 (Serif: events):
 ])
 def test_print_text_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--text',
     ] + list(args) + [
         comm_path
@@ -394,7 +394,7 @@ John's daughter Mary expressed sorrow.
 def test_print_tokens_with_entityMentions(comm_path, first, second, third,
                                           args, output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--mentions',
     ] + list(args) + [
         comm_path
@@ -445,7 +445,7 @@ Mary expressed sorrow .
 ])
 def test_print_tokens_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--tokens',
     ] + list(args) + [
         comm_path
@@ -485,7 +485,7 @@ John 's daughter Mary expressed sorrow .\
 def test_print_penn_treebank_for_communication(comm_path, first, args,
                                                output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--treebank',
     ] + list(args) + [
         comm_path
@@ -588,7 +588,7 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
 def test_print_metadata_for_communication(comm_path, which, args,
                                           output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--metadata',
     ] + list(args) + [
         comm_path
@@ -661,7 +661,7 @@ def test_print_metadata_for_communication(comm_path, which, args,
 def test_print_sections_for_communication(comm_path, first, args,
                                           output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--sections',
     ] + list(args) + [
         comm_path
@@ -710,7 +710,7 @@ John's daughter Mary expressed sorrow.
 ])
 def test_print_id_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--id',
     ] + list(args) + [
         comm_path
@@ -747,7 +747,7 @@ def test_print_communication_taggings_for_communication(comm_path, first,
                                                         second, args,
                                                         output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--communication-taggings',
     ] + list(args) + [
         comm_path
@@ -859,7 +859,7 @@ def test_print_multiple_for_communication(comm_path, first, second, third,
                                           args, first_output_prefix,
                                           second_output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
     ] + list(args) + [
         comm_path
     ], stdout=PIPE, stderr=PIPE)
@@ -924,7 +924,7 @@ Situation Set 1 (Serif: events):
 def test_print_multiple_communications(comms_path, first, second, args,
                                        output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--text',
     ] + list(args) + [
         comms_path
@@ -983,7 +983,7 @@ malheureux.
 def test_print_multiple_communications_tgz(comms_tgz_path, first, second, args,
                                            output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--text',
     ] + list(args) + [
         comms_tgz_path
@@ -1048,7 +1048,7 @@ def test_print_multiple_communications_count(simple_comms_tgz_path, first,
                                              second, third, args,
                                              output_prefix):
     p = Popen([
-        sys.executable, 'scripts/concrete_inspect.py',
+        sys.executable, 'scripts/concrete-inspect.py',
         '--id',
     ] + list(args) + [
         simple_comms_tgz_path

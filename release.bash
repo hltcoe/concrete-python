@@ -63,7 +63,9 @@ then
     exit 2
 fi
 echo
-echo "Computed master versions: $master_release_version, $master_next_version."
+echo "Computed master versions:"
+echo "  release:     $master_release_version"
+echo "  development: $master_next_version"
 echo -n "Okay (y/n)? "
 confirm
 

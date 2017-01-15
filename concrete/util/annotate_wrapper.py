@@ -2,13 +2,14 @@ from multiprocessing import Process
 from time import sleep
 from socket import create_connection
 
-from concrete.services import Annotator
+from concrete.annotate import AnnotateCommunicationService
 from concrete.util.thrift_factory import factory
 
 
-class AnnotatorClientWrapper(object):
+class AnnotateCommunicationClientWrapper(object):
     """
-    A sample client implementation of the Concrete Annotator service.
+    A sample client implementation of the Concrete
+    AnnotateCommunicationService.
 
     Provides sensible/current defaults for transport and protocol.
     """
@@ -22,7 +23,7 @@ class AnnotatorClientWrapper(object):
         self.transport = factory.createTransport(socket)
         protocol = factory.createProtocol(self.transport)
 
-        cli = Annotator.Client(protocol)
+        cli = AnnotateCommunicationService.Client(protocol)
 
         self.transport.open()
         return cli
@@ -31,15 +32,15 @@ class AnnotatorClientWrapper(object):
         self.transport.close()
 
 
-class AnnotatorServiceWrapper(object):
+class AnnotateCommunicationServiceWrapper(object):
     """
     A sample wrapper around the Concrete annotator
     service, providing an easy way to wrap an implementation
-    of the Annotator service.
+    of the AnnotateCommunicationService.
     """
 
     def __init__(self, implementation):
-        self.processor = Annotator.Processor(implementation)
+        self.processor = AnnotateCommunicationService.Processor(implementation)
 
     def serve(self, host, port):
         server = factory.createServer(self.processor, host, port)
@@ -50,17 +51,17 @@ class AnnotatorServiceWrapper(object):
         server.serve()
 
 
-class SubprocessAnnotatorServiceWrapper(object):
+class SubprocessAnnotateCommunicationServiceWrapper(object):
     '''
-    Annotator service wrapper that runs server in a subprocess via a
-    context manager interface.
+    AnnotateCommunicationService service wrapper that runs server in a
+    subprocess via a context manager interface.
     '''
 
     SLEEP_INTERVAL = 0.1
 
     def __init__(self, implementation, host, port, timeout=None):
         self.proc = None
-        self.server = AnnotatorServiceWrapper(implementation)
+        self.server = AnnotateCommunicationServiceWrapper(implementation)
         self.host = host
         self.port = port
         self.timeout = timeout

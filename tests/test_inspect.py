@@ -169,8 +169,9 @@ def test_get_conll_deprel_tags_arbitrary_num_tokens_not_found():
         assert cdt(tokenization, 0, None) == [u"edge_" + unicode(i) + "/0"
                                               for i in xrange(num_tokens)]
         assert (
-            cdt(tokenization, 0, FakeTokenizationAndDependency.default_tool)
-            == [""] * num_tokens)
+            cdt(tokenization, 0, FakeTokenizationAndDependency.default_tool) ==
+            [""] * num_tokens
+        )
         assert cdt(tokenization, 0, "") == [""] * num_tokens
 
         assert cdt(tokenization, -1, None) == [""] * num_tokens

@@ -8,6 +8,7 @@
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
+import concrete.communication.ttypes
 import concrete.services.ttypes
 import concrete.structure.ttypes
 import concrete.uuid.ttypes
@@ -192,6 +193,10 @@ class SearchQuery(object):
    - lang: The language of the corpus that the user wants to search.
   Use ISO 639-2/T three letter codes.
    - corpus: An identifier of the corpus that the search is to be performed over.
+   - k: The maximum number of candidates the search service should return.
+   - communication: An optional communication used as context for the query.
+  If both this field and communicationId is populated, then it is
+  assumed the ID of the communication is the same as communicationId.
   """
 
   thrift_spec = (
@@ -208,9 +213,11 @@ class SearchQuery(object):
     (10, TType.I32, 'type', None, None, ), # 10
     (11, TType.STRING, 'lang', None, None, ), # 11
     (12, TType.STRING, 'corpus', None, None, ), # 12
+    (13, TType.I32, 'k', None, None, ), # 13
+    (14, TType.STRUCT, 'communication', (concrete.communication.ttypes.Communication, concrete.communication.ttypes.Communication.thrift_spec), None, ), # 14
   )
 
-  def __init__(self, terms=None, questions=None, communicationId=None, tokens=None, rawQuery=None, auths=None, userId=None, name=None, labels=None, type=None, lang=None, corpus=None,):
+  def __init__(self, terms=None, questions=None, communicationId=None, tokens=None, rawQuery=None, auths=None, userId=None, name=None, labels=None, type=None, lang=None, corpus=None, k=None, communication=None,):
     self.terms = terms
     self.questions = questions
     self.communicationId = communicationId
@@ -223,6 +230,8 @@ class SearchQuery(object):
     self.type = type
     self.lang = lang
     self.corpus = corpus
+    self.k = k
+    self.communication = communication
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -309,6 +318,17 @@ class SearchQuery(object):
           self.corpus = iprot.readString().decode('utf-8')
         else:
           iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.I32:
+          self.k = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 14:
+        if ftype == TType.STRUCT:
+          self.communication = concrete.communication.ttypes.Communication()
+          self.communication.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -376,6 +396,14 @@ class SearchQuery(object):
       oprot.writeFieldBegin('corpus', TType.STRING, 12)
       oprot.writeString(self.corpus.encode('utf-8'))
       oprot.writeFieldEnd()
+    if self.k is not None:
+      oprot.writeFieldBegin('k', TType.I32, 13)
+      oprot.writeI32(self.k)
+      oprot.writeFieldEnd()
+    if self.communication is not None:
+      oprot.writeFieldBegin('communication', TType.STRUCT, 14)
+      self.communication.write(oprot)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -399,6 +427,8 @@ class SearchQuery(object):
     value = (value * 31) ^ hash(self.type)
     value = (value * 31) ^ hash(self.lang)
     value = (value * 31) ^ hash(self.corpus)
+    value = (value * 31) ^ hash(self.k)
+    value = (value * 31) ^ hash(self.communication)
     return value
 
   def __repr__(self):

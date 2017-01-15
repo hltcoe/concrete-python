@@ -2,18 +2,18 @@
 
 import argparse
 
-from concrete.util.annotator_wrapper import AnnotatorServiceWrapper
+from concrete.util.annotator_wrapper import AnnotateCommunicationServiceWrapper
 from concrete.util.net import find_port
 
 
 from time import time
 
-from concrete.services import Annotator
+from concrete.services import AnnotateCommunicationService
 from concrete.metadata.ttypes import AnnotationMetadata
 
 
-class NoopAnnotator(Annotator.Iface):
-    METADATA_TOOL = 'No-op Annotator'
+class NoopAnnotateCommunicationService(AnnotateCommunicationService.Iface):
+    METADATA_TOOL = 'No-op AnnotateCommunicationService'
 
     def annotate(self, communication):
         return communication
@@ -24,7 +24,9 @@ class NoopAnnotator(Annotator.Iface):
         return metadata
 
     def getDocumentation(self):
-        return 'Annotator that returns communication unmodified'
+        return '''\
+        AnnotateCommunicationService that returns communication unmodified
+        '''
 
     def shutdown(self):
         pass
@@ -49,9 +51,9 @@ def main():
 
     print 'Serving on %s:%d...' % (host, port)
 
-    handler = NoopAnnotator()
+    handler = NoopAnnotateCommunicationService()
 
-    server = AnnotatorServiceWrapper(handler)
+    server = AnnotateCommunicationServiceWrapper(handler)
     server.serve(host, port)
 
 

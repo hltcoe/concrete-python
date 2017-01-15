@@ -4,19 +4,21 @@ from thrift.protocol import TCompactProtocol
 
 import unittest
 
-from concrete.util.annotator_wrapper import SubprocessAnnotatorServiceWrapper
+from concrete.util.annotate_wrapper import (
+    SubprocessAnnotateCommunicationServiceWrapper
+)
 from concrete.util.net import find_port
 from concrete.util.simple_comm import create_comm
 
 
 from time import time
 
-from concrete.services import Annotator
+from concrete.annotate import AnnotateCommunicationService
 from concrete.metadata.ttypes import AnnotationMetadata
 
 
-class NoopAnnotator(Annotator.Iface):
-    METADATA_TOOL = 'No-op Annotator'
+class NoopAnnotateCommunicationService(AnnotateCommunicationService.Iface):
+    METADATA_TOOL = 'No-op AnnotateCommunicationService'
 
     def annotate(self, communication):
         return communication
@@ -27,16 +29,18 @@ class NoopAnnotator(Annotator.Iface):
         return metadata
 
     def getDocumentation(self):
-        return 'Annotator that returns communication unmodified'
+        return '''\
+        AnnotateCommunicationService that returns communication unmodified
+        '''
 
     def shutdown(self):
         pass
 
 
-class TestAnnotator(unittest.TestCase):
+class TestAnnotateCommunicationService(unittest.TestCase):
 
     def test_annotate(self):
-        impl = NoopAnnotator()
+        impl = NoopAnnotateCommunicationService()
         host = 'localhost'
         port = find_port()
         timeout = 5
@@ -48,13 +52,13 @@ class TestAnnotator(unittest.TestCase):
         comm_metadata_tool = comm.metadata.tool
         comm_metadata_timestamp = comm.metadata.timestamp
 
-        with SubprocessAnnotatorServiceWrapper(impl, host, port,
-                                               timeout=timeout):
+        with SubprocessAnnotateCommunicationServiceWrapper(impl, host, port,
+                                                           timeout=timeout):
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
             protocol = TCompactProtocol.TCompactProtocol(transport)
 
-            cli = Annotator.Client(protocol)
+            cli = AnnotateCommunicationService.Client(protocol)
             transport.open()
             res = cli.annotate(comm)
             transport.close()
@@ -65,20 +69,21 @@ class TestAnnotator(unittest.TestCase):
             self.assertEqual(res.metadata.timestamp, comm_metadata_timestamp)
 
     def test_get_metadata(self):
-        impl = NoopAnnotator()
+        impl = NoopAnnotateCommunicationService()
         host = 'localhost'
         port = find_port()
         timeout = 5
 
-        with SubprocessAnnotatorServiceWrapper(impl, host, port,
-                                               timeout=timeout):
+        with SubprocessAnnotateCommunicationServiceWrapper(impl, host, port,
+                                                           timeout=timeout):
             transport = TSocket.TSocket(host, port)
             transport = TTransport.TFramedTransport(transport)
             protocol = TCompactProtocol.TCompactProtocol(transport)
 
-            cli = Annotator.Client(protocol)
+            cli = AnnotateCommunicationService.Client(protocol)
             transport.open()
             metadata = cli.getMetadata()
             transport.close()
 
-            self.assertEqual(NoopAnnotator.METADATA_TOOL, metadata.tool)
+            self.assertEqual(NoopAnnotateCommunicationService.METADATA_TOOL,
+                             metadata.tool)

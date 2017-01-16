@@ -5,6 +5,8 @@ recursive-include integration-tests *
 include LICENSE
 include pytest.ini
 include README.rst
+include AUTHORS
+include CHANGELOG
 include requirements.txt
 include test-requirements.txt
 include tox.ini

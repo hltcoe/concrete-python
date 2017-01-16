@@ -22,6 +22,14 @@ among other Python libraries.  These are installed automatically by
 Installation
 ------------
 
+**Note**: The accelerated protocol offers a (de)serialization speedup
+of 10x or more; if you would like to use it, ensure a C++ compiler is
+available on your system before installing Concrete-Python.
+(If a compiler is not available, Concrete-Python will fall back to the
+unaccelerated protocol automatically.)  If you are on Linux, a suitable
+C++ compiler will be listed as ``g++`` or ``gcc-c++`` in your package
+manager.
+
 You can install Concrete using the ``pip`` package manager::
 
     pip install concrete

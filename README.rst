@@ -115,20 +115,8 @@ Development
 Please see ``CONTRIBUTING.rst`` for information about contributing to
 Concrete-Python.
 
-Contributors
-~~~~~~~~~~~~
-
-* Craig Harman
-* Low Kian Seong
-* Frank Ferraro
-* Max Thomas
-* Adrian Benton
-* Joel Coffman
-* Chandler May
-* Tom Lippincott
-
-Please contact us if you have contributed to Concrete-Python but are
-not on this list.
+Contributors to Concrete-Python are listed in ``AUTHORS``.
+Please contact us if there is an error in this list.
 
 
 

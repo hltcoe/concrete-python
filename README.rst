@@ -19,9 +19,6 @@ Concrete-Python requires Python 2.7 and the Thrift Python library,
 among other Python libraries.  These are installed automatically by
 ``setup.py`` or ``pip``.  The Thrift compiler is *not* required.
 
-Installation
-------------
-
 **Note**: The accelerated protocol offers a (de)serialization speedup
 of 10x or more; if you would like to use it, ensure a C++ compiler is
 available on your system before installing Concrete-Python.
@@ -29,6 +26,9 @@ available on your system before installing Concrete-Python.
 unaccelerated protocol automatically.)  If you are on Linux, a suitable
 C++ compiler will be listed as ``g++`` or ``gcc-c++`` in your package
 manager.
+
+Installation
+------------
 
 You can install Concrete using the ``pip`` package manager::
 

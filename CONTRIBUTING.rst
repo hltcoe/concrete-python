@@ -26,7 +26,7 @@ How to contribute code
    fix it, and try again.
 8. If you've made multiple commits, please squash them and
    ``git push -f`` to the feature branch.
-9. Create a merge request for your feature branch into `master`,
+9. Create a merge request for your feature branch into ``master``,
    referencing the Gitlab issue.
 
 For maintainers

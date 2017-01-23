@@ -1,4 +1,6 @@
-from concrete.access import FetchCommunicationService
+from concrete.access import (
+    FetchCommunicationService,
+    StoreCommunicationService)
 from concrete.util.service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
@@ -21,3 +23,21 @@ SubprocessFetchCommunicationServiceWrapper = type(
     'SubprocessFetchCommunicationServiceWrapper',
     (SubprocessConcreteServiceWrapper,),
     {'concrete_service_wrapper_class': FetchCommunicationServiceWrapper})
+
+
+StoreCommunicationClientWrapper = type(
+    'StoreCommunicationClientWrapper',
+    (ConcreteServiceClientWrapper,),
+    {'concrete_service_class': StoreCommunicationService})
+
+
+StoreCommunicationServiceWrapper = type(
+    'StoreCommunicationServiceWrapper',
+    (ConcreteServiceWrapper,),
+    {'concrete_service_class': StoreCommunicationService})
+
+
+SubprocessStoreCommunicationServiceWrapper = type(
+    'SubprocessStoreCommunicationServiceWrapper',
+    (SubprocessConcreteServiceWrapper,),
+    {'concrete_service_wrapper_class': StoreCommunicationServiceWrapper})

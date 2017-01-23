@@ -2,7 +2,6 @@ from multiprocessing import Process
 from time import sleep
 from socket import create_connection
 
-from concrete.access import FetchCommunicationService
 from concrete.util.thrift_factory import factory
 
 
@@ -105,21 +104,3 @@ class SubprocessConcreteServiceWrapper(object):
     def __exit__(self, type, value, traceback):
         self.proc.terminate()
         self.proc.join()
-
-
-FetchCommunicationClientWrapper = type(
-    'FetchCommunicationClientWrapper',
-    (ConcreteServiceClientWrapper,),
-    {'concrete_service_class': FetchCommunicationService})
-
-
-FetchCommunicationServiceWrapper = type(
-    'FetchCommunicationServiceWrapper',
-    (ConcreteServiceWrapper,),
-    {'concrete_service_class': FetchCommunicationService})
-
-
-SubprocessFetchCommunicationServiceWrapper = type(
-    'SubprocessFetchCommunicationServiceWrapper',
-    (SubprocessConcreteServiceWrapper,),
-    {'concrete_service_wrapper_class': FetchCommunicationServiceWrapper})

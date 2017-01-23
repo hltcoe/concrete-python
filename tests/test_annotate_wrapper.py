@@ -12,7 +12,7 @@ from concrete.util.thrift_factory import ThriftFactory
 @fixture
 def annotate_client_wrapper_triple():
     host = 'fake-host'
-    port = 'fake-port'
+    port = 2
     return (host, port, AnnotateCommunicationClientWrapper(host, port))
 
 
@@ -89,7 +89,7 @@ def test_serve(mock_create_server, annotate_service_wrapper):
     mock_create_server.return_value = mock_server
 
     host = 'fake-host'
-    port = 'fake-port'
+    port = 2
 
     annotate_service_wrapper.serve(host, port)
 

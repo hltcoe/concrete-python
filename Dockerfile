@@ -26,7 +26,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
         pytest-cov \
         pytest-mock \
         redis \
-        scipy
+        scipy \
+        thrift==0.10.0
 
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}

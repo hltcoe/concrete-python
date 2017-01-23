@@ -1,4 +1,4 @@
-from concrete.access import (
+from concrete.learn import (
     ActiveLearnerClientService,
     ActiveLearnerServerService)
 from concrete.util.service_wrapper import (

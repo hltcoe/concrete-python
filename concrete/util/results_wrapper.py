@@ -1,4 +1,4 @@
-from concrete.results import ResultsServerService
+from concrete.services.results import ResultsServerService
 from concrete.util.service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,

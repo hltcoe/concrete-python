@@ -1,4 +1,3 @@
-
 from concrete.util.access import (
     CommunicationContainerFetchHandler,
     RelayFetchHandler)
@@ -28,7 +27,7 @@ def test_comm_container_fetch_handler():
             assert 'one' in ids
             assert 'two' in ids
             assert 'foo' not in ids
-            
+
 
 def test_fetch_backed_container():
     comm_container = {
@@ -48,7 +47,7 @@ def test_fetch_backed_container():
         for comm_id in cc:
             comm = cc[comm_id]
             assert validate_communication(comm)
-            
+
 
 def test_relay_container_fetch_handler():
     comm_container = {

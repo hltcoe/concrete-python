@@ -5,6 +5,7 @@
 
 import argparse
 
+import concrete.version
 from concrete.access import FetchCommunicationService
 from concrete.access.ttypes import FetchRequest
 from concrete.util.file_io import write_communication_to_file
@@ -39,6 +40,7 @@ if __name__ == '__main__':
                         help="Save fetched Communications to disk as "
                         "'[COMMUNICATION_ID].concrete'")
     parser.add_argument("comm_id", nargs="*", help="IDs of Communications to be fetched")
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     socket = factory.createSocket(args.server, args.port)

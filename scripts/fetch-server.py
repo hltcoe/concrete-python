@@ -27,6 +27,7 @@ import zipfile
 
 import humanfriendly
 
+import concrete.version
 from concrete.util.access import CommunicationContainerFetchHandler
 from concrete.util.access_wrapper import FetchCommunicationServiceWrapper
 from concrete.util.comm_container import (
@@ -59,6 +60,7 @@ if __name__ == '__main__':
     parser.add_argument("--max-file-size", type=str, default="1GiB",
                         help="Maximum size of (non-ZIP) files that can be read into memory "
                         "(e.g. '2G', '300MB')")
+    concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
     if os.path.isdir(args.communications_source):

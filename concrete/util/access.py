@@ -3,6 +3,7 @@ import logging
 from concrete.access.ttypes import FetchResult
 from concrete.services.ttypes import ServiceInfo
 from concrete.util.access_wrapper import FetchCommunicationClientWrapper
+import concrete.version
 
 
 class CommunicationContainerFetchHandler(object):
@@ -37,8 +38,9 @@ class CommunicationContainerFetchHandler(object):
     def about(self):
         logging.info("Received about() call")
         service_info = ServiceInfo()
-        service_info.name = 'fetch_server.py - %s' % type(self.communication_container)
-        service_info.version = '0.0.3'
+        service_info.name = 'CommunicationContainerFetchHandler - %s' % \
+                            type(self.communication_container)
+        service_info.version = concrete.version.concrete_library_version()
         return service_info
 
     def alive(self):

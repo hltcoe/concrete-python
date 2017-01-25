@@ -2,7 +2,6 @@ import unittest
 
 from concrete.util.comm_container import (
     DirectoryBackedCommunicationContainer,
-    FetchBackedCommunicationContainer,
     MemoryBackedCommunicationContainer,
     ZipFileBackedCommunicationContainer,
 )

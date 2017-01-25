@@ -46,6 +46,7 @@ if __name__ == '__main__':
         tests_require=['pytest', 'pytest-mock', 'pytest-cov', 'flake8'],
 
         install_requires=[
+            'humanfriendly',
             'networkx',
             'testfixtures',
             'thrift==0.10.0',

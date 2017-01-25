@@ -5,7 +5,7 @@ from concrete.services.ttypes import ServiceInfo
 from concrete.util.access_wrapper import FetchCommunicationClientWrapper
 
 
-class CommunicationContainerFetchHandler:
+class CommunicationContainerFetchHandler(object):
     """FetchCommunicationService implementation using Communication containers
 
     Implements the FetchCommunicationService interface, retrieving
@@ -68,7 +68,7 @@ class CommunicationContainerFetchHandler:
         return self.communication_container.keys()[offset:][:count]
 
 
-class RelayFetchHandler:
+class RelayFetchHandler(object):
     """Implements a 'relay' to another FetchCommunicationService server.
 
     A FetchCommunicationService that acts as a relay to a second

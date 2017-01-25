@@ -123,7 +123,16 @@ class FetchBackedCommunicationContainer(collections.Mapping):
 
     def __getitem__(self, communication_id):
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
-            return fc.fetch(FetchRequest(communicationIds=[communication_id]))
+            fetch_result = fc.fetch(FetchRequest(communicationIds=[communication_id]))
+            total_results = len(fetch_result.communications)
+            if total_results == 0:
+                raise KeyError
+            elif total_results == 1:
+                return fetch_result.communications[0]
+            else:
+                raise Exception("FetchBackedCommunicationContainer.__get_item__() "
+                                "expected to receive 1 Communication, but instead "
+                                "received %d Communications" % total_results)
 
     def __iter__(self):
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:

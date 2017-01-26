@@ -227,3 +227,33 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
 
     def __len__(self):
         return len(self.comm_id_to_filename)
+
+
+class RedisHashBackedCommunicationContainer(collections.Mapping):
+    """Maps Comm IDs to Comms, retrieving Comms from a Redis hash
+
+    RedisHashBackedCommunicationContainer instances behave as dict-like
+    data structures that map Communication IDs to Communications.
+    Communications are lazily-retrieved from a Redis hash.
+    """
+
+    def __init__(self, redis_db, key):
+        """
+        Args:
+        - `redis_db`: redis database connection (redis.Redis object)
+        - `key`:      string specifying key in redis database where
+                      hash is located
+        """
+        self.redis_db = redis_db
+        self.key = key
+
+    def __getitem__(self, communication_id):
+        buf = self.redis_db.hget(self.key, communication_id)
+        comm = concrete.util.read_communication_from_buffer(buf)
+        return comm
+
+    def __iter__(self):
+        return iter(self.redis_db.hkeys(self.key))
+
+    def __len__(self):
+        return self.redis_db.hlen(self.key)

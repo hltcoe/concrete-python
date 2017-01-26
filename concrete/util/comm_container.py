@@ -249,8 +249,13 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
 
     def __getitem__(self, communication_id):
         buf = self.redis_db.hget(self.key, communication_id)
+        if buf is None:
+            raise KeyError
         comm = concrete.util.read_communication_from_buffer(buf)
         return comm
+
+    def __contains__(self, communication_id):
+        return self.redis_db.hexists(self.key, communication_id)
 
     def __iter__(self):
         return iter(self.redis_db.hkeys(self.key))

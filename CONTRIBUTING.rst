@@ -71,6 +71,18 @@ master to Gitlab.
 
 Run ``bash release.bash -h`` for usage information.
 
+Testing PyPI releases
+---------------------
+
+To test how changes to concrete-python will show up on PyPI (for
+example, how the readme is rendered) you can use the PyPI testing
+site.  To do so, set the following in ``~/.pypirc``::
+
+    repository = https://testpypi.python.org/pypi
+
+You will also need to create a testpypi user account and you may need
+to request access to the ``concrete`` package on testpypi.
+
 (Re)generating code from concrete
 ---------------------------------
 

@@ -75,7 +75,7 @@ Concrete types are located under the ``ttypes`` module of their
 respective namespace in the schema.  To import and use
 ``Communication``, for example::
 
-    from concrete.communication.ttypes import Communication
+    from concrete import Communication
 
     foo = Communication()
     foo.text = 'hello world'

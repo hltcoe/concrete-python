@@ -7,6 +7,8 @@ specification defined using [Thrift](http://thrift.apache.org).
 """
 
 
+from access.ttypes import *  # noqa
+from annotate.ttypes import *  # noqa
 from audio.ttypes import *  # noqa
 from clustering.ttypes import *  # noqa
 from communication.ttypes import *  # noqa
@@ -14,9 +16,11 @@ from email.ttypes import *  # noqa
 from entities.ttypes import *  # noqa
 from exceptions.ttypes import *  # noqa
 from language.ttypes import *  # noqa
+from learn.ttypes import *  # noqa
 from linking.ttypes import *  # noqa
 from metadata.ttypes import *  # noqa
 from nitf.ttypes import *  # noqa
+from search.ttypes import *  # noqa
 from services.ttypes import *  # noqa
 from situations.ttypes import *  # noqa
 from spans.ttypes import *  # noqa

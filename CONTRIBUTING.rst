@@ -22,7 +22,9 @@ How to contribute code
 
        tox integration-tests
 
-7. Push your changes to a feature branch on Gitlab (e.g., called
+7. If you created a new module (file) under ``concrete/util``, please
+   add it to the imports in ``concrete/util/__init__.py``.
+8. Push your changes to a feature branch on Gitlab (e.g., called
    ``n-issue-abbrev`` where ``n`` is the issue number and
    ``issue-abbrev`` is a very short abbreviation of the issue title)
    and ensure that the build passes.  The build is defined in
@@ -31,11 +33,11 @@ How to contribute code
    includes unit tests, integration tests, and style checks; if it
    fails, please find the error in the build log, fix it, and try
    again.
-8. Add a line to ``CHANGELOG`` under the current version-in-progress
+9. Add a line to ``CHANGELOG`` under the current version-in-progress
    describing your changes simply and concisely.
-9. If you've made multiple commits, please squash them and
-   ``git push -f`` to the feature branch.
-10. Create a merge request for your feature branch into ``master``,
+10. If you've made multiple commits, please squash them and
+    ``git push -f`` to the feature branch.
+11. Create a merge request for your feature branch into ``master``,
     referencing the Gitlab issue.
 
 
@@ -110,9 +112,13 @@ manually inspected (``git diff``) for sanity.  Note that this will not
 delete previously-generated files that are no longer produced by
 thrift (whose entries were removed from the schema).
 
-Often ``generate.bash`` is not sufficient: the patches (in
+**Note**: Often ``generate.bash`` is not sufficient: the patches (in
 ``patches/``) document where it (thrift) falls short on the
-previously-compiled schema.  If ``generate.bash`` throws an error, the
+previously-compiled schema.  Additionally, if new packages
+(namespaces) are added to the schema, they must be added to
+``setup.py``, ``.flake8``, and ``concrete/__init__.py``.
+
+If ``generate.bash`` throws an error, the
 necessary changes should be performed manually and checked in to the
 index, at which point the generated code should be removed from the
 working tree, raw (unpatched) generated code should be generated, and

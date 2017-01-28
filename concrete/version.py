@@ -1,4 +1,5 @@
-__version__ = '4.12.7b0'
+from __future__ import unicode_literals
+__version__ = '4.12.7b1'
 
 
 def concrete_library_version():
@@ -10,7 +11,7 @@ def concrete_schema_version():
 
 
 def add_argparse_argument(parser):
-    from concrete.util.thrift_factory import is_accelerated
+    from .util.thrift_factory import is_accelerated
     parser.add_argument(
         '--version', action='version',
         version='concrete-python %s (schema %s) (%s)' % (

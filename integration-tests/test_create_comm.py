@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
 from pytest import fixture, mark
-from concrete.util.file_io import CommunicationReader
+from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
 import os
 import sys
@@ -50,14 +51,14 @@ def test_create_comm(output_file, text):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'tests/testdata/les-deux-chandeliers.txt'
     assert validate_communication(comm)
     assert comm.text == text
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -79,14 +80,14 @@ def test_create_comm_stdin(output_file, text):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == '/dev/fd/0'
     assert validate_communication(comm)
     assert comm.text == text
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -110,14 +111,14 @@ def test_create_comm_stdout(output_file, text):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'tests/testdata/les-deux-chandeliers.txt'
     assert validate_communication(comm)
     assert comm.text == text
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -138,14 +139,14 @@ def test_create_comm_annotated(output_file, text):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'tests/testdata/les-deux-chandeliers.txt'
     assert validate_communication(comm)
     assert comm.text == text
     assert len(comm.sectionList) == 2
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:

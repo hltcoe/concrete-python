@@ -1,12 +1,27 @@
 from setuptools import setup
 import glob
+import re
 
-execfile('concrete/version.py')
+
+VERSION_FILE_PATH = 'concrete/version.py'
+VERSION_RE = re.compile(
+    r'^__version__ = (?P<quote>[\'"])(?P<version>[0-9]+\.[0-9]+\.[0-9]+(?:b[0-9]+)?)(?P=quote)$'
+)
+
+
+def get_version():
+    with open(VERSION_FILE_PATH) as f:
+        for line in f:
+            m = VERSION_RE.match(line.rstrip())
+            if m is not None:
+                return m.group('version')
+    raise Exception('unable to determinte version from %s' % VERSION_FILE_PATH)
+
 
 if __name__ == '__main__':
     setup(
         name="concrete",
-        version=__version__,
+        version=get_version(),
         description="Python modules and scripts for working with Concrete",
 
         packages=[
@@ -67,8 +82,7 @@ if __name__ == '__main__':
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 2 :: Only',
-            #'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.5',
             'Topic :: Database :: Front-Ends',
             'Topic :: Multimedia :: Sound/Audio :: Speech',
             'Topic :: Scientific/Engineering :: Artificial Intelligence',

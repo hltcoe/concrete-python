@@ -3,6 +3,7 @@
 '''
 Convert Tweet file to Concrete Communications file.
 '''
+from __future__ import unicode_literals
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from multiprocessing import Pool
@@ -16,6 +17,12 @@ import concrete.version
 from concrete.validate import validate_communication
 from concrete.util.mem_io import write_communication_to_buffer
 from concrete.util.twitter import json_tweet_string_to_Communication
+from concrete.util import set_stdout_encoding
+
+try:
+    JSONDecodeError = json.JSONDecodeError
+except AttributeError:
+    JSONDecodeError = ValueError
 
 
 def json_str_to_validated_concrete_bytes(tweet_str):
@@ -38,21 +45,25 @@ def json_str_to_concrete_bytes(tweet_str):
 
 def json_str_to_concrete_bytes_skip_bad_lines(tweet_str):
     try:
-        tweet_str = tweet_str.decode('utf-8')
         return json_str_to_concrete_bytes(tweet_str)
-    except:
+    except UnicodeDecodeError:
+        return None
+    except JSONDecodeError:
         return None
 
 
 def json_str_to_validated_concrete_bytes_skip_bad_lines(tweet_str):
     try:
-        tweet_str = tweet_str.decode('utf-8')
-        return json_str_to_concrete_bytes(tweet_str)
-    except:
+        return json_str_to_validated_concrete_bytes(tweet_str)
+    except UnicodeDecodeError:
+        return None
+    except JSONDecodeError:
         return None
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read tweets formatted in the Twitter JSON API and write'
@@ -109,7 +120,7 @@ def main():
         )
 
     if ns.tweet_path != '-' and mimetypes.guess_type(tweet_path)[1] == 'gzip':
-        tweet_reader = gzip.open(tweet_path, 'r')
+        tweet_reader = gzip.open(tweet_path, 'rb')
     else:
         tweet_reader = open(tweet_path, 'rb')
 
@@ -118,9 +129,11 @@ def main():
             it = iter(g)
             while True:
                 try:
-                    x = it.next()
+                    x = next(it)
                     yield x
                 except IOError:
+                    raise StopIteration('Caught IOError.')
+                except EOFError:
                     raise StopIteration('Caught IOError.')
         tweet_reader = _catch(tweet_reader)
 

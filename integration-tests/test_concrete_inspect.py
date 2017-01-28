@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
 import os
 import sys
 from pytest import fixture, mark
@@ -117,9 +118,9 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
             ('7', '.', '.', '', '.', '', '', ''),
             (),
         )
-    ).encode('utf-8') + '\n'
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+    ) + '\n'
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -197,7 +198,7 @@ Entity Set 0 (Serif: doc-entities):
           phraseType: PhraseType.COMMON_NOUN
 
 
-'''.encode('utf-8')
+'''
     if second:
         expected_output += u'''\
 Entity Set 1 (Serif: doc-values):
@@ -209,9 +210,9 @@ Entity Set 1 (Serif: doc-values):
           phraseType: PhraseType.OTHER
 
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -266,7 +267,7 @@ Situation Set 0 (Serif: relations):
               entityMention:  daughter
 
 
-'''.encode('utf-8')
+'''
     if second:
         expected_output += u'''\
 Situation Set 1 (Serif: events):
@@ -278,9 +279,9 @@ Situation Set 1 (Serif: events):
               entityMention:  He
 
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -313,7 +314,7 @@ def test_print_situations(comm_path, first, second, args, output_prefix):
         expected_output += u'''\
 Situation Set 0 (Serif: relations):
 
-'''.encode('utf-8')
+'''
     if second:
         expected_output += u'''\
 Situation Set 1 (Serif: events):
@@ -321,9 +322,9 @@ Situation Set 1 (Serif: events):
       situationType:    Life.Die
 
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -366,9 +367,9 @@ John's daughter Mary expressed sorrow.
 </TEXT>
 </DOC>
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -412,7 +413,7 @@ def test_print_tokens_with_entityMentions(comm_path, first, second, third,
 <ENTITY ID=2><ENTITY ID=0>John</ENTITY> 's <ENTITY ID=2>daughter</ENTITY> \
 Mary</ENTITY> expressed sorrow .
 
-'''.encode('utf-8')
+'''
     else:
         expected_output = output_prefix + u'''
 John Smith , manager of \
@@ -424,12 +425,12 @@ He died !
 John 's daughter \
 Mary expressed sorrow .
 
-'''.encode('utf-8')
+'''
     expected_output = expected_output % (
         '<ENTITY ID=3>' if second else '',
         '</ENTITY>' if second else '')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -456,7 +457,7 @@ def test_print_tokens_for_communication(comm_path, first, args, output_prefix):
     if first:
         expected_output += u'''
 John Smith , manager of ACMÉ INC , was bit by a dog on March 10th , 2013 .
-'''.encode('utf-8')
+'''
     expected_output += '\n'
     if first:
         expected_output += '''\
@@ -468,8 +469,8 @@ He died !
 John 's daughter Mary expressed sorrow .\
 '''
     expected_output += '\n\n'
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -530,9 +531,9 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
    (. .))
 
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -642,8 +643,8 @@ def test_print_metadata_for_communication(comm_path, which, args,
         expected_output += '  CommunicationTagging:  urgency\n'
     if 15 in which or 16 in which:
         expected_output += '\n'
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -694,9 +695,9 @@ John's daughter Mary expressed sorrow.
 
 
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -721,9 +722,9 @@ def test_print_id_for_communication(comm_path, first, args, output_prefix):
     if first:
         expected_output += u'''\
 tests/testdata/serif_dog-bites-man.xml
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -758,13 +759,13 @@ def test_print_communication_taggings_for_communication(comm_path, first,
     if first:
         expected_output += u'''\
 topic: animals:-1.500 crime:-3.000 humanity:-4.000
-'''.encode('utf-8')
+'''
     if second:
         expected_output += u'''\
 urgency: low:0.750
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -869,7 +870,7 @@ def test_print_multiple_for_communication(comm_path, first, second, third,
     if first:
         expected_output += u'''\
 tests/testdata/serif_dog-bites-man.xml
-'''.encode('utf-8')
+'''
     expected_output += second_output_prefix
     if second:
         expected_output += u'''\
@@ -893,7 +894,7 @@ Situation Set 0 (Serif: relations):
               entityMention:  daughter
 
 
-'''.encode('utf-8')
+'''
     if third:
         expected_output += u'''\
 Situation Set 1 (Serif: events):
@@ -905,9 +906,9 @@ Situation Set 1 (Serif: events):
               entityMention:  He
 
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -951,7 +952,7 @@ John's daughter Mary expressed sorrow.
 </TEXT>
 </DOC>
 
-'''.encode('utf-8')
+'''
     expected_output += output_prefix
     if second:
         expected_output += u'''\
@@ -964,9 +965,9 @@ pas. Vous me recevez chez vous. Vous allumez vos cierges pour moi. \
 Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -1010,7 +1011,7 @@ John's daughter Mary expressed sorrow.
 </TEXT>
 </DOC>
 
-'''.encode('utf-8')
+'''
     expected_output += output_prefix
     if second:
         expected_output += u'''\
@@ -1023,9 +1024,9 @@ pas. Vous me recevez chez vous. Vous allumez vos cierges pour moi. \
 Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
-'''.encode('utf-8')
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+'''
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode
 
 
@@ -1065,6 +1066,6 @@ def test_print_multiple_communications_count(simple_comms_tgz_path, first,
     if third:
         expected_output += output_prefix
         expected_output += 'three\n'
-    assert '' == stderr
-    assert expected_output.replace('\n', os.linesep) == stdout
+    assert '' == stderr.decode('utf-8')
+    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
     assert 0 == p.returncode

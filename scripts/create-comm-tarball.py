@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 
 'Convert tarball of text files to tarball of Concrete communications.'
+from __future__ import unicode_literals
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import tarfile
@@ -11,6 +12,7 @@ from concrete.util.file_io import CommunicationWriterTGZ
 from concrete.util.simple_comm import (
     create_comm, AL_NONE, add_annotation_level_argparse_argument
 )
+from concrete.util import set_stdout_encoding
 
 
 def load(path, per_line, annotation_level):
@@ -48,6 +50,8 @@ def load(path, per_line, annotation_level):
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Convert tarball of text files to'

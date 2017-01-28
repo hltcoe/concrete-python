@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 'Pretty-prints a Concrete file as JSON'
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import concrete.version
 import argparse
 import codecs
-import sys
 
 from thrift import TSerialization
 from thrift.protocol import TJSONProtocol
@@ -14,11 +15,11 @@ from concrete.util import (
     communication_file_to_json,
     tokenlattice_file_to_json,
     read_communication_from_file)
+from concrete.util import set_stdout_encoding
 
 
 def main():
-    # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors
-    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+    set_stdout_encoding()
 
     parser = argparse.ArgumentParser(
         description="Pretty Print a Concrete file")
@@ -32,8 +33,10 @@ def main():
                         help="Removes timestamps from JSON output")
     parser.add_argument('--remove-uuids', action='store_true',
                         help="Removes UUIDs from JSON output")
-    parser.add_argument('concrete_file')
-    parser.add_argument('json_file', nargs='?', default='STDOUT')
+    parser.add_argument('concrete_file',
+                        help='path to input concrete communication file')
+    parser.add_argument('json_file', nargs='?', default='-',
+                        help='path to output json file')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
@@ -54,8 +57,8 @@ def main():
         else:
             raise NotImplementedError
 
-    if args.json_file == 'STDOUT':
-        print json_communication
+    if args.json_file == '-':
+        print(json_communication)
     else:
         f = codecs.open(args.json_file, "w", encoding="utf-8")
         f.write(json_communication)

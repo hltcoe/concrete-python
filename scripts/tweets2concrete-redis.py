@@ -3,6 +3,7 @@
 '''
 Convert Tweet file to Concrete Communications file.
 '''
+from __future__ import unicode_literals
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from multiprocessing import Pool
@@ -18,6 +19,7 @@ from concrete.validate import validate_communication
 from concrete.util.mem_io import write_communication_to_buffer
 from concrete.util.redis_io import RedisWriter
 from concrete.util.twitter import json_tweet_string_to_Communication
+from concrete.util import set_stdout_encoding
 
 
 def json_str_to_validated_concrete_bytes(tweet_str):
@@ -55,6 +57,8 @@ def json_str_to_validated_concrete_bytes_skip_bad_lines(tweet_str):
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read tweets formatted in the Twitter JSON API and write'
@@ -124,7 +128,7 @@ def main():
             it = iter(g)
             while True:
                 try:
-                    x = it.next()
+                    x = next(it)
                     yield x
                 except IOError:
                     raise StopIteration('Caught IOError.')

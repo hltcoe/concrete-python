@@ -1,9 +1,15 @@
-from concrete.util.mem_io import (
+from __future__ import unicode_literals
+from .mem_io import (
     read_communication_from_buffer,
     write_communication_to_buffer
 )
 
 from uuid import uuid4
+
+try:
+    xrange
+except NameError:
+    xrange = range
 
 
 def _identity(o):
@@ -88,7 +94,7 @@ class RedisReader(object):
         if key_type is None:
             # try to guess type
             if redis_db.exists(key):
-                key_type = redis_db.type(key)
+                key_type = redis_db.type(key).decode('utf-8')
             else:
                 raise ValueError('can only guess type of key that exists')
 
@@ -368,7 +374,7 @@ class RedisWriter(object):
         if key_type is None:
             # try to guess type
             if redis_db.exists(key):
-                key_type = redis_db.type(key)
+                key_type = redis_db.type(key).decode('utf-8')
             else:
                 raise ValueError('can only guess type of key that exists')
 

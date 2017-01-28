@@ -1,4 +1,5 @@
-from concrete.util.file_io import CommunicationReader
+from __future__ import unicode_literals
+from concrete.util import CommunicationReader
 from multiprocessing import Pool
 
 
@@ -21,7 +22,7 @@ def test_egg_extraction_with_subprocesses():
     num_procs = 2
     num_tasks = 4
 
-    for i in xrange(num_trials):
+    for i in range(num_trials):
         pool = Pool(num_procs)
         comm_ids_list = pool.map(_read_comm_ids, [input_path] * num_tasks)
         for comm_ids in comm_ids_list:

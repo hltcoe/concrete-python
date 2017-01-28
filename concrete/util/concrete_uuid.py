@@ -5,17 +5,23 @@ Helper functions for generating Concrete UUIDs
 # Force 'import uuid' to import the Python standard library module
 # named "uuid", and not the "concrete.uuid" module
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import uuid as python_uuid
 
 from thrift.Thrift import TType
-from concrete.uuid.ttypes import UUID
-from concrete.metadata.ttypes import AnnotationMetadata
-from concrete.util.mem_io import communication_deep_copy
+from ..uuid.ttypes import UUID
+from ..metadata.ttypes import AnnotationMetadata
+from .mem_io import communication_deep_copy
 
 from inspect import isroutine
 import random
 import logging
+
+try:
+    unicode
+except NameError:
+    unicode = str
 
 
 def generate_UUID():
@@ -78,7 +84,7 @@ def join_uuid(xs, ys, zs):
 
 
 def generate_hex_unif(n):
-    return ''.join(random.choice('abcdef0123456789') for i in xrange(n))
+    return ''.join(random.choice('abcdef0123456789') for i in range(n))
 
 
 def generate_uuid_unif():
@@ -103,7 +109,7 @@ class _AnalyticUUIDGenerator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         '''
         Generate and return a new concrete UUID.
         StopIteration will never be raised.
@@ -113,6 +119,9 @@ class _AnalyticUUIDGenerator(object):
         return UUID(uuidString=join_uuid(
             self._xs, self._ys, bin_to_hex(self._z, self._z_len)
         ))
+
+    def next(self):
+        return self.__next__()
 
 
 class AnalyticUUIDGeneratorFactory(object):
@@ -127,7 +136,7 @@ class AnalyticUUIDGeneratorFactory(object):
         augf = AnalyticUUIDGeneratorFactory(comm)
         aug = augf.create()
         for <each annotation object created by this analytic>:
-            annotation. = aug.next()
+            annotation = next(aug)
             <add annotation to communication>
 
     or if you're creating a new communication
@@ -135,9 +144,9 @@ class AnalyticUUIDGeneratorFactory(object):
         augf = AnalyticUUIDGeneratorFactory()
         aug = augf.create()
         comm = <create communication>
-        comm.uuid = aug.next()
+        comm.uuid = next(aug)
         for <each annotation object created by this analytic>:
-            annotation. = aug.next()
+            annotation = next(aug)
             <add annotation to communication>
 
     where the annotation objects might be objects of type
@@ -325,7 +334,7 @@ class UUIDCompressor(object):
         '''
 
         aug = self.augs[tool]
-        new_uuid = aug.next()
+        new_uuid = next(aug)
         if old_uuid.uuidString in self.uuid_map:
             raise ValueError('encountered UUID %s twice, aborting' %
                              old_uuid.uuidString)

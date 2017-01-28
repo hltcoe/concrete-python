@@ -1,11 +1,12 @@
-from concrete.util.comm_container import (
+from __future__ import unicode_literals
+from concrete.util import (
     DirectoryBackedCommunicationContainer,
     MemoryBackedCommunicationContainer,
     ZipFileBackedCommunicationContainer,
     RedisHashBackedCommunicationContainer,
 )
-from concrete.util.simple_comm import create_comm
-from concrete.util.mem_io import write_communication_to_buffer
+from concrete.util import create_comm
+from concrete.util import write_communication_to_buffer
 
 from concrete.validate import validate_communication
 

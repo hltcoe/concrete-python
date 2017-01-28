@@ -13,6 +13,7 @@ script is not intended to be run as part of the standard test suite.
 
 This Python script is secretly a shell script.
 """
+from __future__ import unicode_literals
 
 import os
 

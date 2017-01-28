@@ -4,11 +4,13 @@
 Read a concrete tarball and write it back out, rewriting UUIDs with
 compressible UUID scheme
 '''
+from __future__ import unicode_literals
 
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ
 from concrete.util.concrete_uuid import compress_uuids as _compress_uuids
+from concrete.util import set_stdout_encoding
 
 import logging
 
@@ -39,6 +41,8 @@ def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None,
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Read a concrete tarball and write it back out, rewriting'

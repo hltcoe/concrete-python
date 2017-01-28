@@ -1,19 +1,20 @@
+from __future__ import unicode_literals
 from thrift.transport import TTransport
 from thrift.transport import TSocket
 from thrift.protocol import TCompactProtocol
 
-from concrete.util.search_wrapper import SubprocessSearchServiceWrapper
-from concrete.util.net import find_port
+from concrete.util import SubprocessSearchServiceWrapper
+from concrete.util import find_port
 
 
 from time import time
 
 from concrete.search import SearchService
-from concrete.search.ttypes import (
+from concrete import (
     SearchType, SearchQuery, SearchResult, SearchResultItem
 )
-from concrete.uuid.ttypes import UUID
-from concrete.metadata.ttypes import AnnotationMetadata
+from concrete import UUID
+from concrete import AnnotationMetadata
 
 
 class FooSearch(SearchService.Iface):

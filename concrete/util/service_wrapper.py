@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 from multiprocessing import Process
 from time import sleep
 from socket import create_connection
 
-from concrete.util.thrift_factory import factory
+from .thrift_factory import factory
 
 
 class ConcreteServiceClientWrapper(object):

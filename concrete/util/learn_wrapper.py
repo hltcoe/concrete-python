@@ -1,7 +1,7 @@
-from concrete.learn import (
+from ..learn import (
     ActiveLearnerClientService,
     ActiveLearnerServerService)
-from concrete.util.service_wrapper import (
+from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
     SubprocessConcreteServiceWrapper)

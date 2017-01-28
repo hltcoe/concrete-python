@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import unicode_literals
 import argparse
 
 from concrete.util.annotate_wrapper import AnnotateCommunicationServiceWrapper
@@ -49,7 +51,7 @@ def main():
     else:
         port = args.port
 
-    print 'Serving on %s:%d...' % (host, port)
+    print('Serving on %s:%d...' % (host, port))
 
     handler = NoopAnnotateCommunicationService()
 

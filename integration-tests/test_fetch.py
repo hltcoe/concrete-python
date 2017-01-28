@@ -1,12 +1,13 @@
-from concrete.util.access import (
+from __future__ import unicode_literals
+from concrete.util import (
     CommunicationContainerFetchHandler,
     RelayFetchHandler)
-from concrete.util.access_wrapper import (
+from concrete.util import (
     FetchCommunicationClientWrapper,
     SubprocessFetchCommunicationServiceWrapper)
-from concrete.util.comm_container import FetchBackedCommunicationContainer
-from concrete.util.net import find_port
-from concrete.util.simple_comm import create_comm
+from concrete.util import FetchBackedCommunicationContainer
+from concrete.util import find_port
+from concrete.util import create_comm
 from concrete.validate import validate_communication
 
 

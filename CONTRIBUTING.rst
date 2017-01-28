@@ -1,7 +1,7 @@
 How to contribute code
 ======================
 
-1. Create an issue on Gitlab.
+1. Create an issue on GitLab (internal) or GitHub_ (public).
 2. If you are adding new functionality, create a stub implementation
    of the desired argument/function/class/etc.
 3. Write a test for your new functionality/bugfix and run it, ensuring
@@ -24,21 +24,21 @@ How to contribute code
 
 7. If you created a new module (file) under ``concrete/util``, please
    add it to the imports in ``concrete/util/__init__.py``.
-8. Push your changes to a feature branch on Gitlab (e.g., called
+8. Push your changes to a feature branch on GitLab/GitHub (e.g., called
    ``n-issue-abbrev`` where ``n`` is the issue number and
    ``issue-abbrev`` is a very short abbreviation of the issue title)
    and ensure that the build passes.  The build is defined in
    ``.gitlab-ci.yml`` (``.travis.yml`` and ``appveyor.yml`` for public
    builds); tox is configured in ``tox.ini``.  The build
-   includes unit tests, integration tests, and style checks; if it
-   fails, please find the error in the build log, fix it, and try
-   again.
+   includes unit tests, integration tests, and style checks and runs on
+   Python 2.7 and 3.5 across multiple platforms; if it fails, please
+   find the error in the build log, fix it, and try again.
 9. Add a line to ``CHANGELOG`` under the current version-in-progress
    describing your changes simply and concisely.
 10. If you've made multiple commits, please squash them and
     ``git push -f`` to the feature branch.
-11. Create a merge request for your feature branch into ``master``,
-    referencing the Gitlab issue.
+11. Create a merge/pull request for your feature branch into
+    ``master``, referencing the GitLab/GitHub issue.
 
 
 For maintainers
@@ -50,7 +50,7 @@ Branches, versions, and releases
 The master branch is kept stable at all times.  Before a commit is
 pushed to master, it should be checked by CI on another branch.  The
 recommended way of maintaining this is to do all work in feature
-branches that are kept up-to-date with master and pushed to Gitlab,
+branches that are kept up-to-date with master and pushed to GitLab,
 waiting for CI to finish before merging.
 
 All stable versions can be (and are) released to PyPI.  In between
@@ -79,7 +79,7 @@ and commit, build the release tarball, upload the release tarball to
 PyPI, tag the release, update to the next beta version number and
 commit (so that subsequent development on master is linked to the next
 version), and push the release tag and the new development version of
-master to Gitlab.
+master to GitLab.
 
 Run ``bash release.bash -h`` for usage information.
 
@@ -128,4 +128,5 @@ the unpatched code.
 
 
 
+.. _GitHub: https://github.com/hltcoe/concrete-python
 .. _Redis: http://redis.io

@@ -1,7 +1,8 @@
+from __future__ import unicode_literals
 from pytest import fixture, mark
-from concrete.util.file_io import CommunicationReader
+from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
-from concrete.util.concrete_uuid import compress_uuids
+from concrete.util import compress_uuids
 import os
 import sys
 from subprocess import Popen, PIPE
@@ -43,17 +44,17 @@ def test_compress_uuids(output_file, args):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, comm_filename) = it.next()
+    (comm, comm_filename) = next(it)
     assert comm_filename == 'simple_1.concrete'
     assert comm.id == 'one'
     assert validate_communication(comm)
 
-    (comm, comm_filename) = it.next()
+    (comm, comm_filename) = next(it)
     assert comm_filename == 'simple_2.concrete'
     assert comm.id == 'two'
     assert validate_communication(comm)
 
-    (comm, comm_filename) = it.next()
+    (comm, comm_filename) = next(it)
     assert comm_filename == 'simple_3.concrete'
     assert comm.id == 'three'
     assert validate_communication(comm)
@@ -61,7 +62,7 @@ def test_compress_uuids(output_file, args):
     assert os.stat(output_file).st_size < os.stat(input_file).st_size
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -102,26 +103,26 @@ def test_compress_uuids_api(reader_kwargs, compress_kwargs):
     reader = CommunicationReader(input_file, **reader_kwargs)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     (new_comm, uc) = compress_uuids(comm, **compress_kwargs)
     assert new_comm.id == 'one'
     assert comm.id == new_comm.id
     assert validate_communication(new_comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     (new_comm, uc) = compress_uuids(comm, **compress_kwargs)
     assert new_comm.id == 'two'
     assert comm.id == new_comm.id
     assert validate_communication(new_comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     (new_comm, uc) = compress_uuids(comm, **compress_kwargs)
     assert new_comm.id == 'three'
     assert comm.id == new_comm.id
     assert validate_communication(new_comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:

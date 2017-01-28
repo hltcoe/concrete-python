@@ -1,24 +1,25 @@
 """Create a simple (valid) Communication suitable for testing purposes
 """
+from __future__ import unicode_literals
 
 import time
 import tempfile
 import os
 import logging
 
-from concrete import (
-    AnnotationMetadata,
-    Communication,
+from ..communication.ttypes import Communication
+from ..metadata.ttypes import AnnotationMetadata
+from ..spans.ttypes import TextSpan
+from ..structure.ttypes import (
     Section,
     Sentence,
-    TextSpan,
     Token,
     Tokenization,
     TokenizationKind,
     TokenList
 )
-from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
-from concrete.util.file_io import CommunicationWriter
+from .concrete_uuid import AnalyticUUIDGeneratorFactory
+from .file_io import CommunicationWriter
 
 
 AL_NONE = 'none'
@@ -65,10 +66,10 @@ def create_sentence(sen_text, sen_start, sen_end,
     tokens = sentences and (annotation_level != AL_SENTENCE)
 
     return Sentence(
-        uuid=aug.next(),
+        uuid=next(aug),
         textSpan=TextSpan(sen_start, sen_end),
         tokenization=Tokenization(
-            uuid=aug.next(),
+            uuid=next(aug),
             kind=TokenizationKind.TOKEN_LIST,
             metadata=AnnotationMetadata(
                 tool=metadata_tool,
@@ -98,7 +99,7 @@ def create_section(sec_text, sec_start, sec_end, section_kind,
     sentences = sections and (annotation_level != AL_SECTION)
 
     return Section(
-        uuid=aug.next(),
+        uuid=next(aug),
         textSpan=TextSpan(sec_start, sec_end),
         kind=section_kind,
         sentenceList=(
@@ -143,7 +144,7 @@ def create_comm(comm_id, text='',
 
     return Communication(
         id=comm_id,
-        uuid=aug.next(),
+        uuid=next(aug),
         type=comm_type,
         text=text,
         metadata=AnnotationMetadata(
@@ -190,7 +191,7 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
         id=comm_id,
         metadata=AnnotationMetadata(tool=toolname, timestamp=timestamp),
         type=toolname,
-        uuid=aug.next()
+        uuid=next(aug)
     )
 
     tokenization = Tokenization(
@@ -198,7 +199,7 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
         metadata=AnnotationMetadata(tool=toolname, timestamp=timestamp),
         tokenList=TokenList(
             tokenList=[]),
-        uuid=aug.next()
+        uuid=next(aug)
     )
     token_string_list = sentence_string.split()
     for i, token_string in enumerate(token_string_list):
@@ -208,14 +209,14 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
     sentence = Sentence(
         textSpan=TextSpan(0, len(sentence_string)),
         tokenization=tokenization,
-        uuid=aug.next()
+        uuid=next(aug)
     )
 
     section = Section(
         kind="SectionKind",
         sentenceList=[sentence],
         textSpan=TextSpan(0, len(sentence_string)),
-        uuid=aug.next()
+        uuid=next(aug)
     )
 
     comm.sectionList = [section]
@@ -238,9 +239,9 @@ class SimpleCommTempFile(object):
     >>> with SimpleCommTempFile(n=3, id_fmt='temp-%d') as f:
     ...     reader = CommunicationReader(f.path)
     ...     for (orig_comm, comm_path_pair) in zip(f.communications, reader):
-    ...         print orig_comm.id
-    ...         print orig_comm.id == comm_path_pair[0].id
-    ...         print f.path == comm_path_pair[1]
+    ...         print(orig_comm.id)
+    ...         print(orig_comm.id == comm_path_pair[0].id)
+    ...         print(f.path == comm_path_pair[1])
     temp-0
     True
     True
@@ -278,7 +279,7 @@ class SimpleCommTempFile(object):
         self.communications = []
         w = writer_class()
         w.open(path)
-        for i in xrange(n):
+        for i in range(n):
             comm = create_simple_comm(id_fmt % i, sentence_fmt % i)
             self.communications.append(comm)
             w.write(comm)

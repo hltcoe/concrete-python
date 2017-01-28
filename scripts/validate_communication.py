@@ -9,6 +9,7 @@ Command line script to (partially) validate a Concrete Communication
 This script is a thin wrapper around the functionality in the
 concrete.validate library.
 """
+from __future__ import unicode_literals
 
 import argparse
 import logging

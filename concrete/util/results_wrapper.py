@@ -1,5 +1,5 @@
-from concrete.services.results import ResultsServerService
-from concrete.util.service_wrapper import (
+from ..services.results import ResultsServerService
+from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
     SubprocessConcreteServiceWrapper)

@@ -8,6 +8,7 @@ The classes abstract away the storage backend.  If you need to
 optimize for performance, you may not want to use a dictionary
 abstraction that retrieves one Communication at a time.
 """
+from __future__ import unicode_literals
 
 import collections
 import gzip
@@ -17,13 +18,12 @@ import zipfile
 
 import humanfriendly
 
-import concrete
-from concrete.access.ttypes import FetchRequest
-from concrete.util.access_wrapper import FetchCommunicationClientWrapper
-from concrete.util.file_io import (
+from ..access.ttypes import FetchRequest
+from .access_wrapper import FetchCommunicationClientWrapper
+from .file_io import (
     CommunicationReader,
     read_communication_from_file)
-from concrete.util.mem_io import read_communication_from_buffer
+from .mem_io import read_communication_from_buffer
 
 
 class DirectoryBackedCommunicationContainer(collections.Mapping):
@@ -219,7 +219,7 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
     def __getitem__(self, communication_id):
         filename = self.comm_id_to_filename[communication_id]
         buf = self.zipfile.read(filename)
-        comm = concrete.util.read_communication_from_buffer(buf)
+        comm = read_communication_from_buffer(buf)
         return comm
 
     def __iter__(self):
@@ -251,7 +251,7 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
         buf = self.redis_db.hget(self.key, communication_id)
         if buf is None:
             raise KeyError
-        comm = concrete.util.read_communication_from_buffer(buf)
+        comm = read_communication_from_buffer(buf)
         return comm
 
     def __contains__(self, communication_id):

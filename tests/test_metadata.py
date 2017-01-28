@@ -1,4 +1,5 @@
-from concrete.util.metadata import (
+from __future__ import unicode_literals
+from concrete.util import (
     get_index_of_tool, datetime_to_timestamp
 )
 
@@ -21,7 +22,7 @@ class HasMetadata:
     def gen_tool(cls, tool=None, size=6,
                  chars=string.ascii_uppercase + string.digits):
         return tool if (tool is not None) else \
-            u''.join(random.choice(chars) for _ in xrange(size))
+            u''.join(random.choice(chars) for _ in range(size))
 
 
 def test_get_index_of_tool_none_list():

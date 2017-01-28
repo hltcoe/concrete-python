@@ -4,6 +4,7 @@ The fields used by the Twitter API are documented at:
 
   https://dev.twitter.com/overview/api/tweets
 """
+from __future__ import unicode_literals
 
 import json
 import logging
@@ -11,13 +12,12 @@ import time
 import pycountry
 from datetime import datetime
 
-from concrete import (
-    AnnotationMetadata,
+from ..metadata.ttypes import AnnotationMetadata, CommunicationMetadata
+from ..communication.ttypes import Communication
+from ..language.ttypes import LanguageIdentification
+from ..twitter.ttypes import (
     BoundingBox,
-    Communication,
-    CommunicationMetadata,
     HashTag,
-    LanguageIdentification,
     PlaceAttributes,
     TweetInfo,
     TwitterCoordinates,
@@ -29,8 +29,8 @@ from concrete import (
     UserMention
 )
 
-from concrete.util.concrete_uuid import AnalyticUUIDGeneratorFactory
-from concrete.util.metadata import datetime_to_timestamp
+from .concrete_uuid import AnalyticUUIDGeneratorFactory
+from .metadata import datetime_to_timestamp
 
 
 TOOL_NAME = "Python module concrete.util.twitter"
@@ -62,7 +62,7 @@ def json_tweet_object_to_Communication(tweet):
         originalText=tweet_info.text,
         text=tweet_info.text,
         type=TWEET_TYPE,
-        uuid=aug.next(),
+        uuid=next(aug),
         startTime=tweet_time,
         endTime=tweet_time,
         id=tweet_id
@@ -71,10 +71,21 @@ def json_tweet_object_to_Communication(tweet):
     # either this, or pass in gen as parameter to fx
     # latter is more annoying to test but slightly cleaner
     if tweet_info.lid is not None:
-        tweet_info.lid.uuid = aug.next()
+        tweet_info.lid.uuid = next(aug)
         lidList = [tweet_info.lid]
         comm.lidList = lidList
     return comm
+
+
+def snake_case_to_camelcase(value):
+    """Implementation copied from: http://goo.gl/SSgo9k
+    """
+    def camelcase():
+        yield lambda c: c.lower()
+        while True:
+            yield lambda c: c.capitalize()
+    c = iter(camelcase())
+    return u"".join(next(c)(x) if x else u'_' for x in value.split(u"_"))
 
 
 def json_tweet_object_to_TweetInfo(tweet):
@@ -83,15 +94,6 @@ def json_tweet_object_to_TweetInfo(tweet):
 
     Returns:
     """
-    def snake_case_to_camelcase(value):
-        """Implementation copied from: http://goo.gl/SSgo9k
-        """
-        def camelcase():
-            yield unicode.lower
-            while True:
-                yield unicode.capitalize
-        c = camelcase()
-        return u"".join(c.next()(x) if x else u'_' for x in value.split(u"_"))
 
     def set_flat_fields(concrete_object, twitter_dict):
         """Copy data from the dictionary for the Twitter object to the

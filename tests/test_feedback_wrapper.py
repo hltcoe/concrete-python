@@ -1,12 +1,13 @@
+from __future__ import unicode_literals
 import mock
 from mock import sentinel
 from pytest import fixture
 
 from concrete.search import FeedbackService
-from concrete.util.search_wrapper import (
+from concrete.util import (
     FeedbackServiceWrapper, FeedbackClientWrapper
 )
-from concrete.util.thrift_factory import ThriftFactory
+from concrete.util import ThriftFactory
 
 
 @fixture

@@ -1,7 +1,7 @@
-from concrete.access import (
+from ..access import (
     FetchCommunicationService,
     StoreCommunicationService)
-from concrete.util.service_wrapper import (
+from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
     SubprocessConcreteServiceWrapper)

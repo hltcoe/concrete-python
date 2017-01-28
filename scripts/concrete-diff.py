@@ -4,6 +4,8 @@
 Compare two Concrete files by converting to JSON then running the Git
 diff command
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import concrete.version
 import argparse
@@ -14,9 +16,12 @@ import subprocess
 import tempfile
 
 from concrete.util import communication_file_to_json
+from concrete.util import set_stdout_encoding
 
 
 def main():
+    set_stdout_encoding()
+
     parser = argparse.ArgumentParser(
         description="Compare JSON representation of two concrete files")
     parser.add_argument('--include-uuids', action='store_true',
@@ -57,7 +62,7 @@ def main():
     os.remove(json_two_filename)
     os.rmdir(tmp_path)
 
-    print diff_output
+    print(diff_output)
 
 
 if __name__ == "__main__":

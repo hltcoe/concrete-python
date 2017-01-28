@@ -18,6 +18,7 @@ communications_source is:
 - a ZIP file of Communications
 
 """
+from __future__ import unicode_literals
 
 import argparse
 import logging
@@ -34,9 +35,12 @@ from concrete.util.comm_container import (
     DirectoryBackedCommunicationContainer,
     MemoryBackedCommunicationContainer,
     ZipFileBackedCommunicationContainer)
+from concrete.util import set_stdout_encoding
 
 
-if __name__ == '__main__':
+def main():
+    set_stdout_encoding()
+
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(
@@ -77,3 +81,7 @@ if __name__ == '__main__':
     fetch_service = FetchCommunicationServiceWrapper(handler)
     logging.info("Waiting for connections on port %d..." % args.port)
     fetch_service.serve(args.host, args.port)
+
+
+if __name__ == '__main__':
+    main()

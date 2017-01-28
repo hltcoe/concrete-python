@@ -1,10 +1,12 @@
+from __future__ import unicode_literals
 import logging
 
-from concrete.structure.ttypes import TokenizationKind
-from concrete.util.unnone import lun
+from ..structure.ttypes import TokenizationKind
+from .unnone import lun
 
 from collections import deque
 from math import log, exp
+from functools import reduce
 
 
 def get_tokens(tokenization, suppress_warnings=False):
@@ -220,7 +222,7 @@ def compute_lattice_expected_counts(lattice):
     if expectedCounts:
         return [
             (_logsumexp(expectedCounts[idx]) if idx in expectedCounts else None)
-            for idx in xrange(max(expectedCounts) + 1)
+            for idx in range(max(expectedCounts) + 1)
         ]
     else:
         return []

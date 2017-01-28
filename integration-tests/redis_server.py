@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 import subprocess
 import redis
 import time
 
-from concrete.util.net import find_port
+from concrete.util import find_port
 
 
 def start_redis(*args, **kwargs):

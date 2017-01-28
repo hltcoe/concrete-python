@@ -1,12 +1,13 @@
+from __future__ import unicode_literals
 import mock
 from mock import sentinel
 from pytest import fixture
 
 from concrete.annotate import AnnotateCommunicationService
-from concrete.util.annotate_wrapper import (
+from concrete.util import (
     AnnotateCommunicationServiceWrapper, AnnotateCommunicationClientWrapper
 )
-from concrete.util.thrift_factory import ThriftFactory
+from concrete.util import ThriftFactory
 
 
 @fixture

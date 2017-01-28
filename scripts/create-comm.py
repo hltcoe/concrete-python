@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 
 'Convert text file to Concrete Communication file.'
+from __future__ import unicode_literals
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import codecs
@@ -10,9 +11,12 @@ from concrete.util.file_io import write_communication_to_file
 from concrete.util.simple_comm import (
     create_comm, AL_NONE, add_annotation_level_argparse_argument
 )
+from concrete.util import set_stdout_encoding
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Convert text file to communication',

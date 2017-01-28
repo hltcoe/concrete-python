@@ -1,5 +1,5 @@
-from concrete.annotate import AnnotateCommunicationService
-from concrete.util.service_wrapper import (
+from ..annotate import AnnotateCommunicationService
+from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
     SubprocessConcreteServiceWrapper)

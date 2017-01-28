@@ -6,6 +6,7 @@ Command line script to (partially) validate a Concrete Communication
 This script is a thin wrapper around the functionality in the
 concrete.validate library.
 """
+from __future__ import unicode_literals
 
 import argparse
 import logging
@@ -15,9 +16,12 @@ import networkx as nx
 from concrete.util.tokenization import get_comm_tokenizations
 import concrete.version
 from concrete.util.file_io import CommunicationReader, FileType
+from concrete.util import set_stdout_encoding
 
 
 def main():
+    set_stdout_encoding()
+
     parser = argparse.ArgumentParser(
         description="Check dependency parse graph for errors")
     parser.add_argument('communication_file',

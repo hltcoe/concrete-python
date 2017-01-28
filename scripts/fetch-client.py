@@ -2,6 +2,8 @@
 
 """Command line client for FetchCommunicationService
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import argparse
 
@@ -10,9 +12,12 @@ from concrete.access import FetchCommunicationService
 from concrete.access.ttypes import FetchRequest
 from concrete.util.file_io import write_communication_to_file
 from concrete.util.thrift_factory import factory
+from concrete.util import set_stdout_encoding
 
 
-if __name__ == '__main__':
+def main():
+    set_stdout_encoding()
+
     parser = argparse.ArgumentParser(
         description="Command line client for interacting with a FetchCommunicationService server",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -53,24 +58,28 @@ if __name__ == '__main__':
         fetch_request = FetchRequest()
         fetch_request.communicationIds = args.comm_id
         fetch_result = client.fetch(fetch_request)
-        print "Received FetchResult: '%s'" % fetch_result
+        print("Received FetchResult: '%s'" % fetch_result)
 
     if args.about:
-        print "FetchCommunicationService.about() returned %s" % client.about()
+        print("FetchCommunicationService.about() returned %s" % client.about())
     if args.alive:
-        print "FetchCommunicationService.alive() returned %s" % client.alive()
+        print("FetchCommunicationService.alive() returned %s" % client.alive())
     if args.count:
-        print "FetchCommunicationService.getCommunicationCount() returned %d" % \
-            client.getCommunicationCount()
+        print("FetchCommunicationService.getCommunicationCount() returned %d" %
+              client.getCommunicationCount())
     if args.get_ids:
-        print "FetchCommunicationService.getCommunicationIDs(offset=%d, count=%d) returned:" % \
-            (args.get_ids_offset, args.get_ids_count)
+        print("FetchCommunicationService.getCommunicationIDs(offset=%d, count=%d) returned:" %
+              (args.get_ids_offset, args.get_ids_count))
         for comm_id in client.getCommunicationIDs(args.get_ids_offset, args.get_ids_count):
-            print "  %s" % comm_id
+            print("  %s" % comm_id)
 
     if args.save:
         if fetch_result.communications:
             for comm in fetch_result.communications:
                 comm_filename = '%s.concrete' % comm.id
-                print "Saving Communication as '%s'" % comm_filename
+                print("Saving Communication as '%s'" % comm_filename)
                 write_communication_to_file(comm, comm_filename)
+
+
+if __name__ == '__main__':
+    main()

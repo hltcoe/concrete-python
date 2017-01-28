@@ -1,8 +1,9 @@
 # vim: set fileencoding=utf-8 :
 
+from __future__ import unicode_literals
 from concrete.validate import validate_communication
 
-from concrete.util.simple_comm import (
+from concrete.util import (
     create_comm, create_simple_comm,
     AL_NONE, AL_SECTION, AL_SENTENCE
 )

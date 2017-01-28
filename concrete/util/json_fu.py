@@ -1,12 +1,13 @@
 """Convert Concrete objects to JSON strings
 """
+from __future__ import unicode_literals
 
 import json
 
 from thrift import TSerialization
 from thrift.protocol import TJSONProtocol
 
-from concrete.util import (
+from .file_io import (
     read_communication_from_file,
     read_tokenlattice_from_file,
 )
@@ -67,7 +68,7 @@ def get_json_object_without_timestamps(json_object):
                            for obj in json_object]
     elif type(json_object) is dict:
         new_json_object = {}
-        for k, v in json_object.iteritems():
+        for k, v in json_object.items():
             if k != "timestamp":
                 new_json_object[k] = get_json_object_without_timestamps(v)
     else:
@@ -96,7 +97,7 @@ def get_json_object_without_uuids(json_object):
                            if type(obj) is not dict or 'uuidString' not in obj]
     elif type(json_object) is dict:
         new_json_object = {}
-        for k, v in json_object.iteritems():
+        for k, v in json_object.items():
             if type(v) is not dict or 'uuidString' not in v:
                 new_json_object[k] = get_json_object_without_uuids(v)
     else:

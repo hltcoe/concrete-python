@@ -1,7 +1,12 @@
 """Code for reading and writing Concrete Communications
 """
+from __future__ import unicode_literals
 
-import cStringIO
+try:
+    from cStringIO import StringIO as BytesIO
+except ImportError:
+    from io import BytesIO
+
 import gzip
 import bz2
 import mimetypes
@@ -14,9 +19,10 @@ import time
 from thrift import TSerialization
 from thrift.transport import TTransport
 
-from concrete import Communication, TokenLattice
-from concrete.util.references import add_references_to_communication
-from concrete.util.thrift_factory import factory
+from ..communication.ttypes import Communication
+from ..structure.ttypes import TokenLattice
+from .references import add_references_to_communication
+from .thrift_factory import factory
 
 
 if os.name == 'nt':
@@ -275,7 +281,7 @@ class ThriftReader(object):
         else:
             raise ValueError('unknown filetype %d' % filetype)
 
-        if self.filetype is 'stream':
+        if self.filetype == 'stream':
             self.transport = TTransport.TFileObjectTransport(f)
             self.protocol = factory.createProtocol(self.transport)
             self.transport.open()
@@ -283,7 +289,7 @@ class ThriftReader(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         """Returns a `(obj, filename)` tuple where obj is an object
         of type thrift_type.
 
@@ -295,12 +301,17 @@ class ThriftReader(object):
         Thrift structures extracted from the concatenated file will have
         the same value for the `filename` field.
         """
-        if self.filetype is 'stream':
+        if self.filetype == 'stream':
             return self._next_from_stream()
-        elif self.filetype is 'tar':
+        elif self.filetype == 'tar':
             return self._next_from_tar()
-        elif self.filetype is 'zip':
+        elif self.filetype == 'zip':
             return self._next_from_zip()
+        else:
+            raise ValueError('unknown filetype %s' % self.filetype)
+
+    def next(self):
+        return self.__next__()
 
     def _next_from_stream(self):
         try:
@@ -321,7 +332,7 @@ class ThriftReader(object):
                 # Ignore directories
                 continue
             filename = os.path.split(tarinfo.name)[-1]
-            if filename[0] is '.' and filename[1] is '_':
+            if filename[0] == '.' and filename[1] == '_':
                 # Ignore attribute files created by OS X tar
                 continue
             comm = TSerialization.deserialize(
@@ -378,19 +389,6 @@ class CommunicationReader(ThriftReader):
                          if add_references
                          else None),
             filetype=filetype)
-
-    def next(self):
-        """Returns a `(Communication, filename)` tuple
-
-        If the CommunicationReader is reading from an archive, then
-        `filename` will be set to the name of the Communication file in
-        the archive (e.g. `foo.concrete`), and not the name of the archive
-        file (e.g. `bar.zip`).  If the CommunicationReader is reading from
-        a concatenated file (instead of an archive), then all
-        Communications extracted from the concatenated file will have the
-        same value for the `filename` field.
-        """
-        return super(CommunicationReader, self).next()
 
 
 class CommunicationWriter(object):
@@ -459,13 +457,13 @@ class CommunicationWriterTar(object):
         thrift_bytes = TSerialization.serialize(
             comm, protocol_factory=factory.protocolFactory)
 
-        file_like_obj = cStringIO.StringIO(thrift_bytes)
+        file_like_obj = BytesIO(thrift_bytes)
 
         comm_tarinfo = tarfile.TarInfo()
         comm_tarinfo.type = tarfile.REGTYPE
         comm_tarinfo.name = comm_filename
         comm_tarinfo.size = len(thrift_bytes)
-        comm_tarinfo.mode = 0644
+        comm_tarinfo.mode = 0o644
         comm_tarinfo.mtime = time.time()
         comm_tarinfo.uid = _get_uid()
         comm_tarinfo.uname = _get_username()

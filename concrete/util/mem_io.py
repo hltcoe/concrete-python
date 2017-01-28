@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 from thrift.transport.TTransport import TMemoryBuffer
 
-from concrete.util.thrift_factory import factory
-from concrete.util.references import add_references_to_communication
-from concrete import Communication
+from .thrift_factory import factory
+from .references import add_references_to_communication
+from ..communication.ttypes import Communication
 
 
 def read_communication_from_buffer(buf, add_references=True):

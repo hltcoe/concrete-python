@@ -1,14 +1,15 @@
+from __future__ import unicode_literals
 from pytest import raises, fixture
 
 from math import exp, log
 
-from concrete.structure.ttypes import (
+from concrete import (
     TokenizationKind, TokenLattice, LatticePath, Token,
     TokenTagging, TaggedToken, Tokenization, Arc
 )
 
-from concrete.util.simple_comm import create_comm
-from concrete.util.tokenization import (
+from concrete.util import create_comm
+from concrete.util import (
     get_tokens, get_pos, get_lemmas, get_tagged_tokens,
     compute_lattice_expected_counts
 )
@@ -19,7 +20,7 @@ def allclose(x, y, rel_tol=1e-6, abs_tol=1e-9):
         len(x) == len(y) and
         len(x) == sum(
             abs(x[i] - y[i]) <= rel_tol * abs(x[i]) + abs_tol
-            for i in xrange(len(x))
+            for i in range(len(x))
         )
     )
 
@@ -70,8 +71,8 @@ def test_get_tokens_invalid_kind():
 
 
 def test_get_pos(tokenization):
-    assert ['N', 'N', 'X'] == map(lambda t: t.tag, get_pos(tokenization))
-    assert [0, 1, 2] == map(lambda t: t.tokenIndex, get_pos(tokenization))
+    assert ['N', 'N', 'X'] == list(map(lambda t: t.tag, get_pos(tokenization)))
+    assert [0, 1, 2] == list(map(lambda t: t.tokenIndex, get_pos(tokenization)))
 
 
 def test_get_pos_no_tagging(tokenization):
@@ -99,10 +100,10 @@ def test_get_pos_non_unique_tagging(tokenization):
 
 
 def test_get_lemmas(tokenization):
-    assert ['mambo', 'number', '4'] == map(
+    assert ['mambo', 'number', '4'] == list(map(
         lambda t: t.tag,
-        get_lemmas(tokenization))
-    assert [0, 1, 2] == map(lambda t: t.tokenIndex, get_lemmas(tokenization))
+        get_lemmas(tokenization)))
+    assert [0, 1, 2] == list(map(lambda t: t.tokenIndex, get_lemmas(tokenization)))
 
 
 def test_get_lemmas_no_tagging(tokenization):
@@ -130,12 +131,12 @@ def test_get_lemmas_non_unique_tagging(tokenization):
 
 
 def test_get_tagged_tokens(tokenization):
-    assert ['N', 'N', 'Y'] == map(
+    assert ['N', 'N', 'Y'] == list(map(
         lambda t: t.tag,
-        get_tagged_tokens(tokenization, 'NUMERAL'))
-    assert [0, 1, 2] == map(
+        get_tagged_tokens(tokenization, 'NUMERAL')))
+    assert [0, 1, 2] == list(map(
         lambda t: t.tokenIndex,
-        get_tagged_tokens(tokenization, 'NUMERAL'))
+        get_tagged_tokens(tokenization, 'NUMERAL')))
 
 
 def test_get_tagged_tokens_no_tagging(tokenization):

@@ -5,10 +5,14 @@ RUN yum update -y && yum clean all
 RUN yum install -y \
         autoconf \
         automake \
+        bzip2-devel \
+        bzip2-libs \
         gcc \
         gcc-c++ \
         git \
         libtool \
+        libzip \
+        libzip-devel \
         m4 \
         make \
         openssl \
@@ -43,9 +47,9 @@ RUN curl http://download.redis.io/releases/redis-3.2.0.tar.gz | tar -xz && \
 
 RUN curl https://www.python.org/ftp/python/3.5.3/Python-3.5.3.tgz | tar -xz && \
     pushd Python-3.5.3 && \
-    ./configure && \
+    ./configure --prefix=/usr/local && \
     make && \
-    make altinstall PREFIX=/usr/local && \
+    make altinstall && \
     popd && \
     rm -rf Python-3.5.3
 

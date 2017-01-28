@@ -1,18 +1,20 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 import time
 from redis import Redis
 from multiprocessing import Process
 
-from concrete.util.redis_io import (
+from concrete.util import (
     read_communication_from_redis_key,
     RedisCommunicationReader,
     write_communication_to_redis_key,
     RedisCommunicationWriter
 )
-from concrete.util.mem_io import (
+from concrete.util import (
     read_communication_from_buffer,
     write_communication_to_buffer
 )
-from concrete.util.simple_comm import create_comm
+from concrete.util import create_comm
 
 from redis_server import RedisServer
 
@@ -379,10 +381,10 @@ def test_reader_set_pop(comm_buf_pairs):
                                           pop=True)
         it = iter(reader)
         ids = []
-        ids.append(it.next().id)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
+        ids.append(next(it).id)
         assert 1 == redis_db.scard(key)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
         # assert no duplicates
         assert 3 == len(ids)
         assert set(['comm-1', 'comm-2', 'comm-3']) == set(ids)
@@ -390,7 +392,7 @@ def test_reader_set_pop(comm_buf_pairs):
         assert [] == [c.id for c in reader]
         assert not redis_db.exists(key)
         with raises(StopIteration):
-            it.next()
+            next(it)
 
 
 def test_reader_list_pop(comm_buf_pairs):
@@ -405,16 +407,16 @@ def test_reader_list_pop(comm_buf_pairs):
                                           pop=True)
         it = iter(reader)
         ids = []
-        ids.append(it.next().id)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
+        ids.append(next(it).id)
         assert 1 == redis_db.llen(key)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
         assert ['comm-1', 'comm-2', 'comm-3'] == ids
         # assert data is gone
         assert [] == [c.id for c in reader]
         assert not redis_db.exists(key)
         with raises(StopIteration):
-            it.next()
+            next(it)
 
 
 def test_reader_list_pop_left_to_right(comm_buf_pairs):
@@ -429,16 +431,16 @@ def test_reader_list_pop_left_to_right(comm_buf_pairs):
                                           pop=True, right_to_left=False)
         it = iter(reader)
         ids = []
-        ids.append(it.next().id)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
+        ids.append(next(it).id)
         assert 1 == redis_db.llen(key)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
         assert ['comm-3', 'comm-2', 'comm-1'] == ids
         # assert data is gone
         assert [] == [c.id for c in reader]
         assert not redis_db.exists(key)
         with raises(StopIteration):
-            it.next()
+            next(it)
 
 
 def test_reader_list_block_pop(comm_buf_pairs):
@@ -453,16 +455,16 @@ def test_reader_list_block_pop(comm_buf_pairs):
                                           pop=True, block=True)
         it = iter(reader)
         ids = []
-        ids.append(it.next().id)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
+        ids.append(next(it).id)
         assert 1 == redis_db.llen(key)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
         assert ['comm-1', 'comm-2', 'comm-3'] == ids
         proc = Process(target=_add_comm_to_list,
                        args=(3, server.port, 'comm-4', key))
         proc.start()
-        print 'Waiting for new comm to be added (3 sec)...'
-        assert 'comm-4' == iter(reader).next().id
+        print('Waiting for new comm to be added (3 sec)...')
+        assert 'comm-4' == next(iter(reader)).id
         proc.join()
 
 
@@ -479,16 +481,16 @@ def test_reader_list_block_pop_left_to_right(comm_buf_pairs):
                                           right_to_left=False)
         it = iter(reader)
         ids = []
-        ids.append(it.next().id)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
+        ids.append(next(it).id)
         assert 1 == redis_db.llen(key)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
         assert ['comm-3', 'comm-2', 'comm-1'] == ids
         proc = Process(target=_add_comm_to_list,
                        args=(3, server.port, 'comm-4', key))
         proc.start()
-        print 'Waiting for new comm to be added (3 sec)...'
-        assert 'comm-4' == iter(reader).next().id
+        print('Waiting for new comm to be added (3 sec)...')
+        assert 'comm-4' == next(iter(reader)).id
         proc.join()
 
 
@@ -505,14 +507,14 @@ def test_reader_list_block_pop_timeout(comm_buf_pairs):
                                           block_timeout=1)
         it = iter(reader)
         ids = []
-        ids.append(it.next().id)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
+        ids.append(next(it).id)
         assert 1 == redis_db.llen(key)
-        ids.append(it.next().id)
+        ids.append(next(it).id)
         assert ['comm-1', 'comm-2', 'comm-3'] == ids
         with raises(StopIteration):
-            print 'Waiting for timeout (1 sec)...'
-            it.next()
+            print('Waiting for timeout (1 sec)...')
+            next(it)
 
 
 def test_writer_set(comm_buf_pairs):

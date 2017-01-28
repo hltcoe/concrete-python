@@ -6,15 +6,19 @@ Command line script to (partially) validate a Concrete Communication
 This script is a thin wrapper around the functionality in the
 concrete.validate library.
 """
+from __future__ import unicode_literals
 
 import argparse
 import logging
 
 import concrete.version
 from concrete.validate import validate_communication_file
+from concrete.util import set_stdout_encoding
 
 
 def main():
+    set_stdout_encoding()
+
     parser = argparse.ArgumentParser(
         description="Validate a Concrete Communication file")
     parser.add_argument('communication_file')

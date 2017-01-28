@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 
+from __future__ import print_function
+from __future__ import unicode_literals
 import json
 import time
 
@@ -41,13 +43,13 @@ def create_comm_from_tweet(json_tweet_string):
     )
     comm.text = tweet_data['text']
     comm.type = "Tweet"
-    comm.uuid = aug.next()
+    comm.uuid = next(aug)
 
     comm.sectionList = [concrete.Section()]
     comm.sectionList[0].kind = "mySectionKind"
-    comm.sectionList[0].uuid = aug.next()
+    comm.sectionList[0].uuid = next(aug)
     comm.sectionList[0].sentenceList = [concrete.Sentence()]
-    comm.sectionList[0].sentenceList[0].uuid = aug.next()
+    comm.sectionList[0].sentenceList[0].uuid = next(aug)
     comm.sectionList[0].sentenceList[0].tokenization = concrete.Tokenization()
 
     tokenization = comm.sectionList[0].sentenceList[0].tokenization
@@ -56,7 +58,7 @@ def create_comm_from_tweet(json_tweet_string):
         tool="TEST", timestamp=int(time.time()))
     tokenization.tokenList = concrete.TokenList()
     tokenization.tokenList.tokenList = []
-    tokenization.uuid = aug.next()
+    tokenization.uuid = next(aug)
 
     # Whitespace tokenization
     tokens = comm.text.split()
@@ -68,9 +70,9 @@ def create_comm_from_tweet(json_tweet_string):
         tokenization.tokenList.tokenList.append(t)
 
     if validate_communication(comm):
-        print "Created valid Communication"
+        print("Created valid Communication")
     else:
-        print "ERROR: Invalid Communication"
+        print("ERROR: Invalid Communication")
 
     return comm
 
@@ -104,7 +106,7 @@ def add_dictionary_tagging(comm):
                         tool="POS Tagger", timestamp=int(time.time()))
                     posTagList.taggingType = "POS"
                     posTagList.taggedTokenList = []
-                    posTagList.uuid = aug.next()
+                    posTagList.uuid = next(aug)
                     tkzn = sentence.tokenization
                     if tkzn.tokenList:
                         for i, token in enumerate(tkzn.tokenList.tokenList):
@@ -115,14 +117,14 @@ def add_dictionary_tagging(comm):
                             else:
                                 tt.tag = "Out"
                             posTagList.taggedTokenList.append(tt)
-                            print "%d [%s] %s" % (i, token.text, tt.tag)
+                            print("%d [%s] %s" % (i, token.text, tt.tag))
                     tkzn.tokenTaggingList = [posTagList]
-            print
+            print()
 
     if validate_communication(comm):
-        print "Created valid POS tagging for Communication"
+        print("Created valid POS tagging for Communication")
     else:
-        print "ERROR: Invalid POS tagging Communication"
+        print("ERROR: Invalid POS tagging Communication")
     return comm
 
 

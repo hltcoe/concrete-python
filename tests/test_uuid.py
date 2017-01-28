@@ -1,4 +1,5 @@
-from concrete.util.concrete_uuid import (
+from __future__ import unicode_literals
+from concrete.util import (
     generate_UUID, bin_to_hex, hex_to_bin, AnalyticUUIDGeneratorFactory,
     generate_uuid_unif, generate_hex_unif, split_uuid, join_uuid,
 )
@@ -201,7 +202,7 @@ class TestGenerateHex(unittest.TestCase):
     def test_generate_hex_unif_range(self):
         n = 1000  # (1 - 1/16)^n = 9e-29
         r = set()
-        for i in xrange(n):
+        for i in range(n):
             r.add(generate_hex_unif(1))
         self.assertEquals(
             sorted(map(lambda x: str(x).lower(), r)),
@@ -217,7 +218,7 @@ class TestGenerateHex(unittest.TestCase):
         n = 1000
         m = 32
         # union bound: (1/16)^m * n^2 = 3e-33
-        s = set([generate_hex_unif(m) for i in xrange(n)])
+        s = set([generate_hex_unif(m) for i in range(n)])
         self.assertEquals(len(s), n)
 
 
@@ -230,7 +231,7 @@ class TestGenerateUUID(unittest.TestCase):
     def test_generate_uuid_unif_spread(self):
         n = 1000
         # union bound: (1/16)^32 * n^2 = 3e-33
-        s = set([generate_uuid_unif() for i in xrange(n)])
+        s = set([generate_uuid_unif() for i in range(n)])
         self.assertEquals(len(s), n)
 
 
@@ -244,9 +245,9 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
         n = 1000
         augf = AnalyticUUIDGeneratorFactory()
         u = augf.comm_uuid
-        for i in xrange(n):
+        for i in range(n):
             aug = augf.create()
-            self.assertTrue(aug.next().uuidString.startswith(u[:8 + 1 + 4]))
+            self.assertTrue(next(aug).uuidString.startswith(u[:8 + 1 + 4]))
 
     def test_x_prefix_with_comm(self):
         n = 1000
@@ -256,9 +257,9 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
         comm.uuid.uuidString = u
         augf = AnalyticUUIDGeneratorFactory(comm)
         self.assertEquals(augf.comm_uuid, u)
-        for i in xrange(n):
+        for i in range(n):
             aug = augf.create()
-            self.assertTrue(aug.next().uuidString.startswith(u[:8 + 1 + 4]))
+            self.assertTrue(next(aug).uuidString.startswith(u[:8 + 1 + 4]))
 
     def test_x_prefix_bad_comm_uuid(self):
         u = '7575a428a-aaf7-4c2e-929e-1e2a0ab59e16'
@@ -273,23 +274,23 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
         m = 100
         n = 100
         augf = AnalyticUUIDGeneratorFactory()
-        for i in xrange(m):
+        for i in range(m):
             aug = augf.create()
-            uu = aug.next().uuidString
-            for j in xrange(n - 1):
-                self.assertTrue(aug.next().uuidString.startswith(
+            uu = next(aug).uuidString
+            for j in range(n - 1):
+                self.assertTrue(next(aug).uuidString.startswith(
                     uu[:8 + 1 + 4 + 1 + 4 + 1 + 4]))
 
     def test_z_increment(self):
         m = 100
         n = 100
         augf = AnalyticUUIDGeneratorFactory()
-        for i in xrange(m):
+        for i in range(m):
             aug = augf.create()
-            u = aug.next().uuidString
+            u = next(aug).uuidString
             z = int(u[8 + 1 + 4 + 1 + 4 + 1 + 4 + 1:], 16)
-            for j in xrange(n - 1):
-                u = aug.next().uuidString
+            for j in range(n - 1):
+                u = next(aug).uuidString
                 self.assertEquals(
                     int(u[8 + 1 + 4 + 1 + 4 + 1 + 4 + 1:], 16),
                     (z + 1) % 2**48
@@ -300,10 +301,10 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
         m = 100
         # union bound: (1/16)^12 * m^2 = 4e-11
         s = set()
-        for i in xrange(m):
+        for i in range(m):
             augf = AnalyticUUIDGeneratorFactory()
             aug = augf.create()
-            u = aug.next().uuidString
+            u = next(aug).uuidString
             s.add(u[:8 + 1 + 4])
         self.assertEquals(len(s), m)
 
@@ -312,9 +313,9 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
         augf = AnalyticUUIDGeneratorFactory()
         # union bound: (1/16)^8 * m^2 = 2e-8
         s = set()
-        for i in xrange(m):
+        for i in range(m):
             aug = augf.create()
-            u = aug.next().uuidString
+            u = next(aug).uuidString
             s.add(u[:8 + 1 + 4 + 1 + 4 + 1 + 4])
         self.assertEquals(len(s), m)
 
@@ -324,11 +325,11 @@ class TestAnalyticUUIDGeneratorFactory(unittest.TestCase):
         augf = AnalyticUUIDGeneratorFactory()
         # union bound: (2m-1)*(1/16)^12 * n^2 = 7e-9
         s = set()
-        for i in xrange(m):
+        for i in range(m):
             aug = augf.create()
-            u = aug.next().uuidString
+            u = next(aug).uuidString
             s.add(u)
-            for j in xrange(n - 1):
-                u = aug.next().uuidString
+            for j in range(n - 1):
+                u = next(aug).uuidString
                 s.add(u)
         self.assertEquals(len(s), m * n)

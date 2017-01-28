@@ -2000,7 +2000,7 @@ class Tokenization(object):
         if 'sentence' in dict_without_backpointer:
             dict_without_backpointer.pop('sentence')
         L = ['%s=%r' % (key, value)
-             for key, value in dict_without_backpointer.iteritems()]
+             for key, value in dict_without_backpointer.items()]
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
 
     def __eq__(self, other):

@@ -3,11 +3,18 @@
 The function implementations provide useful examples of how to
 interact with many different Concrete datastructures.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
-from concrete.util.metadata import get_index_of_tool
-from concrete.util.unnone import lun
+from .util.metadata import get_index_of_tool
+from .util.unnone import lun
 from collections import defaultdict
 from operator import attrgetter
+
+try:
+    unicode
+except NameError:
+    unicode = str
 
 
 def _reconcile_index_and_tool(lst_of_conc, given_idx, tool):
@@ -71,9 +78,9 @@ def print_conll_style_tags_for_communication(
     if dependency:
         header_fields.append(u"HEAD")
         header_fields.append(u"DEPREL")
-    print u"\t".join(header_fields)
+    print(u"\t".join(header_fields))
     dashes = ["-" * len(fieldname) for fieldname in header_fields]
-    print u"\t".join(dashes)
+    print(u"\t".join(dashes))
 
     for tokenization in _get_tokenizations(comm):
         token_tag_lists = []
@@ -100,7 +107,7 @@ def print_conll_style_tags_for_communication(
                                                         tool=dependency_tool))
         print_conll_style_tags_for_tokenization(tokenization,
                                                 token_tag_lists)
-        print
+        print()
 
 
 def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
@@ -117,7 +124,7 @@ def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
                           for token_tag_list in token_tag_lists]
             fields = [unicode(i + 1), token.text]
             fields.extend(token_tags)
-            print u"\t".join(fields)
+            print(u"\t".join(fields))
 
 
 def print_entities(comm, tool=None):
@@ -130,21 +137,21 @@ def print_entities(comm, tool=None):
     if comm.entitySetList:
         for entitySet_index, entitySet in enumerate(comm.entitySetList):
             if tool is None or entitySet.metadata.tool == tool:
-                print u"Entity Set %d (%s):" % (entitySet_index,
-                                                entitySet.metadata.tool)
+                print(u"Entity Set %d (%s):" % (entitySet_index,
+                                                entitySet.metadata.tool))
                 for entity_index, entity in enumerate(entitySet.entityList):
-                    print u"  Entity %d-%d:" % (entitySet_index, entity_index)
+                    print(u"  Entity %d-%d:" % (entitySet_index, entity_index))
                     for em_index, em in enumerate(entity.mentionList):
-                        print u"      EntityMention %d-%d-%d:" % (
-                            entitySet_index, entity_index, em_index)
-                        print u"          tokens:     %s" % (
-                            u" ".join(_get_tokens_for_entityMention(em)))
+                        print(u"      EntityMention %d-%d-%d:" % (
+                            entitySet_index, entity_index, em_index))
+                        print(u"          tokens:     %s" % (
+                            u" ".join(_get_tokens_for_entityMention(em))))
                         if em.text:
-                            print u"          text:       %s" % em.text
-                        print u"          entityType: %s" % em.entityType
-                        print u"          phraseType: %s" % em.phraseType
-                    print
-                print
+                            print(u"          text:       %s" % em.text)
+                        print(u"          entityType: %s" % em.entityType)
+                        print(u"          phraseType: %s" % em.phraseType)
+                    print()
+                print()
 
 
 def print_metadata(comm, tool=None):
@@ -161,7 +168,7 @@ def print_metadata(comm, tool=None):
         return tokenizations
 
     if tool is None or comm.metadata.tool == tool:
-        print u"Communication:  %s\n" % comm.metadata.tool
+        print(u"Communication:  %s\n" % comm.metadata.tool)
 
     dependency_parse_tools = set()
     parse_tools = set()
@@ -193,50 +200,50 @@ def print_metadata(comm, tool=None):
 
     if tokenization_tools:
         for toolname in sorted(tokenization_tools):
-            print u"  Tokenization:  %s" % toolname
-        print
+            print(u"  Tokenization:  %s" % toolname)
+        print()
     if dependency_parse_tools:
         for toolname in sorted(dependency_parse_tools):
-            print u"    Dependency Parse:  %s" % toolname
-        print
+            print(u"    Dependency Parse:  %s" % toolname)
+        print()
     if parse_tools:
         for toolname in sorted(parse_tools):
-            print u"    Parse:  %s" % toolname
-        print
+            print(u"    Parse:  %s" % toolname)
+        print()
     if token_tagging_tools:
         for toolname in sorted(token_tagging_tools):
-            print u"    TokenTagging:  %s" % toolname
-        print
+            print(u"    TokenTagging:  %s" % toolname)
+        print()
 
     if comm.entityMentionSetList:
         for i, em_set in enumerate(comm.entityMentionSetList):
             if tool is None or em_set.metadata.tool == tool:
-                print u"  EntityMentionSet #%d:  %s" % (
-                    i, em_set.metadata.tool)
-        print
+                print(u"  EntityMentionSet #%d:  %s" % (
+                    i, em_set.metadata.tool))
+        print()
     if comm.entitySetList:
         for i, entitySet in enumerate(comm.entitySetList):
             if tool is None or entitySet.metadata.tool == tool:
-                print u"  EntitySet #%d:  %s" % (
-                    i, entitySet.metadata.tool)
-        print
+                print(u"  EntitySet #%d:  %s" % (
+                    i, entitySet.metadata.tool))
+        print()
     if comm.situationMentionSetList:
         for i, sm_set in enumerate(comm.situationMentionSetList):
             if tool is None or sm_set.metadata.tool == tool:
-                print u"  SituationMentionSet #%d:  %s" % (
-                    i, sm_set.metadata.tool)
-        print
+                print(u"  SituationMentionSet #%d:  %s" % (
+                    i, sm_set.metadata.tool))
+        print()
     if comm.situationSetList:
         for i, situationSet in enumerate(comm.situationSetList):
             if tool is None or situationSet.metadata.tool == tool:
-                print u"  SituationSet #%d:  %s" % (
-                    i, situationSet.metadata.tool)
-        print
+                print(u"  SituationSet #%d:  %s" % (
+                    i, situationSet.metadata.tool))
+        print()
 
     if communication_tagging_tools:
         for toolname in sorted(communication_tagging_tools):
-            print u"  CommunicationTagging:  %s" % toolname
-        print
+            print(u"  CommunicationTagging:  %s" % toolname)
+        print()
 
 
 def print_sections(comm, tool=None):
@@ -251,14 +258,14 @@ def print_sections(comm, tool=None):
         for sect_idx, sect in enumerate(lun(comm.sectionList)):
             ts = sect.textSpan
             if ts is None:
-                print u"Section %s does not have a textSpan "
+                print(u"Section %s does not have a textSpan ")
                 "field set" % (sect.uuid.uuidString)
                 continue
-            print u"Section %d (%s), from %d to %d:" % (
-                sect_idx, sect.uuid.uuidString, ts.start, ts.ending)
-            print u"%s" % (text[ts.start:ts.ending])
-            print
-        print
+            print(u"Section %d (%s), from %d to %d:" % (
+                sect_idx, sect.uuid.uuidString, ts.start, ts.ending))
+            print(u"%s" % (text[ts.start:ts.ending]))
+            print()
+        print()
 
 
 def print_situation_mentions(comm, tool=None):
@@ -271,13 +278,13 @@ def print_situation_mentions(comm, tool=None):
     """
     for sm_set_idx, sm_set in enumerate(lun(comm.situationMentionSetList)):
         if tool is None or sm_set.metadata.tool == tool:
-            print u"Situation Set %d (%s):" % (sm_set_idx,
-                                               sm_set.metadata.tool)
+            print(u"Situation Set %d (%s):" % (sm_set_idx,
+                                               sm_set.metadata.tool))
             for sm_idx, sm in enumerate(sm_set.mentionList):
-                print u"  SituationMention %d-%d:" % (sm_set_idx, sm_idx)
+                print(u"  SituationMention %d-%d:" % (sm_set_idx, sm_idx))
                 _print_situation_mention(sm)
-                print
-            print
+                print()
+            print()
 
 
 def print_situations(comm, tool=None):
@@ -289,17 +296,17 @@ def print_situations(comm, tool=None):
     """
     for s_set_idx, s_set in enumerate(lun(comm.situationSetList)):
         if tool is None or s_set.metadata.tool == tool:
-            print u"Situation Set %d (%s):" % (s_set_idx,
-                                               s_set.metadata.tool)
+            print(u"Situation Set %d (%s):" % (s_set_idx,
+                                               s_set.metadata.tool))
             for s_idx, situation in enumerate(s_set.situationList):
-                print u"  Situation %d-%d:" % (s_set_idx, s_idx)
+                print(u"  Situation %d-%d:" % (s_set_idx, s_idx))
                 _p(6, 18, u"situationType", situation.situationType)
                 for sm_idx, sm in enumerate(lun(situation.mentionList)):
-                    print u" " * 6 + u"SituationMention %d-%d-%d:" % (
-                        s_set_idx, s_idx, sm_idx)
+                    print(u" " * 6 + u"SituationMention %d-%d-%d:" % (
+                        s_set_idx, s_idx, sm_idx))
                     _print_situation_mention(sm)
-                print
-            print
+                print()
+            print()
 
 
 def _print_situation_mention(situationMention):
@@ -309,7 +316,7 @@ def _print_situation_mention(situationMention):
     if situationMention.situationType:
         _p(10, 20, u"situationType", situationMention.situationType)
     for arg_idx, ma in enumerate(lun(situationMention.argumentList)):
-        print u" " * 10 + u"Argument %d:" % arg_idx
+        print(u" " * 10 + u"Argument %d:" % arg_idx)
         if ma.role:
             _p(14, 16, u"role", ma.role)
         if ma.entityMention:
@@ -321,7 +328,7 @@ def _print_situation_mention(situationMention):
         # traverse the list recursively, instead looking at only
         # SituationMentions referenced by top-level SituationMentions
         if ma.situationMention:
-            print u" " * 14 + u"situationMention:"
+            print(u" " * 14 + u"situationMention:")
             if situationMention.text:
                 _p(18, 20, u"text", situationMention.text)
             if situationMention.situationType:
@@ -339,23 +346,23 @@ def _p(indent_level, justified_width, fieldname, content):
 
 def print_text_for_communication(comm, tool=None):
     if tool is None or comm.metadata.tool == tool:
-        print comm.text
+        print(comm.text)
 
 
 def print_id_for_communication(comm, tool=None):
     if tool is None or comm.metadata.tool == tool:
-        print comm.id
+        print(comm.id)
 
 
 def print_communication_taggings_for_communication(comm, tool=None):
     communication_taggings = _filter_by_tool(
         lun(comm.communicationTaggingList), tool)
     for tagging in communication_taggings:
-        print '%s: %s' % (
+        print('%s: %s' % (
             tagging.taggingType,
             ' '.join('%s:%.3f' % p for p in
                      zip(tagging.tagList, tagging.confidenceList))
-        )
+        ))
 
 
 def print_tokens_with_entityMentions(comm, tool=None):
@@ -383,8 +390,8 @@ def print_tokens_with_entityMentions(comm, tool=None):
                         text_tokens[last_token_index] = (
                             u"%s</ENTITY>" % text_tokens[last_token_index]
                         )
-                print u" ".join(text_tokens)
-        print
+                print(u" ".join(text_tokens))
+        print()
 
 
 def print_tokens_for_communication(comm, tool=None):
@@ -399,8 +406,8 @@ def print_tokens_for_communication(comm, tool=None):
                 text_tokens = [token.text
                                for token
                                in tokenization.tokenList.tokenList]
-                print u" ".join(text_tokens)
-        print
+                print(u" ".join(text_tokens))
+        print()
 
 
 def print_penn_treebank_for_communication(comm, tool=None):
@@ -416,7 +423,7 @@ def print_penn_treebank_for_communication(comm, tool=None):
         if tokenization.parseList:
             for parse in tokenization.parseList:
                 if tool is None or tool == parse.metadata.tool:
-                    print penn_treebank_for_parse(parse) + u"\n\n"
+                    print(penn_treebank_for_parse(parse) + u"\n\n")
 
 
 def penn_treebank_for_parse(parse):
@@ -529,12 +536,12 @@ def _get_conll_head_tags_for_tokenization(tokenization,
       function returns a list of empty strings for each token in the
       supplied tokenization.
     """
-    return map(
+    return list(map(
         lambda dep: '' if dep is None else (
             0 if dep.gov is None else dep.gov + 1),
         _sorted_dep_list_for_tokenization(
             tokenization, dependency_parse_index=dependency_parse_index,
-            tool=tool))
+            tool=tool)))
 
 
 def _get_conll_deprel_tags_for_tokenization(tokenization,
@@ -564,12 +571,12 @@ def _get_conll_deprel_tags_for_tokenization(tokenization,
       function returns a list of empty strings for each token in the
       supplied tokenization.
     """
-    return map(
+    return list(map(
         lambda dep: '' if dep is None else (
             '' if dep.edgeType is None else dep.edgeType),
         _sorted_dep_list_for_tokenization(
             tokenization, dependency_parse_index=dependency_parse_index,
-            tool=tool))
+            tool=tool)))
 
 
 def _get_entityMentions_by_tokenizationId(comm, tool=None):

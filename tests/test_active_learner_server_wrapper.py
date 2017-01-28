@@ -1,12 +1,13 @@
+from __future__ import unicode_literals
 import mock
 from mock import sentinel
 from pytest import fixture
 
 from concrete.learn import ActiveLearnerServerService
-from concrete.util.learn_wrapper import (
+from concrete.util import (
     ActiveLearnerServerServiceWrapper, ActiveLearnerServerClientWrapper
 )
-from concrete.util.thrift_factory import ThriftFactory
+from concrete.util import ThriftFactory
 
 
 @fixture

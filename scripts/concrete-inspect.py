@@ -5,20 +5,22 @@
 concrete_inspect.py is a command-line script for printing out information
 about a Concrete Communication.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import argparse
-import codecs
 import sys
 
 import concrete.version
 import concrete.inspect
 from concrete.util import CommunicationReader, FileType
+from concrete.util import set_stdout_encoding
 
 
 def print_header(header):
-    print
-    print header
-    print '-' * len(header)
+    print()
+    print(header)
+    print('-' * len(header))
 
 
 def print_header_if(header, condition):
@@ -27,8 +29,7 @@ def print_header_if(header, condition):
 
 
 def main():
-    # Make stdout output UTF-8, preventing "'ascii' codec can't encode" errors
-    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+    set_stdout_encoding()
 
     parser = argparse.ArgumentParser(
         description="Print information about a Concrete Communication to"

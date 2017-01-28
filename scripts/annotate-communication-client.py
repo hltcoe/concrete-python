@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
+from __future__ import unicode_literals
 import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util import CommunicationReader, CommunicationWriter, FileType
 from concrete.util.annotate_wrapper import AnnotateCommunicationClientWrapper
+from concrete.util import set_stdout_encoding
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description="Interface with a Concrete AnnotateCommunicationService"

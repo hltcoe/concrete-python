@@ -7,6 +7,8 @@ Deprecated: please use concrete-diff.py instead.
 Compare two Concrete files by converting to JSON then running the Git
 diff command
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import concrete.version
 import argparse
@@ -65,7 +67,7 @@ def main():
     os.remove(json_two_filename)
     os.rmdir(tmp_path)
 
-    print diff_output
+    print(diff_output)
 
 
 if __name__ == "__main__":

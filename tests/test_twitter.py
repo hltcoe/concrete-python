@@ -1,7 +1,8 @@
+from __future__ import unicode_literals
 from pytest import fixture, mark
 
-from concrete.util.twitter import (json_tweet_object_to_Communication,
-                                   twitter_lid_to_iso639_3)
+from concrete.util import (
+    json_tweet_object_to_Communication, twitter_lid_to_iso639_3)
 
 
 TWEET_TXT = ("Barber tells me - his son is colorblind / my hair is auburn /"
@@ -255,7 +256,7 @@ def test_json_tweet_object_to_Communication(tweet, omitted_fields,
     else:
         assert 1 == len(comm.lidList)
         kvm = comm.lidList[0].languageToProbabilityMap
-        assert 'eng' == kvm.keys()[0]
+        assert set(['eng']) == set(kvm.keys())
         assert 1.0 == kvm['eng']
 
     assert not omitted_assertions

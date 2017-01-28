@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
 from pytest import fixture, mark
-from concrete.util.file_io import CommunicationReader
+from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
 import os
 import sys
@@ -91,20 +92,20 @@ def test_create_comm_tarball(output_file, text_l0, text_l1):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l0.txt'
     assert validate_communication(comm)
     assert comm.text == text_l0
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l1.txt'
     assert validate_communication(comm)
     assert comm.text == text_l1
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -126,20 +127,20 @@ def test_create_comm_tarball_stdin(output_file, text_l0, text_l1):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l0.txt'
     assert validate_communication(comm)
     assert comm.text == text_l0
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l1.txt'
     assert validate_communication(comm)
     assert comm.text == text_l1
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -163,20 +164,20 @@ def test_create_comm_tarball_stdout(output_file, text_l0, text_l1):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l0.txt'
     assert validate_communication(comm)
     assert comm.text == text_l0
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l1.txt'
     assert validate_communication(comm)
     assert comm.text == text_l1
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -195,26 +196,26 @@ def test_create_comm_tarball_log_every(output_file, text_l0, text_l1):
     (stdout, stderr) = p.communicate()
     assert p.returncode == 0
     assert len([line
-                for line in stderr.strip().split('\n')
+                for line in stderr.decode('utf-8').strip().split('\n')
                 if 'INFO' in line]) >= 2
 
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l0.txt'
     assert validate_communication(comm)
     assert comm.text == text_l0
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l1.txt'
     assert validate_communication(comm)
     assert comm.text == text_l1
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -235,20 +236,20 @@ def test_create_comm_tarball_annotated(output_file, text_l0, text_l1):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l0.txt'
     assert validate_communication(comm)
     assert comm.text == text_l0
     assert len(comm.sectionList) == 1
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers/l1.txt'
     assert validate_communication(comm)
     assert comm.text == text_l1
     assert len(comm.sectionList) == 1
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -271,44 +272,44 @@ def test_create_comm_tarball_per_line(output_file, text_l0,
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers-perline/l0.txt/0'
     assert validate_communication(comm)
     assert comm.text == text_l0
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers-perline/l1.txt/0'
     assert validate_communication(comm)
     assert comm.text == text_l1_s0
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers-perline/l1.txt/1'
     assert validate_communication(comm)
     assert comm.text == text_l1_s1
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers-perline/l1.txt/2'
     assert validate_communication(comm)
     assert comm.text == text_l1_s2
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers-perline/l1.txt/3'
     assert validate_communication(comm)
     assert comm.text == text_l1_s3
     assert comm.sectionList is None
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert comm.id == 'les-deux-chandeliers-perline/l1.txt/4'
     assert validate_communication(comm)
     assert comm.text == text_l1_s4
     assert comm.sectionList is None
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:

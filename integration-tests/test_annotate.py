@@ -1,20 +1,21 @@
+from __future__ import unicode_literals
 from thrift.transport import TTransport
 from thrift.transport import TSocket
 from thrift.protocol import TCompactProtocol
 
 import unittest
 
-from concrete.util.annotate_wrapper import (
+from concrete.util import (
     SubprocessAnnotateCommunicationServiceWrapper
 )
-from concrete.util.net import find_port
-from concrete.util.simple_comm import create_comm
+from concrete.util import find_port
+from concrete.util import create_comm
 
 
 from time import time
 
 from concrete.annotate import AnnotateCommunicationService
-from concrete.metadata.ttypes import AnnotationMetadata
+from concrete import AnnotationMetadata
 
 
 class NoopAnnotateCommunicationService(AnnotateCommunicationService.Iface):

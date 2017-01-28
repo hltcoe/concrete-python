@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import unicode_literals
 import concrete.version
-import sys
-import codecs
 import requests
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from concrete.util.search_wrapper import SearchClientWrapper
 from concrete.search.ttypes import SearchQuery, SearchType
+from concrete.util import set_stdout_encoding
 
 
 def main():
+    set_stdout_encoding()
+
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Interface with a Concrete Search service'
@@ -28,14 +31,12 @@ def main():
     concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
-    out_f = codecs.getwriter('utf-8')(sys.stdout)
-
     with SearchClientWrapper(ns.host, ns.port) as client:
         while True:
             try:
                 line = raw_input('> ').strip().decode('utf-8')
             except EOFError:
-                print
+                print()
                 break
             if line:
                 terms = line.split()
@@ -45,12 +46,12 @@ def main():
                 result = client.search(query)
                 for result_item in result.searchResultItems:
                     if ns.http_lookup_url:
-                        out_f.write(requests.get(
+                        print(requests.get(
                             ns.http_lookup_url %
                             result_item.communicationId
-                        ).text + u'\n')
+                        ).text)
                     else:
-                        out_f.write(result_item.communicationId + u'\n')
+                        print(result_item.communicationId)
 
 
 if __name__ == '__main__':

@@ -2,27 +2,29 @@ Copyright 2012-2017 Johns Hopkins University HLTCOE. All rights
 reserved.  This software is released under the 2-clause BSD license.
 Please see ``LICENSE`` for more information.
 
-Concrete-Python
+concrete-python
 ===============
 
-Concrete-Python is the Python interface to Concrete_, an HLT data
+concrete-python is the Python interface to Concrete_, an HLT data
 specification defined using Thrift_.
 
-Concrete-Python contains generated Python classes and additional
+concrete-python contains generated Python classes and additional
 utilities.  It does not contain the Thrift schema for Concrete, which
 can be found in the `Concrete GitHub repository`_.
 
 Requirements
 ------------
 
-Concrete-Python requires Python 2.7 and the Thrift Python library,
-among other Python libraries.  These are installed automatically by
-``setup.py`` or ``pip``.  The Thrift compiler is *not* required.
+concrete-python is tested on Python 2.7 or 3.5 (it does not run on
+Python 2.6; it may run on more Python 3.x versions) and requires the
+Thrift Python library, among other Python libraries.  These are
+installed automatically by ``setup.py`` or ``pip``.  The Thrift
+compiler is *not* required.
 
 **Note**: The accelerated protocol offers a (de)serialization speedup
 of 10x or more; if you would like to use it, ensure a C++ compiler is
-available on your system before installing Concrete-Python.
-(If a compiler is not available, Concrete-Python will fall back to the
+available on your system before installing concrete-python.
+(If a compiler is not available, concrete-python will fall back to the
 unaccelerated protocol automatically.)  If you are on Linux, a suitable
 C++ compiler will be listed as ``g++`` or ``gcc-c++`` in your package
 manager.
@@ -127,7 +129,7 @@ Thrift fields have three levels of requiredness:
 Other Concrete tools will raise an exception if a **required** field is
 missing on deserialization or serialization, and will raise an
 exception if a "default required" field is missing on serialization.
-By default, Concrete-Python does not perform any validation of Thrift
+By default, concrete-python does not perform any validation of Thrift
 objects on serialization or deserialization.  The Python Thrift classes
 do provide shallow ``validate()`` methods, but they only check for
 explicitly **required** fields (not "default required" fields) and do
@@ -141,10 +143,10 @@ UUID mismatches.
 Development
 -----------
 
-Please see ``CONTRIBUTING.rst`` for information about contributing to
-Concrete-Python.
+Please see ``CONTRIBUTING.rst`` in the source repository for
+information about contributing to concrete-python.
 
-Contributors to Concrete-Python are listed in ``AUTHORS``.
+Contributors to concrete-python are listed in ``AUTHORS``.
 Please contact us if there is an error in this list.
 
 

@@ -1,5 +1,6 @@
 """Add reference variables for each UUID "pointer" in a Communication
 """
+from __future__ import unicode_literals
 
 
 def add_references_to_communication(comm):

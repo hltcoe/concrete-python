@@ -1,9 +1,10 @@
+from __future__ import unicode_literals
 import os
 import tarfile
 import unittest
 import time
 
-from concrete.util.file_io import (
+from concrete.util import (
     CommunicationReader,
     CommunicationWriter,
     CommunicationWriterTar,
@@ -64,7 +65,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_single_file(self):
         filename = u'tests/testdata/simple_1.concrete'
         reader = CommunicationReader(filename)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -72,7 +73,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_single_gz_file(self):
         filename = u'tests/testdata/simple_1.concrete.gz'
         reader = CommunicationReader(filename)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -80,7 +81,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_single_bz2_file(self):
         filename = u'tests/testdata/simple_1.concrete.bz2'
         reader = CommunicationReader(filename)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -181,7 +182,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_explicit_single_file(self):
         filename = u'tests/testdata/simple_1.concrete'
         reader = CommunicationReader(filename, filetype=FileType.STREAM)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -189,7 +190,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_explicit_single_gz_file(self):
         filename = u'tests/testdata/simple_1.concrete.gz'
         reader = CommunicationReader(filename, filetype=FileType.STREAM_GZ)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -197,7 +198,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_explicit_single_bz2_file(self):
         filename = u'tests/testdata/simple_1.concrete.bz2'
         reader = CommunicationReader(filename, filetype=FileType.STREAM_BZ2)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -302,7 +303,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_single_file_no_add_references(self):
         filename = u'tests/testdata/simple_1.concrete'
         reader = CommunicationReader(filename, add_references=False)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertFalse(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -310,7 +311,7 @@ class TestCommunicationReader(unittest.TestCase):
     def test_single_gz_file_no_add_references(self):
         filename = u'tests/testdata/simple_1.concrete.gz'
         reader = CommunicationReader(filename, add_references=False)
-        (comm1, comm1_filename) = reader.next()
+        (comm1, comm1_filename) = next(reader)
         self.assertFalse(hasattr(comm1, 'sentenceForUUID'))
         self.assertEqual(u'one', comm1.id)
         self.assertEqual(filename, comm1_filename)
@@ -461,7 +462,7 @@ def test_CommunicationWriterTar_single_file(output_file, login_info):
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
-    assert 0644 == tarinfo.mode
+    assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
     assert login_info['username'] == tarinfo.uname
     assert login_info['gid'] == tarinfo.gid
@@ -489,7 +490,7 @@ def test_CommunicationWriterTar_single_file_ctx_mgr(output_file, login_info):
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
-    assert 0644 == tarinfo.mode
+    assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
     assert login_info['username'] == tarinfo.uname
     assert login_info['gid'] == tarinfo.gid
@@ -575,7 +576,7 @@ def test_CommunicationWriterTar_single_file_default_name(output_file,
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
-    assert 0644 == tarinfo.mode
+    assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
     assert login_info['username'] == tarinfo.uname
     assert login_info['gid'] == tarinfo.gid
@@ -607,7 +608,7 @@ def test_CommunicationWriterTGZ_single_file(output_file, login_info):
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
-    assert 0644 == tarinfo.mode
+    assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
     assert login_info['username'] == tarinfo.uname
     assert login_info['gid'] == tarinfo.gid
@@ -635,7 +636,7 @@ def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file, login_info):
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
-    assert 0644 == tarinfo.mode
+    assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
     assert login_info['username'] == tarinfo.uname
     assert login_info['gid'] == tarinfo.gid
@@ -668,7 +669,7 @@ def test_CommunicationWriterTGZ_single_file_default_name(output_file,
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
-    assert 0644 == tarinfo.mode
+    assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
     assert login_info['username'] == tarinfo.uname
     assert login_info['gid'] == tarinfo.gid

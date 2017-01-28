@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
 from pytest import fixture, mark
-from concrete.util.file_io import CommunicationReader
+from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
 import os
 import sys
@@ -92,14 +93,14 @@ def test_tweets2concrete(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -121,14 +122,14 @@ def test_tweets2concrete_stdin(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -152,14 +153,14 @@ def test_tweets2concrete_stdout(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -180,14 +181,14 @@ def test_tweets2concrete_multiproc(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -206,20 +207,20 @@ def test_tweets2concrete_log_every(output_file):
     (stdout, stderr) = p.communicate()
     assert p.returncode == 0
     assert len([line
-                for line in stderr.strip().split('\n')
+                for line in stderr.decode('utf-8').strip().split('\n')
                 if 'INFO' in line]) >= 2
 
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -239,15 +240,15 @@ def test_tweets2concrete_unicode(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
     assert validate_communication(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -267,14 +268,14 @@ def test_tweets2concrete_gz(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -295,14 +296,14 @@ def test_tweets2concrete_incomplete_gz(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -324,14 +325,14 @@ def test_tweets2concrete_incomplete_gz_multiproc(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -349,8 +350,8 @@ def test_tweets2concrete_log_config(log_conf, output_file):
         output_file
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    assert stdout == ''
-    assert stderr == ''
+    assert stdout.decode('utf-8') == ''
+    assert stderr.decode('utf-8') == ''
     assert p.returncode == 0
 
     with open(log_path) as f:
@@ -362,14 +363,14 @@ def test_tweets2concrete_log_config(log_conf, output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -389,14 +390,14 @@ def test_tweets2concrete_deleted(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -417,14 +418,14 @@ def test_tweets2concrete_bad_line(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -445,14 +446,14 @@ def test_tweets2concrete_bad_line_unicode(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -473,14 +474,14 @@ def test_tweets2concrete_invalid(output_file):
     reader = CommunicationReader(output_file)
     it = iter(reader)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_first_comm(comm)
 
-    (comm, _) = it.next()
+    (comm, _) = next(it)
     assert_second_comm(comm)
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:

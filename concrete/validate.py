@@ -18,6 +18,7 @@ Current validation checks:
     EntityMention, SituationMention or TokenRefSequence, but the
     MentionArgument should point to exactly one of these objects
 """
+from __future__ import unicode_literals
 
 import logging
 
@@ -25,8 +26,8 @@ import networkx as nx
 from thrift.protocol import TProtocol
 from thrift.Thrift import TType
 
-from concrete.util.file_io import read_communication_from_file
-from concrete.util.unnone import lun
+from .util.file_io import read_communication_from_file
+from .util.unnone import lun
 
 
 def validate_communication_file(communication_filename):
@@ -782,7 +783,7 @@ def validate_thrift_deep(msg, valid=True):
             subtype = spec_tuple[3]
             key_type = subtype[0]
             val_type = subtype[2]
-            for key, val in attr.iteritems():
+            for key, val in attr.items():
                 if _ShouldRecurse(key_type):
                     valid &= validate_thrift_deep(key, valid)
                 if _ShouldRecurse(val_type):

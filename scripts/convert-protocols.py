@@ -30,6 +30,8 @@ The known conversions are stored in a dictionary KNOWN_CONVERSIONS:
 Therefore, adding to the conversions is simple: just add to the
 KNOWN_CONVERSIONS mapping.
 '''
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import argparse
 import gzip
@@ -40,6 +42,7 @@ from thrift.protocol import (
 from thrift.transport import TTransport
 from concrete import Communication
 import concrete.version
+from concrete.util import set_stdout_encoding
 import mimetypes
 
 PROTOCOLS = {
@@ -119,7 +122,9 @@ def convert_communication(input_bytes, input_protocol_factory,
     return output_bytes
 
 
-if __name__ == '__main__':
+def main():
+    set_stdout_encoding()
+
     parser = make_parser()
     args = parser.parse_args()
     mimetypes.init()
@@ -164,3 +169,7 @@ if __name__ == '__main__':
                 input_protocol_factory=encoding_input,
                 output_protocol_factory=encoding_output)
     out_writer.close()
+
+
+if __name__ == '__main__':
+    main()

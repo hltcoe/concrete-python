@@ -1,5 +1,6 @@
+from __future__ import unicode_literals
 from pytest import fixture
-from concrete.util.file_io import (
+from concrete.util import (
     CommunicationReader, FileType
 )
 import os
@@ -40,17 +41,17 @@ def test_concatenated(fifo):
     reader = CommunicationReader(fifo, filetype=FileType.STREAM)
     it = iter(reader)
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'one'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'two'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'three'
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -75,17 +76,17 @@ def test_concatenated_bz2(fifo):
     reader = CommunicationReader(fifo, filetype=FileType.STREAM_BZ2)
     it = iter(reader)
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'one'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'two'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'three'
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -103,17 +104,17 @@ def test_tar(fifo):
     reader = CommunicationReader(fifo, filetype=FileType.TAR)
     it = iter(reader)
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'one'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'two'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'three'
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -131,17 +132,17 @@ def test_tar_gz(fifo):
     reader = CommunicationReader(fifo, filetype=FileType.TAR_GZ)
     it = iter(reader)
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'one'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'two'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'three'
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:
@@ -159,17 +160,17 @@ def test_tar_bz2(fifo):
     reader = CommunicationReader(fifo, filetype=FileType.TAR_BZ2)
     it = iter(reader)
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'one'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'two'
 
-    (comm, path) = it.next()
+    (comm, path) = next(it)
     assert comm.id == 'three'
 
     try:
-        it.next()
+        next(it)
     except StopIteration:
         pass
     else:

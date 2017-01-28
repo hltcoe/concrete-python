@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import time
 import unittest
 
@@ -11,6 +12,14 @@ from concrete.validate import (
     validate_token_offsets_for_section,
     validate_thrift_deep,
     validate_token_offsets_for_sentence
+)
+from concrete import (
+    Section,
+    Sentence,
+    TextSpan,
+    Token,
+    TokenList,
+    Tokenization,
 )
 from test_helper import read_test_comm
 
@@ -162,13 +171,13 @@ class TestTextspanOffsets(unittest.TestCase):
 
     def create_section_with_sentence(self, section_start, section_ending,
                                      sentence_start, sentence_ending):
-        sentence_textspan = concrete.spans.ttypes.TextSpan(
+        sentence_textspan = TextSpan(
             start=sentence_start, ending=sentence_ending)
-        sentence = concrete.structure.ttypes.Sentence(
+        sentence = Sentence(
             textSpan=sentence_textspan, uuid='TEST_SENTENCE')
-        section_textspan = concrete.spans.ttypes.TextSpan(
+        section_textspan = TextSpan(
             start=section_start, ending=section_ending)
-        section = concrete.structure.ttypes.Section(
+        section = Section(
             sentenceList=[sentence],
             textSpan=section_textspan,
             uuid='TEST_SECTION')
@@ -176,14 +185,14 @@ class TestTextspanOffsets(unittest.TestCase):
 
     def create_sentence_with_token(self, sentence_start, sentence_ending,
                                    token_start, token_ending):
-        token_textspan = concrete.spans.ttypes.TextSpan(
+        token_textspan = TextSpan(
             start=token_start, ending=token_ending)
-        token = concrete.structure.ttypes.Token(textSpan=token_textspan)
-        tokenization = concrete.structure.ttypes.Tokenization(
-            tokenList=concrete.TokenList(tokenList=[token]))
-        sentence_textspan = concrete.spans.ttypes.TextSpan(
+        token = Token(textSpan=token_textspan)
+        tokenization = Tokenization(
+            tokenList=TokenList(tokenList=[token]))
+        sentence_textspan = TextSpan(
             start=sentence_start, ending=sentence_ending)
-        sentence = concrete.structure.ttypes.Sentence(
+        sentence = Sentence(
             tokenization=tokenization,
             textSpan=sentence_textspan,
             uuid='TEST')

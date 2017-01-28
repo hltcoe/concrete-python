@@ -1,9 +1,10 @@
+from __future__ import unicode_literals
 import logging
 
-from concrete.access.ttypes import FetchResult
-from concrete.services.ttypes import ServiceInfo
-from concrete.util.access_wrapper import FetchCommunicationClientWrapper
-import concrete.version
+from ..access.ttypes import FetchResult
+from ..services.ttypes import ServiceInfo
+from .access_wrapper import FetchCommunicationClientWrapper
+from ..version import concrete_library_version
 
 
 class CommunicationContainerFetchHandler(object):
@@ -40,7 +41,7 @@ class CommunicationContainerFetchHandler(object):
         service_info = ServiceInfo()
         service_info.name = 'CommunicationContainerFetchHandler - %s' % \
                             type(self.communication_container)
-        service_info.version = concrete.version.concrete_library_version()
+        service_info.version = concrete_library_version()
         return service_info
 
     def alive(self):
@@ -67,7 +68,7 @@ class CommunicationContainerFetchHandler(object):
 
     def getCommunicationIDs(self, offset, count):
         logging.info('Received getCommunicationIDs() call')
-        return self.communication_container.keys()[offset:][:count]
+        return list(self.communication_container.keys())[offset:][:count]
 
 
 class RelayFetchHandler(object):

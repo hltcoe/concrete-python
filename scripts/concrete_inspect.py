@@ -9,6 +9,8 @@ Print human-readable information about a Communication to stdout
 concrete_inspect.py is a command-line script for printing out information
 about a Concrete Communication.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import argparse
 import codecs
@@ -25,9 +27,9 @@ sys.stderr.write('Please use concrete-inspect.py instead.\n')
 
 
 def print_header(header):
-    print
-    print header
-    print '-' * len(header)
+    print()
+    print(header)
+    print('-' * len(header))
 
 
 def print_header_if(header, condition):

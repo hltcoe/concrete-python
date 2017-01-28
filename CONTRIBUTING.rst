@@ -31,10 +31,12 @@ How to contribute code
    includes unit tests, integration tests, and style checks; if it
    fails, please find the error in the build log, fix it, and try
    again.
-8. If you've made multiple commits, please squash them and
+8. Add a line to ``CHANGELOG`` under the current version-in-progress
+   describing your changes simply and concisely.
+9. If you've made multiple commits, please squash them and
    ``git push -f`` to the feature branch.
-9. Create a merge request for your feature branch into ``master``,
-   referencing the Gitlab issue.
+10. Create a merge request for your feature branch into ``master``,
+    referencing the Gitlab issue.
 
 
 For maintainers

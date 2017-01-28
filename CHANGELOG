@@ -1,5 +1,32 @@
-4.12.5 (TBA)
+4.12.7 (TBA)
 
+
+4.12.6 (2017-01-28)
+
+* Refactor build, simplifying with tox.
+* Turn on public Appveyor and GitHub builds.
+* Remove hard numpy/scipy dependency in concrete.util.tokenization,
+  adding (slower) fallback implementations.
+* Add concrete.services.results to top-level package import.
+* Expand Windows test coverage to (most) integration tests.
+* Update package-level imports and use them in README.rst (as before).
+* Rename
+  annotate-communication-example.py to create-tokentagging-example.py.
+* Add Redis hash backed Communication container implementation.
+
+
+4.12.5 (2017-01-26)
+
+* Add command-line Fetch client, server scripts.
+* Add wrappers for all current Concrete (4.12) services.
+* Add Communication container interface and implementations:
+    - filesystem directory
+    - Fetch service
+    - file loaded into memory
+    - zip file
+* Increase flake8 max-line-length from 79 to 99.
+* Add note about accelerated protocol C++ dependency to README.rst.
+* Fix syntax error in CONTRIBUTING.rst.
 * Add CHANGELOG, AUTHORS.
 
 

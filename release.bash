@@ -42,6 +42,9 @@ confirm() {
     echo
 }
 
+echo -n "Is the CHANGELOG up to date (y/n)? "
+confirm
+
 echo
 echo "Tip of master log:"
 git log master | head

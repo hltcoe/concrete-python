@@ -1,6 +1,3 @@
-#!/usr/bin/env python2.7
-
-
 import os
 import sys
 
@@ -29,7 +26,3 @@ def test_imports():
                 file_path = os.path.join(parent_path, basename)
                 module_name = file_path[:-len('.py')].replace(os.sep, '.')
                 assert import_ok(module_name)
-
-
-if __name__ == '__main__':
-    test_imports()

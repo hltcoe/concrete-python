@@ -14,20 +14,28 @@ How to contribute code
 5. Run the test again, ensuring that it now passes.
 6. Run all tests and style checks, ensuring that they pass::
 
-       python setup.py test
-       bash check-style.bash
+       tox
+
+   Optionally, run integration tests (you must have Redis_ server
+   version 2.8 or later in your path; do ``redis-server --version``
+   to check)::
+
+       tox integration-tests
 
 7. Push your changes to a feature branch on Gitlab (e.g., called
    ``n-issue-abbrev`` where ``n`` is the issue number and
    ``issue-abbrev`` is a very short abbreviation of the issue title)
    and ensure that the build passes.  The build is defined in
-   ``.gitlab-ci.yml`` and includes unit tests, integration tests, and
-   style checks; if it fails, please find the error in the build log,
-   fix it, and try again.
+   ``.gitlab-ci.yml`` (``.travis.yml`` and ``appveyor.yml`` for public
+   builds); tox is configured in ``tox.ini``.  The build
+   includes unit tests, integration tests, and style checks; if it
+   fails, please find the error in the build log, fix it, and try
+   again.
 8. If you've made multiple commits, please squash them and
    ``git push -f`` to the feature branch.
 9. Create a merge request for your feature branch into ``master``,
    referencing the Gitlab issue.
+
 
 For maintainers
 ===============
@@ -109,3 +117,7 @@ working tree, raw (unpatched) generated code should be generated, and
 new patches should be produced and stored in ``patches/`` using
 ``git diff``.  See the arguments to ``generate.bash`` for generating
 the unpatched code.
+
+
+
+.. _Redis: http://redis.io

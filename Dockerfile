@@ -11,23 +11,22 @@ RUN yum install -y \
         libtool \
         m4 \
         make \
+        openssl \
+        openssl-devel \
+        openssl-libs \
         pkgconfig \
         python \
         python-devel \
-        tar
+        tar \
+        zlib \
+        zlib-devel
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
     pip install --upgrade setuptools && \
     pip install --upgrade setuptools && \
     pip install --upgrade \
-        flake8 \
-        numpy \
-        pytest \
-        pytest-cov \
-        pytest-mock \
-        redis \
-        scipy \
-        thrift==0.10.0
+        thrift==0.10.0 \
+        tox>=1.6.1
 
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}
@@ -41,6 +40,20 @@ RUN curl http://download.redis.io/releases/redis-3.2.0.tar.gz | tar -xz && \
     popd && \
     popd && \
     rm -rf redis-3.2.0
+
+RUN curl https://www.python.org/ftp/python/3.5.3/Python-3.5.3.tgz | tar -xz && \
+    pushd Python-3.5.3 && \
+    ./configure && \
+    make && \
+    make altinstall PREFIX=/usr/local && \
+    popd && \
+    rm -rf Python-3.5.3
+
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3.5 && \
+    pip3.5 install --upgrade setuptools && \
+    pip3.5 install --upgrade setuptools && \
+    pip3.5 install --upgrade \
+        thrift==0.10.0
 
 RUN ldconfig -v
 

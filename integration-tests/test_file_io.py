@@ -16,6 +16,9 @@ from pytest import fixture
 from tempfile import mkstemp
 
 
+TIME_MARGIN = 60 * 60
+
+
 @fixture
 def login_info():
     if os.name == 'nt':
@@ -436,9 +439,6 @@ def test_CommunicationWriter_fixed_point_unicode(output_file):
         with open(output_file, 'rb') as actual_f:
             actual_data = actual_f.read()
             assert expected_data == actual_data
-
-
-TIME_MARGIN = 60 * 60 * 24
 
 
 def test_CommunicationWriterTar_single_file(output_file, login_info):

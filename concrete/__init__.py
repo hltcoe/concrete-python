@@ -22,6 +22,7 @@ from metadata.ttypes import *  # noqa
 from nitf.ttypes import *  # noqa
 from search.ttypes import *  # noqa
 from services.ttypes import *  # noqa
+from services.results.ttypes import *  # noqa
 from situations.ttypes import *  # noqa
 from spans.ttypes import *  # noqa
 from structure.ttypes import *  # noqa

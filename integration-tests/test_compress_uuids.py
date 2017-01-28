@@ -3,6 +3,7 @@ from concrete.util.file_io import CommunicationReader
 from concrete.validate import validate_communication
 from concrete.util.concrete_uuid import compress_uuids
 import os
+import sys
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
 
@@ -30,6 +31,7 @@ def test_compress_uuids(output_file, args):
     input_file = 'tests/testdata/simple.tar.gz'
 
     p = Popen([
+        sys.executable,
         'scripts/compress-uuids.py',
         input_file,
         output_file

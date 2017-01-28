@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
-from pytest import fixture
+from pytest import fixture, mark
 from concrete.util.file_io import CommunicationReader
 from concrete.validate import validate_communication
 import os
+import sys
+import json
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
 
@@ -31,26 +33,28 @@ def log_conf(request):
     (fd, conf_path) = mkstemp()
     os.close(fd)
     with open(conf_path, 'w') as f:
-        f.write('''{
-  "version": 1,
-  "root": {
-    "level": "INFO",
-    "handlers": ["file"]
-  },
-  "formatters": {
-    "medium": {
-      "format": "%%(asctime)-15s %%(levelname)s: %%(message)s"
-    }
-  },
-  "handlers": {
-    "file": {
-      "class": "logging.FileHandler",
-      "formatter": "medium",
-      "filename": "%s"
-    }
-  }
-}
-''' % log_path)
+        json.dump(
+            dict(
+                version=1,
+                root=dict(
+                    level='INFO',
+                    handlers=['file'],
+                ),
+                formatters=dict(
+                    medium=dict(
+                        format='%(asctime)-15s %(levelname)s: %(message)s',
+                    ),
+                ),
+                handlers=dict(
+                    file={
+                        'class': 'logging.FileHandler',
+                        'formatter': 'medium',
+                        'filename': log_path,
+                    },
+                ),
+            ),
+            f
+        )
 
     def _remove():
         if os.path.exists(conf_path):
@@ -77,6 +81,7 @@ def output_file(request):
 
 def test_tweets2concrete(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         'tests/testdata/tweets.json',
         output_file
@@ -101,8 +106,10 @@ def test_tweets2concrete(output_file):
         assert False
 
 
+@mark.posix
 def test_tweets2concrete_stdin(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '-',
         output_file
@@ -128,8 +135,10 @@ def test_tweets2concrete_stdin(output_file):
         assert False
 
 
+@mark.posix
 def test_tweets2concrete_stdout(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         'tests/testdata/tweets.json',
         '-'
@@ -159,6 +168,7 @@ def test_tweets2concrete_stdout(output_file):
 
 def test_tweets2concrete_multiproc(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--num-proc', '2',
         'tests/testdata/tweets.json',
@@ -186,6 +196,7 @@ def test_tweets2concrete_multiproc(output_file):
 
 def test_tweets2concrete_log_every(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--log-level', 'INFO',
         '--log-interval', '1',
@@ -217,6 +228,7 @@ def test_tweets2concrete_log_every(output_file):
 
 def test_tweets2concrete_unicode(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         'tests/testdata/tweets.unicode.json',
         output_file
@@ -244,6 +256,7 @@ def test_tweets2concrete_unicode(output_file):
 
 def test_tweets2concrete_gz(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         'tests/testdata/tweets.json.gz',
         output_file
@@ -270,6 +283,7 @@ def test_tweets2concrete_gz(output_file):
 
 def test_tweets2concrete_incomplete_gz(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--catch-ioerror',
         'tests/testdata/tweets.json.incomplete.gz',
@@ -297,6 +311,7 @@ def test_tweets2concrete_incomplete_gz(output_file):
 
 def test_tweets2concrete_incomplete_gz_multiproc(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--num-proc', '2',
         '--catch-ioerror',
@@ -326,6 +341,7 @@ def test_tweets2concrete_incomplete_gz_multiproc(output_file):
 def test_tweets2concrete_log_config(log_conf, output_file):
     (log_conf_path, log_path) = log_conf
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--log-conf-path', log_conf_path,
         '--log-interval', '1',
@@ -333,9 +349,9 @@ def test_tweets2concrete_log_config(log_conf, output_file):
         output_file
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
+    assert stdout == ''
+    assert stderr == ''
     assert p.returncode == 0
-    assert len(stdout) == 0
-    assert len(stderr) == 0
 
     with open(log_path) as f:
         data = f.read()
@@ -362,6 +378,7 @@ def test_tweets2concrete_log_config(log_conf, output_file):
 
 def test_tweets2concrete_deleted(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         'tests/testdata/tweets.deleted.json',
         output_file
@@ -388,6 +405,7 @@ def test_tweets2concrete_deleted(output_file):
 
 def test_tweets2concrete_bad_line(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--skip-bad-lines',
         'tests/testdata/tweets.bad-line.json',
@@ -415,6 +433,7 @@ def test_tweets2concrete_bad_line(output_file):
 
 def test_tweets2concrete_bad_line_unicode(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--skip-bad-lines',
         'tests/testdata/tweets.bad-line-unicode.json',
@@ -442,6 +461,7 @@ def test_tweets2concrete_bad_line_unicode(output_file):
 
 def test_tweets2concrete_invalid(output_file):
     p = Popen([
+        sys.executable,
         'scripts/tweets2concrete.py',
         '--skip-invalid-comms',
         'tests/testdata/tweets.invalid.json',

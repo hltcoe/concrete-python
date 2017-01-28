@@ -1,3 +1,4 @@
-flake8
-mock
-pytest
+mock>=2.0.0
+pytest>=3.0.0
+pytest-cov>=2.4.0
+pytest-platform-markers>=0.1.0

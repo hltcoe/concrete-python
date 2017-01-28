@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
-from pytest import fixture
+from pytest import fixture, mark
 from concrete.util.file_io import CommunicationReader
 from concrete.validate import validate_communication
 import os
+import sys
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
 
@@ -79,6 +80,7 @@ def output_file(request):
 
 def test_create_comm_tarball(output_file, text_l0, text_l1):
     p = Popen([
+        sys.executable,
         'scripts/create-comm-tarball.py',
         'tests/testdata/les-deux-chandeliers.tar.gz',
         output_file
@@ -109,8 +111,10 @@ def test_create_comm_tarball(output_file, text_l0, text_l1):
         assert False
 
 
+@mark.posix
 def test_create_comm_tarball_stdin(output_file, text_l0, text_l1):
     p = Popen([
+        sys.executable,
         'scripts/create-comm-tarball.py',
         '-',
         output_file
@@ -142,8 +146,10 @@ def test_create_comm_tarball_stdin(output_file, text_l0, text_l1):
         assert False
 
 
+@mark.posix
 def test_create_comm_tarball_stdout(output_file, text_l0, text_l1):
     p = Popen([
+        sys.executable,
         'scripts/create-comm-tarball.py',
         'tests/testdata/les-deux-chandeliers.tar.gz',
         '-'
@@ -179,6 +185,7 @@ def test_create_comm_tarball_stdout(output_file, text_l0, text_l1):
 
 def test_create_comm_tarball_log_every(output_file, text_l0, text_l1):
     p = Popen([
+        sys.executable,
         'scripts/create-comm-tarball.py',
         '--log-level', 'INFO',
         '--log-interval', '1',
@@ -216,6 +223,7 @@ def test_create_comm_tarball_log_every(output_file, text_l0, text_l1):
 
 def test_create_comm_tarball_annotated(output_file, text_l0, text_l1):
     p = Popen([
+        sys.executable,
         'scripts/create-comm-tarball.py',
         '--annotation-level', 'section',
         'tests/testdata/les-deux-chandeliers.tar.gz',
@@ -251,6 +259,7 @@ def test_create_comm_tarball_per_line(output_file, text_l0,
                                       text_l1_s0, text_l1_s1, text_l1_s2,
                                       text_l1_s3, text_l1_s4):
     p = Popen([
+        sys.executable,
         'scripts/create-comm-tarball.py',
         '--per-line',
         'tests/testdata/les-deux-chandeliers-perline.tar.gz',

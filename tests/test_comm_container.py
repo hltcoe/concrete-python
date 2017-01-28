@@ -10,6 +10,7 @@ from concrete.util.mem_io import write_communication_to_buffer
 from concrete.validate import validate_communication
 
 from pytest import raises, fixture
+import mock
 
 
 @fixture
@@ -60,9 +61,9 @@ def test_zip_file_backed_comm_container_retrieve():
         assert validate_communication(comm)
 
 
-def test_redis_hash_backed_comm_container_len(mocker, comm_id_and_buf):
-    redis_db = mocker.Mock()
-    key = mocker.sentinel
+def test_redis_hash_backed_comm_container_len(comm_id_and_buf):
+    redis_db = mock.Mock()
+    key = mock.sentinel
     (comm_id, comm_buf) = comm_id_and_buf
     cc = RedisHashBackedCommunicationContainer(redis_db, key)
 
@@ -71,9 +72,9 @@ def test_redis_hash_backed_comm_container_len(mocker, comm_id_and_buf):
     redis_db.hlen.assert_called_once_with(key)
 
 
-def test_redis_hash_backed_comm_container_contains(mocker, comm_id_and_buf):
-    redis_db = mocker.Mock()
-    key = mocker.sentinel
+def test_redis_hash_backed_comm_container_contains(comm_id_and_buf):
+    redis_db = mock.Mock()
+    key = mock.sentinel
     (comm_id, comm_buf) = comm_id_and_buf
     cc = RedisHashBackedCommunicationContainer(redis_db, key)
 
@@ -82,10 +83,9 @@ def test_redis_hash_backed_comm_container_contains(mocker, comm_id_and_buf):
     redis_db.hexists.assert_called_once_with(key, comm_id + 'x')
 
 
-def test_redis_hash_backed_comm_container_not_contains(mocker,
-                                                       comm_id_and_buf):
-    redis_db = mocker.Mock()
-    key = mocker.sentinel
+def test_redis_hash_backed_comm_container_not_contains(comm_id_and_buf):
+    redis_db = mock.Mock()
+    key = mock.sentinel
     (comm_id, comm_buf) = comm_id_and_buf
     cc = RedisHashBackedCommunicationContainer(redis_db, key)
 
@@ -94,9 +94,9 @@ def test_redis_hash_backed_comm_container_not_contains(mocker,
     redis_db.hexists.assert_called_once_with(key, comm_id)
 
 
-def test_redis_hash_backed_comm_container_not_getitem(mocker, comm_id_and_buf):
-    redis_db = mocker.Mock()
-    key = mocker.sentinel
+def test_redis_hash_backed_comm_container_not_getitem(comm_id_and_buf):
+    redis_db = mock.Mock()
+    key = mock.sentinel
     (comm_id, comm_buf) = comm_id_and_buf
     cc = RedisHashBackedCommunicationContainer(redis_db, key)
 

@@ -4,6 +4,7 @@ from concrete.structure.ttypes import TokenizationKind
 from concrete.util.unnone import lun
 
 from collections import deque
+from math import log, exp
 
 
 def get_tokens(tokenization, suppress_warnings=False):
@@ -144,12 +145,19 @@ def _lattice_to_fsm(lattice):
     return (fsm, bkFsm, tokens, states)
 
 
+def _logsumexp(a):
+    try:
+        from scipy.misc import logsumexp
+        return logsumexp(a)
+    except ImportError:
+        m = max(a)
+        return m + log(sum(map(lambda x: exp(x - m), a)))
+
+
 def _calc_marginal_in_log_prob(fsm, states, start, end):
     '''
     Calculate marginal in-log-probability of each state.
     '''
-
-    from scipy.misc import logsumexp
 
     alpha = {}
     alpha[start] = 0.
@@ -169,7 +177,7 @@ def _calc_marginal_in_log_prob(fsm, states, start, end):
                 state_queue.append(dst)
                 alpha[dst] = float('-inf')
             for token, wt in tokenWts:
-                alpha[dst] = logsumexp([alpha[dst], alpha[currState] + wt])
+                alpha[dst] = _logsumexp([alpha[dst], alpha[currState] + wt])
 
     return alpha
 
@@ -184,8 +192,6 @@ def compute_lattice_expected_counts(lattice):
     tokenIndex i.
     Input arc weights are treated as unnormalized log-probabilities.
     '''
-
-    from scipy.misc import logsumexp
 
     (fsm, bkFsm, tokens, states) = _lattice_to_fsm(lattice)
     alpha = _calc_marginal_in_log_prob(fsm, states,
@@ -213,7 +219,7 @@ def compute_lattice_expected_counts(lattice):
 
     if expectedCounts:
         return [
-            (logsumexp(expectedCounts[idx]) if idx in expectedCounts else None)
+            (_logsumexp(expectedCounts[idx]) if idx in expectedCounts else None)
             for idx in xrange(max(expectedCounts) + 1)
         ]
     else:

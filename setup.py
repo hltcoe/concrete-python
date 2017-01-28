@@ -42,9 +42,6 @@ if __name__ == '__main__':
         scripts=glob.glob('scripts/*')
                   + glob.glob('concrete/services/*-remote'),
 
-        setup_requires=['pytest-runner'],
-        tests_require=['pytest', 'pytest-mock', 'pytest-cov', 'flake8'],
-
         install_requires=[
             'humanfriendly',
             'networkx',
@@ -56,5 +53,27 @@ if __name__ == '__main__':
         ],
 
         url="https://github.com/hltcoe/concrete-python",
-        license="BSD",
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            #'Development Status :: 5 - Production/Stable',
+            'Environment :: Console',
+            'Environment :: No Input/Output (Daemon)',
+            'Intended Audience :: Developers',
+            'Intended Audience :: Education',
+            'Intended Audience :: Science/Research',
+            'License :: OSI Approved :: BSD License',
+            'Natural Language :: English',
+            #'Operating System :: MacOS :: MacOS X',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX :: Linux',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 2 :: Only',
+            #'Programming Language :: Python :: 3.5',
+            'Topic :: Database :: Front-Ends',
+            'Topic :: Multimedia :: Sound/Audio :: Speech',
+            'Topic :: Scientific/Engineering :: Artificial Intelligence',
+            'Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator',
+            'Topic :: Text Processing :: Linguistic',
+            'Topic :: Utilities',
+        ],
     )

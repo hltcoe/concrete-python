@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
-from pytest import fixture
+from pytest import fixture, mark
 from concrete.util.file_io import CommunicationReader
 from concrete.validate import validate_communication
 import os
+import sys
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
 
@@ -38,6 +39,7 @@ def output_file(request):
 
 def test_create_comm(output_file, text):
     p = Popen([
+        sys.executable,
         'scripts/create-comm.py',
         'tests/testdata/les-deux-chandeliers.txt',
         output_file
@@ -62,8 +64,10 @@ def test_create_comm(output_file, text):
         assert False
 
 
+@mark.posix
 def test_create_comm_stdin(output_file, text):
     p = Popen([
+        sys.executable,
         'scripts/create-comm.py',
         '-',
         output_file
@@ -89,8 +93,10 @@ def test_create_comm_stdin(output_file, text):
         assert False
 
 
+@mark.posix
 def test_create_comm_stdout(output_file, text):
     p = Popen([
+        sys.executable,
         'scripts/create-comm.py',
         'tests/testdata/les-deux-chandeliers.txt',
         '-'
@@ -120,6 +126,7 @@ def test_create_comm_stdout(output_file, text):
 
 def test_create_comm_annotated(output_file, text):
     p = Popen([
+        sys.executable,
         'scripts/create-comm.py',
         '--annotation-level', 'section',
         'tests/testdata/les-deux-chandeliers.txt',

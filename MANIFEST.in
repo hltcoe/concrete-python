@@ -2,12 +2,10 @@ recursive-include tests *
 exclude tests/testdata/create_simple_communications.py
 recursive-include examples *
 recursive-include integration-tests *
-include LICENSE
-include pytest.ini
-include README.rst
+include .flake8
 include AUTHORS
 include CHANGELOG
-include requirements.txt
+include LICENSE
+include README.rst
 include test-requirements.txt
 include tox.ini
-include Dockerfile

@@ -3,8 +3,10 @@ version: '{build}-{branch}'
 skip_branch_with_pr: false
 
 install:
-- set PATH=C:\Python27-x64\scripts;C:\Python27-x64;%PATH%
-- pip install pytest
+- nuget install redis-64 -excludeversion
+- set PATH=C:\Python27-x64\scripts;C:\Python27-x64;C:\Python35-x64\scripts;C:\Python35-x64;redis-64\tools;%PATH%
+- pip install tox
 
 build_script:
-- python setup.py test
+- tox
+- tox integration-tests

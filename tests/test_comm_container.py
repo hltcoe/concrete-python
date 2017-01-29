@@ -35,7 +35,7 @@ def test_directory_backed_comm_container_retrieve():
         assert validate_communication(comm)
 
 
-def test_memory_backed_comm_container_filesize_check():
+def test_memory_backed_comm_container_file_too_large():
     comm_path = u'tests/testdata/simple.tar.gz'
     with raises(Exception):
         MemoryBackedCommunicationContainer(comm_path, max_file_size=500)

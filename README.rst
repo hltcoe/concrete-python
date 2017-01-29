@@ -51,25 +51,25 @@ The Concrete Python package installs a number of scripts, including:
     (such as tokens, POS and NER tags, Entities, Situations, etc) to
     stdout.  This script is a command-line wrapper around the
     functionality in the ``concrete.inspect`` library.
-    
+
 ``create-comm.py``
     reads in a text file, parses it into sections and sentences based
     on whitespace, and writes it out as a Concrete Communication.
-    
+
 ``create-comm-tarball.py``
     reads in a tar.gz archive of text files, parses them into sections and
     sentence based on whitespace, and writes them back out as Concrete
     Communications in another tar.gz archive.
-    
+
 ``fetch-client.py``
     connects to a FetchCommunicationService, retrieves one or more
     Communications (as specified on the command line), and writes them
     to disk.
-    
+
 ``fetch-server.py``
     implements FetchCommunicationService, serving Communications to
     clients from a file or directory of Communications on disk.
-    
+
 ``search-client.py``
     connects to a SearchService, reading queries from the console and
     printing out results as Communication ids in a loop.

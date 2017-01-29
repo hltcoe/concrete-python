@@ -38,20 +38,41 @@ or by cloning the repository and running ``setup.py``::
 
     git clone https://github.com/hltcoe/concrete-python.git
     cd concrete-python
-    python setup.py test
     python setup.py install
 
 Useful Scripts
 --------------
 
-The Concrete Python package comes with three scripts:
+The Concrete Python package installs a number of scripts, including:
 
-``concrete_inspect.py``
+``concrete-inspect.py``
     reads in a Concrete Communication and prints
     out human-readable information about the Communication's contents
     (such as tokens, POS and NER tags, Entities, Situations, etc) to
     stdout.  This script is a command-line wrapper around the
     functionality in the ``concrete.inspect`` library.
+    
+``create-comm.py``
+    reads in a text file, parses it into sections and sentences based
+    on whitespace, and writes it out as a Concrete Communication.
+    
+``create-comm-tarball.py``
+    reads in a tar.gz archive of text files, parses them into sections and
+    sentence based on whitespace, and writes them back out as Concrete
+    Communications in another tar.gz archive.
+    
+``fetch-client.py``
+    connects to a FetchCommunicationService, retrieves one or more
+    Communications (as specified on the command line), and writes them
+    to disk.
+    
+``fetch-server.py``
+    implements FetchCommunicationService, serving Communications to
+    clients from a file or directory of Communications on disk.
+    
+``search-client.py``
+    connects to a SearchService, reading queries from the console and
+    printing out results as Communication ids in a loop.
 
 ``concrete2json.py``
     reads in a Concrete Communication and prints a
@@ -59,7 +80,7 @@ The Concrete Python package comes with three scripts:
     printed" with indentation and whitespace, which makes the JSON
     easier to read and to use for diffs.
 
-``validate_communication.py``
+``validate-communication.py``
     reads in a Concrete Communication file and prints out information
     about any invalid fields.  This script is a command-line wrapper
     around the functionality in the ``concrete.validate`` library.

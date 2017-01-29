@@ -28,7 +28,7 @@ def main():
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
-    # Won't work on Windows... but that use case is very unlikely
+    # Won't work on Windows
     if args.communication_file is None:
         reader_kwargs = dict(filetype=FileType.STREAM)
         input_path = '/dev/fd/0'

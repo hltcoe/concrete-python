@@ -66,7 +66,7 @@ def main():
     concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
-    # Won't work on Windows... but that use case is very unlikely
+    # Won't work on Windows
     input_path = '/dev/fd/0' if ns.input_path == '-' else ns.input_path
     output_path = '/dev/fd/1' if ns.output_path == '-' else ns.output_path
 

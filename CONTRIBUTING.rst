@@ -53,35 +53,14 @@ recommended way of maintaining this is to do all work in feature
 branches that are kept up-to-date with master and pushed to GitLab,
 waiting for CI to finish before merging.
 
-All stable versions can be (and are) released to PyPI.  In between
-these, beta versions are used to denote significant changes to the code
-that we wish to deploy to users tracking master.
-
-The script ``release.bash`` can automate the release process.  It
-should be run after all changes are committed to master and CI has
-passed, but before the version (in ``concrete/version.py``) has been
-incremented to a stable version.
-
-For example, if the version in ``concrete/version.py`` is 4.13.4b7, to
-release 4.13.4, ``release.bash`` does the following:
-
-* ``git reset --hard``
-* ``git clean -f -d -x``
-* Increase master version to 4.13.4 and commit
-* ``python setup.py sdist``
-* ``twine upload dist/*``
-* ``git tag -am v4.13.4 v4.13.4``
-* Increase master version to 4.13.5b0 and commit
-* ``git push gitlab master v4.13.4``
-
-In words, we clean the repository, update to a stable version number
-and commit, build the release tarball, upload the release tarball to
-PyPI, tag the release, update to the next beta version number and
-commit (so that subsequent development on master is linked to the next
-version), and push the release tag and the new development version of
-master to GitLab.
-
-Run ``bash release.bash -h`` for usage information.
+We use zest.releaser_ to manage versions, the ``CHANGELOG``, and
+releases.  (Making a new release is a many-step process that requires
+great care; doing so by hand is strongly discouraged.)
+Using zest.releaser, stable versions are released to PyPI
+and master is kept on a development version number (so that a stable
+version number never represents more than one snapshot of the code).
+To make a new release install zest.releaser
+(``pip install zest.releaser``) and run ``fullrelease``.
 
 Testing PyPI releases
 ---------------------
@@ -116,7 +95,7 @@ thrift (whose entries were removed from the schema).
 ``patches/``) document where it (thrift) falls short on the
 previously-compiled schema.  Additionally, if new packages
 (namespaces) are added to the schema, they must be added to
-``setup.py``, ``.flake8``, and ``concrete/__init__.py``.
+``setup.py``, ``setup.cfg``, and ``concrete/__init__.py``.
 
 If ``generate.bash`` throws an error, the
 necessary changes should be performed manually and checked in to the
@@ -130,3 +109,4 @@ the unpatched code.
 
 .. _GitHub: https://github.com/hltcoe/concrete-python
 .. _Redis: http://redis.io
+.. _zest.releaser: http://zestreleaser.readthedocs.io/en/latest/overview.html

@@ -5,7 +5,7 @@ import re
 
 VERSION_FILE_PATH = 'concrete/version.py'
 VERSION_RE = re.compile(
-    r'^__version__ = (?P<quote>[\'"])(?P<version>[0-9]+\.[0-9]+\.[0-9]+(?:b[0-9]+)?)(?P=quote)$'
+    r'^__version__ = (?P<quote>[\'"])(?P<version>[0-9]+\.[0-9]+\.[0-9]+(?:\.dev[0-9]+)?)(?P=quote)$'
 )
 
 
@@ -15,7 +15,7 @@ def get_version():
             m = VERSION_RE.match(line.rstrip())
             if m is not None:
                 return m.group('version')
-    raise Exception('unable to determinte version from %s' % VERSION_FILE_PATH)
+    raise Exception('unable to determine version from %s' % VERSION_FILE_PATH)
 
 
 if __name__ == '__main__':

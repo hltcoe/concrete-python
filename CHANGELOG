@@ -1,94 +1,123 @@
-4.12.7 (TBA)
+4.12.7 (unreleased)
+-------------------
 
-* Add Python 3 support.
+- Add Python 3 support.
 
 
 4.12.6 (2017-01-28)
+-------------------
 
-* Refactor build, simplifying with tox.
-* Turn on public Appveyor and GitHub builds.
-* Remove hard numpy/scipy dependency in concrete.util.tokenization,
+- Refactor build, simplifying with tox.
+
+- Turn on public Appveyor and GitHub builds.
+
+- Remove hard numpy/scipy dependency in concrete.util.tokenization,
   adding (slower) fallback implementations.
-* Add concrete.services.results to top-level package import.
-* Expand Windows test coverage to (most) integration tests.
-* Update package-level imports and use them in README.rst (as before).
-* Rename
+
+- Add concrete.services.results to top-level package import.
+
+- Expand Windows test coverage to (most) integration tests.
+
+- Update package-level imports and use them in README.rst (as before).
+
+- Rename
   annotate-communication-example.py to create-tokentagging-example.py.
-* Add Redis hash backed Communication container implementation.
+
+- Add Redis hash backed Communication container implementation.
 
 
 4.12.5 (2017-01-26)
+-------------------
 
-* Add command-line Fetch client, server scripts.
-* Add wrappers for all current Concrete (4.12) services.
-* Add Communication container interface and implementations:
+- Add command-line Fetch client, server scripts.
+
+- Add wrappers for all current Concrete (4.12) services.
+
+- Add Communication container interface and implementations:
     - filesystem directory
     - Fetch service
     - file loaded into memory
     - zip file
-* Increase flake8 max-line-length from 79 to 99.
-* Add note about accelerated protocol C++ dependency to README.rst.
-* Fix syntax error in CONTRIBUTING.rst.
-* Add CHANGELOG, AUTHORS.
+
+- Increase flake8 max-line-length from 79 to 99.
+
+- Add note about accelerated protocol C++ dependency to README.rst.
+
+- Fix syntax error in CONTRIBUTING.rst.
+
+- Add CHANGELOG, AUTHORS.
 
 
 4.12.4 (2017-01-15)
+-------------------
 
-* Deprecate remaining scripts containing underscores (to be removed in
+- Deprecate remaining scripts containing underscores (to be removed in
   the future):
     - concrete_inspect.py
     - concrete_diff.py
     - validate_communication.py
     - inspect_dependency_parses.py
-* Add new scripts using hyphens instead of underscores, for easy typing:
+
+- Add new scripts using hyphens instead of underscores, for easy typing:
     - concrete-inspect.py
     - concrete-diff.py
     - validate-communication.py
     - inspect-dependency-parses.py
-* Fix import errors in new AnnotateCommunicationService scripts:
+
+- Fix import errors in new AnnotateCommunicationService scripts:
     - examples/annotate-communication-service.py
     - scripts/annotate-communication-client.py
-* Add check for accelerated protocol.  This can be used directly as
+
+- Add check for accelerated protocol.  This can be used directly as
   concrete.util.thrift_factory.is_accelerated(); acceleration is also
   now reported in the version string reported by scripts (when the
   --version flag is passed).
 
 
 4.12.3 (2017-01-15)
+-------------------
 
-* Select accelerated compact protocol in thrift_factory.  The
+- Select accelerated compact protocol in thrift_factory.  The
   accelerated protocol will now be used by default; if it is not
   supported, Thrift will fall back to the unaccelerated protocol.
-* Switch to reStructuredText in README and CONTRIBUTING to improve look
+
+- Switch to reStructuredText in README and CONTRIBUTING to improve look
   and feel on PyPI.
 
 
 4.12.2 (2017-01-15)
+-------------------
 
-* Update to Thrift 0.10.0.
+- Update to Thrift 0.10.0.
     - __hash__ implementations are removed for mutable objects,
       including all Concrete types.  This is in response to the existing
       __hash__ implementation breaking on lists and other mutable
       container types.
-* Remove accel branch from documentation and build.  Thrift 0.10.0
+
+- Remove accel branch from documentation and build.  Thrift 0.10.0
   includes the accelerated compact protocol, so the accelerated
   protocol is now available on Concrete-Python master and installations
   using pip.
     - The accel branch is now defunct; 4.12.1 is the final release on
       the accel branch.
-* Add g++ to Docker image, needed to build accelerated protocols.
-* Rename build.bash to generate.bash (affects maintainers only).
+
+- Add g++ to Docker image, needed to build accelerated protocols.
+
+- Rename build.bash to generate.bash (affects maintainers only).
 
 
 4.12.1 (2017-01-15)
+-------------------
 
-* accel branch corresponding to 4.12.0.
+- accel branch corresponding to 4.12.0.
 
 
 4.12.0 (2017-01-15)
+-------------------
 
-* Update to concrete 4.12 schema.
-* Remove wrappers and scripts interfacing with the Annotator service
+- Update to concrete 4.12 schema.
+
+- Remove wrappers and scripts interfacing with the Annotator service
   removed in the 4.12 schema:
     - concrete.util.annotator_wrapper.AnnotatorClientWrapper
     - concrete.util.annotator_wrapper.AnnotatorServiceWrapper
@@ -96,7 +125,8 @@
     - examples/annotate_example.py
     - examples/annotator_server.py
     - scripts/annotator_client.py
-* Add wrappers and scripts interfacing with the
+
+- Add wrappers and scripts interfacing with the
   AnnotateCommunicationService (replacing the Annotator service):
     - concrete.util.annotate_wrapper.AnnotateCommunicationClientWrapper
     - concrete.util.annotate_wrapper.AnnotateCommunicationServiceWrapper
@@ -104,5 +134,7 @@
     - examples/annotate-communication-example.py
     - examples/annotate-communication-service.py
     - scripts/annotate-communication-client.py
-* Rename search_client.py to search-client.py.
-* Remove deprecated compress-uuids, tweets2concrete scripts.
+
+- Rename search_client.py to search-client.py.
+
+- Remove deprecated compress-uuids, tweets2concrete scripts.

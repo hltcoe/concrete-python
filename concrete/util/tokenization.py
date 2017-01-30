@@ -72,12 +72,16 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
         raise Exception('More than one matching %s tagging.' % tagging_type)
 
 
-def get_lemmas(t):
-    return get_tagged_tokens(t, 'LEMMA')
+def get_lemmas(t, tool=None):
+    return get_tagged_tokens(t, 'LEMMA', tool=tool)
 
 
-def get_pos(t):
-    return get_tagged_tokens(t, 'POS')
+def get_pos(t, tool=None):
+    return get_tagged_tokens(t, 'POS', tool=tool)
+
+
+def get_ner(t, tool=None):
+    return get_tagged_tokens(t, 'NER', tool=tool)
 
 
 def plus(x, y):

@@ -5,14 +5,17 @@ from math import exp, log
 
 from concrete import (
     TokenizationKind, TokenLattice, LatticePath, Token,
-    TokenTagging, TaggedToken, Tokenization, Arc
+    TokenTagging, TaggedToken, Tokenization, Arc,
+    AnnotationMetadata
 )
 
 from concrete.util import create_comm
 from concrete.util import (
-    get_tokens, get_pos, get_lemmas, get_tagged_tokens,
+    get_tokens, get_ner, get_pos, get_lemmas, get_tagged_tokens,
     compute_lattice_expected_counts
 )
+
+import mock
 
 
 def allclose(x, y, rel_tol=1e-6, abs_tol=1e-9):
@@ -30,6 +33,7 @@ def tokenization(request):
     return Tokenization(
         tokenTaggingList=[
             TokenTagging(
+                metadata=AnnotationMetadata(tool='x'),
                 taggingType='?',
                 taggedTokenList=[
                     TaggedToken(tokenIndex=0, tag='?'),
@@ -38,6 +42,7 @@ def tokenization(request):
                 ],
             ),
             TokenTagging(
+                metadata=AnnotationMetadata(tool='x'),
                 taggingType='POS',
                 taggedTokenList=[
                     TaggedToken(tokenIndex=0, tag='N'),
@@ -46,6 +51,7 @@ def tokenization(request):
                 ],
             ),
             TokenTagging(
+                metadata=AnnotationMetadata(tool='y'),
                 taggingType='NUMERAL',
                 taggedTokenList=[
                     TaggedToken(tokenIndex=0, tag='N'),
@@ -54,6 +60,7 @@ def tokenization(request):
                 ],
             ),
             TokenTagging(
+                metadata=AnnotationMetadata(tool='y'),
                 taggingType='LEMMA',
                 taggedTokenList=[
                     TaggedToken(tokenIndex=0, tag='mambo'),
@@ -70,64 +77,28 @@ def test_get_tokens_invalid_kind():
         get_tokens(Tokenization(kind='invalid-kind'))
 
 
-def test_get_pos(tokenization):
-    assert ['N', 'N', 'X'] == list(map(lambda t: t.tag, get_pos(tokenization)))
-    assert [0, 1, 2] == list(map(lambda t: t.tokenIndex, get_pos(tokenization)))
+@mock.patch('concrete.util.tokenization.get_tagged_tokens')
+def test_get_pos(mock_get_tagged_tokens):
+    tokenization = mock.sentinel
+    tool = mock.sentinel
+    get_pos(tokenization, tool=tool)
+    mock_get_tagged_tokens.assert_called_with(tokenization, 'POS', tool=tool)
 
 
-def test_get_pos_no_tagging(tokenization):
-    tokenization.tokenTaggingList = filter(
-        lambda ttl: ttl.taggingType != 'POS',
-        tokenization.tokenTaggingList
-    )
-    with raises(Exception):
-        get_pos(tokenization)
+@mock.patch('concrete.util.tokenization.get_tagged_tokens')
+def test_get_lemmas(mock_get_tagged_tokens):
+    tokenization = mock.sentinel
+    tool = mock.sentinel
+    get_lemmas(tokenization, tool=tool)
+    mock_get_tagged_tokens.assert_called_with(tokenization, 'LEMMA', tool=tool)
 
 
-def test_get_pos_non_unique_tagging(tokenization):
-    tokenization.tokenTaggingList.append(
-        TokenTagging(
-            taggingType='POS',
-            taggedTokenList=[
-                TaggedToken(tokenIndex=0, tag='N'),
-                TaggedToken(tokenIndex=1, tag='X'),
-                TaggedToken(tokenIndex=2, tag='N'),
-            ],
-        ),
-    )
-    with raises(Exception):
-        get_pos(tokenization)
-
-
-def test_get_lemmas(tokenization):
-    assert ['mambo', 'number', '4'] == list(map(
-        lambda t: t.tag,
-        get_lemmas(tokenization)))
-    assert [0, 1, 2] == list(map(lambda t: t.tokenIndex, get_lemmas(tokenization)))
-
-
-def test_get_lemmas_no_tagging(tokenization):
-    tokenization.tokenTaggingList = filter(
-        lambda ttl: ttl.taggingType != 'LEMMA',
-        tokenization.tokenTaggingList
-    )
-    with raises(Exception):
-        get_lemmas(tokenization)
-
-
-def test_get_lemmas_non_unique_tagging(tokenization):
-    tokenization.tokenTaggingList.append(
-        TokenTagging(
-            taggingType='LEMMA',
-            taggedTokenList=[
-                TaggedToken(tokenIndex=0, tag='mambo'),
-                TaggedToken(tokenIndex=1, tag='number'),
-                TaggedToken(tokenIndex=2, tag='four'),
-            ],
-        ),
-    )
-    with raises(Exception):
-        get_lemmas(tokenization)
+@mock.patch('concrete.util.tokenization.get_tagged_tokens')
+def test_get_ner(mock_get_tagged_tokens):
+    tokenization = mock.sentinel
+    tool = mock.sentinel
+    get_ner(tokenization, tool=tool)
+    mock_get_tagged_tokens.assert_called_with(tokenization, 'NER', tool=tool)
 
 
 def test_get_tagged_tokens(tokenization):
@@ -161,6 +132,31 @@ def test_get_tagged_tokens_non_unique_tagging(tokenization):
     )
     with raises(Exception):
         get_tagged_tokens(tokenization, 'NUMERAL')
+
+
+def test_get_tagged_tokens_non_unique_tagging_specify_tool(tokenization):
+    tokenization.tokenTaggingList.append(
+        TokenTagging(
+            metadata=AnnotationMetadata(tool='z'),
+            taggingType='NUMERAL',
+            taggedTokenList=[
+                TaggedToken(tokenIndex=0, tag='N'),
+                TaggedToken(tokenIndex=1, tag='Y'),
+                TaggedToken(tokenIndex=2, tag='Y'),
+            ],
+        ),
+    )
+    assert ['N', 'N', 'Y'] == list(map(
+        lambda t: t.tag,
+        get_tagged_tokens(tokenization, 'NUMERAL', tool='y')))
+    assert [0, 1, 2] == list(map(
+        lambda t: t.tokenIndex,
+        get_tagged_tokens(tokenization, 'NUMERAL', tool='y')))
+
+
+def test_get_tagged_tokens_no_tagging_specify_tool(tokenization):
+    with raises(Exception):
+        get_tagged_tokens(tokenization, 'NUMERAL', tool='z')
 
 
 def test_no_lattice():

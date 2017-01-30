@@ -266,7 +266,7 @@ class SimpleCommTempFile(object):
             sentence_fmt: format string used to generate communication
                     IDs; should contain one instance of %d, which will
                     be replaced by the number of the communication
-            writer_class: CommunicationWriter or CommunicationTGZWriter
+            writer_class: CommunicationWriter or CommunicationWriterTGZ
             suffix: file path suffix (you probably want to choose this
                     to match writer_class)
         '''

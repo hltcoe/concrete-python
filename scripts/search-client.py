@@ -12,6 +12,17 @@ from concrete.util.search_wrapper import SearchClientWrapper
 import concrete.version
 
 
+def print_search_result(result, http_lookup_url):
+    for result_item in result.searchResultItems:
+        if http_lookup_url:
+            print(requests.get(
+                http_lookup_url %
+                result_item.communicationId
+            ).text)
+        else:
+            print(result_item.communicationId)
+
+
 def main():
     set_stdout_encoding()
 
@@ -40,13 +51,14 @@ def main():
                         help="Print output of searchService.getCapabilities()")
     parser.add_argument("--corpora", action="store_true",
                         help="Print output of searchService.getCorpora()")
+    parser.add_argument("terms", nargs="*")
     concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
     with SearchClientWrapper(ns.host, ns.port) as client:
         interactive_mode = True
 
-        if ns.about or ns.alive or ns.capabilities or ns.corpora:
+        if ns.about or ns.alive or ns.capabilities or ns.corpora or ns.terms:
             interactive_mode = False
 
         if ns.about:
@@ -72,15 +84,14 @@ def main():
                                         terms=terms,
                                         type=SearchType.COMMUNICATIONS,
                                         userId=ns.user_id)
-                    result = client.search(query)
-                    for result_item in result.searchResultItems:
-                        if ns.http_lookup_url:
-                            print(requests.get(
-                                ns.http_lookup_url %
-                                result_item.communicationId
-                            ).text)
-                        else:
-                            print(result_item.communicationId)
+                    print_search_result(client.search(query), ns.http_lookup_url)
+        elif ns.terms:
+            query = SearchQuery(k=ns.k,
+                                rawQuery=' '.join(ns.terms),
+                                terms=ns.terms,
+                                type=SearchType.COMMUNICATIONS,
+                                userId=ns.user_id)
+            print_search_result(client.search(query), None)
 
 
 if __name__ == '__main__':

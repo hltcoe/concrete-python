@@ -2,12 +2,14 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
-import concrete.version
-import requests
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from concrete.util.search_wrapper import SearchClientWrapper
+
+import requests
+
 from concrete.search.ttypes import SearchQuery, SearchType
 from concrete.util import set_stdout_encoding
+from concrete.util.search_wrapper import SearchClientWrapper
+import concrete.version
 
 
 def main():

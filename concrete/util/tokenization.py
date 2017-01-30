@@ -46,10 +46,13 @@ def get_tokens(tokenization, suppress_warnings=False):
     return None
 
 
-def get_tagged_tokens(tokenization, tagging_type):
+def get_tagged_tokens(tokenization, tagging_type, tool=None):
     '''
     Return list of TaggedTokens of taggingType equal to tagging_type,
     if there is a unique choice.
+
+    If tool is not None, filter the candidate TokenTaggings to those
+    whose metadata.tool field matches tool.
 
     Raise exception if there is no matching tagging or more than one
     matching tagging.
@@ -57,14 +60,16 @@ def get_tagged_tokens(tokenization, tagging_type):
     tts = [
         tt
         for tt in tokenization.tokenTaggingList
-        if tt.taggingType == tagging_type
+        if tt.taggingType.lower() == tagging_type.lower() and (
+            tool is None or tt.metadata.tool.lower() == tool.lower()
+        )
     ]
     if len(tts) == 0:
-        raise Exception('No %s tagging.' % tagging_type)
+        raise Exception('No matching %s tagging.' % tagging_type)
     elif len(tts) == 1:
         return tts[0].taggedTokenList
     else:
-        raise Exception('More than one %s tagging.' % tagging_type)
+        raise Exception('More than one matching %s tagging.' % tagging_type)
 
 
 def get_lemmas(t):

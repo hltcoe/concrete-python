@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from concrete.util import (
-    get_index_of_tool, datetime_to_timestamp
+    get_index_of_tool, datetime_to_timestamp, now_timestamp
 )
 
 from concrete import AnnotationMetadata
@@ -10,8 +10,7 @@ import random
 import string
 
 
-class HasMetadata:
-
+class HasMetadata(object):
     def __init__(self, tool=None):
         self.metadata = AnnotationMetadata(
             tool=HasMetadata.gen_tool(tool),
@@ -67,3 +66,7 @@ def test_get_index_of_tool_nonempty_list_no_contains():
 def test_datetime_to_timestamp():
     assert datetime_to_timestamp(datetime(1970, 1, 1)) == 0
     assert datetime_to_timestamp(datetime(1970, 1, 1, 0, 0, 47)) == 47
+
+
+def test_now_timestamp():
+    assert now_timestamp() > datetime_to_timestamp(datetime(2000, 1, 1, 0, 0, 0))

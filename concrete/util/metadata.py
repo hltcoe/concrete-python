@@ -13,6 +13,13 @@ def datetime_to_timestamp(dt):
     return int((dt - EPOCH).total_seconds())
 
 
+def now_timestamp():
+    '''
+    Return timestamp representing the current time.
+    '''
+    return datetime_to_timestamp(datetime.now())
+
+
 def get_index_of_tool(lst_of_conc, tool):
     """Return the index of the object in the provided list
     whose tool name matches tool.

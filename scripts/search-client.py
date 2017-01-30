@@ -67,8 +67,9 @@ def main():
                     break
                 if line:
                     terms = line.split()
-                    query = SearchQuery(terms=terms,
-                                        k=ns.k,
+                    query = SearchQuery(k=ns.k,
+                                        rawQuery=line,
+                                        terms=terms,
                                         type=SearchType.COMMUNICATIONS,
                                         userId=ns.user_id)
                     result = client.search(query)

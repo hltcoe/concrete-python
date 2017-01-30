@@ -30,30 +30,56 @@ def main():
                              'example, http://localhost:3000/comm/id/%%s')
     parser.add_argument('--user-id', type=str,
                         help='user id to send to search service')
+    parser.add_argument("--k", type=int, default=10,
+                        help="Maximum number of search results to return")
+    parser.add_argument("--about", action="store_true",
+                        help="Print output of searchService.about()")
+    parser.add_argument("--alive", action="store_true",
+                        help="Print output of searchService.alive()")
+    parser.add_argument("--capabilities", action="store_true",
+                        help="Print output of searchService.getCapabilities()")
+    parser.add_argument("--corpora", action="store_true",
+                        help="Print output of searchService.getCorpora()")
     concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
 
     with SearchClientWrapper(ns.host, ns.port) as client:
-        while True:
-            try:
-                line = raw_input('> ').strip().decode('utf-8')
-            except EOFError:
-                print()
-                break
-            if line:
-                terms = line.split()
-                query = SearchQuery(terms=terms,
-                                    type=SearchType.COMMUNICATIONS,
-                                    userId=ns.user_id)
-                result = client.search(query)
-                for result_item in result.searchResultItems:
-                    if ns.http_lookup_url:
-                        print(requests.get(
-                            ns.http_lookup_url %
-                            result_item.communicationId
-                        ).text)
-                    else:
-                        print(result_item.communicationId)
+        interactive_mode = True
+
+        if ns.about or ns.alive or ns.capabilities or ns.corpora:
+            interactive_mode = False
+
+        if ns.about:
+            print("SearchService.about() returned %s" % client.about())
+        if ns.alive:
+            print("SearchService.alive() returned %s" % client.alive())
+        if ns.capabilities:
+            print("SearchService.getCapabilities() returned %s" % client.getCapabilities())
+        if ns.corpora:
+            print("SearchService.getCorpora() returned %s" % client.getCorpora())
+
+        if interactive_mode:
+            while True:
+                try:
+                    line = raw_input('> ').strip().decode('utf-8')
+                except EOFError:
+                    print()
+                    break
+                if line:
+                    terms = line.split()
+                    query = SearchQuery(terms=terms,
+                                        k=ns.k,
+                                        type=SearchType.COMMUNICATIONS,
+                                        userId=ns.user_id)
+                    result = client.search(query)
+                    for result_item in result.searchResultItems:
+                        if ns.http_lookup_url:
+                            print(requests.get(
+                                ns.http_lookup_url %
+                                result_item.communicationId
+                            ).text)
+                        else:
+                            print(result_item.communicationId)
 
 
 if __name__ == '__main__':

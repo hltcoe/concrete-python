@@ -110,6 +110,15 @@ def test_get_tagged_tokens(tokenization):
         get_tagged_tokens(tokenization, 'NUMERAL')))
 
 
+def test_get_tagged_tokens_lowercase(tokenization):
+    assert ['N', 'N', 'Y'] == list(map(
+        lambda t: t.tag,
+        get_tagged_tokens(tokenization, 'numeral')))
+    assert [0, 1, 2] == list(map(
+        lambda t: t.tokenIndex,
+        get_tagged_tokens(tokenization, 'numeral')))
+
+
 def test_get_tagged_tokens_no_tagging(tokenization):
     tokenization.tokenTaggingList = filter(
         lambda ttl: ttl.taggingType != 'NUMERAL',
@@ -138,6 +147,26 @@ def test_get_tagged_tokens_non_unique_tagging_specify_tool(tokenization):
     tokenization.tokenTaggingList.append(
         TokenTagging(
             metadata=AnnotationMetadata(tool='z'),
+            taggingType='NUMERAL',
+            taggedTokenList=[
+                TaggedToken(tokenIndex=0, tag='N'),
+                TaggedToken(tokenIndex=1, tag='Y'),
+                TaggedToken(tokenIndex=2, tag='Y'),
+            ],
+        ),
+    )
+    assert ['N', 'N', 'Y'] == list(map(
+        lambda t: t.tag,
+        get_tagged_tokens(tokenization, 'NUMERAL', tool='y')))
+    assert [0, 1, 2] == list(map(
+        lambda t: t.tokenIndex,
+        get_tagged_tokens(tokenization, 'NUMERAL', tool='y')))
+
+
+def test_get_tagged_tokens_non_unique_tagging_specify_tool_uppercase(tokenization):
+    tokenization.tokenTaggingList.append(
+        TokenTagging(
+            metadata=AnnotationMetadata(tool='Z'),
             taggingType='NUMERAL',
             taggedTokenList=[
                 TaggedToken(tokenIndex=0, tag='N'),

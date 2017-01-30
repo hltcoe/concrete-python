@@ -60,7 +60,6 @@ if __name__ == '__main__':
         install_requires=[
             'humanfriendly',
             'networkx',
-            'testfixtures',
             'thrift==0.10.0',
             'redis>=2.10.0',
             'pycountry==1.20',

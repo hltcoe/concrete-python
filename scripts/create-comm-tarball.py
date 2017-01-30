@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 'Convert tarball of text files to tarball of Concrete communications.'
 from __future__ import unicode_literals

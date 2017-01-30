@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 'Convert text file to Concrete Communication file.'
 from __future__ import unicode_literals

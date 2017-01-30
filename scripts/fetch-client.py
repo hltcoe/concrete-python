@@ -10,7 +10,7 @@ import argparse
 import concrete.version
 from concrete.access import FetchCommunicationService
 from concrete.access.ttypes import FetchRequest
-from concrete.util.file_io import write_communication_to_file
+from concrete.util.file_io import CommunicationWriterTGZ
 from concrete.util.thrift_factory import factory
 from concrete.util import set_stdout_encoding
 
@@ -37,13 +37,13 @@ def main():
                         "fetch_service.getCommunicationIDs(offset, count).  "
                         "The offset and count parameters are set using the "
                         "'--get-ids-offset' and '--get-ids-count' flags")
-    parser.add_argument("--get-ids-offset", type=int, default=0,
+    parser.add_argument("--get-ids-offset", type=int, default=0, metavar="ID_OFFSET",
                         help="Number of Communication IDs printed using the '--get-ids' flag")
-    parser.add_argument("--get-ids-count", type=int, default=20,
+    parser.add_argument("--get-ids-count", type=int, default=20, metavar="ID_COUNT",
                         help="Offset for Communication IDs printed using the '--get-ids' flag")
-    parser.add_argument("--save", action="store_true",
-                        help="Save fetched Communications to disk as "
-                        "'[COMMUNICATION_ID].concrete'")
+    parser.add_argument("--save-as-tgz", metavar="TGZ_FILENAME",
+                        help="Save fetched Communications to a TGZ archive containing files "
+                        "named '[COMMUNICATION_ID].concrete'")
     parser.add_argument("comm_id", nargs="*", help="IDs of Communications to be fetched")
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
@@ -73,12 +73,14 @@ def main():
         for comm_id in client.getCommunicationIDs(args.get_ids_offset, args.get_ids_count):
             print("  %s" % comm_id)
 
-    if args.save:
+    if args.save_as_tgz:
         if fetch_result.communications:
-            for comm in fetch_result.communications:
-                comm_filename = '%s.concrete' % comm.id
-                print("Saving Communication as '%s'" % comm_filename)
-                write_communication_to_file(comm, comm_filename)
+            with CommunicationWriterTGZ(args.save_as_tgz) as writer:
+                for comm in fetch_result.communications:
+                    comm_filename = '%s.concrete' % comm.id
+                    print("Saving Communication to TGZ archive '%s' as '%s'" %
+                          (args.save_as_tgz, comm_filename))
+                    writer.write(comm, comm_filename)
 
 
 if __name__ == '__main__':

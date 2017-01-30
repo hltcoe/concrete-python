@@ -1,6 +1,10 @@
 4.12.7 (unreleased)
 -------------------
 
+- Add brief tutorial to README.rst.
+
+- Switch to zest.releaser for releases.
+
 - Add Python 3 support.
 
 

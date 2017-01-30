@@ -127,6 +127,15 @@ def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
             print(u"\t".join(fields))
 
 
+def _print_entity_mention_content(em, prefix=''):
+    print(prefix + u"tokens:     %s" % (
+        u" ".join(_get_tokens_for_entityMention(em))))
+    if em.text:
+        print(prefix + u"text:       %s" % em.text)
+    print(prefix + u"entityType: %s" % em.entityType)
+    print(prefix + u"phraseType: %s" % em.phraseType)
+
+
 def print_entities(comm, tool=None):
     """Print information for all Entities and their EntityMentions
 
@@ -144,12 +153,10 @@ def print_entities(comm, tool=None):
                     for em_index, em in enumerate(entity.mentionList):
                         print(u"      EntityMention %d-%d-%d:" % (
                             entitySet_index, entity_index, em_index))
-                        print(u"          tokens:     %s" % (
-                            u" ".join(_get_tokens_for_entityMention(em))))
-                        if em.text:
-                            print(u"          text:       %s" % em.text)
-                        print(u"          entityType: %s" % em.entityType)
-                        print(u"          phraseType: %s" % em.phraseType)
+                        _print_entity_mention_content(em, prefix=' ' * 10)
+                        for (cm_index, cm) in enumerate(em.childMentionList):
+                            print(u"          child EntityMention #%d:" % cm_index)
+                            _print_entity_mention_content(cm, prefix=' ' * 14)
                     print()
                 print()
 

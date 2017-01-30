@@ -162,6 +162,16 @@ Entity Set 0 (Serif: doc-entities):
           text:       John Smith, manager of ACMÉ INC,
           entityType: PER
           phraseType: PhraseType.APPOSITIVE
+          child EntityMention #0:
+              tokens:     John Smith
+              text:       John Smith
+              entityType: PER
+              phraseType: PhraseType.NAME
+          child EntityMention #1:
+              tokens:     manager of ACMÉ INC
+              text:       manager of ACMÉ INC
+              entityType: PER
+              phraseType: PhraseType.COMMON_NOUN
       EntityMention 0-0-2:
           tokens:     manager of ACMÉ INC
           text:       manager of ACMÉ INC
@@ -191,6 +201,11 @@ Entity Set 0 (Serif: doc-entities):
           text:       John's daughter Mary
           entityType: PER.Individual
           phraseType: PhraseType.NAME
+          child EntityMention #0:
+              tokens:     Mary
+              text:       Mary
+              entityType: PER
+              phraseType: PhraseType.OTHER
       EntityMention 0-2-1:
           tokens:     daughter
           text:       daughter

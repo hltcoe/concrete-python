@@ -1,7 +1,7 @@
 4.12.8 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add child mentions to "concrete-inspect.py --entities" output.
 
 
 4.12.7 (2017-01-29)

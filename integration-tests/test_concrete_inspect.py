@@ -120,7 +120,7 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
         )
     ) + '\n'
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -212,7 +212,7 @@ Entity Set 1 (Serif: doc-values):
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -281,7 +281,7 @@ Situation Set 1 (Serif: events):
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -324,7 +324,7 @@ Situation Set 1 (Serif: events):
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -369,7 +369,7 @@ John's daughter Mary expressed sorrow.
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -430,7 +430,7 @@ Mary expressed sorrow .
         '<ENTITY ID=3>' if second else '',
         '</ENTITY>' if second else '')
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -470,7 +470,7 @@ John 's daughter Mary expressed sorrow .\
 '''
     expected_output += '\n\n'
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -533,7 +533,7 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -644,7 +644,7 @@ def test_print_metadata_for_communication(comm_path, which, args,
     if 15 in which or 16 in which:
         expected_output += '\n'
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -697,7 +697,7 @@ John's daughter Mary expressed sorrow.
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -724,7 +724,7 @@ def test_print_id_for_communication(comm_path, first, args, output_prefix):
 tests/testdata/serif_dog-bites-man.xml
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -765,7 +765,7 @@ topic: animals:-1.500 crime:-3.000 humanity:-4.000
 urgency: low:0.750
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -908,7 +908,7 @@ Situation Set 1 (Serif: events):
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -967,7 +967,7 @@ malheureux.
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -1026,7 +1026,7 @@ malheureux.
 
 '''
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
@@ -1067,5 +1067,5 @@ def test_print_multiple_communications_count(simple_comms_tgz_path, first,
         expected_output += output_prefix
         expected_output += 'three\n'
     assert '' == stderr.decode('utf-8')
-    assert expected_output.replace('\n', os.linesep) == stdout.decode('utf-8')
+    assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode

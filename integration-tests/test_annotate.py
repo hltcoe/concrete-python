@@ -3,8 +3,6 @@ from thrift.transport import TTransport
 from thrift.transport import TSocket
 from thrift.protocol import TCompactProtocol
 
-import unittest
-
 from concrete.util import (
     SubprocessAnnotateCommunicationServiceWrapper
 )
@@ -38,53 +36,51 @@ class NoopAnnotateCommunicationService(AnnotateCommunicationService.Iface):
         pass
 
 
-class TestAnnotateCommunicationService(unittest.TestCase):
+def test_annotate():
+    impl = NoopAnnotateCommunicationService()
+    host = 'localhost'
+    port = find_port()
+    timeout = 5
 
-    def test_annotate(self):
-        impl = NoopAnnotateCommunicationService()
-        host = 'localhost'
-        port = find_port()
-        timeout = 5
+    comm_id = '1-2-3-4'
+    comm = create_comm(comm_id)
 
-        comm_id = '1-2-3-4'
-        comm = create_comm(comm_id)
+    comm_uuid_uuidString = comm.uuid.uuidString
+    comm_metadata_tool = comm.metadata.tool
+    comm_metadata_timestamp = comm.metadata.timestamp
 
-        comm_uuid_uuidString = comm.uuid.uuidString
-        comm_metadata_tool = comm.metadata.tool
-        comm_metadata_timestamp = comm.metadata.timestamp
+    with SubprocessAnnotateCommunicationServiceWrapper(impl, host, port,
+                                                       timeout=timeout):
+        transport = TSocket.TSocket(host, port)
+        transport = TTransport.TFramedTransport(transport)
+        protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
 
-        with SubprocessAnnotateCommunicationServiceWrapper(impl, host, port,
-                                                           timeout=timeout):
-            transport = TSocket.TSocket(host, port)
-            transport = TTransport.TFramedTransport(transport)
-            protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
+        cli = AnnotateCommunicationService.Client(protocol)
+        transport.open()
+        res = cli.annotate(comm)
+        transport.close()
 
-            cli = AnnotateCommunicationService.Client(protocol)
-            transport.open()
-            res = cli.annotate(comm)
-            transport.close()
+        assert res.id == comm_id
+        assert res.uuid.uuidString == comm_uuid_uuidString
+        assert res.metadata.tool == comm_metadata_tool
+        assert res.metadata.timestamp == comm_metadata_timestamp
 
-            self.assertEqual(res.id, comm_id)
-            self.assertEqual(res.uuid.uuidString, comm_uuid_uuidString)
-            self.assertEqual(res.metadata.tool, comm_metadata_tool)
-            self.assertEqual(res.metadata.timestamp, comm_metadata_timestamp)
 
-    def test_get_metadata(self):
-        impl = NoopAnnotateCommunicationService()
-        host = 'localhost'
-        port = find_port()
-        timeout = 5
+def test_get_metadata():
+    impl = NoopAnnotateCommunicationService()
+    host = 'localhost'
+    port = find_port()
+    timeout = 5
 
-        with SubprocessAnnotateCommunicationServiceWrapper(impl, host, port,
-                                                           timeout=timeout):
-            transport = TSocket.TSocket(host, port)
-            transport = TTransport.TFramedTransport(transport)
-            protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
+    with SubprocessAnnotateCommunicationServiceWrapper(impl, host, port,
+                                                       timeout=timeout):
+        transport = TSocket.TSocket(host, port)
+        transport = TTransport.TFramedTransport(transport)
+        protocol = TCompactProtocol.TCompactProtocolAccelerated(transport)
 
-            cli = AnnotateCommunicationService.Client(protocol)
-            transport.open()
-            metadata = cli.getMetadata()
-            transport.close()
+        cli = AnnotateCommunicationService.Client(protocol)
+        transport.open()
+        metadata = cli.getMetadata()
+        transport.close()
 
-            self.assertEqual(NoopAnnotateCommunicationService.METADATA_TOOL,
-                             metadata.tool)
+        assert NoopAnnotateCommunicationService.METADATA_TOOL == metadata.tool

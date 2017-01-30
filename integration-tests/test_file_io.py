@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import os
 import tarfile
-import unittest
 import time
 
 from concrete.util import (
@@ -60,321 +59,347 @@ def test_output_file_finalizer_sanity(output_file):
     assert True
 
 
-class TestCommunicationReader(unittest.TestCase):
+def test_CommunicationReader_single_file():
+    filename = u'tests/testdata/simple_1.concrete'
+    reader = CommunicationReader(filename)
+    (comm1, comm1_filename) = next(reader)
+    assert hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
 
-    def test_single_file(self):
-        filename = u'tests/testdata/simple_1.concrete'
-        reader = CommunicationReader(filename)
-        (comm1, comm1_filename) = next(reader)
-        self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
 
-    def test_single_gz_file(self):
-        filename = u'tests/testdata/simple_1.concrete.gz'
-        reader = CommunicationReader(filename)
-        (comm1, comm1_filename) = next(reader)
-        self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
+def test_CommunicationReader_single_gz_file():
+    filename = u'tests/testdata/simple_1.concrete.gz'
+    reader = CommunicationReader(filename)
+    (comm1, comm1_filename) = next(reader)
+    assert hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
 
-    def test_single_bz2_file(self):
-        filename = u'tests/testdata/simple_1.concrete.bz2'
-        reader = CommunicationReader(filename)
-        (comm1, comm1_filename) = next(reader)
-        self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
 
-    def test_concatenated_file(self):
-        filename = u'tests/testdata/simple_concatenated'
-        reader = CommunicationReader(filename)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertTrue(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
+def test_CommunicationReader_single_bz2_file():
+    filename = u'tests/testdata/simple_1.concrete.bz2'
+    reader = CommunicationReader(filename)
+    (comm1, comm1_filename) = next(reader)
+    assert hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
 
-    def test_concatenated_gz_file(self):
-        filename = u'tests/testdata/simple_concatenated.gz'
-        reader = CommunicationReader(filename)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertTrue(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
 
-    def test_concatenated_bz2_file(self):
-        filename = u'tests/testdata/simple_concatenated.bz2'
-        reader = CommunicationReader(filename)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertTrue(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
+def test_CommunicationReader_concatenated_file():
+    filename = u'tests/testdata/simple_concatenated'
+    reader = CommunicationReader(filename)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
 
-    def test_tar_file(self):
-        filename = u'tests/testdata/simple.tar'
-        reader = CommunicationReader(filename)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
 
-    def test_tar_gz_file(self):
-        reader = CommunicationReader("tests/testdata/simple.tar.gz")
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+def test_CommunicationReader_concatenated_gz_file():
+    filename = u'tests/testdata/simple_concatenated.gz'
+    reader = CommunicationReader(filename)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
 
-    def test_tar_bz2_file(self):
-        reader = CommunicationReader("tests/testdata/simple.tar.bz2")
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
 
-    def test_nested_tar_file(self):
-        reader = CommunicationReader("tests/testdata/simple_nested.tar")
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'a/b/simple_1.concrete', filenames[0])
-        self.assertEqual(u'a/c/simple_2.concrete', filenames[1])
-        self.assertEqual(u'a/c/simple_3.concrete', filenames[2])
+def test_CommunicationReader_concatenated_bz2_file():
+    filename = u'tests/testdata/simple_concatenated.bz2'
+    reader = CommunicationReader(filename)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
 
-    def test_zip_file(self):
-        reader = CommunicationReader("tests/testdata/simple.zip")
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
 
-    def test_explicit_single_file(self):
-        filename = u'tests/testdata/simple_1.concrete'
-        reader = CommunicationReader(filename, filetype=FileType.STREAM)
-        (comm1, comm1_filename) = next(reader)
-        self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
+def test_CommunicationReader_tar_file():
+    filename = u'tests/testdata/simple.tar'
+    reader = CommunicationReader(filename)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
 
-    def test_explicit_single_gz_file(self):
-        filename = u'tests/testdata/simple_1.concrete.gz'
-        reader = CommunicationReader(filename, filetype=FileType.STREAM_GZ)
-        (comm1, comm1_filename) = next(reader)
-        self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
 
-    def test_explicit_single_bz2_file(self):
-        filename = u'tests/testdata/simple_1.concrete.bz2'
-        reader = CommunicationReader(filename, filetype=FileType.STREAM_BZ2)
-        (comm1, comm1_filename) = next(reader)
-        self.assertTrue(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
+def test_CommunicationReader_tar_gz_file():
+    reader = CommunicationReader("tests/testdata/simple.tar.gz")
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
 
-    def test_explicit_concatenated_file(self):
-        filename = u'tests/testdata/simple_concatenated'
-        reader = CommunicationReader(filename, filetype=FileType.STREAM)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertTrue(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
 
-    def test_explicit_concatenated_gz_file(self):
-        filename = u'tests/testdata/simple_concatenated.gz'
-        reader = CommunicationReader(filename, filetype=FileType.STREAM_GZ)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertTrue(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
+def test_CommunicationReader_tar_bz2_file():
+    reader = CommunicationReader("tests/testdata/simple.tar.bz2")
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
 
-    def test_explicit_concatenated_bz2_file(self):
-        filename = u'tests/testdata/simple_concatenated.bz2'
-        reader = CommunicationReader(filename, filetype=FileType.STREAM_BZ2)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertTrue(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
 
-    def test_explicit_tar_file(self):
-        filename = u'tests/testdata/simple.tar'
-        reader = CommunicationReader(filename, filetype=FileType.TAR)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+def test_CommunicationReader_nested_tar_file():
+    reader = CommunicationReader("tests/testdata/simple_nested.tar")
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'a/b/simple_1.concrete' == filenames[0]
+    assert u'a/c/simple_2.concrete' == filenames[1]
+    assert u'a/c/simple_3.concrete' == filenames[2]
 
-    def test_explicit_tar_gz_file(self):
-        reader = CommunicationReader("tests/testdata/simple.tar.gz",
-                                     filetype=FileType.TAR_GZ)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
 
-    def test_explicit_tar_bz2_file(self):
-        reader = CommunicationReader("tests/testdata/simple.tar.bz2",
-                                     filetype=FileType.TAR_BZ2)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+def test_CommunicationReader_zip_file():
+    reader = CommunicationReader("tests/testdata/simple.zip")
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
 
-    def test_explicit_nested_tar_file(self):
-        reader = CommunicationReader("tests/testdata/simple_nested.tar",
-                                     filetype=FileType.TAR)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'a/b/simple_1.concrete', filenames[0])
-        self.assertEqual(u'a/c/simple_2.concrete', filenames[1])
-        self.assertEqual(u'a/c/simple_3.concrete', filenames[2])
 
-    def test_explicit_zip_file(self):
-        reader = CommunicationReader("tests/testdata/simple.zip",
-                                     filetype=FileType.ZIP)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertTrue(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertTrue(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+def test_CommunicationReader_explicit_single_file():
+    filename = u'tests/testdata/simple_1.concrete'
+    reader = CommunicationReader(filename, filetype=FileType.STREAM)
+    (comm1, comm1_filename) = next(reader)
+    assert hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
 
-    def test_single_file_no_add_references(self):
-        filename = u'tests/testdata/simple_1.concrete'
-        reader = CommunicationReader(filename, add_references=False)
-        (comm1, comm1_filename) = next(reader)
-        self.assertFalse(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
 
-    def test_single_gz_file_no_add_references(self):
-        filename = u'tests/testdata/simple_1.concrete.gz'
-        reader = CommunicationReader(filename, add_references=False)
-        (comm1, comm1_filename) = next(reader)
-        self.assertFalse(hasattr(comm1, 'sentenceForUUID'))
-        self.assertEqual(u'one', comm1.id)
-        self.assertEqual(filename, comm1_filename)
+def test_CommunicationReader_explicit_single_gz_file():
+    filename = u'tests/testdata/simple_1.concrete.gz'
+    reader = CommunicationReader(filename, filetype=FileType.STREAM_GZ)
+    (comm1, comm1_filename) = next(reader)
+    assert hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
 
-    def test_concatenated_file_no_add_references(self):
-        filename = u'tests/testdata/simple_concatenated'
-        reader = CommunicationReader(filename, add_references=False)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertFalse(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
 
-    def test_concatenated_gz_file_no_add_references(self):
-        filename = u'tests/testdata/simple_concatenated.gz'
-        reader = CommunicationReader(filename, add_references=False)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        for (i, comm_id) in enumerate([u'one', u'two', u'three']):
-            self.assertFalse(hasattr(comms[i], 'sentenceForUUID'))
-            self.assertEqual(comm_id, comms[i].id)
-            self.assertEqual(filename, filenames[i])
+def test_CommunicationReader_explicit_single_bz2_file():
+    filename = u'tests/testdata/simple_1.concrete.bz2'
+    reader = CommunicationReader(filename, filetype=FileType.STREAM_BZ2)
+    (comm1, comm1_filename) = next(reader)
+    assert hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
 
-    def test_tar_file_no_add_references(self):
-        filename = u'tests/testdata/simple.tar'
-        reader = CommunicationReader(filename, add_references=False)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertFalse(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertFalse(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertFalse(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
 
-    def test_tar_gz_file_no_add_references(self):
-        reader = CommunicationReader(
-            "tests/testdata/simple.tar.gz", add_references=False)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertFalse(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertFalse(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertFalse(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+def test_CommunicationReader_explicit_concatenated_file():
+    filename = u'tests/testdata/simple_concatenated'
+    reader = CommunicationReader(filename, filetype=FileType.STREAM)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
 
-    def test_zip_file_no_add_references(self):
-        reader = CommunicationReader(
-            "tests/testdata/simple.zip", add_references=False)
-        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
-        self.assertFalse(hasattr(comms[0], 'sentenceForUUID'))
-        self.assertFalse(hasattr(comms[1], 'sentenceForUUID'))
-        self.assertFalse(hasattr(comms[2], 'sentenceForUUID'))
-        self.assertEqual(u'one', comms[0].id)
-        self.assertEqual(u'two', comms[1].id)
-        self.assertEqual(u'three', comms[2].id)
-        self.assertEqual(u'simple_1.concrete', filenames[0])
-        self.assertEqual(u'simple_2.concrete', filenames[1])
-        self.assertEqual(u'simple_3.concrete', filenames[2])
+
+def test_CommunicationReader_explicit_concatenated_gz_file():
+    filename = u'tests/testdata/simple_concatenated.gz'
+    reader = CommunicationReader(filename, filetype=FileType.STREAM_GZ)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
+
+
+def test_CommunicationReader_explicit_concatenated_bz2_file():
+    filename = u'tests/testdata/simple_concatenated.bz2'
+    reader = CommunicationReader(filename, filetype=FileType.STREAM_BZ2)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
+
+
+def test_CommunicationReader_explicit_tar_file():
+    filename = u'tests/testdata/simple.tar'
+    reader = CommunicationReader(filename, filetype=FileType.TAR)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_explicit_tar_gz_file():
+    reader = CommunicationReader("tests/testdata/simple.tar.gz",
+                                 filetype=FileType.TAR_GZ)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_explicit_tar_bz2_file():
+    reader = CommunicationReader("tests/testdata/simple.tar.bz2",
+                                 filetype=FileType.TAR_BZ2)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_explicit_nested_tar_file():
+    reader = CommunicationReader("tests/testdata/simple_nested.tar",
+                                 filetype=FileType.TAR)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'a/b/simple_1.concrete' == filenames[0]
+    assert u'a/c/simple_2.concrete' == filenames[1]
+    assert u'a/c/simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_explicit_zip_file():
+    reader = CommunicationReader("tests/testdata/simple.zip",
+                                 filetype=FileType.ZIP)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_single_file_no_add_references():
+    filename = u'tests/testdata/simple_1.concrete'
+    reader = CommunicationReader(filename, add_references=False)
+    (comm1, comm1_filename) = next(reader)
+    assert not hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
+
+
+def test_CommunicationReader_single_gz_file_no_add_references():
+    filename = u'tests/testdata/simple_1.concrete.gz'
+    reader = CommunicationReader(filename, add_references=False)
+    (comm1, comm1_filename) = next(reader)
+    assert not hasattr(comm1, 'sentenceForUUID')
+    assert u'one' == comm1.id
+    assert filename == comm1_filename
+
+
+def test_CommunicationReader_concatenated_file_no_add_references():
+    filename = u'tests/testdata/simple_concatenated'
+    reader = CommunicationReader(filename, add_references=False)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert not hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
+
+
+def test_CommunicationReader_concatenated_gz_file_no_add_references():
+    filename = u'tests/testdata/simple_concatenated.gz'
+    reader = CommunicationReader(filename, add_references=False)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    for (i, comm_id) in enumerate([u'one', u'two', u'three']):
+        assert not hasattr(comms[i], 'sentenceForUUID')
+        assert comm_id == comms[i].id
+        assert filename == filenames[i]
+
+
+def test_CommunicationReader_tar_file_no_add_references():
+    filename = u'tests/testdata/simple.tar'
+    reader = CommunicationReader(filename, add_references=False)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert not hasattr(comms[0], 'sentenceForUUID')
+    assert not hasattr(comms[1], 'sentenceForUUID')
+    assert not hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_tar_gz_file_no_add_references():
+    reader = CommunicationReader(
+        "tests/testdata/simple.tar.gz", add_references=False)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert not hasattr(comms[0], 'sentenceForUUID')
+    assert not hasattr(comms[1], 'sentenceForUUID')
+    assert not hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
+
+
+def test_CommunicationReader_zip_file_no_add_references():
+    reader = CommunicationReader(
+        "tests/testdata/simple.zip", add_references=False)
+    [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+    assert not hasattr(comms[0], 'sentenceForUUID')
+    assert not hasattr(comms[1], 'sentenceForUUID')
+    assert not hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'simple_1.concrete' == filenames[0]
+    assert u'simple_2.concrete' == filenames[1]
+    assert u'simple_3.concrete' == filenames[2]
 
 
 def test_CommunicationReader_single_file_unicode():

@@ -1,6 +1,17 @@
 4.12.8 (unreleased)
 -------------------
 
+- Store tweet JSON in Communication.originalText.
+
+- Expand/modify functionality of fetch-client.py:
+    - Accept communication IDs on standard input
+    - Write results to tar.gz archive
+
+- Expand functionality of search-client.py:
+    - Accept search terms as command-line arguments
+    - Populate SearchQuery.rawQuery field
+    - Add command-line flags --about, --alive, --capabilities, --corpora
+
 - Add child mentions to "concrete-inspect.py --entities" output.
 
 

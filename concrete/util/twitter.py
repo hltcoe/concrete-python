@@ -59,7 +59,7 @@ def json_tweet_object_to_Communication(tweet):
         metadata=AnnotationMetadata(
             tool=TOOL_NAME,
             timestamp=int(time.time())),
-        originalText=tweet_info.text,
+        originalText=json.dumps(tweet),
         text=tweet_info.text,
         type=TWEET_TYPE,
         uuid=next(aug),

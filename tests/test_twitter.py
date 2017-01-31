@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import json
+
 from pytest import fixture, mark
 
 from concrete.util import (
@@ -135,6 +137,7 @@ def test_json_tweet_object_to_Communication(tweet, omitted_fields,
 
     assert TWEET_ID_STR == comm.id
     assert TWEET_TXT == comm.text
+    assert tweet == json.loads(comm.originalText)
     assert 1219842525 == comm.startTime
     assert 1219842525 == comm.endTime
 

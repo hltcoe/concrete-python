@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import sys
 
 import concrete.version
 from concrete.access import FetchCommunicationService
@@ -44,7 +45,9 @@ def main():
     parser.add_argument("--save-as-tgz", metavar="TGZ_FILENAME",
                         help="Save fetched Communications to a TGZ archive containing files "
                         "named '[COMMUNICATION_ID].concrete'")
-    parser.add_argument("comm_id", nargs="*", help="IDs of Communications to be fetched")
+    parser.add_argument("comm_id", nargs="*", help="IDs of Communications to be fetched. "
+                        "If '-' is specified, a list of Communication IDs will be read from "
+                        "stdin, one Communication ID per line")
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
@@ -56,7 +59,10 @@ def main():
 
     if args.comm_id:
         fetch_request = FetchRequest()
-        fetch_request.communicationIds = args.comm_id
+        if len(args.comm_id) == 1 and args.comm_id[0] == '-':
+            fetch_request.communicationIds = [line.strip() for line in sys.stdin.readlines()]
+        else:
+            fetch_request.communicationIds = args.comm_id
         fetch_result = client.fetch(fetch_request)
         print("Received FetchResult: '%s'" % fetch_result)
 

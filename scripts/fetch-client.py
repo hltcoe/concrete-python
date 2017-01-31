@@ -79,7 +79,7 @@ def main():
         for comm_id in client.getCommunicationIDs(args.get_ids_offset, args.get_ids_count):
             print("  %s" % comm_id)
 
-    if args.save_as_tgz:
+    if args.save_as_tgz and args.comm_id:
         if fetch_result.communications:
             with CommunicationWriterTGZ(args.save_as_tgz) as writer:
                 for comm in fetch_result.communications:

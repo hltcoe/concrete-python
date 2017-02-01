@@ -6,6 +6,15 @@ Please see ``LICENSE`` for more information.
 concrete-python
 ===============
 
+.. image:: https://img.shields.io/pypi/v/concrete.svg
+   :target: https://pypi.org/project/concrete/
+.. image:: https://img.shields.io/pypi/pyversions/concrete.svg
+   :target: https://pypi.org/project/concrete/
+.. image:: https://travis-ci.org/hltcoe/concrete-python.svg
+   :target: https://travis-ci.org/hltcoe/concrete-python
+.. image:: https://img.shields.io/appveyor/ci/cjmay/concrete-python-f3iqf/master.svg
+   :target: https://ci.appveyor.com/project/cjmay/concrete-python-f3iqf
+
 concrete-python is the Python interface to Concrete_, an HLT data
 specification defined using Thrift_.
 

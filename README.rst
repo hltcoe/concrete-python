@@ -6,10 +6,6 @@ Please see ``LICENSE`` for more information.
 concrete-python
 ===============
 
-.. image:: https://img.shields.io/pypi/v/concrete.svg
-   :target: https://pypi.org/project/concrete/
-.. image:: https://img.shields.io/pypi/pyversions/concrete.svg
-   :target: https://pypi.org/project/concrete/
 .. image:: https://travis-ci.org/hltcoe/concrete-python.svg
    :target: https://travis-ci.org/hltcoe/concrete-python
 .. image:: https://ci.appveyor.com/api/projects/status/0346c3lu11vj8xqj?svg=true

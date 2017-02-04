@@ -52,7 +52,7 @@ class RedisReader(object):
     iteration, behavior is undefined.  If pop is True, modifications
     during iteration are encouraged. :)
 
-    Example usage:
+    Example usage::
 
         from redis import Redis
         redis_db = Redis(port=12345)
@@ -286,7 +286,7 @@ class RedisCommunicationReader(RedisReader):
     Iterable class for reading one or more Communications from redis.
     See RedisReader for further description.
 
-    Example usage:
+    Example usage::
 
         from redis import Redis
         redis_db = Redis(port=12345)

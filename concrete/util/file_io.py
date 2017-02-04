@@ -198,9 +198,7 @@ class ThriftReader(object):
     - a .tar.gz file with one or more Thrift structures
     - a .zip file with one or more Thrift structures
 
-    -----
-
-    Sample usage:
+    Sample usage::
 
         for (comm, filename) in ThriftReader(Communication,
                                              'multiple_comms.tar.gz'):
@@ -373,9 +371,7 @@ class CommunicationReader(ThriftReader):
     - a .tar.gz file with one or more Communications
     - a .zip file with one or more Communications
 
-    -----
-
-    Sample usage:
+    Sample usage::
 
         for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
@@ -394,9 +390,7 @@ class CommunicationReader(ThriftReader):
 class CommunicationWriter(object):
     """Class for writing one or more Communications to a file
 
-    -----
-
-    Sample usage:
+    Sample usage::
 
         writer = CommunicationWriter('foo.concrete')
         writer.write(existing_comm_object)
@@ -428,9 +422,7 @@ class CommunicationWriter(object):
 class CommunicationWriterTar(object):
     """Class for writing one or more Communications to a .TAR archive
 
-    -----
-
-    Sample usage:
+    Sample usage::
 
         writer = CommunicationWriterTar('multiple_comms.tar')
         writer.write(comm_object_one, 'comm_one.concrete')
@@ -482,9 +474,7 @@ class CommunicationWriterTar(object):
 class CommunicationWriterTGZ(CommunicationWriterTar):
     """Class for writing one or more Communications to a .TAR.GZ archive
 
-    -----
-
-    Sample usage:
+    Sample usage::
 
         writer = CommunicationWriterTGZ('multiple_comms.tgz')
         writer.write(comm_object_one, 'comm_one.concrete')

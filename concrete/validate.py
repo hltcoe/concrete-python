@@ -726,8 +726,6 @@ def validate_thrift_deep(msg, valid=True):
 
     -   `msg`: a Thrift message
 
-    -----
-
     The Python version of Thrift 0.9.1 does not support deep (recursive)
     validation, and none of the Thrift serialization/deserialization
     code calls even the shallow validation functions provided by Thrift.

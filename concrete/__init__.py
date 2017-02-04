@@ -2,8 +2,8 @@
 
 """
 Python modules and scripts for working with
-[Concrete](https://github.com/hltcoe/concrete), an HLT data
-specification defined using [Thrift](http://thrift.apache.org).
+`Concrete <https://github.com/hltcoe/concrete>`_, an HLT data
+specification defined using `Thrift <http://thrift.apache.org>`_.
 """
 from __future__ import absolute_import
 from __future__ import unicode_literals

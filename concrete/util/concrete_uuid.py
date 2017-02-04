@@ -131,7 +131,7 @@ class AnalyticUUIDGeneratorFactory(object):
     One factory should be created per communication, and a new generator
     should be created from that factory for each analytic processing the
     communication.  Usually each program represents a single analytic,
-    so common usage is
+    so common usage is::
 
         augf = AnalyticUUIDGeneratorFactory(comm)
         aug = augf.create()
@@ -139,7 +139,7 @@ class AnalyticUUIDGeneratorFactory(object):
             annotation = next(aug)
             <add annotation to communication>
 
-    or if you're creating a new communication
+    or if you're creating a new communication::
 
         augf = AnalyticUUIDGeneratorFactory()
         aug = augf.create()

@@ -8,5 +8,5 @@ before_script:
 
 script:
   - docker build -t concrete-python .
-  - docker run --rm concrete-python tox
+  - docker run --rm concrete-python tox # configured in tox.ini
   - docker run --rm concrete-python tox integration-tests

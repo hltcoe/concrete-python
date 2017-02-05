@@ -35,16 +35,6 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
 WORKDIR /tmp
 RUN mkdir -p /usr/local/{include,lib}
 
-RUN curl http://download.redis.io/releases/redis-3.2.0.tar.gz | tar -xz && \
-    pushd redis-3.2.0 && \
-    make && \
-    make install && \
-    pushd deps/hiredis && \
-    make install && \
-    popd && \
-    popd && \
-    rm -rf redis-3.2.0
-
 RUN curl https://www.python.org/ftp/python/3.5.3/Python-3.5.3.tgz | tar -xz && \
     pushd Python-3.5.3 && \
     ./configure --prefix=/usr/local && \

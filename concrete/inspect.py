@@ -56,14 +56,13 @@ def print_conll_style_tags_for_communication(
     """Print 'ConLL-style' tags for the tokens in a Communication
 
     Args:
-
-    - `comm`: A Concrete Communication object
-    - `char_offsets`: A boolean flag for printing token text specified by
-          a Token's (optional) TextSpan
-    - `dependency`: A boolean flag for printing dependency parse HEAD tags
-    - `lemmas`: A boolean flag for printing lemma tags
-    - `ner`: A boolean flag for printing Named Entity Recognition tags
-    - `pos`: A boolean flag for printing Part-of-Speech tags
+        comm (Communication):
+        char_offsets (bool): Flag for printing token text specified by
+          a :class:`.Token`'s (optional) :class:`.TextSpan`
+        dependency (bool): Flag for printing dependency parse HEAD tags
+        lemmas (bool): Flag for printing lemma tags
+        ner (bool): Flag for printing Named Entity Recognition tags
+        pos (bool): Flag for printing Part-of-Speech tags
     """
 
     header_fields = [u"INDEX", u"TOKEN"]
@@ -114,9 +113,8 @@ def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
     """Print 'ConLL-style' tags for the tokens in a tokenization
 
     Args:
-
-    - `tokenization`: A Concrete Tokenization object
-    - `token_tag_lists`: A list of lists of token tag strings
+        tokenization (Tokenization):
+        token_tag_lists: A list of lists of token tag strings
     """
     if tokenization.tokenList:
         for i, token in enumerate(tokenization.tokenList.tokenList):
@@ -137,11 +135,14 @@ def _print_entity_mention_content(em, prefix=''):
 
 
 def print_entities(comm, tool=None):
-    """Print information for all Entities and their EntityMentions
+    """Print information for :class:`.Entity` objects and their
+    associated :class:`.EntityMention` objects
 
     Args:
-
-    - `comm`: A Concrete Communication object
+        comm (Communication):
+        tool (str): If not `None`, only print information for
+                    :class:`.EntitySet` objects with a matching
+                    `metadata.tool` field
     """
     if comm.entitySetList:
         for entitySet_index, entitySet in enumerate(comm.entitySetList):
@@ -163,6 +164,12 @@ def print_entities(comm, tool=None):
 
 def print_metadata(comm, tool=None):
     """Print metadata for tools used to annotate Communication
+
+    Args:
+        comm (Communication):
+        tool (str): If not `None`, only print :class:`.AnnotationMetadata`
+                    information for objects with a matching
+                    `metadata.tool` field
     """
     def _get_tokenizations(comm):
         tokenizations = []
@@ -254,11 +261,13 @@ def print_metadata(comm, tool=None):
 
 
 def print_sections(comm, tool=None):
-    """Print information for all Sections, according to their spans.
+    """Print information for all :class:`.Section` object, according to their spans.
 
     Args:
-
-    - `comm`: A Concrete Communication
+        comm (Communication):
+        tool (str): If not `None`, only print information for
+                    :class:`.Section` objects with a matching
+                    `metadata.tool` field
     """
     if tool is None or comm.metadata.tool == tool:
         text = comm.text
@@ -276,12 +285,14 @@ def print_sections(comm, tool=None):
 
 
 def print_situation_mentions(comm, tool=None):
-    """Print information for all SituationMentions (some of which may
-    not have Situations)
+    """Print information for all :class:`.SituationMention` (some of which
+    may not have a :class:`.Situation`)
 
     Args:
-
-    - `comm`: A Concrete Communication
+        comm (Communication):
+        tool (str): If not `None`, only print information for
+                    :class:`.SituationMention` objects with a matching
+                    `metadata.tool` field
     """
     for sm_set_idx, sm_set in enumerate(lun(comm.situationMentionSetList)):
         if tool is None or sm_set.metadata.tool == tool:
@@ -295,11 +306,14 @@ def print_situation_mentions(comm, tool=None):
 
 
 def print_situations(comm, tool=None):
-    """Print information for all Situations and their SituationMentions
+    """Print information for all :class:`.Situation` objects and their
+    associated :class:`.SituationMention` objects
 
     Args:
-
-    - `comm`: A Concrete Communication
+        comm (Communication):
+        tool (str): If not `None`, only print information for
+                    :class:`.Situation` objects with a matching
+                    `metadata.tool` field
     """
     for s_set_idx, s_set in enumerate(lun(comm.situationSetList)):
         if tool is None or s_set.metadata.tool == tool:
@@ -352,16 +366,41 @@ def _p(indent_level, justified_width, fieldname, content):
 
 
 def print_text_for_communication(comm, tool=None):
+    """Print `text field of :class:`.Communication`
+
+    Args:
+        comm (Communication):
+        tool (str): If not `None`, only print `text` field of
+                    :class:`.Communication` objects with a matching
+                    `metadata.tool` field
+    """
     if tool is None or comm.metadata.tool == tool:
         print(comm.text)
 
 
 def print_id_for_communication(comm, tool=None):
+    """Print ID field of :class:`.Communication`
+
+    Args:
+        comm (Communication):
+        tool (str): If not `None`, only print ID of
+                    :class:`.Communication` objects with a matching
+                    `metadata.tool` field
+
+    """
     if tool is None or comm.metadata.tool == tool:
         print(comm.id)
 
 
 def print_communication_taggings_for_communication(comm, tool=None):
+    """Print information for :class:`.CommunicationTagging` objects
+
+    Args:
+        comm (Communication):
+        tool (str): If not `None`, only print information for
+                    :class:`.CommunicationTagging` objects with a
+                    matching `metadata.tool` field
+    """
     communication_taggings = _filter_by_tool(
         lun(comm.communicationTaggingList), tool)
     for tagging in communication_taggings:
@@ -373,6 +412,16 @@ def print_communication_taggings_for_communication(comm, tool=None):
 
 
 def print_tokens_with_entityMentions(comm, tool=None):
+    """Print information for :class:`.Token` objects that are part of an :class:`.EntityMention`
+
+    Args:
+        comm (Communication):
+        tool (str): If not `None`, only print information for tokens
+                    that are associated with an
+                    :class:`.EntityMention` that is part of an
+                    :class:`.EntityMentionSet` with a matching
+                    `metadata.tool` field
+    """
     em_by_tkzn_id = _get_entityMentions_by_tokenizationId(
         comm, tool=tool)
     em_entity_num = _get_entity_number_for_entityMention_uuid(comm, tool=tool)
@@ -402,7 +451,13 @@ def print_tokens_with_entityMentions(comm, tool=None):
 
 
 def print_tokens_for_communication(comm, tool=None):
-    """
+    """Print token text for a :class:`.Communication`
+
+    Args:
+        comm (Communication):
+        tool (str): If not `None`, only print token text for
+                    :class:`.Communication` objects with a matching
+                    `metadata.tool` field
     """
     tokenizations_by_section = _get_tokenizations_grouped_by_section(
         comm, tool=tool)
@@ -418,11 +473,13 @@ def print_tokens_for_communication(comm, tool=None):
 
 
 def print_penn_treebank_for_communication(comm, tool=None):
-    """Print Penn-Treebank parse trees for all tokenizations
+    """Print Penn-Treebank parse trees for all :class:`.Tokenization` objects
 
     Args:
-
-    - `comm`: A Concrete Communication object
+        comm (Communication):
+        tool (str): If not `None`, only print information for
+                    :class:`.Tokenization` objects with a matching
+                    `metadata.tool` field
     """
     tokenizations = _get_tokenizations(comm)
 
@@ -437,12 +494,10 @@ def penn_treebank_for_parse(parse):
     """Get a Penn-Treebank style string for a Concrete Parse object
 
     Args:
-
-    - `parse`: A Concrete Parse object
+        parse (Parse):
 
     Returns:
-
-    - A string containing a Penn Treebank style parse tree representation
+        str: A string containing a Penn Treebank style parse tree representation
     """
     def _traverse_parse(nodes, node_index, indent=0):
         s = u""
@@ -477,10 +532,10 @@ def _get_char_offset_tags_for_tokenization(comm, tokenization):
 def _deps_for_tokenization(tokenization,
                            dependency_parse_index=0,
                            tool=None):
-    '''
+    """
     Return a generator of the dependencies (Dependency objects) for
     a tokenization under the given tool.
-    '''
+    """
     if tokenization.tokenList is not None:
         # Tokens that are not part of the dependency parse
         # (e.g. punctuation) are represented using an empty string
@@ -498,12 +553,12 @@ def _deps_for_tokenization(tokenization,
 def _sorted_dep_list_for_tokenization(tokenization,
                                       dependency_parse_index=0,
                                       tool=None):
-    '''
+    """
     Return output of _deps_for_tokenization in a list whose length
     is equal to the number of tokens in this tokenization's token list,
     where the element at index i is a dependency if there is a
     dependency whose dep field is i and None otherwise.
-    '''
+    """
     if tokenization.tokenList is not None:
         dep_list = [None] * len(tokenization.tokenList.tokenList)
         for dep in _deps_for_tokenization(
@@ -529,19 +584,17 @@ def _get_conll_head_tags_for_tokenization(tokenization,
     index of 0.
 
     Args:
-
-    - `tokenization`: A Concrete Tokenization object
+        tokenization (Tokenization):
 
     Returns:
+        str[]: A list of ConLL 'HEAD tag' strings, with one HEAD tag
+               for each token in the supplied tokenization.  If a
+               token does not have a HEAD tag (e.g. punctuation
+               tokens), the HEAD tag is an empty string.
 
-    - A list of ConLL 'HEAD tag' strings, with one HEAD tag for each
-      token in the supplied tokenization.  If a token does not have
-      a HEAD tag (e.g. punctuation tokens), the HEAD tag is an empty
-      string.
-
-      If the tokenization does not have a Dependency Parse, this
-      function returns a list of empty strings for each token in the
-      supplied tokenization.
+               If the tokenization does not have a Dependency Parse,
+               this function returns a list of empty strings for each
+               token in the supplied tokenization.
     """
     return list(map(
         lambda dep: '' if dep is None else (
@@ -564,19 +617,17 @@ def _get_conll_deprel_tags_for_tokenization(tokenization,
     its parent.
 
     Args:
-
-    - `tokenization`: A Concrete Tokenization object
+        tokenization (Tokenization):
 
     Returns:
+        A list of ConLL 'DEPREL tag' strings, with one DEPREL tag for
+        each token in the supplied tokenization.  If a token does not
+        have a DEPREL tag (e.g. punctuation tokens), the DEPREL tag is
+        an empty string.
 
-    - A list of ConLL 'DEPREL tag' strings, with one DEPREL tag for each
-      token in the supplied tokenization.  If a token does not have
-      a DEPREL tag (e.g. punctuation tokens), the DEPREL tag is an empty
-      string.
-
-      If the tokenization does not have a Dependency Parse, this
-      function returns a list of empty strings for each token in the
-      supplied tokenization.
+        If the tokenization does not have a Dependency Parse, this
+        function returns a list of empty strings for each token in the
+        supplied tokenization.
     """
     return list(map(
         lambda dep: '' if dep is None else (
@@ -591,13 +642,11 @@ def _get_entityMentions_by_tokenizationId(comm, tool=None):
     UUID string
 
     Args:
-
-    - `comm`: A Concrete Communication object
+        comm (Communication):
 
     Returns:
-
-    - A dictionary of lists of EntityMentions, where the dictionary
-      keys are Tokenization UUID strings.
+        A dictionary of lists of EntityMentions, where the dictionary
+        keys are Tokenization UUID strings.
     """
     mentions_by_tkzn_id = defaultdict(list)
     for entitySet in lun(comm.entitySetList):
@@ -615,15 +664,13 @@ def _get_entity_number_for_entityMention_uuid(comm, tool=None):
     'Entity Number'
 
     Args:
-
-    - `comm`: A Concrete Communication object
+        comm (Communication):
 
     Returns:
-
-    - A dictionary where the keys are EntityMention UUID strings,
-      and the values are "Entity Numbers", where the first Entity is
-      assigned number 0, the second Entity is assigned number 1,
-      etc.
+        A dictionary where the keys are EntityMention UUID strings,
+        and the values are "Entity Numbers", where the first Entity is
+        assigned number 0, the second Entity is assigned number 1,
+        etc.
     """
     entity_number_for_entityMention_uuid = {}
     entity_number_counter = 0
@@ -650,12 +697,10 @@ def _get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0,
     """Get lemma tags for a tokenization
 
     Args:
-
-    - `tokenization`: A Concrete Tokenization object
+        tokenization (Tokenization):
 
     Returns:
-
-    - A list of lemma tags for each token in the Tokenization
+        A list of lemma tags for each token in the Tokenization
     """
     if tokenization.tokenList:
         lemma_tags = [""] * len(tokenization.tokenList.tokenList)
@@ -678,12 +723,10 @@ def _get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0,
     """Get Named Entity Recognition tags for a tokenization
 
     Args:
-
-    - `tokenization`: A Concrete Tokenization object
+        tokenization (Tokenization):
 
     Returns:
-
-    - A list of NER tags for each token in the Tokenization
+        A list of NER tags for each token in the Tokenization
     """
     if tokenization.tokenList:
         ner_tags = [""] * len(tokenization.tokenList.tokenList)
@@ -708,12 +751,10 @@ def _get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
     """Get Part-of-Speech tags for a tokenization
 
     Args:
-
-    - tokenization: A Concrete Tokenization object
+        tokenization (Tokenization):
 
     Returns:
-
-    - A list of POS tags for each token in the Tokenization
+        A list of POS tags for each token in the Tokenization
     """
     if tokenization.tokenList:
         pos_tags = [""] * len(tokenization.tokenList.tokenList)
@@ -732,12 +773,10 @@ def _get_tokenizations(comm, tool=None):
     """Returns a flat list of all Tokenization objects in a Communication
 
     Args:
-
-    - `comm`: A Concrete Communication
+        comm (Communication):
 
     Returns:
-
-    - A list of all Tokenization objects within the Communication
+        A list of all Tokenization objects within the Communication
     """
     tokenizations = []
 
@@ -756,13 +795,11 @@ def _get_tokenizations_grouped_by_section(comm, tool=None):
     """Returns a list of lists of Tokenization objects in a Communication
 
     Args:
-
-    - `comm`: A Concrete Communication
+        comm (Communication):
 
     Returns:
-
-    - Returns a list of lists of Tokenization objects, where the
-      Tokenization objects are grouped by Section
+        Returns a list of lists of Tokenization objects, where the
+        Tokenization objects are grouped by Section
     """
     tokenizations_by_section = []
 
@@ -785,12 +822,10 @@ def _get_tokens_for_entityMention(entityMention):
     """Get list of token strings for an EntityMention
 
     Args:
-
-    - `entityMention`: A Concrete EntityMention argument
+        entityMention (EntityMention):
 
     Returns:
-
-    - A list of token strings
+        A list of token strings
     """
     tokens = []
     for tokenIndex in entityMention.tokens.tokenIndexList:
@@ -800,16 +835,14 @@ def _get_tokens_for_entityMention(entityMention):
 
 
 def _get_tokentaggings_of_type(tokenization, taggingType, tool=None):
-    """Returns a list of TokenTagging objects with the specified taggingType
+    """Returns a list of :class:`.TokenTagging` objects with the specified taggingType
 
     Args:
-
-    - `tokenization`: A Concrete Tokenizaiton object
-    - `taggingType`: A string value for the specified TokenTagging.taggingType
+        tokenization (Tokenization):
+        taggingType (str): A string value for the specified TokenTagging.taggingType
 
     Returns:
-
-    - A list of TokenTagging objects
+        A list of TokenTagging objects
     """
     return [
         tt for tt in tokenization.tokenTaggingList

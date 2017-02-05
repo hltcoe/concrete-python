@@ -4,22 +4,10 @@ concrete.clustering package
 Submodules
 ----------
 
-concrete.clustering.constants module
-------------------------------------
+.. toctree::
 
-.. automodule:: concrete.clustering.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.clustering.ttypes module
----------------------------------
-
-.. automodule:: concrete.clustering.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.clustering.constants
+   concrete.clustering.ttypes
 
 Module contents
 ---------------

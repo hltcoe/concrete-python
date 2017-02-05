@@ -4,22 +4,10 @@ concrete.audio package
 Submodules
 ----------
 
-concrete.audio.constants module
--------------------------------
+.. toctree::
 
-.. automodule:: concrete.audio.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.audio.ttypes module
-----------------------------
-
-.. automodule:: concrete.audio.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.audio.constants
+   concrete.audio.ttypes
 
 Module contents
 ---------------

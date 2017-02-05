@@ -4,22 +4,10 @@ concrete.language package
 Submodules
 ----------
 
-concrete.language.constants module
-----------------------------------
+.. toctree::
 
-.. automodule:: concrete.language.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.language.ttypes module
--------------------------------
-
-.. automodule:: concrete.language.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.language.constants
+   concrete.language.ttypes
 
 Module contents
 ---------------

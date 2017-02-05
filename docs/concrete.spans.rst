@@ -4,22 +4,10 @@ concrete.spans package
 Submodules
 ----------
 
-concrete.spans.constants module
--------------------------------
+.. toctree::
 
-.. automodule:: concrete.spans.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.spans.ttypes module
-----------------------------
-
-.. automodule:: concrete.spans.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.spans.constants
+   concrete.spans.ttypes
 
 Module contents
 ---------------

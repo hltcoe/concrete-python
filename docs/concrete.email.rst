@@ -4,22 +4,10 @@ concrete.email package
 Submodules
 ----------
 
-concrete.email.constants module
--------------------------------
+.. toctree::
 
-.. automodule:: concrete.email.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.email.ttypes module
-----------------------------
-
-.. automodule:: concrete.email.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.email.constants
+   concrete.email.ttypes
 
 Module contents
 ---------------

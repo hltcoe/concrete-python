@@ -4,22 +4,10 @@ concrete.nitf package
 Submodules
 ----------
 
-concrete.nitf.constants module
-------------------------------
+.. toctree::
 
-.. automodule:: concrete.nitf.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.nitf.ttypes module
----------------------------
-
-.. automodule:: concrete.nitf.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.nitf.constants
+   concrete.nitf.ttypes
 
 Module contents
 ---------------

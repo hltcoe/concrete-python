@@ -4,22 +4,10 @@ concrete.structure package
 Submodules
 ----------
 
-concrete.structure.constants module
------------------------------------
+.. toctree::
 
-.. automodule:: concrete.structure.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.structure.ttypes module
---------------------------------
-
-.. automodule:: concrete.structure.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.structure.constants
+   concrete.structure.ttypes
 
 Module contents
 ---------------

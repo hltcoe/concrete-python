@@ -4,22 +4,10 @@ concrete.situations package
 Submodules
 ----------
 
-concrete.situations.constants module
-------------------------------------
+.. toctree::
 
-.. automodule:: concrete.situations.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.situations.ttypes module
----------------------------------
-
-.. automodule:: concrete.situations.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.situations.constants
+   concrete.situations.ttypes
 
 Module contents
 ---------------

@@ -4,38 +4,12 @@ concrete.learn package
 Submodules
 ----------
 
-concrete.learn.ActiveLearnerClientService module
-------------------------------------------------
+.. toctree::
 
-.. automodule:: concrete.learn.ActiveLearnerClientService
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.learn.ActiveLearnerServerService module
-------------------------------------------------
-
-.. automodule:: concrete.learn.ActiveLearnerServerService
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.learn.constants module
--------------------------------
-
-.. automodule:: concrete.learn.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.learn.ttypes module
-----------------------------
-
-.. automodule:: concrete.learn.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.learn.ActiveLearnerClientService
+   concrete.learn.ActiveLearnerServerService
+   concrete.learn.constants
+   concrete.learn.ttypes
 
 Module contents
 ---------------

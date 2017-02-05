@@ -1,46 +1,45 @@
-"""Add reference variables for each :py:class:`.UUID` "pointer" in a
-:py:class:`.Communication`
+"""Add reference variables for each :class:`.UUID` "pointer" in a
+:class:`.Communication`
 
 """
 from __future__ import unicode_literals
 
 
 def add_references_to_communication(comm):
-    """Create references for each :py:class:`.UUID` 'pointer'
+    """Create references for each :class:`.UUID` 'pointer'
 
     Args:
+        comm (Communication): A Concrete Communication object
 
-    - `comm`: A Concrete :py:class:`.Communication` object
-
-    The Concrete schema uses :py:class:`.UUID` objects as internal
+    The Concrete schema uses :class:`.UUID` objects as internal
     pointers between Concrete objects.  This function adds member
     variables to Concrete objects that are references to the Concrete
-    objects identified by the :py:class:`.UUID`.
+    objects identified by the :class:`.UUID`.
 
-    For example, each :py:class:`.Entity` has a `mentionIdlist` that
-    lists the UUIDs of the :py:class:`.EntityMention` objects for that
-    :py:class:`.Entity`.  This function adds a `mentionList` variable
-    to the :py:class:`.Entity` that is a list of references to the
-    actual :py:class:`.EntityMention` objects.  This allows you to
-    access the :py:class:`.EntityMention` objects using:
+    For example, each :class:`.Entity` has a `mentionIdlist` that
+    lists the UUIDs of the :class:`.EntityMention` objects for that
+    :class:`.Entity`.  This function adds a `mentionList` variable
+    to the :class:`.Entity` that is a list of references to the
+    actual :class:`.EntityMention` objects.  This allows you to
+    access the :class:`.EntityMention` objects using:
 
         entity.mentionList
 
     This function adds these reference variables:
 
-    - `tokenization` to each :py:class:`.TokenRefSequence`
-    - `entityMention` to each :py:class:`.Argument`
-    - `sentence` backpointer to each :py:class:`.Tokenization`
-    - `parentMention` backpointer to appropriate :py:class:`.EntityMention`
+    - `tokenization` to each :class:`.TokenRefSequence`
+    - `entityMention` to each :class:`.Argument`
+    - `sentence` backpointer to each :class:`.Tokenization`
+    - `parentMention` backpointer to appropriate :class:`.EntityMention`
 
     And adds these lists of reference variables:
 
-    - `mentionList` to each :py:class:`.Entity`
-    - `situationMention` to each :py:class:`.Argument`
-    - `mentionList` to each :py:class:`.Situation`
-    - `childMentionList` to each :py:class:`.EntityMention`
+    - `mentionList` to each :class:`.Entity`
+    - `situationMention` to each :class:`.Argument`
+    - `mentionList` to each :class:`.Situation`
+    - `childMentionList` to each :class:`.EntityMention`
 
-    For variables that represent optional lists of :py:class:`.UUID`
+    For variables that represent optional lists of :class:`.UUID`
     objects (e.g. `situation.mentionIdList`), Python Thrift will set
     the variable to `None` if the list is not provided.  When this
     function adds a list-of-references variable (in this case,

@@ -10,17 +10,20 @@ from ..version import concrete_library_version
 class CommunicationContainerFetchHandler(object):
     """FetchCommunicationService implementation using Communication containers
 
-    Implements the FetchCommunicationService interface, retrieving
+    Implements the :mod:`.FetchCommunicationService` interface, retrieving
     Communications from a dict-like `communication_container` object
     that maps Communication ID strings to Communications.  The
     `communication_container` could be an actual dict, or a container
     such as:
-    - DirectoryBackedCommunicationContainer
-    - FetchBackedCommunicationContainer
-    - MemoryBackedCommunicationContainer
-    - ZipFileBackedCommunicationContainer
 
-    Usage:
+    - :class:`.DirectoryBackedCommunicationContainer`
+    - :class:`.FetchBackedCommunicationContainer`
+    - :class:`.MemoryBackedCommunicationContainer`
+    - :class:`.RedisHashBackedCommunicationContainer`
+    - :class:`.ZipFileBackedCommunicationContainer`
+
+    Usage::
+
         from concrete.util.access_wrapper import FetchCommunicationServiceWrapper
 
         handler = CommunicationContainerFetchHandler(comm_container)
@@ -31,7 +34,7 @@ class CommunicationContainerFetchHandler(object):
     def __init__(self, communication_container):
         """
         Args:
-        - `communication_container`: Dict-like object that maps Communication
+            communication_container: Dict-like object that maps Communication
                                      IDs to Communications
         """
         self.communication_container = communication_container
@@ -72,16 +75,19 @@ class CommunicationContainerFetchHandler(object):
 
 
 class RelayFetchHandler(object):
-    """Implements a 'relay' to another FetchCommunicationService server.
+    """Implements a 'relay' to another :mod:`.FetchCommunicationService`
+    server.
 
-    A FetchCommunicationService that acts as a relay to a second
-    FetchCommunicationService, where the second service is using the
-    TSocket transport and TCompactProtocol protocol.
+    A :mod:`.FetchCommunicationService` that acts as a relay to a
+    second :mod:`.FetchCommunicationService`, where the second
+    service is using the TSocket transport and TCompactProtocol
+    protocol.
 
     This class was designed for the use case where you have Thrift
     JavaScript code that needs to communicate with a
-    FetchCommunicationService server, but the server does not support
-    the same Thrift serialization protocol as the JavaScript client.
+    :mod:`.FetchCommunicationService` server, but the server does
+    not support the same Thrift serialization protocol as the
+    JavaScript client.
 
     The de-facto standard for Concrete services is to use the
     TCompactProtocol serialization protocol over a TSocket connection.
@@ -90,16 +96,16 @@ class RelayFetchHandler(object):
 
     The RelayFetchHandler class is intended to be used as server-side
     code by a web application.  The JavaScript code will make
-    FetchCommunicationService RPC calls to the web server using
-    HTTP/TJSONProtocol, and the web application will then pass these
-    RPC calls to another FetchCommunicationService using
-    TSocket/TCompactProtocol RPC calls.
+    :mod:`.FetchCommunicationService` RPC calls to the web server
+    using HTTP/TJSONProtocol, and the web application will then pass
+    these RPC calls to another :mod:`.FetchCommunicationService`
+    using TSocket/TCompactProtocol RPC calls.
     """
     def __init__(self, host, port):
         """
         Args:
-        - `host`: Hostname of FetchCommunicationService server
-        - `port`: Port # of FetchCommunicationService server
+            host (str): Hostname of :mod:`.FetchCommunicationService` server
+            port (int): Port # of :mod:`.FetchCommunicationService` server
         """
         self.host = host
         self.port = int(port)

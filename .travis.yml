@@ -8,5 +8,4 @@ before_script:
 
 script:
   - docker build -t concrete-python .
-  - docker run --rm concrete-python tox # configured in tox.ini
-  - docker run --rm concrete-python tox integration-tests
+  - docker run --rm concrete-python tox -e pep8,py27,py35,docs tests integration-tests # configured in tox.ini

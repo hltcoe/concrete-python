@@ -4,30 +4,11 @@ concrete.services.results package
 Submodules
 ----------
 
-concrete.services.results.ResultsServerService module
------------------------------------------------------
+.. toctree::
 
-.. automodule:: concrete.services.results.ResultsServerService
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.services.results.constants module
-------------------------------------------
-
-.. automodule:: concrete.services.results.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.services.results.ttypes module
----------------------------------------
-
-.. automodule:: concrete.services.results.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.services.results.ResultsServerService
+   concrete.services.results.constants
+   concrete.services.results.ttypes
 
 Module contents
 ---------------

@@ -11,30 +11,11 @@ Subpackages
 Submodules
 ----------
 
-concrete.services.Service module
---------------------------------
+.. toctree::
 
-.. automodule:: concrete.services.Service
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.services.constants module
-----------------------------------
-
-.. automodule:: concrete.services.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.services.ttypes module
--------------------------------
-
-.. automodule:: concrete.services.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.services.Service
+   concrete.services.constants
+   concrete.services.ttypes
 
 Module contents
 ---------------

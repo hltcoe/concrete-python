@@ -4,22 +4,10 @@ concrete.entities package
 Submodules
 ----------
 
-concrete.entities.constants module
-----------------------------------
+.. toctree::
 
-.. automodule:: concrete.entities.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.entities.ttypes module
--------------------------------
-
-.. automodule:: concrete.entities.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.entities.constants
+   concrete.entities.ttypes
 
 Module contents
 ---------------

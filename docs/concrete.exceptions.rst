@@ -4,22 +4,10 @@ concrete.exceptions package
 Submodules
 ----------
 
-concrete.exceptions.constants module
-------------------------------------
+.. toctree::
 
-.. automodule:: concrete.exceptions.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.exceptions.ttypes module
----------------------------------
-
-.. automodule:: concrete.exceptions.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.exceptions.constants
+   concrete.exceptions.ttypes
 
 Module contents
 ---------------

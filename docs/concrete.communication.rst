@@ -4,22 +4,10 @@ concrete.communication package
 Submodules
 ----------
 
-concrete.communication.constants module
----------------------------------------
+.. toctree::
 
-.. automodule:: concrete.communication.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.communication.ttypes module
-------------------------------------
-
-.. automodule:: concrete.communication.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.communication.constants
+   concrete.communication.ttypes
 
 Module contents
 ---------------

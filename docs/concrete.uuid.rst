@@ -4,22 +4,10 @@ concrete.uuid package
 Submodules
 ----------
 
-concrete.uuid.constants module
-------------------------------
+.. toctree::
 
-.. automodule:: concrete.uuid.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.uuid.ttypes module
----------------------------
-
-.. automodule:: concrete.uuid.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.uuid.constants
+   concrete.uuid.ttypes
 
 Module contents
 ---------------

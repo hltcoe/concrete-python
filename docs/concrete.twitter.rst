@@ -4,22 +4,10 @@ concrete.twitter package
 Submodules
 ----------
 
-concrete.twitter.constants module
----------------------------------
+.. toctree::
 
-.. automodule:: concrete.twitter.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.twitter.ttypes module
-------------------------------
-
-.. automodule:: concrete.twitter.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.twitter.constants
+   concrete.twitter.ttypes
 
 Module contents
 ---------------

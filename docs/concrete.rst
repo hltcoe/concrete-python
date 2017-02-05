@@ -31,30 +31,11 @@ Subpackages
 Submodules
 ----------
 
-concrete.inspect module
------------------------
+.. toctree::
 
-.. automodule:: concrete.inspect
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.validate module
-------------------------
-
-.. automodule:: concrete.validate
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.version module
------------------------
-
-.. automodule:: concrete.version
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.inspect
+   concrete.validate
+   concrete.version
 
 Module contents
 ---------------

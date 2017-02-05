@@ -4,22 +4,10 @@ concrete.linking package
 Submodules
 ----------
 
-concrete.linking.constants module
----------------------------------
+.. toctree::
 
-.. automodule:: concrete.linking.constants
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-concrete.linking.ttypes module
-------------------------------
-
-.. automodule:: concrete.linking.ttypes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   concrete.linking.constants
+   concrete.linking.ttypes
 
 Module contents
 ---------------

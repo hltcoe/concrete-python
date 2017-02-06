@@ -29,6 +29,15 @@ AL_TOKEN = 'token'
 
 
 def add_annotation_level_argparse_argument(parser):
+    """Add an '--annotation-level' argument to an ArgumentParser
+
+    The '--annotation-level argument specifies the level of
+    concrete annotation to infer from whitespace in text.
+    See :func:`create_comm` for details.
+
+    Args:
+        parser (argparse.ArgumentParser)
+    """
     parser.add_argument('--annotation-level', type=str,
                         choices=(AL_NONE, AL_SECTION, AL_SENTENCE, AL_TOKEN),
                         help='Level of concrete annotation to infer from'
@@ -56,10 +65,22 @@ def _split(s, delim):
 def create_sentence(sen_text, sen_start, sen_end,
                     aug, metadata_tool, metadata_timestamp,
                     annotation_level):
-    '''
-    Create sentence from provided text and metadata.
-    Lower-level routine (called indirectly by create_comm).
-    '''
+    """Create :class:`.Sentence` from provided text and metadata.
+
+    Lower-level routine (called indirectly by :func:`create_comm`)
+
+    Args:
+        sen_text (str):
+        sen_start (int):
+        sen_end (int):
+        aug (_AnalyticUUIDGenerator):
+        metadata_tool (str):
+        metadata_timestamp (int): Time in seconds since the Epoch
+        annotation_level (str): See :func:`create_comm` for details
+
+    Returns:
+        Sentence:
+    """
 
     sections = (annotation_level is not None) and (annotation_level != AL_NONE)
     sentences = sections and (annotation_level != AL_SECTION)
@@ -90,10 +111,23 @@ def create_sentence(sen_text, sen_start, sen_end,
 def create_section(sec_text, sec_start, sec_end, section_kind,
                    aug, metadata_tool, metadata_timestamp,
                    annotation_level):
-    '''
-    Create section from provided text and metadata.
-    Lower-level routine (called by create_comm).
-    '''
+    """Create :class:`.Section` from provided text and metadata.
+
+    Lower-level routine (called by :func:`create_comm`).
+
+    Args:
+        sec_text (str):
+        sec_start (int):
+        sec_end (int):
+        section_kind (str):
+        aug (_AnalyticUUIDGenerator):
+        metadata_tool (str):
+        metadata_timestamp (int): Time in seconds since the Epoch
+        annotation_level (str): See :func:`create_comm` for details
+
+    Returns:
+        Section:
+    """
 
     sections = (annotation_level is not None) and (annotation_level != AL_NONE)
     sentences = sections and (annotation_level != AL_SECTION)
@@ -120,19 +154,31 @@ def create_comm(comm_id, text='',
                 metadata_tool='concrete-python',
                 metadata_timestamp=None,
                 annotation_level=AL_TOKEN):
-    '''
-    Create a simple, valid Communication from text.
+    """Create a simple, valid :class:`.Communication` from text.
+
     By default the text will be split by double-newlines into sections
     and then by single newlines into sentences within those sections.
 
-    annotation_level controls the amount of annotation that is added:
-      AL_NONE      add no optional annotations (not even sections)
-      AL_SECTION   add sections but not sentences
-      AL_SENTENCE  add sentences but not tokens
-      AL_TOKEN     add all annotations, up to tokens (the default)
+    `annotation_level` controls the amount of annotation that is added:
 
-    If metadata_timestamp is None, the current time will be used.
-    '''
+     - AL_NONE:      add no optional annotations (not even sections)
+     - AL_SECTION:   add sections but not sentences
+     - AL_SENTENCE:  add sentences but not tokens
+     - AL_TOKEN:     add all annotations, up to tokens (the default)
+
+    Args:
+        comm_id (str):
+        text (str):
+        comm_type (str):
+        section_kind (str):
+        metadata_tool (str):
+        metadata_timestamp (int): Time in seconds since the Epoch.
+          If `None, the current time will be used.
+        annotation_level (str):
+
+    Returns:
+        Communication:
+    """
 
     if metadata_timestamp is None:
         metadata_timestamp = int(time.time())
@@ -163,20 +209,18 @@ def create_comm(comm_id, text='',
 
 
 def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
-    """Create a simple (valid) Communication suitable for testing purposes
+    """Create a simple (valid) :class:`.Communication` suitable for testing purposes
 
-    The Communication will have a single Section containing a single
-    Sentence.
+    The Communication will have a single :class:`.Section` containing
+    a single :class:`.Sentence`.
 
     Args:
-
-    - `comm_id`: A string specifying a Communication ID
-    - `sentence_string`: A string to be used for the sentence text.
-       The string will be whitespace-tokenized.
+        comm_id (str): Specifies a Communication ID
+        sentence_string (str): String to be used for the sentence text.
+            The string will be whitespace-tokenized.
 
     Returns:
-
-    - A Concrete Communication object
+        Communication:
     """
     logging.warning('create_simple_comm will be removed in a future'
                     ' release, please use create_comm instead')
@@ -226,12 +270,14 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
 
 
 class SimpleCommTempFile(object):
-    '''
-    Class representing a temporary file of sample concrete objects.
-    Designed to facilitate testing.  Class members:
+    """DEPRECATED. Please use :func:`create_comm` instead.
 
-        path:           path to file
-        communications: list of communications that were written to file
+    Class representing a temporary file of sample concrete objects.
+    Designed to facilitate testing.
+
+    Attributes:
+        path (str): path to file
+        communications (Communication[]): List of communications that were written to file
 
     Usage demo:
 
@@ -251,12 +297,12 @@ class SimpleCommTempFile(object):
     temp-2
     True
     True
-    '''
+    """
 
     def __init__(self, n=10, id_fmt='temp-%d',
                  sentence_fmt='Super simple sentence %d .',
                  writer_class=CommunicationWriter, suffix='.concrete'):
-        '''
+        """
         Create temp file and write communications.
 
             n:i     number of communications to write
@@ -269,7 +315,7 @@ class SimpleCommTempFile(object):
             writer_class: CommunicationWriter or CommunicationWriterTGZ
             suffix: file path suffix (you probably want to choose this
                     to match writer_class)
-        '''
+        """
         logging.warning('SimpleCommTempFile will be removed in a future'
                         ' release, please use create_comm instead')
 

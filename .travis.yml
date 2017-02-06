@@ -1,11 +1,19 @@
+language: generic
+
 sudo: required
 
-services:
-  - docker
+matrix:
+    include:
+        - os: linux
+        - os: osx
+          env:
+          - LDFLAGS=-L/usr/local/opt/openssl/lib
+            CPPFLAGS=-I/usr/local/opt/openssl/include
 
-before_script:
-  - docker info
+
+install:
+    - ./.travis/install.bash
 
 script:
-  - docker build -t concrete-python .
-  - docker run --rm concrete-python tox -e pep8,py27,py35,docs tests integration-tests # configured in tox.ini
+  - tox -e pep8,py27,py35,docs tests # configured in tox.ini
+  - tox -e py27,py35 integration-tests

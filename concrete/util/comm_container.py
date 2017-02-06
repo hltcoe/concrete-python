@@ -1,7 +1,7 @@
 """Communication Containers - mapping Communication IDs to Communications
 
 Classes that behave like a read-only dictionary (implementing Python's
-collections.Mapping interface) and map Communication ID strings to
+`collections.Mapping` interface) and map Communication ID strings to
 Communications.
 
 The classes abstract away the storage backend.  If you need to
@@ -29,12 +29,12 @@ from .mem_io import read_communication_from_buffer
 class DirectoryBackedCommunicationContainer(collections.Mapping):
     """Maps Comm IDs to Comms, retrieving Comms from the filesystem
 
-    DirectoryBackedCommunicationContainer instances behave as
+    `DirectoryBackedCommunicationContainer` instances behave as
     dict-like data structures that map Communication IDs to
     Communications.  Communications are lazily-retrieved from the
     filesystem.
 
-    Upon initialization, a DirectoryBackedCommunicationContainer
+    Upon initialization, a `DirectoryBackedCommunicationContainer`
     instance will (recursively) search `directory_path` for any files
     that end with the specified `comm_extensions`.  Files with
     matching extensions are assumed to be Communication files whose
@@ -45,19 +45,18 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
 
     Files with the extension `.gz` will be decompressed using gzip.
 
-    A DirectoryBackedCommunicationsContainer will not be able to find
+    A `DirectoryBackedCommunicationsContainer` will not be able to find
     any files that are added to `directory_path` after the container
     was initialized.
+
+    Args:
+         directory_path (str): Path to directory containing Communications files
+         comm_extensions (str[]): List of strings specifying filename extensions
+                                     to be associated with Communications
     """
 
     def __init__(self, directory_path,
                  comm_extensions=['.comm', '.concrete', '.gz']):
-        """
-        Args:
-        - `directory_path`: Path to directory containing Communications files
-        - `comm_extensions`: List of strings specifying filename extensions
-                             associated with Communications
-        """
         self.comm_id_to_comm_path = {}
 
         logging.info("Caching names of files with extensions [%s] in '%s'" %
@@ -100,24 +99,24 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
 
 
 class FetchBackedCommunicationContainer(collections.Mapping):
-    """Maps Comm IDs to Comms, retrieving Comms from a Fetch server
+    """Maps Comm IDs to Comms, retrieving Comms from a
+    :mod:`.FetchCommunicationService` server
 
-    FetchBackedCommunicationContainer instances behave as dict-like data
+    `FetchBackedCommunicationContainer` instances behave as dict-like data
     structures that map Communication IDs to Communications.  Communications
-    are lazily-retrieved from a FetchCommunicationService.
+    are lazily-retrieved from a :mod:`.FetchCommunicationService`.
 
     If you need to retrieve large amounts of data from a
-    FetchCommunicationService, then you SHOULD NOT USE THIS CLASS.
+    :mod:`.FetchCommunicationService`, then you SHOULD NOT USE THIS CLASS.
     This class retrieves one Communication at a time using
-    FetchCommunicationService.
+    :mod:`.FetchCommunicationService`.
+
+    Args:
+        host (str): Hostname of :mod:`.FetchCommunicationService` server
+        port (int): Port # of :mod:`.FetchCommunicationService` server
     """
 
     def __init__(self, host, port):
-        """
-        Args:
-        - `host`: Hostname of FetchCommunicationService server
-        - `port`: Port # of FetchCommunicationService server
-        """
         self.host = host
         self.port = port
 
@@ -147,18 +146,17 @@ class FetchBackedCommunicationContainer(collections.Mapping):
 class MemoryBackedCommunicationContainer(collections.Mapping):
     """Maps Comm IDs to Comms by loading all Comms in file into memory
 
-    FetchBackedCommunicationContainer instances behave as dict-like
+    `FetchBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.  All
     Communications in `communications_file` will be read into memory
-    using a CommunicationReader instance.
+    using a :class:`.CommunicationReader` instance.
+
+    Args:
+        communications_file (str): String specifying name of Communications file
+        max_file_size (int): Maximum file size, in bytes
     """
 
     def __init__(self, communications_file, max_file_size=1073741824):
-        """
-        Args:
-        `communications_file`: String specifying name of Communications file
-        `max_file_size`: Integer specifying maximum file size, in bytes
-        """
         self.comm_id_to_comm = {}
 
         comm_file_size = os.path.getsize(communications_file)
@@ -194,18 +192,17 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
 class ZipFileBackedCommunicationContainer(collections.Mapping):
     """Maps Comm IDs to Comms, retrieving Comms from a Zip file
 
-    ZipFileBackedCommunicationContainer instances behave as dict-like
+    `ZipFileBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
     Communications are lazily-retrieved from a Zip file.
+
+    Args:
+        zipfile_path (str): Path to Zip file containing Communications
+        comm_extensions (str[]): List of strings specifying filename extensions
+                             associated with Communications
     """
 
     def __init__(self, zipfile_path, comm_extensions=['.comm', '.concrete']):
-        """
-        Args:
-        - `zipfile_path`: Path to Zip file containing Communications
-        - `comm_extensions`: List of strings specifying filename extensions
-                             associated with Communications
-        """
         self.comm_id_to_filename = {}
         self.zipfile = zipfile.ZipFile(zipfile_path, 'r')
         for filename in self.zipfile.namelist():
@@ -232,18 +229,16 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
 class RedisHashBackedCommunicationContainer(collections.Mapping):
     """Maps Comm IDs to Comms, retrieving Comms from a Redis hash
 
-    RedisHashBackedCommunicationContainer instances behave as dict-like
+    `RedisHashBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
     Communications are lazily-retrieved from a Redis hash.
+
+    Args:
+        redis_db (redis.Redis): redis database connection
+        key (str): Key in redis database where hash is located
     """
 
     def __init__(self, redis_db, key):
-        """
-        Args:
-        - `redis_db`: redis database connection (redis.Redis object)
-        - `key`:      string specifying key in redis database where
-                      hash is located
-        """
         self.redis_db = redis_db
         self.key = key
 

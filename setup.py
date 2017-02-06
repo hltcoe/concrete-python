@@ -77,7 +77,7 @@ if __name__ == '__main__':
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: BSD License',
             'Natural Language :: English',
-            #'Operating System :: MacOS :: MacOS X',
+            'Operating System :: MacOS :: MacOS X',
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 2.7',

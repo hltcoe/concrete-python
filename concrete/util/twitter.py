@@ -1,6 +1,6 @@
 """Convert between JSON and Concrete representations of Tweets
 
-The fields used by the Twitter API are documented at:
+The JSON fields used by the Twitter API are documented at:
 
   https://dev.twitter.com/overview/api/tweets
 """
@@ -40,7 +40,13 @@ CREATED_AT_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
 
 def json_tweet_object_to_Communication(tweet):
-    """
+    """Convert deserialized JSON Tweet object to :class:`.Communication`
+
+    Args:
+        tweet (object): Object created by deserializing a JSON Tweet string
+
+    Returns:
+        Communication:
     """
     tweet_info = json_tweet_object_to_TweetInfo(tweet)
 
@@ -78,7 +84,16 @@ def json_tweet_object_to_Communication(tweet):
 
 
 def snake_case_to_camelcase(value):
-    """Implementation copied from: http://goo.gl/SSgo9k
+    """Converts snake case to camel case
+
+    Implementation copied from this Stack Overflow post:
+    http://goo.gl/SSgo9k
+
+    Args:
+        value (unicode):
+
+    Returns:
+        unicode
     """
     def camelcase():
         yield lambda c: c.lower()
@@ -89,10 +104,13 @@ def snake_case_to_camelcase(value):
 
 
 def json_tweet_object_to_TweetInfo(tweet):
-    """
+    """Create :class:`.TweetInfo` object from deserialized JSON Tweet object
+
     Args:
+        tweet (object): Object created by deserializing a JSON Tweet string
 
     Returns:
+        TweetInfo:
     """
 
     def set_flat_fields(concrete_object, twitter_dict):
@@ -195,6 +213,18 @@ def json_tweet_object_to_TweetInfo(tweet):
 
 def json_tweet_string_to_Communication(json_tweet_string, check_empty=False,
                                        check_delete=False):
+    """Convert JSON Tweet string to Communication
+
+    Args:
+        json_tweet_string (str): JSON Tweet string from Twitter API
+        check_empty (bool): If `True`, check if `json_tweet_string` is empty
+        check_delete (bool): If `True`, check for presence of `delete` field
+            in Tweet JSON, and if the 'delete' field is present, return `None`
+
+    Returns:
+        Communication:
+    """
+
     json_tweet_string = json_tweet_string.strip()
     if (not check_empty) or json_tweet_string:
         json_tweet = json.loads(json_tweet_string)
@@ -207,24 +237,36 @@ def json_tweet_string_to_Communication(json_tweet_string, check_empty=False,
 
 
 def json_tweet_string_to_TweetInfo(json_tweet_string):
+    """Create :class:`.TweetInfo` object from JSON Tweet string
+
+    Args:
+        tweet (object): JSON Tweet string from Twitter API
+
+    Returns:
+        TweetInfo:
+    """
     tweet = json.loads(json_tweet_string)
     return json_tweet_object_to_TweetInfo(tweet)
 
 
-def capture_tweet_lid(twitter_dict):
+def capture_tweet_lid(tweet):
     """
     Attempts to capture the 'lang' field in the twitter API, if it
     exists.
 
-    Returns a list of LanguageIdentification objects, or None if the
-    field is not present in the tweet json.
+    Args:
+        tweet (object): Object created by deserializing a JSON Tweet string
+
+    Returns:
+        List of :class:`.LanguageIdentification` objects, or `None`
+        if the field is not present in the Tweet JSON
     """
-    if u'lang' in twitter_dict:
+    if u'lang' in tweet:
         amd = AnnotationMetadata(tool="Twitter LID",
                                  timestamp=int(time.time()),
                                  kBest=1)
         kvs = {}
-        kvs[twitter_lid_to_iso639_3(twitter_dict[u'lang'])] = 1.0
+        kvs[twitter_lid_to_iso639_3(tweet[u'lang'])] = 1.0
         return LanguageIdentification(metadata=amd,
                                       languageToProbabilityMap=kvs)
     else:
@@ -232,11 +274,17 @@ def capture_tweet_lid(twitter_dict):
 
 
 def twitter_lid_to_iso639_3(twitter_lid):
-    """
+    """Convert Twitter Language ID string to ISO639-3 code
+
     Ref: https://dev.twitter.com/rest/reference/get/help/languages
 
-    This can be an iso639-3 code (no-op), iso639-1 2-letter abbr
-    (converted to 3), or combo (split by '-', then first part converted)
+    Args:
+        twitter_lid (str): This can be an iso639-3 code (no-op),
+            iso639-1 2-letter abbr (converted to 3), or combo
+            (split by '-', then first part converted)
+
+    Returns:
+        str: An ISO639-3 code
     """
     if len(twitter_lid) == 2:
         return ISO_LANGS.get(iso639_1_code=twitter_lid).iso639_3_code

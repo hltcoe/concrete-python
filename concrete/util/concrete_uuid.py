@@ -1,5 +1,5 @@
 """
-Helper functions for generating Concrete UUIDs
+Helper functions for generating Concrete :class:`.UUID` objects
 """
 
 # Force 'import uuid' to import the Python standard library module
@@ -26,6 +26,9 @@ except NameError:
 
 def generate_UUID():
     """Helper function for generating a Concrete UUID object
+
+    Returns:
+        UUID: Concrete UUID object
     """
     return UUID(uuidString=str(python_uuid.uuid4()))
 
@@ -94,9 +97,9 @@ def generate_uuid_unif():
 
 
 class _AnalyticUUIDGenerator(object):
-    '''
-    UUID generator for a given analytic in a given communication.
-    '''
+    """
+    UUID generator for a given analytic in a given Communication.
+    """
 
     def __init__(self, u):
         (self._xs, ys, zs) = split_uuid(u)
@@ -110,10 +113,10 @@ class _AnalyticUUIDGenerator(object):
         return self
 
     def __next__(self):
-        '''
+        """
         Generate and return a new concrete UUID.
         StopIteration will never be raised.
-        '''
+        """
         self._z = (self._z + 1) % self._z_bound
         self.n += 1
         return UUID(uuidString=join_uuid(
@@ -125,10 +128,9 @@ class _AnalyticUUIDGenerator(object):
 
 
 class AnalyticUUIDGeneratorFactory(object):
-    '''
-    Factory for a compressible UUID generator.
+    """Factory for a compressible UUID generator.
 
-    One factory should be created per communication, and a new generator
+    One factory should be created per Communication, and a new generator
     should be created from that factory for each analytic processing the
     communication.  Usually each program represents a single analytic,
     so common usage is::
@@ -139,7 +141,7 @@ class AnalyticUUIDGeneratorFactory(object):
             annotation = next(aug)
             <add annotation to communication>
 
-    or if you're creating a new communication::
+    or if you're creating a new Communication::
 
         augf = AnalyticUUIDGeneratorFactory()
         aug = augf.create()
@@ -150,8 +152,10 @@ class AnalyticUUIDGeneratorFactory(object):
             <add annotation to communication>
 
     where the annotation objects might be objects of type
-    Parse, DependencyParse, TokenTagging, CommunicationTagging, etc.
-    '''
+    :class:`.Parse`, :class:`.DependencyParse`, :class:`.TokenTagging`,
+    :class:`.CommunicationTagging`, etc.
+
+    """
 
     def __init__(self, comm=None):
         if comm is None:
@@ -160,19 +164,20 @@ class AnalyticUUIDGeneratorFactory(object):
             self.comm_uuid = comm.uuid.uuidString
 
     def create(self):
-        '''
-        Create and return a UUID generator for a new analytic.
-        '''
+        """
+        Returns:
+            A UUID generator for a new analytic.
+        """
         return _AnalyticUUIDGenerator(self.comm_uuid)
 
 
 def _filtered_getmembers(obj):
-    '''
+    """
     Generate key-value pairs of object members that may contain UUIDs.
     Over-generate, but filter the output enough that concrete objects
     can be traversed recursively using this function without leading to
     stack overflows or infinite loops.
-    '''
+    """
 
     for k in dir(obj):
         if not (k[0] == '_' or k == 'thrift_spec' or k == 'read' or
@@ -188,7 +193,7 @@ _FILTERED_TTYPES = set((TType.STRUCT, TType.LIST, TType.MAP, TType.SET))
 
 
 def _fast_filtered_getmembers(obj):
-    'Fast thrift-specific implementation of filtered_getmembers.'
+    """Fast thrift-specific implementation of filtered_getmembers."""
 
     if hasattr(obj, 'thrift_spec'):
         for s in obj.thrift_spec:
@@ -200,36 +205,40 @@ def _fast_filtered_getmembers(obj):
 
 
 class UUIDClustering(object):
-    '''
+    """
     Representation of the UUID instance clusters in a concrete
     communication (each cluster represents the set of nested members of
     the communication that reference or are identified by a given UUID).
-    '''
+    """
 
     def __init__(self, comm):
         self._clusters = dict()  # map: UUID -> set of nested members
         self._search(comm)
 
     def hashable_clusters(self):
-        '''
-        Return the set of unlabeled UUID clusters in a unique and
-        hashable format.  Two UUIDClusterings c1 and c2 are equivalent
-        (the two underlying communications' UUID structures are
+        """Hashable version of UUIDClustering.
+
+        Two UUIDClusterings c1 and c2 are equivalent
+        (the two underlying Communications' UUID structures are
         equivalent) if and only if:
 
             c1.hashable_clusters() == c2.hashable_clusters()
-        '''
+
+        Returns:
+            The set of unlabeled UUID clusters in a unique
+            and hashable format.
+        """
         return set(tuple(sorted(c)) for c in self._clusters.values())
 
     def _search(self, obj, prefix=()):
-        '''
+        """
         Search obj for UUIDs, calling _add_uuid_field when UUIDs are
         found and calling _search on other object members.
         When _search calls itself, prefix is appended with the object
         member name, forming a uniquely identifiable tuple
         representation of the path from the root object to a nested
         object member.
-        '''
+        """
 
         if isinstance(obj, UUID):
             self._add_uuid_field(obj.uuidString, prefix)
@@ -246,11 +255,11 @@ class UUIDClustering(object):
                 self._search(v, prefix + (k,))
 
     def _add_uuid_field(self, u, f):
-        '''
+        """
         Add UUID field f (a unique, hashable representation of the path
         from the root communication to a nested UUID object) to the UUID
         cluster indexed by UUID string u.
-        '''
+        """
         if u in self._clusters:
             self._clusters[u].add(f)
         else:
@@ -263,7 +272,13 @@ class UUIDCompressor(object):
         self.single_analytic = single_analytic
 
     def compress(self, comm):
-        'Return a deep copy of comm with compressed UUIDs.'
+        """
+        Args:
+            comm (Communication)
+
+        Returns:
+            Communication: Deep copy of `comm` with compressed UUIDs
+        """
 
         cc = communication_deep_copy(comm)
         self.augf = AnalyticUUIDGeneratorFactory(cc)
@@ -276,7 +291,7 @@ class UUIDCompressor(object):
         return cc
 
     def _compress_uuids(self, obj, name_is_uuid=False, tool=None):
-        'Generate new UUIDs in "uuid" fields and save mapping'
+        """Generate new UUIDs in "uuid" fields and save mapping"""
 
         tool = self._get_tool(obj, tool)
 
@@ -295,7 +310,7 @@ class UUIDCompressor(object):
             )
 
     def _compress_uuid_refs(self, obj, name_is_uuid=False, tool=None):
-        'Update UUID references (not in "uuid" fields) using saved mapping'
+        """Update UUID references (not in "uuid" fields) using saved mapping"""
 
         tool = self._get_tool(obj, tool)
 
@@ -311,10 +326,10 @@ class UUIDCompressor(object):
             )
 
     def _get_tool(self, obj, tool=None):
-        '''
+        """
         Return tool for this object, given the parent tool;
         update self.augs
-        '''
+        """
 
         if hasattr(obj, 'metadata'):
             if isinstance(obj.metadata, AnnotationMetadata):
@@ -328,10 +343,10 @@ class UUIDCompressor(object):
         return tool
 
     def _gen_uuid(self, old_uuid, tool):
-        '''
+        """
         Return a new UUID for the provided tool, using self.augs;
         update self.uuid_map
-        '''
+        """
 
         aug = self.augs[tool]
         new_uuid = next(aug)
@@ -343,10 +358,10 @@ class UUIDCompressor(object):
 
     @classmethod
     def _apply(cls, f, x):
-        '''
+        """
         Apply f to the members of x if it is a basic container type,
         otherwise apply f to x directly.
-        '''
+        """
 
         if isinstance(x, list):
             for elt in x:
@@ -363,19 +378,25 @@ class UUIDCompressor(object):
 
 
 def compress_uuids(comm, verify=False, single_analytic=False):
-    '''
-    Create a copy of communication comm with UUIDs converted according
-    to the compressible UUID scheme.  Return a 2-tuple containing that
-    new communication and the UUIDCompressor object used to perform
-    the conversion.
+    """Create a copy of :class:`.Communication` `comm` with UUIDs
+    converted according to the compressible UUID scheme
 
-    If verify is True, use a heuristic to verify the UUID link structure
-    is preserved in the new communication.  If single_analytic is True,
-    use a single analytic prefix for all UUIDs in comm.
+    Args:
+        comm (Communication):
+        verify (bool): If True, use a heuristic to verify the
+            UUID link structure is preserved in the new Communication
+        single_analytic (bool): If True, use a single analytic prefix
+            for all UUIDs in `comm`.
 
-    If verify is True and comm has references added, throw a ValueError
-    because verification would cause an infinite loop.
-    '''
+    Returns:
+        A 2-tuple containing the new :class:`.Communication`
+        (converted using the compressible UUID scheme) and the
+        :class:`UUIDCompressor` object used to perform the conversion.
+
+    Raises:
+        ValueError: If `verify` is True and `comm` has references added,
+            raise because verification would cause an infinite loop.
+    """
 
     if verify and hasattr(comm, 'tokenizationForUUID'):
         raise ValueError('cannot verify communication with references')

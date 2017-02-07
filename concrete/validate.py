@@ -1,22 +1,7 @@
 """Library to validate a Concrete Communication
 
-Current validation checks:
-
-  - for each constituent parse, do any of the constituent ID's for
-    that parse repeat?
-  - is each dependency and constituent parse a fully connected graph?
-  - is each constituent parse "tree" really a tree?
-  - for each dependency parse, are there any nodes with a null
-    governer node whose edgeType is not root?
-  - for each entityMention, does entityMention.tokens.tokenizationId
-    point to a valid tokenization uuid?
-  - for each entity, do all the entity's entityMentionId's point to a
-    valid entityMention uuid?
-  - for each TokenRefSequence, are the token indices valid indices
-    into the corresponding tokenization?
-  - for each MentionArgument, there are fields that can point to an
-    EntityMention, SituationMention or TokenRefSequence, but the
-    MentionArgument should point to exactly one of these objects
+Validation info, error and warning messages are logged using the
+Python standard library's `logging` module.
 """
 from __future__ import unicode_literals
 
@@ -31,6 +16,14 @@ from .util.unnone import lun
 
 
 def validate_communication_file(communication_filename):
+    """Test if the :class:`.Communication` in a file is valid
+
+    Deserializes a :class:`.Communication` file into memory, then
+    calls :func:`validate_communication` on the Communication object.
+
+    Args:
+        communication_filename (str): Name of file containing
+    """
     logging.info(_ilm(
         0, "Opening Concrete Communication with filename '%s'"
            % communication_filename))
@@ -39,14 +32,27 @@ def validate_communication_file(communication_filename):
 
 
 def validate_communication(comm):
-    """
-    Args:
+    """Test if all objects in a :class:`.Communication` are valid.
 
-    - `comm` (`Communication`)
+    Calls :func:`validate_thrift_deep` to check for Concrete data
+    structure fields that are required by the Concrete Thrift
+    definitions.  Then calls:
+
+    - :func:`validate_token_offsets_for_section`
+    - :func:`validate_token_offsets_for_sentence`
+    - :func:`validate_constituency_parses`
+    - :func:`validate_dependency_parses`
+    - :func:`validate_token_taggings`
+    - :func:`validate_entity_mention_ids`
+    - :func:`validate_entity_mention_tokenization_ids`
+    - :func:`validate_situations`
+    - :func:`validate_situation_mentions`
+
+    Args:
+        comm (Communication)
 
     Returns:
-
-    - `True` if Communication is valid, `False` otherwise
+        bool
     """
     valid = True
 
@@ -87,12 +93,11 @@ def validate_communication(comm):
 def _get_entity_uuidString_set(comm):
     """
     Args:
-
-    - `comm` (`Communication`)
+        comm (Communication)
 
     Returns:
-
-    - set of strings: uuidStrings for all Entities in the Communication
+        set of strings: uuidStrings for all :class:`.Entity` objects
+        in the Communication
     """
     entity_uuidString_set = set()
     for entitySet in lun(comm.entitySetList):
@@ -104,12 +109,11 @@ def _get_entity_uuidString_set(comm):
 def _get_entity_mention_uuidString_set(comm):
     """
     Args:
-
-    - `comm` (`Communication`)
+        comm (Communication)
 
     Returns:
-
-    - set of strings: uuidStrings for all EntityMentions in the Communication
+        set of strings: uuidStrings for all :class:`.EntityMention`
+        objects in the Communication
     """
     entity_mention_uuidString_set = set()
     for entityMentionSet in lun(comm.entityMentionSetList):
@@ -122,12 +126,10 @@ def _get_entity_mention_uuidString_set(comm):
 def _get_sentence_for_tokenization_uuidString_dict(comm):
     """
     Args:
-
-    - `comm` (`Communication`)
+        comm (Communication)
 
     Returns:
-
-    - dictionary mapping of Tokenization uuidStrings to Sentences
+        dict: Maps :class:`.Tokenization` uuidString to :class:`.Sentence`
     """
     if not hasattr(comm, 'sentence_for_tokenization_uuidString_dict'):
         comm.sentence_for_tokenization_uuidString_dict = {}
@@ -142,12 +144,11 @@ def _get_sentence_for_tokenization_uuidString_dict(comm):
 def _get_situation_uuidString_set(comm):
     """
     Args:
-
-    - `comm` (`Communication`)
+        comm (Communication)
 
     Returns:
-
-    - set of strings: uuidStrings for all Situations in the Communication
+        set of strings: uuidStrings for all :class:`.Situation` objects
+        in the :class:`.Communication`
     """
     situation_uuidString_set = set()
     for situationSet in lun(comm.situationSetList):
@@ -158,6 +159,8 @@ def _get_situation_uuidString_set(comm):
 
 def _get_situation_mention_uuidString_set(comm):
     """
+    Args:
+        comm (Communication)
     Args:
 
     - `comm` (`Communication`)
@@ -177,6 +180,8 @@ def _get_situation_mention_uuidString_set(comm):
 
 def _get_tokenization_uuidString_dict(comm):
     """
+    Args:
+        comm (Communication)
     Args:
 
     - `comm` (`Communication`)
@@ -198,6 +203,8 @@ def _get_tokenization_uuidString_dict(comm):
 
 def _get_tokenization_uuidString_set(comm):
     """
+    Args:
+        comm (Communication)
     Args:
 
     - `comm` (`Communication`)
@@ -225,7 +232,7 @@ def _ilm(indent_level, log_message):
     Args:
 
     - `log_message` (string): Log message to be indented
-    - `indent_level` (int): Indentation level
+    - `indent_level` (int): Text indentation level
 
     Returns:
 
@@ -235,15 +242,22 @@ def _ilm(indent_level, log_message):
 
 
 def validate_constituency_parses(comm, tokenization):
-    """
-    Args:
+    """Test a :class:`.Tokenization`'s constituency :class:`.Parse`
+    objects.
 
-    - `comm` (`Communication`)
-    - `tokenization` (`Tokenization`)
+    Verifies that, for each constituent :class:`.Parse`:
+
+    - none of the constituent IDs for the parse repeat
+    - the parse tree is a fully connected graph
+    - the parse "tree" is really a tree data structure
+
+    Args:
+        comm (Communication)
+        tokenization (Tokenization)
 
     Returns:
+        bool
 
-    - `True` if tokenization's constituency parse is valid, `False` otherwise
     """
     valid = True
 
@@ -300,15 +314,19 @@ def validate_constituency_parses(comm, tokenization):
 
 
 def validate_dependency_parses(tokenization):
-    """
-    Args:
+    """Test a :class:`.Tokenization`'s :class:`.DependencyParse`
+    objects
 
-    - `tokenization` (`Tokenization`)
+    Verifies that, for each :class:`.DependencyParse`:
+
+    - the parse is a fully connected graph
+    - there are no nodes with a null governer node whose edgeType is not root
+
+    Args:
+        tokenization (Tokenization)
 
     Returns:
-
-    -  `True` if all of a tokenization's dependency parses are valid,
-       `False` otherwise
+        bool
     """
     valid = True
 
@@ -365,6 +383,18 @@ def validate_dependency_parses(tokenization):
 
 
 def validate_entity_mention_ids(comm):
+    """Test if all :class:`.Entity` mentionIds are valid
+
+    Checks if all :class:`.Entity` mentionId :class:`.UUID`'s refer to
+    a :class:`.EntityMention` :class:`.UUID` that exists in the
+    :class:`.Communication`
+
+    Args:
+        comm (Communication)
+
+    Returns:
+        bool
+    """
     valid = True
     entity_mention_uuidString_set = _get_entity_mention_uuidString_set(comm)
 
@@ -382,6 +412,19 @@ def validate_entity_mention_ids(comm):
 
 
 def validate_entity_mention_tokenization_ids(comm):
+    """Test `tokenizationID` field of every :class:`.EntityMention`
+
+    Verifies that, for each :class:`.EntityMention`, the
+    `entityMention.tokens.tokenizationId` :class:`.UUID` field
+    matches the :class:`.UUID` of a  :class:`.Tokenization`
+    that exists in this :class:`.Communication`
+
+    Args:
+        comm (Communication)
+
+    Returns:
+        bool
+    """
     valid = True
     tokenization_uuidString_set = _get_tokenization_uuidString_set(comm)
 
@@ -398,6 +441,16 @@ def validate_entity_mention_tokenization_ids(comm):
 
 
 def validate_entity_mention_token_ref_sequences(comm):
+    """Test if all :class:`.EntityMention` objects have a valid
+    :class:`.TokenRefSequences`
+
+    Args:
+        comm (Communication)
+
+    Returns:
+        bool
+
+    """
     valid = True
     for entityMentionSet in lun(comm.entityMentionSetList):
         for entityMention in lun(entityMentionSet.mentionList):
@@ -407,6 +460,23 @@ def validate_entity_mention_token_ref_sequences(comm):
 
 
 def validate_situation_mentions(comm):
+    """Test every :class:`.SituationMention` in the :class:`.Communication`
+
+    A :class:`.SituationMention` has a list of
+    :class:`.MentionArgument` objects, and each
+    :class:`.MentionArgument` can point to an :class:`.EntityMention`,
+    :class:`.SituationMention` or :class:`.TokenRefSequence`.
+
+    Checks that each :class:`.MentionArgument` points to only one type
+    of argument.  Also checks validity of all :class:`.EntityMention`
+    and :class:`.SituationMention` :class:`.UUID`'s.
+
+    Args:
+        comm (Communication)
+
+    Returns:
+        bool
+    """
     valid = True
     entity_mention_uuidString_set = _get_entity_mention_uuidString_set(comm)
     situation_mention_uuidString_set = _get_situation_mention_uuidString_set(
@@ -458,6 +528,19 @@ def validate_situation_mentions(comm):
 
 
 def validate_situations(comm):
+    """Test every :class:`.Situation` in the :class:`.Communication`
+
+    Checks the validity of all :class:`.EntityMention` and
+    :class:`.SituationMention` :class:`.UUID`'s referenced by each
+    :class:`.Situation`.
+
+    Args:
+        comm (Communication)
+
+    Returns:
+        bool
+
+    """
     valid = True
 
     entity_uuidString_set = _get_entity_uuidString_set(comm)
@@ -516,9 +599,16 @@ def validate_situations(comm):
 
 
 def validate_token_offsets_for_section(section):
-    """
-    Test if the TextSpan boundaries for all sentences in a section fall
-    within the boundaries of the section's TextSpan
+    """Test if the :class:`.TextSpan` boundaries for all
+    :class:`.Sentence` objects in a :class:`.Section` fall within the
+    boundaries of the :class:`.Section`'s :class:`.TextSpan`
+
+    Args:
+        section (Section)
+
+    Returns:
+        bool
+
     """
     valid = True
 
@@ -561,9 +651,15 @@ def validate_token_offsets_for_section(section):
 
 
 def validate_token_offsets_for_sentence(sentence):
-    """
-    Test if the TextSpan boundaries for all tokens in a sentence fall
-    within the boundaries of the sentence's TextSpan
+    """Test if the :class:`.TextSpan` boundaries for all :class:`.Token`
+    objects` in a :class:`.Sentence` fall within the boundaries of the
+    :class:`.Sentence`'s :class:`.TextSpan`.
+
+    Args:
+        sentence (Sentence)
+
+    Returns:
+        bool
     """
     valid = True
 
@@ -607,6 +703,20 @@ def validate_token_offsets_for_sentence(sentence):
 
 
 def validate_token_ref_sequence(comm, token_ref_sequence):
+    """Check if a :class:`.TokenRefSequence` is valid
+
+    Verify that all token indices in the :class:`.TokenRefSequence`
+    point to actual token indices in corresponding
+    :class:`.Tokenization`
+
+    Args:
+        comm (Communication)
+        token_ref_sequence (TokenRefSequence)
+
+    Returns:
+        bool
+
+    """
     valid = True
 
     tkzn_map = _get_tokenization_uuidString_dict(comm)
@@ -654,8 +764,14 @@ def validate_token_ref_sequence(comm, token_ref_sequence):
 
 
 def validate_token_taggings(tokenization):
-    """
-    Test if a Tokenization has any TokenTaggings with invalid token indices
+    """Test if a :class:`.Tokenization` has any :class:`.TokenTagging`
+    objects with invalid token indices
+
+    Args:
+        tokenization (Tokenization)
+
+    Returns:
+        bool
     """
     valid = True
     if tokenization and tokenization.tokenTaggingList:
@@ -676,21 +792,19 @@ def validate_token_taggings(tokenization):
 
 def validate_thrift(thrift_object, indent_level=0):
     """
-    Test if a thrift object has all required fields.
+    Test if a Thrift object has all required fields.
 
-    This function calls the thrift object's `validate()` function.
+    This function calls the Thrift object's `validate()` function.
     If an exception is raised because of missing required fields, the
     function catches the exception and logs the exception's error
-    message using the Python standard library's `logging` module.
+    message using the Python Standard Library's `logging` module.
 
     Args:
-
-    - `thrift_object`
-    - `indent_level`: Indentation level for logging error message
+        thrift_object
+        indent_level (int): Text indentation level for logging error message
 
     Returns:
-
-    - `True` if the Thrift object has all required fields, `False` otherwise
+        bool
     """
     try:
         thrift_object.validate()
@@ -712,6 +826,7 @@ def validate_thrift(thrift_object, indent_level=0):
 
 
 def validate_thrift_object_required_fields(thrift_object, indent_level=0):
+    """DEPRECATED: Use :func:`validate_thrift` instead"""
     logging.warning(
         'this rather long name is deprecated and will be removed;'
         ' switch to validate_thrift'
@@ -719,12 +834,11 @@ def validate_thrift_object_required_fields(thrift_object, indent_level=0):
     return validate_thrift(thrift_object, indent_level=indent_level)
 
 
-def validate_thrift_deep(msg, valid=True):
+def validate_thrift_deep(thrift_object, valid=True):
     """Deep validation of thrift messages.
 
     Args:
-
-    -   `msg`: a Thrift message
+        thrift_object: a Thrift object
 
     The Python version of Thrift 0.9.1 does not support deep (recursive)
     validation, and none of the Thrift serialization/deserialization
@@ -732,13 +846,11 @@ def validate_thrift_deep(msg, valid=True):
 
     This function implements deep validation.  The code is adapted from:
 
-      https://raw.githubusercontent.com/flamholz/py-thrift-validation-example/
-          master/util/validation.py
+      https://raw.githubusercontent.com/flamholz/py-thrift-validation-example/master/util/validation.py
 
     See this blog post for more information:
 
-      http://techblog.ridewithvia.com/post/38231652492/
-          recursive-validation-of-python-thrift-structures
+      http://techblog.ridewithvia.com/post/38231652492/recursive-validation-of-python-thrift-structures
 
     A patch to implement deep validation was submitted to the Thrift
     repository in February of 2013:
@@ -748,19 +860,19 @@ def validate_thrift_deep(msg, valid=True):
     but Thrift 0.9.1 - which was released on 2013-08-21 - does not
     include this functionality.
     """
-    assert msg is not None
-    valid &= validate_thrift(msg)
+    assert thrift_object is not None
+    valid &= validate_thrift(thrift_object)
 
     # Introspect the structure specification.
     # For each field, check type and decide whether to recurse.
-    spec = msg.thrift_spec
+    spec = thrift_object.thrift_spec
     for spec_tuple in spec:
         if spec_tuple is None:
             continue
 
         mtype = spec_tuple[1]
         name = spec_tuple[2]
-        attr = getattr(msg, name)
+        attr = getattr(thrift_object, name)
         if not _ShouldRecurse(mtype):
             # Some primitive type that we don't validate.
             continue
@@ -775,8 +887,8 @@ def validate_thrift_deep(msg, valid=True):
         elif mtype in (TType.LIST, TType.SET):
             subtype = spec_tuple[3][0]
             if _ShouldRecurse(subtype):
-                for submsg in attr:
-                    valid &= validate_thrift_deep(submsg, valid)
+                for sub_object in attr:
+                    valid &= validate_thrift_deep(sub_object, valid)
         elif mtype == TType.MAP:
             subtype = spec_tuple[3]
             key_type = subtype[0]
@@ -790,12 +902,14 @@ def validate_thrift_deep(msg, valid=True):
     return valid
 
 
-def validate_thrift_object_required_fields_recursively(msg, valid=True):
+def validate_thrift_object_required_fields_recursively(thrift_object, valid=True):
+    """DEPRECATED.  Use :func:`validate_thrift_deep` instead.
+    """
     logging.warning(
         'this incredibly long name is deprecated and will be removed;'
         ' switch to validate_thrift_deep'
     )
-    return validate_thrift_deep(msg, valid=valid)
+    return validate_thrift_deep(thrift_object, valid=valid)
 
 
 _RECURSE_ON = frozenset([TType.STRUCT,

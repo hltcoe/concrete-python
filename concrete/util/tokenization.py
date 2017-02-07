@@ -10,13 +10,22 @@ from functools import reduce
 
 
 def get_tokens(tokenization, suppress_warnings=False):
-    '''
+    """Get list of :class:`.Token` objects for a :class:`.Tokenization`
+
     Return list of Tokens from lattice.cachedBestPath, if Tokenization
     kind is TOKEN_LATTICE; else, return list of Tokens from tokenList.
 
     Warn and return list of Tokens from tokenList if kind is not set.
+
     Return None if kind is set but the respective data fields are not.
-    '''
+
+    Args:
+        tokenization (Tokenization):
+        suppress_warnings (bool):
+
+    Returns:
+        List of :class:`.Token` objects, or `None`
+    """
 
     if tokenization.kind is None:
         if not suppress_warnings:
@@ -47,16 +56,25 @@ def get_tokens(tokenization, suppress_warnings=False):
 
 
 def get_tagged_tokens(tokenization, tagging_type, tool=None):
-    '''
-    Return list of TaggedTokens of taggingType equal to tagging_type,
-    if there is a unique choice.
 
-    If tool is not None, filter the candidate TokenTaggings to those
-    whose metadata.tool field matches tool.
+    """Return list of :class:`.TaggedToken` objects of taggingType equal
+    to tagging_type, if there is a unique choice.
 
-    Raise exception if there is no matching tagging or more than one
-    matching tagging.
-    '''
+    Args:
+        tokenization (Tokenization):
+        tagging_type (str):
+        tool (str): If tool is not None, filter the candidate
+            TokenTaggings to those whose metadata.tool field
+            matches tool.
+
+    Returns:
+        List of :class:`.TaggedToken` objects of `taggingType` equal
+        to `tagging_type`, if there is a unique choice.
+
+    Raises:
+        Exception: Raised if there is no matching tagging or more than
+            one matching tagging.
+    """
     tts = [
         tt
         for tt in tokenization.tokenTaggingList
@@ -73,30 +91,55 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
 
 
 def get_lemmas(t, tool=None):
+    """Calls :func:`get_tagged_tokens` with a `tagging_type` of "LEMMA"
+    """
     return get_tagged_tokens(t, 'LEMMA', tool=tool)
 
 
 def get_pos(t, tool=None):
+    """Calls :func:`get_tagged_tokens` with a `tagging_type` of "POS"
+    """
     return get_tagged_tokens(t, 'POS', tool=tool)
 
 
 def get_ner(t, tool=None):
+    """Calls :func:`get_tagged_tokens` with a `tagging_type` of "NER"
+    """
     return get_tagged_tokens(t, 'NER', tool=tool)
 
 
 def plus(x, y):
+    """
+    Returns:
+        x + y
+    """
     return x + y
 
 
 def flatten(a):
+    """
+    Args:
+        a (list):
+    Returns:
+        list: Flattened list
+    """
     return reduce(plus, a, [])
 
 
 def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
-    '''
-    Return list of Tokens in communication, delegating to get_tokens
-    for each sentence.
-    '''
+    """Get list of :class:`.Token` objects in :class:`.Communication`.
+
+    Args:
+        comm (Communication):
+        sect_pred (function): Function that takes a :class:`.Section`
+            and returns false if the :class:`.Section` should be
+            excluded.
+        suppress_warnings (bool):
+
+    Returns:
+        List of :class:`.Token` objects in :class:`.Communication`,
+        delegating to :func:`get_tokens` for each sentence.
+    """
     return flatten(map(
         lambda sect: flatten(map(
             lambda sent: get_tokens(sent.tokenization, suppress_warnings),
@@ -108,6 +151,16 @@ def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
 
 
 def get_comm_tokenizations(comm, tool=None):
+    """Get list of :class:`.Tokenization` objects in a :class:`.Communication`
+
+    Args:
+        comm (Communication):
+        tool (str): If given, only return :class:`.Tokenization` objects
+            whose `metadata.tool` field is equal to `tool`
+
+    Returns:
+        List of :class:`.Tokenization` objects
+    """
     for section in lun(comm.sectionList):
         for sentence in lun(section.sentenceList):
             if tool is None or sentence.tokenization.metadata.tool == tool:
@@ -166,9 +219,9 @@ def _logsumexp(a):
 
 
 def _calc_marginal_in_log_prob(fsm, states, start, end):
-    '''
+    """
     Calculate marginal in-log-probability of each state.
-    '''
+    """
 
     alpha = {}
     alpha[start] = 0.
@@ -194,15 +247,19 @@ def _calc_marginal_in_log_prob(fsm, states, start, end):
 
 
 def compute_lattice_expected_counts(lattice):
-    '''
-    Given an object of type TokenLattice in which the
-    dst, src, token, and weight fields are set in each arc,
-    compute and return a list of expected token log-probabilities.
-    Return type is a list of floats (expected log-probabilities)
-    with the float at position i corresponding to the token with
-    tokenIndex i.
+    """Given a :class:`.TokenLattice` in which the dst, src, token, and
+    weight fields are set in each arc, compute and return a list of
+    expected token log-probabilities.
+
     Input arc weights are treated as unnormalized log-probabilities.
-    '''
+
+    Args:
+        lattice (TokenLattice):
+
+    Returns:
+        List of floats (expected log-probabilities) with the float
+        at position i corresponding to the token with tokenIndex i.
+    """
 
     (fsm, bkFsm, tokens, states) = _lattice_to_fsm(lattice)
     alpha = _calc_marginal_in_log_prob(fsm, states,

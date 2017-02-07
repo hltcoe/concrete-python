@@ -65,13 +65,11 @@ def read_thrift_from_file(thrift_obj, filename):
     deserialize data from the file `/dev/urandom`.
 
     Args:
-
-    - `thrift_obj`: A Thrift object (e.g. a Communication object)
-    - `filename`:  A filename string
+        thrift_obj: A Thrift object (e.g. a Communication object)
+        filename (str):  A filename string
 
     Returns:
-
-    -  The Thrift object that was passed in as an argument
+        The Thrift object that was passed in as an argument
     """
     thrift_file = open(filename, "rb")
     thrift_bytes = thrift_file.read()
@@ -86,12 +84,13 @@ def read_communication_from_file(communication_filename, add_references=True):
     """Read a Communication from the file specified by filename
 
     Args:
-
-    - `communication_filename`: String with filename
+        communication_filename (str): String with filename
+        add_references (bool): If True, calls
+           :func:`concrete.util.references.add_references_to_communication`
+           on :class:`.Communication` read from file
 
     Returns:
-
-    - A Concrete `Communication` object
+        Communication:
     """
     comm = read_thrift_from_file(Communication(), communication_filename)
     if add_references:
@@ -100,19 +99,35 @@ def read_communication_from_file(communication_filename, add_references=True):
 
 
 def read_tokenlattice_from_file(tokenlattice_filename):
-    """
-    Takes the filename of a serialized Concrete TokenLattice file,
-    reads the TokenLattice from the file and returns an instantiated
-    TokenLattice instance.
+    """Read a :class:`.TokenLattice` from a file
+
+    Args:
+        tokenlattice_filename (str): Name of file containing serialized
+            :class:`.TokenLattice`
+
+    Returns:
+        TokenLattice:
     """
     return read_thrift_from_file(TokenLattice(), tokenlattice_filename)
 
 
 def write_communication_to_file(communication, communication_filename):
+    """Write a :class:`.Communication` to a file
+
+    Args:
+        communication (Communication)
+        communication_filename (str)
+    """
     return write_thrift_to_file(communication, communication_filename)
 
 
 def write_thrift_to_file(thrift_obj, filename):
+    """Write a Thrift object to a file
+
+    Args:
+        thrift_obj:
+        filename (str):
+    """
     thrift_bytes = TSerialization.serialize(
         thrift_obj,
         protocol_factory=factory.protocolFactory)
@@ -203,6 +218,16 @@ class ThriftReader(object):
         for (comm, filename) in ThriftReader(Communication,
                                              'multiple_comms.tar.gz'):
             do_something(comm)
+
+    Args:
+        thrift_type: Class for Thrift type, e.g. Communication, TokenLattice
+        filename (str):
+        postprocess (function): A post-processing function that is called
+            with the Thrift object as argument each time a Thrift object
+            is read from the file
+        filetype (FileType): Expected type of file.  Default value is
+            `FileType.AUTO`, where function will try to automatically
+            determine file type.
     """
 
     def __init__(self, thrift_type, filename,
@@ -375,6 +400,15 @@ class CommunicationReader(ThriftReader):
 
         for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
+
+    Args:
+        filename (str):
+        add_references (bool): If True, calls
+           :func:`concrete.util.references.add_references_to_communication`
+           on all :class:`.Communication` objects read from file
+        filetype (FileType): Expected type of file.  Default value is
+            `FileType.AUTO`, where function will try to automatically
+            determine file type.
     """
 
     def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
@@ -405,9 +439,17 @@ class CommunicationWriter(object):
         self.file.close()
 
     def open(self, filename):
+        """
+        Args:
+            filename (str)
+        """
         self.file = open(filename, 'wb')
 
     def write(self, comm):
+        """
+        Args:
+            comm (Communication)
+        """
         thrift_bytes = TSerialization.serialize(
             comm, protocol_factory=factory.protocolFactory)
         self.file.write(thrift_bytes)
@@ -429,6 +471,12 @@ class CommunicationWriterTar(object):
         writer.write(comm_object_two, 'comm_two.concrete')
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
+
+    Args:
+        tar_filename(str): If a filename is given, :func:`open`
+            will be called with the filename
+        gzip (bool): Flag indicating if .TAR file should be
+            compressed with gzip
     """
 
     def __init__(self, tar_filename=None, gzip=False):
@@ -440,9 +488,18 @@ class CommunicationWriterTar(object):
         self.tarfile.close()
 
     def open(self, tar_filename):
+        """
+        Args:
+            tar_filename (str):
+        """
         self.tarfile = tarfile.open(tar_filename, 'w:gz' if self.gzip else 'w')
 
     def write(self, comm, comm_filename=None):
+        """
+        Args:
+            comm (Communication)
+            comm_filename (str)
+        """
         if comm_filename is None:
             comm_filename = comm.uuid.uuidString + '.concrete'
 

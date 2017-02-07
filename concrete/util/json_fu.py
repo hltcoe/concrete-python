@@ -15,18 +15,15 @@ from .file_io import (
 
 def communication_file_to_json(communication_filename, remove_timestamps=False,
                                remove_uuids=False):
-    """Get a "pretty-printed" JSON string representation for a Communication
+    """Get a "pretty-printed" JSON string representation for a :class:`.Communication`
 
     Args:
-
-    - `communication_filename`: String specifying Communication filename
-    - `remove_uuids`: Boolean flag indicating if Concrete UUIDs should be
-                      removed
+        communication_filename (str): Communication filename
+        remove_timestamps (bool): Flag for removing timestamps from JSON output
+        remove_uuids (bool): Flag for removing :class:`.UUID` info from JSON output
 
     Returns:
-
-    - A string containing a "pretty-printed" JSON representation of the
-      Communication
+        str: A "pretty-printed" JSON representation of the Communication
     """
     comm = read_communication_from_file(communication_filename)
     return thrift_to_json(comm, remove_timestamps=remove_timestamps,
@@ -34,34 +31,28 @@ def communication_file_to_json(communication_filename, remove_timestamps=False,
 
 
 def tokenlattice_file_to_json(toklat_filename):
-    """Get a "pretty-printed" JSON string representation for a TokenLattice
+    """Get a "pretty-printed" JSON string representation for a :class:`.TokenLattice`
 
     Args:
-
-    - `toklat_filename`: String specifying TokenLattice filename
+        toklat_filename (str): String specifying TokenLattice filename
 
     Returns:
-
-    - A string containing a "pretty-printed" JSON representation of the
-      TokenLattice
+        str: A "pretty-printed" JSON representation of the TokenLattice
     """
     toklat = read_tokenlattice_from_file(toklat_filename)
     return thrift_to_json(toklat)
 
 
 def get_json_object_without_timestamps(json_object):
-    """Create a copy of a JSON object created by json.loads(), with all
-    representations of Concrete Metadata timestamps (dictionary keys
-    with value 'timestamp') recursively removed.
+    """Create a copy of a JSON object created by `json.loads()`, with all
+    representations of :class:`.AnnotationMetadata` timestamps
+    (dictionary keys with value `timestamp`) recursively removed.
 
     Args:
-
-    - `json_object`: A Python data structure created from a JSON string by
-                     json.loads
+        json_object: Python object created from string by `json.loads()`
 
     Returns:
-
-    - A copy of the input data structure with all timestamp objects removed
+         A copy of the input data structure with all timestamp objects removed
     """
     if type(json_object) is list:
         new_json_object = [get_json_object_without_timestamps(obj)
@@ -78,18 +69,15 @@ def get_json_object_without_timestamps(json_object):
 
 
 def get_json_object_without_uuids(json_object):
-    """Create a copy of a JSON object created by json.loads(), with all
-    representations of Concrete UUIDs (dictionaries containing a
+    """Create a copy of a JSON object created by `json.loads()`, with all
+    representations of :class:`.UUID` objects (dictionaries containing a
     'uuidString' key) recursively removed.
 
     Args:
-
-    - `json_object`: A Python data structure created from a JSON string by
-                     json.loads
+        json_object: Python object created from string by `json.loads()`
 
     Returns:
-
-    - A copy of the input data structure with all UUID objects removed
+        A copy of the input data structure with all UUID objects removed
     """
     if type(json_object) is list:
         new_json_object = [get_json_object_without_uuids(obj)
@@ -110,15 +98,12 @@ def thrift_to_json(tobj, remove_timestamps=False, remove_uuids=False):
     """Get a "pretty-printed" JSON string representation for a Thrift object
 
     Args:
-
-    - `tobj`: A Thrift object
-    - `remove_uuids`: Boolean flag indicating if Concrete UUIDs should be
-                      removed
+        tobj: A Thrift object
+        remove_timestamps (bool): Flag for removing timestamps from JSON output
+        remove_uuids (bool): Flag for removing :class:`.UUID` info from JSON output
 
     Returns:
-
-    - A string containing a "pretty-printed" JSON representation of the Thrift
-      object
+        str: A "pretty-printed" JSON representation of the Thrift object
     """
     thrift_json_string = TSerialization.serialize(
         tobj, TJSONProtocol.TSimpleJSONProtocolFactory())

@@ -16,14 +16,13 @@ from thrift.server import TServer
 from thrift.transport import TTransport
 
 from concrete.access import FetchCommunicationService, StoreCommunicationService
-from concrete.services.ttypes import ServiceInfo
-from concrete.util.access import CommunicationContainerFetchHandler
+from concrete.util.access import (
+    CommunicationContainerFetchHandler,
+    DirectoryBackedStoreHandler)
 from concrete.util.comm_container import (
     DirectoryBackedCommunicationContainer,
     MemoryBackedCommunicationContainer,
     ZipFileBackedCommunicationContainer)
-from concrete.util.file_io import write_communication_to_file
-from concrete.version import concrete_library_version
 
 
 class AccessHTTPServer(object):
@@ -56,30 +55,6 @@ class AccessHTTPServer(object):
 
     def serve(self):
         bottle.run(host=self.host, port=self.port)
-
-
-class DirectoryBackedStoreHandler(object):
-    def __init__(self, store_path):
-        self.store_path = store_path
-
-    def about(self):
-        logging.info("DirectoryBackedStoreHandler.about() called")
-        service_info = ServiceInfo()
-        service_info.name = 'DirectoryBackedStoreHandler'
-        service_info.version = concrete_library_version()
-        return service_info
-
-    def alive(self):
-        logging.info("DirectoryBackedStoreHandler.alive() called")
-        return True
-
-    def store(self, communication):
-        logging.info(
-            "DirectoryBackedStoreHandler.store() called with Communication "
-            "with ID '%s'" % communication.id)
-        comm_filename = os.path.join(self.store_path, communication.id + '.comm')
-        write_communication_to_file(communication, comm_filename)
-        return
 
 
 @bottle.post('/fetch_http_endpoint/')

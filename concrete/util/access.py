@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 import logging
+import os
 
 from ..access.ttypes import FetchResult
 from ..services.ttypes import ServiceInfo
 from .access_wrapper import FetchCommunicationClientWrapper
+from .file_io import write_communication_to_file
 from ..version import concrete_library_version
 
 
@@ -72,6 +74,43 @@ class CommunicationContainerFetchHandler(object):
     def getCommunicationIDs(self, offset, count):
         logging.info('Received getCommunicationIDs() call')
         return list(self.communication_container.keys())[offset:][:count]
+
+
+class DirectoryBackedStoreHandler(object):
+    """Simple StoreCommunicationService implementation using a directory
+
+    Implements the :mod:`.StoreCommunicationService` interface, storing
+    Communications in a directory.
+    """
+    def __init__(self, store_path):
+        """
+        Args:
+            store_path: Path where Communications should be Stored
+        """
+        self.store_path = store_path
+
+    def about(self):
+        logging.info("DirectoryBackedStoreHandler.about() called")
+        service_info = ServiceInfo()
+        service_info.name = 'DirectoryBackedStoreHandler'
+        service_info.version = concrete_library_version()
+        return service_info
+
+    def alive(self):
+        logging.info("DirectoryBackedStoreHandler.alive() called")
+        return True
+
+    def store(self, communication):
+        """Save Communication to a directory
+
+        Stored Communication files will be named `[COMMUNICATION_ID].comm`.
+        If a file with that name already exists, it will be overwritten.
+        """
+        logging.info(
+            "DirectoryBackedStoreHandler.store() called with Communication "
+            "with ID '%s'" % communication.id)
+        comm_filename = os.path.join(self.store_path, communication.id + '.comm')
+        write_communication_to_file(communication, comm_filename)
 
 
 class RelayFetchHandler(object):

@@ -17,7 +17,7 @@ from thrift.transport import TTransport
 
 from concrete.access import FetchCommunicationService, StoreCommunicationService
 from concrete.services.ttypes import ServiceInfo
-from concrete.util.access import CommunicationContainerFetchHandler, RelayFetchHandler
+from concrete.util.access import CommunicationContainerFetchHandler
 from concrete.util.comm_container import (
     DirectoryBackedCommunicationContainer,
     MemoryBackedCommunicationContainer,
@@ -35,7 +35,7 @@ class AccessHTTPServer(object):
     STORE_HANDLER = None
     STORE_TSERVER = None
     STATIC_PATH = None
-    
+
     def __init__(self, host, port, static_path, fetch_handler, store_handler):
         self.host = host
         self.port = port
@@ -53,7 +53,7 @@ class AccessHTTPServer(object):
         store_pfactory = TJSONProtocol.TJSONProtocolFactory()
         AccessHTTPServer.STORE_TSERVER = TServer.TServer(
             store_processor, None, None, None, store_pfactory, store_pfactory)
-        
+
     def serve(self):
         bottle.run(host=self.host, port=self.port)
 
@@ -74,7 +74,9 @@ class DirectoryBackedStoreHandler(object):
         return True
 
     def store(self, communication):
-        logging.info("DirectoryBackedStoreHandler.store() called with Communication with ID '%s'" % communication.id)
+        logging.info(
+            "DirectoryBackedStoreHandler.store() called with Communication "
+            "with ID '%s'" % communication.id)
         comm_filename = os.path.join(self.store_path, communication.id + '.comm')
         write_communication_to_file(communication, comm_filename)
         return
@@ -84,13 +86,16 @@ class DirectoryBackedStoreHandler(object):
 def fetch_http_endpoint():
     return thrift_endpoint(AccessHTTPServer.FETCH_TSERVER)
 
+
 @bottle.post('/store_http_endpoint/')
 def store_http_endpoint():
     return thrift_endpoint(AccessHTTPServer.STORE_TSERVER)
 
+
 @bottle.route('/<filepath:path>')
 def server_static(filepath):
     return bottle.static_file(filepath, root=AccessHTTPServer.STATIC_PATH)
+
 
 def thrift_endpoint(tserver):
     """Thrift RPC endpoint for Concrete FetchCommunicationService
@@ -129,7 +134,7 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(format='%(levelname)7s:  %(message)s', level=logging.INFO)
-    
+
     comm_container = {}
     if os.path.isdir(args.fetch_source):
         comm_container = DirectoryBackedCommunicationContainer(args.fetch_source)
@@ -142,10 +147,10 @@ def main():
 
     fetch_handler = CommunicationContainerFetchHandler(comm_container)
     store_handler = DirectoryBackedStoreHandler(args.store_path)
-    
+
     ahs = AccessHTTPServer(args.host, args.port, args.static_path, fetch_handler, store_handler)
     ahs.serve()
 
-    
+
 if __name__ == '__main__':
     main()

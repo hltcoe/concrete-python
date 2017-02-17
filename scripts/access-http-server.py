@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 
-"""
+"""Simple webserver with Fetch/Store RPC support
+
+A simple Bottle webserver useful for testing **concrete-js** programs
+that interact with Fetch and Store servers.
+
+Implements an HTTP server that serves static files (e.g. HTML, JS and
+CSS) and provides::
+
+- a filesystem-backed :mod:`.FetchCommunicationService`
+  at URL `/fetch_http_endpoint/`
+
+- a directory-backed :mod:`.StoreCommunicationService`
+  at URL `/store_http_endpoint/`
+
 """
 
 from __future__ import print_function
@@ -73,7 +86,7 @@ def server_static(filepath):
 
 
 def thrift_endpoint(tserver):
-    """Thrift RPC endpoint for Concrete FetchCommunicationService
+    """Thrift RPC endpoint
     """
     itrans = TTransport.TFileObjectTransport(bottle.request.body)
     itrans = TTransport.TBufferedTransport(
@@ -101,14 +114,18 @@ def main():
     parser.add_argument('--host', default='localhost',
                         help='Host interface to listen on')
     parser.add_argument('-p', '--port', type=int, default=8080)
-    parser.add_argument('--static-path', default='.')
-    parser.add_argument('--store-path', default='.')
+    parser.add_argument('-l', '--loglevel', choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
+                        help='Logging verbosity level threshold (to stderr)')
+    parser.add_argument('--static-path', default='.',
+                        help='Path where HTML files are stored')
+    parser.add_argument('--store-path', default='.',
+                        help='Path where Communications should be stored')
     parser.add_argument('--max-file-size', type=str, default='1GiB',
                         help="Maximum size of (non-ZIP) files that can be read into memory "
                         "(e.g. '2G', '300MB')")
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel)
 
     comm_container = {}
     if os.path.isdir(args.fetch_source):

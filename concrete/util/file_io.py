@@ -218,20 +218,21 @@ class ThriftReader(object):
         for (comm, filename) in ThriftReader(Communication,
                                              'multiple_comms.tar.gz'):
             do_something(comm)
-
-    Args:
-        thrift_type: Class for Thrift type, e.g. Communication, TokenLattice
-        filename (str):
-        postprocess (function): A post-processing function that is called
-            with the Thrift object as argument each time a Thrift object
-            is read from the file
-        filetype (FileType): Expected type of file.  Default value is
-            `FileType.AUTO`, where function will try to automatically
-            determine file type.
     """
 
     def __init__(self, thrift_type, filename,
                  postprocess=None, filetype=FileType.AUTO):
+        """
+        Args:
+            thrift_type: Class for Thrift type, e.g. Communication, TokenLattice
+            filename (str):
+            postprocess (function): A post-processing function that is called
+                with the Thrift object as argument each time a Thrift object
+                is read from the file
+            filetype (FileType): Expected type of file.  Default value is
+                `FileType.AUTO`, where function will try to automatically
+                determine file type.
+        """
         filetype = FileType.lookup(filetype)
 
         self._thrift_type = thrift_type
@@ -400,18 +401,19 @@ class CommunicationReader(ThriftReader):
 
         for (comm, filename) in CommunicationReader('multiple_comms.tar.gz'):
             do_something(comm)
-
-    Args:
-        filename (str):
-        add_references (bool): If True, calls
-           :func:`concrete.util.references.add_references_to_communication`
-           on all :class:`.Communication` objects read from file
-        filetype (FileType): Expected type of file.  Default value is
-            `FileType.AUTO`, where function will try to automatically
-            determine file type.
     """
 
     def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
+        """
+        Args:
+            filename (str):
+            add_references (bool): If True, calls
+               :func:`concrete.util.references.add_references_to_communication`
+               on all :class:`.Communication` objects read from file
+            filetype (FileType): Expected type of file.  Default value is
+                `FileType.AUTO`, where function will try to automatically
+                determine file type.
+        """
         super(CommunicationReader, self).__init__(
             Communication,
             filename,
@@ -471,15 +473,16 @@ class CommunicationWriterTar(object):
         writer.write(comm_object_two, 'comm_two.concrete')
         writer.write(comm_object_three, 'comm_three.concrete')
         writer.close()
-
-    Args:
-        tar_filename(str): If a filename is given, :func:`open`
-            will be called with the filename
-        gzip (bool): Flag indicating if .TAR file should be
-            compressed with gzip
     """
 
     def __init__(self, tar_filename=None, gzip=False):
+        """
+        Args:
+            tar_filename(str): If a filename is given, :func:`open`
+                will be called with the filename
+            gzip (bool): Flag indicating if .TAR file should be
+                compressed with gzip
+        """
         self.gzip = gzip
         if tar_filename is not None:
             self.open(tar_filename)

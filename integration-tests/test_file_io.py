@@ -597,7 +597,7 @@ def test_CommunicationWriterTar_single_file_default_name(output_file,
     tarinfo = f.next()
     assert tarinfo is not None
 
-    assert comm.uuid.uuidString + '.concrete' == tarinfo.name
+    assert comm.id + '.concrete' == tarinfo.name
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
@@ -690,7 +690,7 @@ def test_CommunicationWriterTGZ_single_file_default_name(output_file,
     tarinfo = f.next()
     assert tarinfo is not None
 
-    assert comm.uuid.uuidString + '.concrete' == tarinfo.name
+    assert comm.id + '.concrete' == tarinfo.name
     assert tarinfo.isreg()
     assert tarinfo.mtime > time.time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size

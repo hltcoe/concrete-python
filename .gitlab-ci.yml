@@ -11,4 +11,10 @@ build-test-deploy:
       (docker tag concrete-python r8n01:5000/concrete-python:latest &&
       docker push r8n01:5000/concrete-python:latest)"
   tags:
+    - shell
+
+mac-python-test:
+  script:
+    - tox
+  tags:
     - mac-shell-no-docker

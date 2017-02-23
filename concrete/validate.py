@@ -23,12 +23,15 @@ def validate_communication_file(communication_filename):
 
     Args:
         communication_filename (str): Name of file containing
+
+    Returns:
+        bool
     """
     logging.info(_ilm(
         0, "Opening Concrete Communication with filename '%s'"
            % communication_filename))
     comm = read_communication_from_file(communication_filename)
-    validate_communication(comm)
+    return validate_communication(comm)
 
 
 def validate_communication(comm):

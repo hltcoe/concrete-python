@@ -12,3 +12,4 @@ build-test-deploy:
       docker push r8n01:5000/concrete-python:latest)"
   tags:
     - shell
+    - mac-shell-no-docker

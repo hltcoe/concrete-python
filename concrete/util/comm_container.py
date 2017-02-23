@@ -48,15 +48,16 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
     A `DirectoryBackedCommunicationsContainer` will not be able to find
     any files that are added to `directory_path` after the container
     was initialized.
-
-    Args:
-         directory_path (str): Path to directory containing Communications files
-         comm_extensions (str[]): List of strings specifying filename extensions
-                                     to be associated with Communications
     """
 
     def __init__(self, directory_path,
                  comm_extensions=['.comm', '.concrete', '.gz']):
+        """
+        Args:
+             directory_path (str): Path to directory containing Communications files
+             comm_extensions (str[]): List of strings specifying filename extensions
+                                         to be associated with Communications
+        """
         self.comm_id_to_comm_path = {}
 
         logging.info("Caching names of files with extensions [%s] in '%s'" %
@@ -110,13 +111,14 @@ class FetchBackedCommunicationContainer(collections.Mapping):
     :mod:`.FetchCommunicationService`, then you SHOULD NOT USE THIS CLASS.
     This class retrieves one Communication at a time using
     :mod:`.FetchCommunicationService`.
-
-    Args:
-        host (str): Hostname of :mod:`.FetchCommunicationService` server
-        port (int): Port # of :mod:`.FetchCommunicationService` server
     """
 
     def __init__(self, host, port):
+        """
+        Args:
+            host (str): Hostname of :mod:`.FetchCommunicationService` server
+            port (int): Port # of :mod:`.FetchCommunicationService` server
+        """
         self.host = host
         self.port = port
 
@@ -150,13 +152,14 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
     data structures that map Communication IDs to Communications.  All
     Communications in `communications_file` will be read into memory
     using a :class:`.CommunicationReader` instance.
-
-    Args:
-        communications_file (str): String specifying name of Communications file
-        max_file_size (int): Maximum file size, in bytes
     """
 
     def __init__(self, communications_file, max_file_size=1073741824):
+        """
+        Args:
+            communications_file (str): String specifying name of Communications file
+            max_file_size (int): Maximum file size, in bytes
+        """
         self.comm_id_to_comm = {}
 
         comm_file_size = os.path.getsize(communications_file)
@@ -195,14 +198,15 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
     `ZipFileBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
     Communications are lazily-retrieved from a Zip file.
-
-    Args:
-        zipfile_path (str): Path to Zip file containing Communications
-        comm_extensions (str[]): List of strings specifying filename extensions
-                             associated with Communications
     """
 
     def __init__(self, zipfile_path, comm_extensions=['.comm', '.concrete']):
+        """
+        Args:
+            zipfile_path (str): Path to Zip file containing Communications
+            comm_extensions (str[]): List of strings specifying filename extensions
+                                 associated with Communications
+        """
         self.comm_id_to_filename = {}
         self.zipfile = zipfile.ZipFile(zipfile_path, 'r')
         for filename in self.zipfile.namelist():
@@ -232,13 +236,14 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
     `RedisHashBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
     Communications are lazily-retrieved from a Redis hash.
-
-    Args:
-        redis_db (redis.Redis): redis database connection
-        key (str): Key in redis database where hash is located
     """
 
     def __init__(self, redis_db, key):
+        """
+        Args:
+            redis_db (redis.Redis): redis database connection
+            key (str): Key in redis database where hash is located
+        """
         self.redis_db = redis_db
         self.key = key
 

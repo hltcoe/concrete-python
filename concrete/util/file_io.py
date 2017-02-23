@@ -501,7 +501,7 @@ class CommunicationWriterTar(object):
             comm_filename (str)
         """
         if comm_filename is None:
-            comm_filename = comm.uuid.uuidString + '.concrete'
+            comm_filename = comm.id + '.concrete'
 
         thrift_bytes = TSerialization.serialize(
             comm, protocol_factory=factory.protocolFactory)

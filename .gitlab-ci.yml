@@ -1,7 +1,6 @@
-before_script:
-  - docker info
-
 build-test-deploy:
+  before_script:
+    - docker info
   script:
     - docker build -t concrete-python .
     - docker run --rm concrete-python tox -e pep8,py27,py35,docs tests # configured in tox.ini
@@ -12,3 +11,12 @@ build-test-deploy:
       docker push r8n01:5000/concrete-python:latest)"
   tags:
     - shell
+
+mac-python-test:
+  before_script:
+    - python --version
+    - tox --version
+  script:
+    - tox
+  tags:
+    - mac-shell-no-docker

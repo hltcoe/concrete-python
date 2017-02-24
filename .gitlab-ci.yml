@@ -18,5 +18,6 @@ mac-python-test:
     - tox --version
   script:
     - tox
+    - tox integration-tests
   tags:
     - mac-shell-no-docker

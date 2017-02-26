@@ -2,10 +2,11 @@
 """
 from __future__ import unicode_literals
 
-import time
-import tempfile
-import os
 import logging
+import os
+import re
+import tempfile
+import time
 
 from ..communication.ttypes import Communication
 from ..metadata.ttypes import AnnotationMetadata
@@ -99,10 +100,14 @@ def create_sentence(sen_text, sen_start, sen_end,
             tokenList=TokenList(tokenList=[
                 Token(
                     tokenIndex=i,
-                    text=tok_text,
+                    text=match.group(),
+                    textSpan=TextSpan(
+                        start=match.start() + sen_start,
+                        ending=match.end() + sen_start
+                    ),
                 )
-                for (i, tok_text)
-                in enumerate(sen_text.split())
+                for (i, match)
+                in enumerate([m for m in re.finditer('\S+', sen_text)])
             ]),
         ) if tokens else None,
     )

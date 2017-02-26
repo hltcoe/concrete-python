@@ -48,6 +48,7 @@ def test_create_comm_unicode():
     assert 2 == len(tl)
     assert 0 == tl[0].tokenIndex
     assert u'狐狸' == tl[0].text
+    assert u'狐狸' == comm.text[tl[0].textSpan.start:tl[0].textSpan.ending]
     assert 1 == tl[1].tokenIndex
     assert '.' == tl[1].text
     assert validate_communication(comm)
@@ -69,10 +70,13 @@ def test_create_comm_one_sentence():
     assert 3 == len(tl)
     assert 0 == tl[0].tokenIndex
     assert 'simple' == tl[0].text
+    assert 'simple' == comm.text[tl[0].textSpan.start:tl[0].textSpan.ending]
     assert 1 == tl[1].tokenIndex
     assert 'comm' == tl[1].text
+    assert 'comm' == comm.text[tl[1].textSpan.start:tl[1].textSpan.ending]
     assert 2 == tl[2].tokenIndex
     assert '.' == tl[2].text
+    assert '.' == comm.text[tl[2].textSpan.start:tl[2].textSpan.ending]
     assert validate_communication(comm)
 
 
@@ -98,10 +102,13 @@ def test_create_comm_complex():
     assert 3 == len(tl)
     assert 0 == tl[0].tokenIndex
     assert 'simple' == tl[0].text
+    assert 'simple' == comm.text[tl[0].textSpan.start:tl[0].textSpan.ending]
     assert 1 == tl[1].tokenIndex
     assert 'comm' == tl[1].text
+    assert 'comm' == comm.text[tl[1].textSpan.start:tl[1].textSpan.ending]
     assert 2 == tl[2].tokenIndex
     assert '.' == tl[2].text
+    assert '.' == comm.text[tl[2].textSpan.start:tl[2].textSpan.ending]
     sent = sect.sentenceList[1]
     assert 17 == sent.textSpan.start
     assert 23 == sent.textSpan.ending
@@ -123,6 +130,7 @@ def test_create_comm_complex():
     assert 1 == len(tl)
     assert 0 == tl[0].tokenIndex
     assert 'isit?' == tl[0].text
+    assert 'isit?' == comm.text[tl[0].textSpan.start:tl[0].textSpan.ending]
     sent = sect.sentenceList[1]
     assert 31 == sent.textSpan.start
     assert 31 == sent.textSpan.ending

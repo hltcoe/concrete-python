@@ -1,4 +1,4 @@
-4.12.8 (unreleased)
+4.12.8 (2017-02-27)
 -------------------
 
 - Store tweet JSON in Communication.originalText.

@@ -106,7 +106,7 @@ def thrift_to_json(tobj, remove_timestamps=False, remove_uuids=False):
         str: A "pretty-printed" JSON representation of the Thrift object
     """
     thrift_json_string = TSerialization.serialize(
-        tobj, TJSONProtocol.TSimpleJSONProtocolFactory())
+        tobj, TJSONProtocol.TSimpleJSONProtocolFactory()).decode('utf-8')
     thrift_json = json.loads(thrift_json_string)
 
     if remove_timestamps:

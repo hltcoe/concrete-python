@@ -48,21 +48,22 @@ def main():
                 remove_uuids=args.remove_uuids
             )
         else:
-            json_communication = tokenlattice_file_to_json(args.concrete_file)
+            json_communication = tokenlattice_file_to_json(
+                args.concrete_file
+            )
     else:
         if args.concrete_type == 'communication':
             comm = read_communication_from_file(args.concrete_file)
             json_communication = TSerialization.serialize(
-                comm, TJSONProtocol.TJSONProtocolFactory())
+                comm, TJSONProtocol.TJSONProtocolFactory()).decode('utf-8')
         else:
             raise NotImplementedError
 
     if args.json_file == '-':
         print(json_communication)
     else:
-        f = codecs.open(args.json_file, "w", encoding="utf-8")
-        f.write(json_communication)
-        f.close()
+        with codecs.open(args.json_file, 'w', encoding='utf-8') as f:
+            f.write(json_communication)
 
 
 if __name__ == "__main__":

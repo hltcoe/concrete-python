@@ -1,7 +1,7 @@
 4.12.9 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added PropertyLists to situation-mentions output of concrete-inspect.py
 
 
 4.12.8 (2017-02-27)

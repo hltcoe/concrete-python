@@ -343,6 +343,19 @@ def _print_situation_mention(situationMention):
         if ma.entityMention:
             _p(14, 16, u"entityMention",
                 u" ".join(_get_tokens_for_entityMention(ma.entityMention)))
+        if ma.propertyList:
+            # PROTO-ROLE PROPERTIES: Format a separate list for each
+            # distinct annotator (metadata.tool) which tool should be
+            # either None or a string. Sort by annotator
+            # (metadata.tool) and then by property (p.value)
+            last_tool = False
+            for p in sorted(ma.propertyList,
+                            key=lambda x: (x.metadata.tool, x.value)):
+                tool = p.metadata.tool
+                if tool != last_tool:
+                    print(u" " * 14 + u"Properties (%s):" % tool)
+                    last_tool = tool
+                _p(18, 20, p.value, u"%1.1f" % p.polarity)
         # A SituationMention can have an argumentList with a
         # MentionArgument that points to another SituationMention---
         # which could conceivably lead to loops.  We currently don't

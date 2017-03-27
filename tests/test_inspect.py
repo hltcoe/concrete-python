@@ -1,20 +1,85 @@
 from __future__ import unicode_literals
+from __future__ import print_function
+import time
+
+from pytest import mark
+
 from concrete.inspect import (
     _reconcile_index_and_tool,
     _valid_index_lun,
-    _get_conll_deprel_tags_for_tokenization as cdt
+    _get_conll_deprel_tags_for_tokenization as cdt,
+    print_situation_mentions,
+)
+from concrete.util import generate_UUID as genId
+from concrete.util.references import add_references_to_communication
+from concrete import (
+    AnnotationMetadata,
+    Communication,
+    Dependency,
+    DependencyParse,
+    EntityMention,
+    EntityMentionSet,
+    MentionArgument,
+    Property,
+    Section,
+    Sentence,
+    SituationMention,
+    SituationMentionSet,
+    TextSpan,
+    TokenRefSequence,
+    Tokenization,
+    TokenizationKind,
+    Token,
+    TokenList,
+    UUID,
 )
 
-from concrete import (AnnotationMetadata,
-                      Dependency,
-                      DependencyParse,
-                      Tokenization,
-                      TokenizationKind,
-                      Token,
-                      TokenList,
-                      UUID)
 
-import time
+def _comm_with_properties(num_properties):
+    ts = 17
+    meta_tokn = AnnotationMetadata(tool='tokn-tool', timestamp=ts)
+    toks = TokenList(tokenList=[Token(tokenIndex=0,
+                                      text='text',
+                                      textSpan=TextSpan(start=0,
+                                                        ending=1))])
+    tokn = Tokenization(uuid=genId(), metadata=meta_tokn,
+                        kind=TokenizationKind.TOKEN_LIST,
+                        tokenList=toks)
+    sentence = Sentence(uuid=genId(), tokenization=tokn)
+    section = Section(uuid=genId(), kind='kind', label='label',
+                      sentenceList=[sentence])
+    trfs = TokenRefSequence(tokenizationId=tokn.uuid,
+                            tokenIndexList=[0],
+                            anchorTokenIndex=0)
+    em = EntityMention(uuid=genId(), entityType='entityType',
+                       text='text', tokens=trfs)
+    meta_ems = AnnotationMetadata(tool='ems-tool', timestamp=ts)
+    ems = EntityMentionSet(uuid=genId(), metadata=meta_ems,
+                           mentionList=[em])
+    meta_prop = AnnotationMetadata(tool='Annotator1',
+                                   timestamp=ts)
+    props = list(
+        Property(
+            value="Property%d" % i,
+            metadata=meta_prop,
+            polarity=4.0) for i in range(num_properties))
+    am = MentionArgument(role='role', entityMentionId=em.uuid,
+                         propertyList=props)
+    sm = SituationMention(uuid=genId(), text='text',
+                          situationType='stiuationType',
+                          situationKind='situationKind',
+                          tokens=trfs, argumentList=[am])
+    meta_sms = AnnotationMetadata(tool='sms-tool', timestamp=ts)
+    sms = SituationMentionSet(uuid=genId(), metadata=meta_sms,
+                              mentionList=[sm])
+    meta_comm = AnnotationMetadata(tool='tool', timestamp=ts)
+    comm = Communication(uuid=genId(), id='id', text='text',
+                         type='type', metadata=meta_comm,
+                         sectionList=[section],
+                         situationMentionSetList=[sms],
+                         entityMentionSetList=[ems])
+    add_references_to_communication(comm)
+    return comm
 
 
 class ReconcileIndexAndTool:
@@ -32,6 +97,23 @@ class ReconcileIndexAndTool:
                 dependencyList=[]
             ) for i in range(num)
         ] if num is not None else None
+
+
+def test_print_situation_mentions_without_properties(capsys):
+    print_situation_mentions(_comm_with_properties(0))
+    (out, err) = capsys.readouterr()
+    assert 'Properties' not in out
+
+
+@mark.parametrize('num_properties', [(1,), (2,), (3,)])
+def test_print_situation_mentions_with_properties(capsys, num_properties):
+    num_properties = 3
+    print_situation_mentions(_comm_with_properties(num_properties))
+    (out, err) = capsys.readouterr()
+    assert 1 == out.count("Properties")
+    assert 1 == out.count("Annotator1")
+    assert num_properties == out.count("Property")
+    assert num_properties == out.count("4.0")
 
 
 def test_reconcile_index_and_tool_none_list():

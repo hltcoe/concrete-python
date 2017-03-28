@@ -51,7 +51,7 @@ def _filter_by_tool(lst, tool):
 
 def print_conll_style_tags_for_communication(
         comm, char_offsets=False, dependency=False, lemmas=False, ner=False,
-        pos=False,
+        pos=False, other_tags=list(),
         dependency_tool=None, lemmas_tool=None, ner_tool=None, pos_tool=None):
 
     """Print 'ConLL-style' tags for the tokens in a Communication
@@ -78,6 +78,8 @@ def print_conll_style_tags_for_communication(
     if dependency:
         header_fields.append(u"HEAD")
         header_fields.append(u"DEPREL")
+    for tag in other_tags:
+        header_fields.append(tag)
     print(u"\t".join(header_fields))
     dashes = ["-" * len(fieldname) for fieldname in header_fields]
     print(u"\t".join(dashes))
@@ -105,6 +107,9 @@ def print_conll_style_tags_for_communication(
             token_tag_lists.append(
                 _get_conll_deprel_tags_for_tokenization(tokenization,
                                                         tool=dependency_tool))
+        for tag in other_tags:
+            token_tag_lists.append(
+                _get_arbitrary_tag_for_tokenization(tokenization, tag=tag))
         print_conll_style_tags_for_tokenization(tokenization,
                                                 token_tag_lists)
         print()
@@ -763,6 +768,28 @@ def _get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
     if tokenization.tokenList:
         pos_tags = [""] * len(tokenization.tokenList.tokenList)
         pos_tts = _get_tokentaggings_of_type(tokenization, u"POS", tool=tool)
+        if pos_tts and len(pos_tts) > pos_tokentagging_index:
+            tag_for_tokenIndex = {}
+            for taggedToken in pos_tts[pos_tokentagging_index].taggedTokenList:
+                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
+            for i, token in enumerate(tokenization.tokenList.tokenList):
+                if i in tag_for_tokenIndex:
+                    pos_tags[i] = tag_for_tokenIndex[i]
+        return pos_tags
+
+def _get_arbitrary_tag_for_tokenization(tokenization, pos_tokentagging_index=0, tag=''):
+    """Get arbitrary tag for a tokenization
+
+    Args:
+        tokenization (Tokenization):
+        tag (the tag name)
+
+    Returns:
+        A list of the tag values for each token in the Tokenization
+    """
+    if tokenization.tokenList:
+        pos_tags = [""] * len(tokenization.tokenList.tokenList)
+        pos_tts = _get_tokentaggings_of_type(tokenization, tag)
         if pos_tts and len(pos_tts) > pos_tokentagging_index:
             tag_for_tokenIndex = {}
             for taggedToken in pos_tts[pos_tokentagging_index].taggedTokenList:

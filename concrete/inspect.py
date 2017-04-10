@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 from .util.metadata import get_index_of_tool
 from .util.unnone import lun
+from .util.tokenization import get_tokenizations
 from collections import defaultdict
 from operator import attrgetter
 
@@ -81,7 +82,7 @@ def print_conll_style_tags_for_communication(
     dashes = ["-" * len(fieldname) for fieldname in header_fields]
     print(u"\t".join(dashes))
 
-    for tokenization in _get_tokenizations(comm):
+    for tokenization in get_tokenizations(comm):
         token_tag_lists = []
 
         if char_offsets:
@@ -171,16 +172,6 @@ def print_metadata(comm, tool=None):
                     information for objects with a matching
                     `metadata.tool` field
     """
-    def _get_tokenizations(comm):
-        tokenizations = []
-        if comm.sectionList:
-            for section in comm.sectionList:
-                if section.sentenceList:
-                    for sentence in section.sentenceList:
-                        if sentence.tokenization:
-                            tokenizations.append(sentence.tokenization)
-        return tokenizations
-
     if tool is None or comm.metadata.tool == tool:
         print(u"Communication:  %s\n" % comm.metadata.tool)
 
@@ -188,7 +179,7 @@ def print_metadata(comm, tool=None):
     parse_tools = set()
     tokenization_tools = set()
     token_tagging_tools = set()
-    for tokenization in _get_tokenizations(comm):
+    for tokenization in get_tokenizations(comm):
         tokenization_tools.add(tokenization.metadata.tool)
         if tokenization.tokenTaggingList:
             for tokenTagging in tokenization.tokenTaggingList:
@@ -494,7 +485,7 @@ def print_penn_treebank_for_communication(comm, tool=None):
                     :class:`.Tokenization` objects with a matching
                     `metadata.tool` field
     """
-    tokenizations = _get_tokenizations(comm)
+    tokenizations = get_tokenizations(comm)
 
     for tokenization in tokenizations:
         if tokenization.parseList:
@@ -780,28 +771,6 @@ def _get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
                 if i in tag_for_tokenIndex:
                     pos_tags[i] = tag_for_tokenIndex[i]
         return pos_tags
-
-
-def _get_tokenizations(comm, tool=None):
-    """Returns a flat list of all Tokenization objects in a Communication
-
-    Args:
-        comm (Communication):
-
-    Returns:
-        A list of all Tokenization objects within the Communication
-    """
-    tokenizations = []
-
-    if comm.sectionList:
-        for section in comm.sectionList:
-            if section.sentenceList:
-                for sentence in section.sentenceList:
-                    if sentence.tokenization:
-                        if (tool is None or
-                                sentence.tokenization.metadata.tool == tool):
-                            tokenizations.append(sentence.tokenization)
-    return tokenizations
 
 
 def _get_tokenizations_grouped_by_section(comm, tool=None):

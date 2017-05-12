@@ -2,15 +2,16 @@ from __future__ import unicode_literals
 from __future__ import print_function
 import time
 
-from pytest import mark
+from pytest import mark, fixture
 
 from concrete.inspect import (
     _reconcile_index_and_tool,
     _valid_index_lun,
     _get_conll_deprel_tags_for_tokenization as cdt,
     print_situation_mentions,
+    print_conll_style_tags_for_communication,
 )
-from concrete.util import generate_UUID as genId
+from concrete.util import generate_UUID as genId, create_comm
 from concrete.util.references import add_references_to_communication
 from concrete import (
     AnnotationMetadata,
@@ -31,6 +32,8 @@ from concrete import (
     TokenizationKind,
     Token,
     TokenList,
+    TokenTagging,
+    TaggedToken,
     UUID,
 )
 
@@ -80,6 +83,91 @@ def _comm_with_properties(num_properties):
                          entityMentionSetList=[ems])
     add_references_to_communication(comm)
     return comm
+
+
+@fixture
+def comm_with_other_tags():
+    comm = create_comm('quick', '''\
+The quick brown fox jumped
+over the lazy dog .
+
+Or did she ?
+''')
+    for section in comm.sectionList:
+        for sentence in section.sentenceList:
+            sentence.tokenization.tokenTaggingList = [
+                TokenTagging(
+                    uuid=genId(),
+                    metadata=AnnotationMetadata(
+                        tool=u'tool',
+                        timestamp=1,
+                    ),
+                    taggingType=u'upper',
+                    taggedTokenList=[
+                        TaggedToken(
+                            tokenIndex=token.tokenIndex,
+                            tag=token.text.upper(),
+                        )
+                        for token in sentence.tokenization.tokenList.tokenList
+                    ],
+                ),
+                TokenTagging(
+                    uuid=genId(),
+                    metadata=AnnotationMetadata(
+                        tool=u'tool',
+                        timestamp=1,
+                    ),
+                    taggingType=u'lower',
+                    taggedTokenList=[
+                        TaggedToken(
+                            tokenIndex=token.tokenIndex,
+                            tag=token.text.lower(),
+                        )
+                        for token in sentence.tokenization.tokenList.tokenList
+                    ],
+                ),
+            ]
+    return comm
+
+
+def test_print_conll_other_tags_ignore_all(capsys, comm_with_other_tags):
+    print_conll_style_tags_for_communication(comm_with_other_tags)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\n'
+        '-----\t-----\n'
+        '1\tThe\n'
+        '2\tquick\n'
+    )
+
+
+def test_print_conll_other_tags_ignore_some(capsys, comm_with_other_tags):
+    print_conll_style_tags_for_communication(comm_with_other_tags,
+                                             other_tags=('upper',))
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\tupper\n'
+        '-----\t-----\t-----\n'
+        '1\tThe\tTHE\n'
+        '2\tquick\tQUICK\n'
+    )
+    assert '3\tshe\tSHE\n' in out
+
+
+def test_print_conll_other_tags(capsys, comm_with_other_tags):
+    print_conll_style_tags_for_communication(comm_with_other_tags,
+                                             other_tags=('upper', 'lower'))
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\tupper\tlower\n'
+        '-----\t-----\t-----\t-----\n'
+        '1\tThe\tTHE\tthe\n'
+        '2\tquick\tQUICK\tquick\n'
+    )
+    assert '3\tshe\tSHE\tshe\n' in out
 
 
 class ReconcileIndexAndTool:

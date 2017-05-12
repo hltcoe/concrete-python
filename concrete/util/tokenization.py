@@ -9,6 +9,11 @@ from math import log, exp
 from functools import reduce
 
 
+class NoSuchTokenTagging(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+
 def get_tokens(tokenization, suppress_warnings=False):
     """Get list of :class:`.Token` objects for a :class:`.Tokenization`
 
@@ -72,8 +77,8 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
         to `tagging_type`, if there is a unique choice.
 
     Raises:
-        Exception: Raised if there is no matching tagging or more than
-            one matching tagging.
+        NoSuchTokenTagging: if there is no matching tagging
+        Exception: if there is more than one matching tagging.
     """
     tts = [
         tt
@@ -83,7 +88,7 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
         )
     ]
     if len(tts) == 0:
-        raise Exception('No matching %s tagging.' % tagging_type)
+        raise NoSuchTokenTagging('No matching %s tagging.' % tagging_type)
     elif len(tts) == 1:
         return tts[0].taggedTokenList
     else:

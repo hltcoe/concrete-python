@@ -135,9 +135,11 @@ def main():
                         type=str,
                         help='Filter --situations output to specified '
                              'tool (requires --situations)')
-    parser.add_argument("--other-tags",
-                        help="List of other tag annotation layers to display",
-                        nargs='+')
+    parser.add_argument("--other-tag",
+                        help="Tagging type of other token tagging to display "
+                             "(this flag can be specified multiple times to "
+                             "display multiple other token taggings)",
+                        action='append')
     parser.add_argument("--text",
                         help="Print .text field",
                         action="store_true")
@@ -196,7 +198,7 @@ def main():
             args.pos or args.entities or args.mentions or args.metadata or
             args.sections or args.situation_mentions or args.situations or
             args.text or args.tokens or args.treebank or args.id or
-            args.communication_taggings):
+            args.communication_taggings or args.other_tag):
         parser.print_help()
         sys.exit(1)
 
@@ -245,12 +247,13 @@ def main():
             concrete.inspect.print_penn_treebank_for_communication(
                 comm, tool=args.treebank_tool)
         if (args.char_offsets or args.dependency or args.lemmas or args.ner or
-                args.pos or len(args.other_tags) > 0):
+                args.pos or args.other_tag):
             print_header_if('conll', args.annotation_headers)
             concrete.inspect.print_conll_style_tags_for_communication(
                 comm, char_offsets=args.char_offsets,
                 dependency=args.dependency,
-                lemmas=args.lemmas, ner=args.ner, pos=args.pos, other_tags=args.other_tags,
+                lemmas=args.lemmas, ner=args.ner, pos=args.pos,
+                other_tags=args.other_tag,
                 dependency_tool=args.dependency_tool,
                 lemmas_tool=args.lemmas_tool,
                 pos_tool=args.pos_tool,

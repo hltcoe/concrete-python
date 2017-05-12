@@ -8,7 +8,9 @@ from __future__ import unicode_literals
 
 from .util.metadata import get_index_of_tool
 from .util.unnone import lun
-from .util.tokenization import get_tokenizations
+from .util.tokenization import (
+    get_tokenizations, get_tagged_tokens, NoSuchTokenTagging,
+)
 from collections import defaultdict
 from operator import attrgetter
 
@@ -49,9 +51,31 @@ def _filter_by_tool(lst, tool):
     return filter(lambda x: tool is None or x.metadata.tool == tool, lst)
 
 
+def _get_tagged_token_strs_by_token_index(tagged_tokens, num_tokens):
+    tagged_tokens_by_token_index = dict(
+        (tagged_token.tokenIndex, tagged_token)
+        for tagged_token in tagged_tokens
+    )
+    return [
+        (
+            tagged_tokens_by_token_index[token_index].tag
+            if token_index in tagged_tokens_by_token_index
+            else u''
+        )
+        for token_index in range(num_tokens)
+    ]
+
+
+def _get_tagged_tokens_or_empty(*args, **kwargs):
+    try:
+        return get_tagged_tokens(*args, **kwargs)
+    except NoSuchTokenTagging:
+        return []
+
+
 def print_conll_style_tags_for_communication(
         comm, char_offsets=False, dependency=False, lemmas=False, ner=False,
-        pos=False, other_tags=list(),
+        pos=False, other_tags=None,
         dependency_tool=None, lemmas_tool=None, ner_tool=None, pos_tool=None):
 
     """Print 'ConLL-style' tags for the tokens in a Communication
@@ -65,6 +89,8 @@ def print_conll_style_tags_for_communication(
         ner (bool): Flag for printing Named Entity Recognition tags
         pos (bool): Flag for printing Part-of-Speech tags
     """
+    if other_tags is None:
+        other_tags = ()
 
     header_fields = [u"INDEX", u"TOKEN"]
     if char_offsets:
@@ -92,14 +118,25 @@ def print_conll_style_tags_for_communication(
                 _get_char_offset_tags_for_tokenization(comm, tokenization))
         if lemmas:
             token_tag_lists.append(
-                _get_lemma_tags_for_tokenization(tokenization,
-                                                 tool=lemmas_tool))
+                _get_tagged_token_strs_by_token_index(
+                    _get_tagged_tokens_or_empty(
+                        tokenization, tagging_type=u'LEMMA', tool=lemmas_tool),
+                    len(tokenization.tokenList.tokenList)))
         if pos:
             token_tag_lists.append(
-                _get_pos_tags_for_tokenization(tokenization, tool=pos_tool))
+                _get_tagged_token_strs_by_token_index(
+                    _get_tagged_tokens_or_empty(
+                        tokenization, tagging_type=u'POS', tool=pos_tool),
+                    len(tokenization.tokenList.tokenList)))
         if ner:
-            token_tag_lists.append(
-                _get_ner_tags_for_tokenization(tokenization, tool=ner_tool))
+            token_tag_lists.append([
+                (tag if tag != u'NONE' else u'')
+                for tag in _get_tagged_token_strs_by_token_index(
+                    _get_tagged_tokens_or_empty(
+                        tokenization, tagging_type=u'NER', tool=ner_tool),
+                    len(tokenization.tokenList.tokenList)
+                )
+            ])
         if dependency:
             token_tag_lists.append(
                 _get_conll_head_tags_for_tokenization(tokenization,
@@ -109,7 +146,10 @@ def print_conll_style_tags_for_communication(
                                                         tool=dependency_tool))
         for tag in other_tags:
             token_tag_lists.append(
-                _get_arbitrary_tag_for_tokenization(tokenization, tag=tag))
+                _get_tagged_token_strs_by_token_index(
+                    _get_tagged_tokens_or_empty(
+                        tokenization, tagging_type=tag),
+                    len(tokenization.tokenList.tokenList)))
         print_conll_style_tags_for_tokenization(tokenization,
                                                 token_tag_lists)
         print()
@@ -699,105 +739,6 @@ def _get_entity_number_for_entityMention_uuid(comm, tool=None):
                 if any_mention:
                     entity_number_counter += 1
     return entity_number_for_entityMention_uuid
-
-
-def _get_lemma_tags_for_tokenization(tokenization, lemma_tokentagging_index=0,
-                                     tool=None):
-    """Get lemma tags for a tokenization
-
-    Args:
-        tokenization (Tokenization):
-
-    Returns:
-        A list of lemma tags for each token in the Tokenization
-    """
-    if tokenization.tokenList:
-        lemma_tags = [""] * len(tokenization.tokenList.tokenList)
-        lemma_tts = _get_tokentaggings_of_type(tokenization, u"lemma",
-                                               tool=tool)
-        if (lemma_tts and
-                len(lemma_tts) > lemma_tokentagging_index):
-            tag_for_tokenIndex = {}
-            tt = lemma_tts[lemma_tokentagging_index]
-            for taggedToken in tt.taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokenList):
-                if i in tag_for_tokenIndex:
-                    lemma_tags[i] = tag_for_tokenIndex[i]
-        return lemma_tags
-
-
-def _get_ner_tags_for_tokenization(tokenization, ner_tokentagging_index=0,
-                                   tool=None):
-    """Get Named Entity Recognition tags for a tokenization
-
-    Args:
-        tokenization (Tokenization):
-
-    Returns:
-        A list of NER tags for each token in the Tokenization
-    """
-    if tokenization.tokenList:
-        ner_tags = [""] * len(tokenization.tokenList.tokenList)
-        ner_tts = _get_tokentaggings_of_type(tokenization, u"NER", tool=tool)
-        if (ner_tts and
-                len(ner_tts) > ner_tokentagging_index):
-            tag_for_tokenIndex = {}
-            for taggedToken in ner_tts[ner_tokentagging_index].taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokenList):
-                try:
-                    ner_tags[i] = tag_for_tokenIndex[i]
-                except IndexError:
-                    ner_tags[i] = u""
-                if ner_tags[i] == u"NONE":
-                    ner_tags[i] = u""
-        return ner_tags
-
-
-def _get_pos_tags_for_tokenization(tokenization, pos_tokentagging_index=0,
-                                   tool=None):
-    """Get Part-of-Speech tags for a tokenization
-
-    Args:
-        tokenization (Tokenization):
-
-    Returns:
-        A list of POS tags for each token in the Tokenization
-    """
-    if tokenization.tokenList:
-        pos_tags = [""] * len(tokenization.tokenList.tokenList)
-        pos_tts = _get_tokentaggings_of_type(tokenization, u"POS", tool=tool)
-        if pos_tts and len(pos_tts) > pos_tokentagging_index:
-            tag_for_tokenIndex = {}
-            for taggedToken in pos_tts[pos_tokentagging_index].taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokenList):
-                if i in tag_for_tokenIndex:
-                    pos_tags[i] = tag_for_tokenIndex[i]
-        return pos_tags
-
-def _get_arbitrary_tag_for_tokenization(tokenization, pos_tokentagging_index=0, tag=''):
-    """Get arbitrary tag for a tokenization
-
-    Args:
-        tokenization (Tokenization):
-        tag (the tag name)
-
-    Returns:
-        A list of the tag values for each token in the Tokenization
-    """
-    if tokenization.tokenList:
-        pos_tags = [""] * len(tokenization.tokenList.tokenList)
-        pos_tts = _get_tokentaggings_of_type(tokenization, tag)
-        if pos_tts and len(pos_tts) > pos_tokentagging_index:
-            tag_for_tokenIndex = {}
-            for taggedToken in pos_tts[pos_tokentagging_index].taggedTokenList:
-                tag_for_tokenIndex[taggedToken.tokenIndex] = taggedToken.tag
-            for i, token in enumerate(tokenization.tokenList.tokenList):
-                if i in tag_for_tokenIndex:
-                    pos_tags[i] = tag_for_tokenIndex[i]
-        return pos_tags
 
 
 def _get_tokenizations_grouped_by_section(comm, tool=None):

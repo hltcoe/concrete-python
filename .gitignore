@@ -6,6 +6,7 @@
 /.tox/
 /.eggs/
 /.coverage
+/.coverage.*
 /build/
 /concrete.egg-info/
 /dist/

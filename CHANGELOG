@@ -1,4 +1,4 @@
-4.12.9 (unreleased)
+4.12.9 (2017-05-13)
 -------------------
 
 - Clean up sphinx doc: suppress thrift_spec fields, render

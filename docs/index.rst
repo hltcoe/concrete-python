@@ -6,11 +6,13 @@
 Welcome to concrete's documentation!
 ====================================
 
+.. automodule:: concrete
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: concrete
+   concrete.rst
 
 
 Indices and tables

@@ -85,7 +85,7 @@ autoclass_content = 'both'
 # Skip thrift_spec fields
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    exclusions = ('thrift_spec')
+    exclusions = ('thrift_spec',)
     exclude = name in exclusions
     return skip or exclude
 

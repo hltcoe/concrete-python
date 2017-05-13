@@ -40,7 +40,11 @@ def main():
     parser.add_argument('--count', type=int,
                         help='Print at most this many communications.')
     parser.add_argument('--annotation-headers', action='store_true',
-                        help='Print annotation type headers.')
+                        help='Print a header above each annotation '
+                             '(useful if multiple annotation flags are '
+                             'specified and it\'s not clear where the output '
+                             'of one annotation ends and the output of the '
+                             'next annotation begins)')
     parser.add_argument("--char-offsets",
                         help="Print token text extracted from character offset"
                              "s (not the text stored in the tokenization) in '"

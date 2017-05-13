@@ -32,10 +32,11 @@ def main():
     set_stdout_encoding()
 
     parser = argparse.ArgumentParser(
-        description="Print information about a Concrete Communication to"
-                    " stdout.  If communication_filename is specified, read"
-                    " communication from file; otherwise, read from standard"
-                    " input.",
+        description="Print information about a Concrete Communication to "
+                    "stdout.  If communication_filename is specified, read "
+                    "communication from file; otherwise, read from standard "
+                    "input.  One or more annotation flags must be specified "
+                    "(calling this script with no arguments is an error)."
     )
     parser.add_argument('--count', type=int,
                         help='Print at most this many communications.')
@@ -177,15 +178,16 @@ def main():
                         help='Filter --id output to specified '
                              'tool (requires --id)')
     parser.add_argument("--no-references",
-                        help="Don't add references to communication (may preve"
-                             "nt 'NoneType' errors)",
+                        help="Don't add references to communication while "
+                             "loading (may prevent some 'NoneType' errors but "
+                             "is incompatible with some annotations)",
                         action="store_true")
     parser.add_argument('communication_filename',
                         nargs='?',
                         type=str,
                         help='Path to a Concrete Communication from which '
                         'to display information. If not specified, read '
-                        'read from standard input')
+                        'from standard input')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 

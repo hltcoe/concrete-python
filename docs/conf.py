@@ -82,6 +82,18 @@ todo_include_todos = False
 autoclass_content = 'both'
 
 
+# Skip thrift_spec fields
+
+def autodoc_skip_member(app, what, name, obj, skip, options):
+    exclusions = ('thrift_spec')
+    exclude = name in exclusions
+    return skip or exclude
+
+
+def setup(app):
+    app.connect('autodoc-skip-member', autodoc_skip_member)
+
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

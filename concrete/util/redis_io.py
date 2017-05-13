@@ -23,6 +23,11 @@ def read_communication_from_redis_key(redis_db, key, add_references=True):
     or until specified timeout (indefinitely if timeout is zero).
     Return None if block is False and key does not exist or if
     block is True and key does not exist after specified timeout.
+
+    Args:
+        redis_db:
+        key:
+        add_references:
     '''
     buf = redis_db.get(key)
     if buf is None:
@@ -50,7 +55,7 @@ class RedisReader(object):
 
     If pop is False and the key (in the database) is modified during
     iteration, behavior is undefined.  If pop is True, modifications
-    during iteration are encouraged. :)
+    during iteration are encouraged.
 
     Example usage::
 
@@ -68,25 +73,26 @@ class RedisReader(object):
         Create reader for specified key in specified
         redis_db.
 
+        Args:
             redis_db: object of class redis.Redis
-            key:      name of redis key containing your object(s)
+            key: name of redis key containing your object(s)
             key_type: 'set', 'list', 'hash', or None; if None, look up
-                      type in redis (only works if the key exists, so
-                      probably not suitable for block and/or pop modes)
-            pop:      boolean, True to remove objects from redis
-                      as we iterate over them, and False to leave redis
-                      unaltered
-            block:    boolean, True to block for data (i.e., wait for
-                      something to be added to the list if it is empty),
-                      False to end iteration when there is no more data
+                type in redis (only works if the key exists, so
+                probably not suitable for block and/or pop modes)
+            pop: boolean, True to remove objects from redis
+                as we iterate over them, and False to leave redis
+                unaltered
+            block: boolean, True to block for data (i.e., wait for
+                something to be added to the list if it is empty),
+                False to end iteration when there is no more data
             right_to_left: boolean, True to iterate over and index in
-                      lists from right to left, False to iterate/index
-                      from left to right
+                lists from right to left, False to iterate/index
+                from left to right
             deserialize_func: function, maps blobs from redis to some more
-                      friendly representation (e.g., if all your items
-                      are unicode strings, you might want to specify
-                      lambda s: s.decode('utf-8')); return blobs
-                      unchanged if deserialize_func is None
+                friendly representation (e.g., if all your items
+                are unicode strings, you might want to specify
+                lambda s: s.decode('utf-8')); return blobs
+                unchanged if deserialize_func is None
         '''
         self.redis_db = redis_db
         self.key = key
@@ -206,6 +212,9 @@ class RedisReader(object):
         '''
         Return item at specified list index or hash key;
         never pop or block.
+
+        Args:
+            k:
         '''
         if self.key_type in ('list', 'hash'):
             if self.key_type == 'list':
@@ -225,6 +234,9 @@ class RedisReader(object):
         non-popping, non-blocking set configurations.  Support for
         popping, non-blocking sets is planned; see
         http://redis.io/commands/spop .
+
+        Args:
+            n:
         '''
         if self.key_type == 'set' and not self.pop and not self.block:
             return [
@@ -299,13 +311,14 @@ class RedisCommunicationReader(RedisReader):
         Create communication reader for specified key in specified
         redis_db.
 
+        Args:
             redis_db: object of class redis.Redis
-            key:      name of redis key containing your communication(s)
+            key: name of redis key containing your communication(s)
             add_references: boolean, True to fill in members in the
-                      communication according to UUID relationships (see
-                      concrete.util.add_references), False to return
-                      communication as-is (note: you may need this False
-                      if you are dealing with incomplete communications)
+                communication according to UUID relationships (see
+                concrete.util.add_references), False to return
+                communication as-is (note: you may need this False
+                if you are dealing with incomplete communications)
 
         All other keyword arguments are passed through to RedisReader.
         '''
@@ -354,19 +367,20 @@ class RedisWriter(object):
         Create object writer for specified key in specified
         redis_db.
 
+        Args:
             redis_db: object of class redis.Redis
-            key:      name of redis key containing your object(s)
+            key: name of redis key containing your object(s)
             key_type: 'set', 'list', 'hash', or None; if None, look up
-                      type in redis (only works if the key exists)
+                type in redis (only works if the key exists)
             right_to_left: boolean, True to write elements to the left
-                      end of lists, False to write to the right end
+                end of lists, False to write to the right end
             serialize_func: function, maps objects to blobs before
-                      sending to Redis (e.g., if everything you write
-                      will be a unicode string, you might want to use
-                      lambda u: u.encode('utf-8')); pass objects to
-                      Redis unchanged if serialize_func is None
+                sending to Redis (e.g., if everything you write
+                will be a unicode string, you might want to use
+                lambda u: u.encode('utf-8')); pass objects to
+                Redis unchanged if serialize_func is None
             hash_key_func: function, maps objects to keys when key_type
-                      is hash (None: use Python's hash function)
+                is hash (None: use Python's hash function)
         '''
         self.redis_db = redis_db
         self.key = key
@@ -441,10 +455,11 @@ class RedisCommunicationWriter(RedisWriter):
         Create communication writer for specified key in specified
         redis_db.
 
+        Args:
             redis_db: object of class redis.Redis
-            key:      name of redis key containing your communication(s)
+            key: name of redis key containing your communication(s)
             uuid_hash_key: boolean, True to use the UUID as the hash key
-                      for a communication, False to use the id
+                 for a communication, False to use the id
         '''
         if 'serialize_func' in kwargs:
             raise ValueError('RedisCommunicationWriter does not allow custom '

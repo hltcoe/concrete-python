@@ -178,7 +178,7 @@ def create_comm(comm_id, text='',
         section_kind (str):
         metadata_tool (str):
         metadata_timestamp (int): Time in seconds since the Epoch.
-          If `None, the current time will be used.
+            If `None`, the current time will be used.
         annotation_level (str):
 
     Returns:
@@ -284,24 +284,15 @@ class SimpleCommTempFile(object):
         path (str): path to file
         communications (Communication[]): List of communications that were written to file
 
-    Usage demo:
+    Usage::
 
-    >>> from concrete.util import CommunicationReader
-    >>> with SimpleCommTempFile(n=3, id_fmt='temp-%d') as f:
-    ...     reader = CommunicationReader(f.path)
-    ...     for (orig_comm, comm_path_pair) in zip(f.communications, reader):
-    ...         print(orig_comm.id)
-    ...         print(orig_comm.id == comm_path_pair[0].id)
-    ...         print(f.path == comm_path_pair[1])
-    temp-0
-    True
-    True
-    temp-1
-    True
-    True
-    temp-2
-    True
-    True
+        from concrete.util import CommunicationReader
+        with SimpleCommTempFile(n=3, id_fmt='temp-%d') as f:
+            reader = CommunicationReader(f.path)
+            for (orig_comm, comm_path_pair) in zip(f.communications, reader):
+                print(orig_comm.id)
+                print(orig_comm.id == comm_path_pair[0].id)
+                print(f.path == comm_path_pair[1])
     """
 
     def __init__(self, n=10, id_fmt='temp-%d',
@@ -310,6 +301,7 @@ class SimpleCommTempFile(object):
         """
         Create temp file and write communications.
 
+        Args:
             n:i     number of communications to write
             id_fmt: format string used to generate communication IDs;
                     should contain one instance of %d, which will be

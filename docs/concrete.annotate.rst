@@ -14,6 +14,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.annotate
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

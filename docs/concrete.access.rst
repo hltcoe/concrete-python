@@ -15,6 +15,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.access
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

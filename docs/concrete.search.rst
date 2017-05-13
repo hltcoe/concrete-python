@@ -16,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.search
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

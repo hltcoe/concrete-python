@@ -13,6 +13,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.uuid
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

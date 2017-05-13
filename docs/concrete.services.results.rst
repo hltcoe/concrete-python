@@ -14,6 +14,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.services.results
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

@@ -13,6 +13,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.linking
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

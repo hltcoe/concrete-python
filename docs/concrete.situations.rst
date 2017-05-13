@@ -13,6 +13,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.situations
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

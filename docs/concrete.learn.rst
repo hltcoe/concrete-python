@@ -15,6 +15,6 @@ Module contents
 ---------------
 
 .. automodule:: concrete.learn
-    :members:
+    :members: ttypes
     :undoc-members:
     :show-inheritance:

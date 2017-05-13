@@ -90,8 +90,30 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     return skip or exclude
 
 
+# Treat auto-generated concrete thrift doc as explicit markup
+
+def autodoc_process_docstring(app, what, name, obj, options, lines):
+    if (name != 'concrete' and
+            name != 'concrete.util' and
+            not name.startswith('concrete.util.') and
+            name != 'concrete.validate' and
+            not name.startswith('concrete.validate.') and
+            name != 'concrete.version' and
+            not name.startswith('concrete.version.') and
+            name != 'concrete.inspect' and
+            not name.startswith('concrete.inspect.')):
+
+        while lines:
+            lines.pop()
+
+        if obj.__doc__:
+            for line in obj.__doc__.split('\n'):
+                lines.append('| ' + line)
+
+
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
+    app.connect('autodoc-process-docstring', autodoc_process_docstring)
 
 
 # -- Options for HTML output ----------------------------------------------

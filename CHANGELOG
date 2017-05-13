@@ -1,7 +1,22 @@
 4.12.9 (unreleased)
 -------------------
 
-- Added PropertyLists to situation-mentions output of concrete-inspect.py
+- Clean up sphinx doc: suppress thrift_spec fields, render
+  comments from Thrift verbatim
+
+- Update help for concrete-inspect.py --annotation-headers
+  (and a few other help messages)
+
+- Add --other-tag option to concrete-inspect.py to enable CoNLL output
+  of arbitrary token tags
+
+- Move get_tokenizations from concrete.inspect to
+  concrete.util.tokenization
+
+- Added PropertyLists to situation-mentions output of
+  concrete-inspect.py
+
+- Fix concrete2json TJSONProtocol UTF-8 bug
 
 
 4.12.8 (2017-02-27)

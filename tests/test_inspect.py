@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 import time
+import re
 
 from pytest import mark, fixture
 
@@ -68,9 +69,7 @@ def _comm_with_properties(num_properties):
             polarity=4.0) for i in range(num_properties))
     am = MentionArgument(role='role', entityMentionId=em.uuid,
                          propertyList=props)
-    sm = SituationMention(uuid=genId(), text='text',
-                          situationType='stiuationType',
-                          situationKind='situationKind',
+    sm = SituationMention(uuid=genId(),
                           tokens=trfs, argumentList=[am])
     meta_sms = AnnotationMetadata(tool='sms-tool', timestamp=ts)
     sms = SituationMentionSet(uuid=genId(), metadata=meta_sms,
@@ -168,6 +167,53 @@ def test_print_conll_other_tags(capsys, comm_with_other_tags):
         '2\tquick\tQUICK\tquick\n'
     )
     assert '3\tshe\tSHE\tshe\n' in out
+
+
+def test_print_situation_mentions(capsys):
+    comm = _comm_with_properties(0)
+    print_situation_mentions(comm)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert re.search(r'SituationMention\s+(\d+)-(\d+):\n', out)
+    assert not re.search(r'situationType:', out)
+    assert not re.search(r'situationKind:', out)
+    assert not re.search(r'intensity:', out)
+
+
+def test_print_situation_mentions_with_type(capsys):
+    comm = _comm_with_properties(0)
+    comm.situationMentionSetList[0].mentionList[0].situationType = u'st'
+    print_situation_mentions(comm)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert re.search(
+        r'SituationMention +(\d+)-(\d+):\n +situationType: +st\n', out)
+    assert not re.search(r'situationKind:', out)
+    assert not re.search(r'intensity:', out)
+
+
+def test_print_situation_mentions_with_kind(capsys):
+    comm = _comm_with_properties(0)
+    comm.situationMentionSetList[0].mentionList[0].situationKind = u'sk'
+    print_situation_mentions(comm)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert re.search(
+        r'SituationMention +(\d+)-(\d+):\n +situationKind: +sk\n', out)
+    assert not re.search(r'situationType:', out)
+    assert not re.search(r'intensity:', out)
+
+
+def test_print_situation_mentions_with_intensity(capsys):
+    comm = _comm_with_properties(0)
+    comm.situationMentionSetList[0].mentionList[0].intensity = 3.5
+    print_situation_mentions(comm)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert re.search(
+        r'SituationMention +(\d+)-(\d+):\n +intensity: +3\.50*\n', out)
+    assert not re.search(r'situationType:', out)
+    assert not re.search(r'situationKind:', out)
 
 
 class ReconcileIndexAndTool:

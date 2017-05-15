@@ -375,7 +375,7 @@ def _print_situation_mention(situationMention):
     if situationMention.situationKind:
         _p(10, 20, u"situationKind", situationMention.situationKind)
     if situationMention.intensity:
-        _p(10, 20, u"situationIntensity", str(situationMention.intensity))
+        _p(10, 20, u"intensity", str(situationMention.intensity))
     for arg_idx, ma in enumerate(lun(situationMention.argumentList)):
         print(u" " * 10 + u"Argument %d:" % arg_idx)
         if ma.role:

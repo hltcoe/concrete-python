@@ -12,12 +12,14 @@ concrete-python
    :target: https://ci.appveyor.com/project/cjmay/concrete-python-f3iqf
 
 
-concrete-python is the Python interface to Concrete_, an HLT data
-specification defined using Thrift_.
+Concrete-python is the Python interface to Concrete_, an HLT data
+specification defined using Thrift_.  Concrete-python contains generated Python
+classes, utility classes and functions, and scripts.  It does not contain the
+Thrift schema for Concrete, which can be found in the
+`Concrete GitHub repository`_.
 
-concrete-python contains generated Python classes, utility classes and
-functions, and scripts.  It does not contain the Thrift schema for
-Concrete, which can be found in the `Concrete GitHub repository`_.
+For information about installing and using concrete-python, please see the
+`online documentation`_.
 
 
 .. contents:: **Table of Contents**
@@ -771,7 +773,8 @@ Please contact us if there is an error in this list.
 
 
 
-.. _Concrete: http://hltcoe.github.io
+.. _Concrete: http://hltcoe.github.io/concrete/
+.. _`online documentation`: http://hltcoe.github.io/concrete-python/
 .. _Thrift: http://thrift.apache.org
 .. _`Concrete GitHub repository`: https://github.com/hltcoe/concrete
 .. _serif_dog-bites-man.concrete: https://github.com/hltcoe/concrete-python/raw/master/tests/testdata/serif_dog-bites-man.concrete

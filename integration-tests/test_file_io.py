@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import gzip
 import os
 import tarfile
 import time
@@ -463,6 +464,52 @@ def test_CommunicationWriter_fixed_point_unicode(output_file):
     with open(input_file, 'rb') as expected_f:
         expected_data = expected_f.read()
         with open(output_file, 'rb') as actual_f:
+            actual_data = actual_f.read()
+            assert expected_data == actual_data
+
+
+def test_CommunicationWriter_gz_fixed_point(output_file):
+    input_file = 'tests/testdata/simple_1.concrete'
+    comm = read_communication_from_file(input_file)
+
+    writer = CommunicationWriter(gzip=True)
+    try:
+        writer.open(output_file)
+        writer.write(comm)
+    finally:
+        writer.close()
+
+    with open(input_file, 'rb') as expected_f:
+        expected_data = expected_f.read()
+        with gzip.open(output_file, 'rb') as actual_f:
+            actual_data = actual_f.read()
+            assert expected_data == actual_data
+
+
+def test_CommunicationWriter_gz_fixed_point_ctx_mgr(output_file):
+    input_file = 'tests/testdata/simple_1.concrete'
+    comm = read_communication_from_file(input_file)
+
+    with CommunicationWriter(output_file, gzip=True) as writer:
+        writer.write(comm)
+
+    with open(input_file, 'rb') as expected_f:
+        expected_data = expected_f.read()
+        with gzip.open(output_file, 'rb') as actual_f:
+            actual_data = actual_f.read()
+            assert expected_data == actual_data
+
+
+def test_CommunicationWriter_gz_fixed_point_unicode(output_file):
+    input_file = 'tests/testdata/les-deux-chandeliers.concrete'
+    comm = read_communication_from_file(input_file)
+
+    with CommunicationWriter(output_file, gzip=True) as writer:
+        writer.write(comm)
+
+    with open(input_file, 'rb') as expected_f:
+        expected_data = expected_f.read()
+        with gzip.open(output_file, 'rb') as actual_f:
             actual_data = actual_f.read()
             assert expected_data == actual_data
 

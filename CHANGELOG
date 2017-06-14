@@ -1,6 +1,8 @@
 4.12.10 (unreleased)
 --------------------
 
+- Add optional gzip compression to CommunicationWriter
+
 - Print situation mention kind and intensity in concrete.inspect
 
 

@@ -7,7 +7,7 @@ try:
 except ImportError:
     from io import BytesIO
 
-import gzip
+from gzip import open as gzip_open
 import bz2
 import mimetypes
 import tarfile
@@ -268,7 +268,7 @@ class ThriftReader(object):
 
         elif filetype == FileType.STREAM_GZ:
             self.filetype = 'stream'
-            f = gzip.open(filename, 'rb')
+            f = gzip_open(filename, 'rb')
 
         elif filetype == FileType.STREAM_BZ2:
             self.filetype = 'stream'
@@ -290,7 +290,7 @@ class ThriftReader(object):
                 # successfully seeked backwards on the file if we have
                 # reached this point
                 self.filetype = 'stream'
-                f = gzip.open(filename, 'rb')
+                f = gzip_open(filename, 'rb')
 
             elif mimetypes.guess_type(filename)[1] == 'bzip2':
                 # this is not a true stream
@@ -433,7 +433,15 @@ class CommunicationWriter(object):
         writer.close()
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, gzip=False):
+        """
+        Args:
+            filename (str): If a filename is given, :func:`gzip_open`
+                will be called with the filename
+            gzip (bool): Flag indicating if file should be
+                compressed with gzip
+        """
+        self.gzip = gzip
         if filename is not None:
             self.open(filename)
 
@@ -445,7 +453,10 @@ class CommunicationWriter(object):
         Args:
             filename (str)
         """
-        self.file = open(filename, 'wb')
+        if self.gzip:
+            self.file = gzip_open(filename, 'wb')
+        else:
+            self.file = open(filename, 'wb')
 
     def write(self, comm):
         """

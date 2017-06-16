@@ -115,8 +115,8 @@ def write_communication_to_file(communication, communication_filename):
     """Write a :class:`.Communication` to a file
 
     Args:
-        communication (Communication)
-        communication_filename (str)
+        communication (Communication): communication to write
+        communication_filename (str): path of file to write to
     """
     return write_thrift_to_file(communication, communication_filename)
 
@@ -125,8 +125,8 @@ def write_thrift_to_file(thrift_obj, filename):
     """Write a Thrift object to a file
 
     Args:
-        thrift_obj:
-        filename (str):
+        thrift_obj: Thrift object to write
+        filename (str): path of file to write to
     """
     thrift_bytes = TSerialization.serialize(
         thrift_obj,
@@ -156,9 +156,15 @@ class _FileTypeClass(object):
 
     def lookup(self, ft):
         '''
-        Return filetype (integer value) for ft, where ft may be
-        a filetype name or (for convenience) the filetype integer
-        value itself.
+        Convenience method:
+        Look up and return integer filetype corresponding to filetype
+        name (or, if given the integer filetype, return that integer).
+
+        Args:
+            ft: filetype name (str) or integer value
+
+        Returns:
+            filetype (integer value) for ft
         '''
 
         if isinstance(ft, int):
@@ -406,7 +412,7 @@ class CommunicationReader(ThriftReader):
     def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
         """
         Args:
-            filename (str):
+            filename (str): path of file to read from
             add_references (bool): If True, calls
                :func:`concrete.util.references.add_references_to_communication`
                on all :class:`.Communication` objects read from file
@@ -436,8 +442,9 @@ class CommunicationWriter(object):
     def __init__(self, filename=None, gzip=False):
         """
         Args:
-            filename (str): If a filename is given, :func:`gzip_open`
-                will be called with the filename
+            filename (str): if specified, open file at this path
+                during construction (a file can alternatively be opened
+                after construction using the open method)
             gzip (bool): Flag indicating if file should be
                 compressed with gzip
         """
@@ -446,12 +453,18 @@ class CommunicationWriter(object):
             self.open(filename)
 
     def close(self):
+        '''
+        Close file.
+        '''
         self.file.close()
 
     def open(self, filename):
         """
+        Open specified file for writing.  File will be compressed
+        if the gzip flag of the constructor was set to True.
+
         Args:
-            filename (str)
+            filename (str): path to file to open for writing
         """
         if self.gzip:
             self.file = gzip_open(filename, 'wb')
@@ -461,7 +474,7 @@ class CommunicationWriter(object):
     def write(self, comm):
         """
         Args:
-            comm (Communication)
+            comm (Communication): communication to write to file
         """
         thrift_bytes = TSerialization.serialize(
             comm, protocol_factory=factory.protocolFactory)
@@ -489,8 +502,9 @@ class CommunicationWriterTar(object):
     def __init__(self, tar_filename=None, gzip=False):
         """
         Args:
-            tar_filename(str): If a filename is given, :func:`open`
-                will be called with the filename
+            tar_filename (str): if specified, open file at this path
+                during construction (a file can alternatively be opened
+                after construction using the open method)
             gzip (bool): Flag indicating if .TAR file should be
                 compressed with gzip
         """
@@ -499,20 +513,28 @@ class CommunicationWriterTar(object):
             self.open(tar_filename)
 
     def close(self):
+        '''
+        Close tar file.
+        '''
         self.tarfile.close()
 
     def open(self, tar_filename):
         """
+        Open specified tar file for writing.  File will be compressed
+        if the gzip flag of the constructor was set to True.
+
         Args:
-            tar_filename (str):
+            tar_filename (str): path to file to open for writing
         """
         self.tarfile = tarfile.open(tar_filename, 'w:gz' if self.gzip else 'w')
 
     def write(self, comm, comm_filename=None):
         """
         Args:
-            comm (Communication)
-            comm_filename (str)
+            comm (Communication): communication to write to tar file
+            comm_filename (str): desired filename of communication
+                within tar file (by default the filename will be the
+                communication id appended with a .concrete extension)
         """
         if comm_filename is None:
             comm_filename = comm.id + '.concrete'

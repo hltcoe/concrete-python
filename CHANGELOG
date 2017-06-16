@@ -1,6 +1,8 @@
 4.12.10 (unreleased)
 --------------------
 
+- Add timestamp_to_datetime in concrete.util.metadata
+
 - Add optional gzip compression to CommunicationWriter
 
 - Print situation mention kind and intensity in concrete.inspect

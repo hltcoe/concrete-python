@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from concrete.util import (
-    get_index_of_tool, datetime_to_timestamp, now_timestamp
+    get_index_of_tool, datetime_to_timestamp, now_timestamp,
+    timestamp_to_datetime
 )
 
 from concrete import AnnotationMetadata
@@ -66,6 +67,11 @@ def test_get_index_of_tool_nonempty_list_no_contains():
 def test_datetime_to_timestamp():
     assert datetime_to_timestamp(datetime(1970, 1, 1)) == 0
     assert datetime_to_timestamp(datetime(1970, 1, 1, 0, 0, 47)) == 47
+
+
+def test_timestamp_to_datetime():
+    assert timestamp_to_datetime(0) == datetime(1970, 1, 1)
+    assert timestamp_to_datetime(47) == datetime(1970, 1, 1, 0, 0, 47)
 
 
 def test_now_timestamp():

@@ -7,10 +7,33 @@ EPOCH = datetime.utcfromtimestamp(0)
 
 def datetime_to_timestamp(dt):
     '''
+    Given time-zone--unaware datetime object representing date and time
+    in UTC, return corresponding Concrete timestamp.
+
+    Args:
+        dt(datetime): time-zone--unaware datetime object representing
+        date and time (in UTC) to convert
+
     Source:
     http://stackoverflow.com/questions/6999726/how-can-i-convert-a-datetime-object-to-milliseconds-since-epoch-unix-time-in-p
     '''
     return int((dt - EPOCH).total_seconds())
+
+
+def timestamp_to_datetime(timestamp):
+    '''
+    Given Concrete timestamp, return corresponding time-zone--unaware
+    datetime object representing date and time in UTC.
+
+    Args:
+        timestamp(int): Concrete timestamp (integer representing
+            seconds since the epoch in UTC) representing date and time
+            to convert
+
+    Source:
+    https://stackoverflow.com/questions/3694487/initialize-a-datetime-object-with-seconds-since-epoch
+    '''
+    return datetime.utcfromtimestamp(timestamp)
 
 
 def now_timestamp():

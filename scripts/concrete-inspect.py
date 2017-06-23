@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import argparse
 import sys
+import logging
 
 import concrete.version
 import concrete.inspect
@@ -254,6 +255,9 @@ def main():
                 comm, tool=args.treebank_tool)
         if (args.char_offsets or args.dependency or args.lemmas or args.ner or
                 args.pos or args.other_tag):
+            logging.warning(
+                'CoNLL-style output from concrete-inspect.py is deprecated; '
+                'please use concrete2conll.py instead.')
             print_header_if('conll', args.annotation_headers)
             concrete.inspect.print_conll_style_tags_for_communication(
                 comm, char_offsets=args.char_offsets,

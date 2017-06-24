@@ -1,14 +1,16 @@
 from __future__ import unicode_literals
-from concrete.util import (
-    get_index_of_tool, datetime_to_timestamp, now_timestamp,
-    timestamp_to_datetime
-)
-
-from concrete import AnnotationMetadata
-
 from datetime import datetime
 import random
 import string
+
+from pytest import raises
+from mock import Mock, sentinel, patch
+
+from concrete.util import (
+    get_index_of_tool, datetime_to_timestamp, now_timestamp,
+    timestamp_to_datetime, get_annotation_field, filter_annotations
+)
+from concrete import AnnotationMetadata
 
 
 class HasMetadata(object):
@@ -76,3 +78,68 @@ def test_timestamp_to_datetime():
 
 def test_now_timestamp():
     assert now_timestamp() > datetime_to_timestamp(datetime(2000, 1, 1, 0, 0, 0))
+
+
+def test_get_annotation_field_kBest():
+    annotation = Mock(metadata=Mock(kBest=4))
+    assert get_annotation_field(annotation, 'kBest') == 4
+
+
+def test_get_annotation_field_tool():
+    annotation = Mock(metadata=Mock(tool='goldenhorse'))
+    assert get_annotation_field(annotation, 'tool') == 'goldenhorse'
+
+
+def test_get_annotation_field_timestamp():
+    annotation = Mock(metadata=Mock(timestamp=4))
+    assert get_annotation_field(annotation, 'timestamp') == 4
+
+
+def test_get_annotation_field_invalid():
+    annotation = Mock(metadata=Mock())
+    with raises(ValueError):
+        get_annotation_field(annotation, 'foobar')
+
+
+def test_filter_annotations_noop():
+    assert filter_annotations([
+        sentinel.annotation0,
+        sentinel.annotation1,
+        sentinel.annotation2,
+    ]) == [
+        sentinel.annotation0,
+        sentinel.annotation1,
+        sentinel.annotation2,
+    ]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        if field == 'foo':
+            return 3 if (
+                annotation in (sentinel.annotation0, sentinel.annotation1)
+            ) else 4
+        elif field == 'bar':
+            return 4 if (
+                annotation in (sentinel.annotation1, sentinel.annotation2)
+            ) else 3
+        else:
+            raise ValueError('bad field')
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+    ) == [sentinel.annotation1]
+
+# def filter_annotations(annotations,
+#                        filter_field_value_pairs=None,
+#                        sort_field=None,
+#                        sort_reverse=False,
+#                        action_if_multiple='pass',
+#                        action_if_zero='pass'):

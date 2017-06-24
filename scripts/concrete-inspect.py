@@ -37,7 +37,10 @@ def main():
                     "stdout.  If communication_filename is specified, read "
                     "communication from file; otherwise, read from standard "
                     "input.  One or more annotation flags must be specified "
-                    "(calling this script with no arguments is an error)."
+                    "(calling this script with no arguments is an error).  "
+                    "Not suitable for programmatic use (use as input to "
+                    "another program).",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('--count', type=int,
                         help='Print at most this many communications.')
@@ -227,6 +230,25 @@ def main():
                 not args.communication_taggings)):
         parser.print_help()
         sys.exit(1)
+
+    if (args.dependency_tool or
+            args.lemmas_tool or
+            args.ner_tool or
+            args.pos_tool or
+            args.entities_tool or
+            args.mentions_tool or
+            args.metadata_tool or
+            args.sections_tool or
+            args.situation_mentions_tool or
+            args.situations_tool or
+            args.text_tool or
+            args.tokens_tool or
+            args.treebank_tool or
+            args.id_tool or
+            args.communication_taggings_tool):
+        logging.warning(
+            'Filtering by tool using --*-tool flags is deprecated; '
+            'please use --filter-annotations instead.')
 
     comm_num = 0
 

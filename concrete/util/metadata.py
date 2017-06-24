@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from datetime import datetime
+import json
 
 
 EPOCH = datetime.utcfromtimestamp(0)
@@ -184,3 +185,25 @@ def filter_annotations(annotations,
                 action_if_multiple))
 
     return annotations
+
+
+def filter_annotations_json(annotations, kwargs_json):
+    '''
+    Call :func:`filter_annotations` on `annotations`, sending it
+    keyword arguments from the JSON-encoded dictionary
+    `kwargs_json`.
+
+    Args:
+        annotations (list): original list of annotations (objects
+            containing a `metadata` field of type
+            :class:`..metadata.ttypes.AnnotationMetadata`).
+            This list is not modified.
+        kwargs_json (str): JSON-encoded dictionary of keyword
+            arguments to be passed to :func:`filter_annotations`.
+
+    Returns:
+        `annotations` filtered by :func:`filter_annotations` according
+        to provided JSON-encoded keyword arguments.
+    '''
+
+    return filter_annotations(annotations, **json.loads(kwargs_json))

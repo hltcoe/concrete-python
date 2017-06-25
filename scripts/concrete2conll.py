@@ -9,12 +9,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import sys
 
 import concrete.version
 import concrete.inspect
-from concrete.util import CommunicationReader, FileType
-from concrete.util import set_stdout_encoding
+from concrete.util import (
+    CommunicationReader, FileType, set_stdout_encoding, filter_annotations_json
+)
 
 
 def main():
@@ -68,11 +68,8 @@ def main():
                              'char-offsets, dependency, entities, lemmas, '
                              'ner, pos, or other-tag:TAG-NAME (with TAG-TYPE '
                              'replaced by the desired other token tagging '
-                             'type')
+                             'type',
                         action='append')
-    parser.add_argument('--annotation-allow-multi',
-                        help='print multiple columns of the same annotation',
-                        action='store_true')
     parser.add_argument('communication_filename',
                         help='Path to a Concrete Communication from which '
                         'to display information, or - for standard input')
@@ -91,6 +88,30 @@ def main():
     for (comm, _) in comms:
         if args.count is not None and comm_num == args.count:
             break
+
+        kwargs = {}
+
+        for (annotation_type,
+                filter_annotations_args_json) in args.filter_annotations:
+
+            def _f(annotations):
+                return filter_annotations_json(
+                    annotations,
+                    filter_annotations_args_json)
+
+            if annotation_type.startswith('other-tag'):
+                if annotation_type.count(':') != 1:
+                    raise ValueError(
+                        'other-tag filter requires tagging type TAG_NAME to '
+                        'be specified as in other-tag:TAG-NAME')
+                (_, other_tag_type) = annotation_type.split(':')
+                # TODO how to handle this in kwargs?
+            elif annotation_type in (
+                    'char-offsets', 'dependency', 'lemmas', 'ner', 'pos'):
+                kwargs[annotation_type.replace('-', '_') + '_filter'] = _f
+            else:
+                raise ValueError(
+                    'unrecognized annotation type {}'.format(annotation_type))
 
         concrete.inspect.print_conll_style_tags_for_communication(
             comm, char_offsets=args.char_offsets,

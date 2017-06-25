@@ -8,7 +8,8 @@ from mock import Mock, sentinel, patch
 
 from concrete.util import (
     get_index_of_tool, datetime_to_timestamp, now_timestamp,
-    timestamp_to_datetime, get_annotation_field, filter_annotations
+    timestamp_to_datetime, get_annotation_field, filter_annotations,
+    ZeroAnnotationsError, MultipleAnnotationsError, filter_annotations_json
 )
 from concrete import AnnotationMetadata
 
@@ -116,16 +117,14 @@ def test_filter_annotations_noop():
 @patch('concrete.util.metadata.get_annotation_field')
 def test_filter_annotations(mock_get_annotation_field):
     def _mock_get_annotation_field(annotation, field):
-        if field == 'foo':
-            return 3 if (
-                annotation in (sentinel.annotation0, sentinel.annotation1)
-            ) else 4
-        elif field == 'bar':
-            return 4 if (
-                annotation in (sentinel.annotation1, sentinel.annotation2)
-            ) else 3
-        else:
-            raise ValueError('bad field')
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 4,
+            (sentinel.annotation0, 'bar'): 3,
+            (sentinel.annotation1, 'bar'): 4,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
     mock_get_annotation_field.side_effect = _mock_get_annotation_field
 
     assert filter_annotations(
@@ -137,9 +136,480 @@ def test_filter_annotations(mock_get_annotation_field):
         filter_field_value_pairs=(('foo', 3), ('bar', 4))
     ) == [sentinel.annotation1]
 
-# def filter_annotations(annotations,
-#                        filter_field_value_pairs=None,
-#                        sort_field=None,
-#                        sort_reverse=False,
-#                        action_if_multiple='pass',
-#                        action_if_zero='pass'):
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_zero(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 4,
+            (sentinel.annotation0, 'bar'): 3,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+    ) == []
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+    ) == [sentinel.annotation0, sentinel.annotation2]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_reverse(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_reverse=True
+    ) == [sentinel.annotation3, sentinel.annotation2, sentinel.annotation0]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_sort(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+            (sentinel.annotation0, 'baz'): 2,
+            (sentinel.annotation1, 'baz'): 0,
+            (sentinel.annotation2, 'baz'): 1,
+            (sentinel.annotation3, 'baz'): 3,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_field='baz'
+    ) == [sentinel.annotation2, sentinel.annotation0, sentinel.annotation3]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_sort_reverse(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+            (sentinel.annotation0, 'baz'): 2,
+            (sentinel.annotation1, 'baz'): 0,
+            (sentinel.annotation2, 'baz'): 1,
+            (sentinel.annotation3, 'baz'): 3,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_field='baz',
+        sort_reverse=True
+    ) == [sentinel.annotation3, sentinel.annotation0, sentinel.annotation2]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_raise(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    with raises(MultipleAnnotationsError):
+        filter_annotations(
+            [
+                sentinel.annotation0,
+                sentinel.annotation1,
+                sentinel.annotation2,
+            ],
+            filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+            action_if_multiple='raise'
+        )
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_zero_raise(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 4,
+            (sentinel.annotation0, 'bar'): 3,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    with raises(ZeroAnnotationsError):
+        filter_annotations(
+            [
+                sentinel.annotation0,
+                sentinel.annotation1,
+                sentinel.annotation2,
+            ],
+            filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+            action_if_zero='raise'
+        )
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_zero_raise_with_multiple(
+        mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        action_if_zero='raise'
+    ) == [sentinel.annotation0, sentinel.annotation2]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_raise_with_zero(
+        mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 4,
+            (sentinel.annotation0, 'bar'): 3,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        action_if_multiple='raise'
+    ) == []
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_zero_raise_with_one(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 4,
+            (sentinel.annotation0, 'bar'): 3,
+            (sentinel.annotation1, 'bar'): 4,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+    ) == [sentinel.annotation1]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_raise_with_one(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 4,
+            (sentinel.annotation0, 'bar'): 3,
+            (sentinel.annotation1, 'bar'): 4,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+    ) == [sentinel.annotation1]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_first(
+        mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        action_if_multiple='first'
+    ) == [sentinel.annotation0]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_last(
+        mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        action_if_multiple='last'
+    ) == [sentinel.annotation2]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_sort_first(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+            (sentinel.annotation0, 'baz'): 2,
+            (sentinel.annotation1, 'baz'): 0,
+            (sentinel.annotation2, 'baz'): 1,
+            (sentinel.annotation3, 'baz'): 3,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_field='baz',
+        action_if_multiple='first'
+    ) == [sentinel.annotation2]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_sort_last(mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+            (sentinel.annotation0, 'baz'): 2,
+            (sentinel.annotation1, 'baz'): 0,
+            (sentinel.annotation2, 'baz'): 1,
+            (sentinel.annotation3, 'baz'): 3,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_field='baz',
+        action_if_multiple='last'
+    ) == [sentinel.annotation3]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_sort_reverse_first(
+        mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+            (sentinel.annotation0, 'baz'): 2,
+            (sentinel.annotation1, 'baz'): 0,
+            (sentinel.annotation2, 'baz'): 1,
+            (sentinel.annotation3, 'baz'): 3,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_field='baz',
+        sort_reverse=True,
+        action_if_multiple='first'
+    ) == [sentinel.annotation3]
+
+
+@patch('concrete.util.metadata.get_annotation_field')
+def test_filter_annotations_multiple_sort_reverse_last(
+        mock_get_annotation_field):
+    def _mock_get_annotation_field(annotation, field):
+        return {
+            (sentinel.annotation0, 'foo'): 3,
+            (sentinel.annotation1, 'foo'): 3,
+            (sentinel.annotation2, 'foo'): 3,
+            (sentinel.annotation3, 'foo'): 3,
+            (sentinel.annotation0, 'bar'): 4,
+            (sentinel.annotation1, 'bar'): 3,
+            (sentinel.annotation2, 'bar'): 4,
+            (sentinel.annotation3, 'bar'): 4,
+            (sentinel.annotation0, 'baz'): 2,
+            (sentinel.annotation1, 'baz'): 0,
+            (sentinel.annotation2, 'baz'): 1,
+            (sentinel.annotation3, 'baz'): 3,
+        }[(annotation, field)]
+    mock_get_annotation_field.side_effect = _mock_get_annotation_field
+
+    assert filter_annotations(
+        [
+            sentinel.annotation0,
+            sentinel.annotation1,
+            sentinel.annotation2,
+            sentinel.annotation3,
+        ],
+        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        sort_field='baz',
+        sort_reverse=True,
+        action_if_multiple='last'
+    ) == [sentinel.annotation2]
+
+
+@patch('concrete.util.metadata.filter_annotations')
+def test_filter_annotations_json(mock_filter_annotations):
+    mock_filter_annotations.side_effect = [sentinel.return_value]
+    assert filter_annotations_json(
+        sentinel.annotations,
+        '{"foo": 47, "baz": ["hello", "world"]}'
+    ) == sentinel.return_value
+    mock_filter_annotations.assert_called_once_with(
+        sentinel.annotations,
+        foo=47,
+        baz=['hello', 'world'],
+    )

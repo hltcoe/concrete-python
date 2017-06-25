@@ -106,11 +106,11 @@ def get_annotation_field(annotation, field):
 
 
 def filter_annotations(annotations,
-                       filter_field_value_pairs=None,
                        sort_field=None,
                        sort_reverse=False,
                        action_if_multiple='pass',
-                       action_if_zero='pass'):
+                       action_if_zero='pass',
+                       **filter_field_value_pairs):
     '''
     Return filtered and/or re-ordered list of annotations, that is,
     objects containing a `metadata` field of type AnnotationMetadata.
@@ -120,11 +120,6 @@ def filter_annotations(annotations,
             containing a `metadata` field of type
             :class:`..metadata.ttypes.AnnotationMetadata`).
             This list is not modified.
-        filter_field_value_pairs (list): list of field-value pairs
-            by which to filter annotations (keep annotations whose
-            field `FIELD` not equals `VALUE` for all (`FIELD`,
-            `VALUE`) pairs).  Default: keep all annotations.
-            See :func:`get_annotation_field` for valid fields.
         sort_field (str): field by which to re-order annotations.
             Default: do not re-order annotations.
         sort_reverse (bool): True to reverse order of annotations
@@ -140,6 +135,12 @@ def filter_annotations(annotations,
         action_if_zero (str): action to take if, after filtering, there
             are no annotations left.  'pass' to return an empty list,
             'raise to raise an exception of type `ZeroAnnotationsError`.
+        filter_field_value_pairs: field-value pairs (for example:
+            `tool='goldenhorse', kBest=1`) by which to filter
+            annotations (keep annotations whose field `FIELD` not equals
+            `VALUE` for all (`FIELD`, `VALUE`) pairs).  Default: keep
+            all annotations.  See :func:`get_annotation_field` for valid
+            fields.
 
     Returns:
         filtered and/or re-ordered list of annotations
@@ -151,7 +152,7 @@ def filter_annotations(annotations,
             a for a in annotations
             if all(
                 get_annotation_field(a, field) == value
-                for (field, value) in filter_field_value_pairs
+                for (field, value) in filter_field_value_pairs.items()
             )
         ]
 

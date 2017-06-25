@@ -133,7 +133,7 @@ def test_filter_annotations(mock_get_annotation_field):
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+        foo=3, bar=4,
     ) == [sentinel.annotation1]
 
 
@@ -156,7 +156,7 @@ def test_filter_annotations_zero(mock_get_annotation_field):
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+        foo=3, bar=4,
     ) == []
 
 
@@ -179,7 +179,7 @@ def test_filter_annotations_multiple(mock_get_annotation_field):
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+        foo=3, bar=4,
     ) == [sentinel.annotation0, sentinel.annotation2]
 
 
@@ -205,7 +205,7 @@ def test_filter_annotations_multiple_reverse(mock_get_annotation_field):
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_reverse=True
     ) == [sentinel.annotation3, sentinel.annotation2, sentinel.annotation0]
 
@@ -236,7 +236,7 @@ def test_filter_annotations_multiple_sort(mock_get_annotation_field):
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_field='baz'
     ) == [sentinel.annotation2, sentinel.annotation0, sentinel.annotation3]
 
@@ -267,7 +267,7 @@ def test_filter_annotations_multiple_sort_reverse(mock_get_annotation_field):
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_field='baz',
         sort_reverse=True
     ) == [sentinel.annotation3, sentinel.annotation0, sentinel.annotation2]
@@ -293,7 +293,7 @@ def test_filter_annotations_multiple_raise(mock_get_annotation_field):
                 sentinel.annotation1,
                 sentinel.annotation2,
             ],
-            filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+            foo=3, bar=4,
             action_if_multiple='raise'
         )
 
@@ -318,7 +318,7 @@ def test_filter_annotations_zero_raise(mock_get_annotation_field):
                 sentinel.annotation1,
                 sentinel.annotation2,
             ],
-            filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+            foo=3, bar=4,
             action_if_zero='raise'
         )
 
@@ -343,7 +343,7 @@ def test_filter_annotations_zero_raise_with_multiple(
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         action_if_zero='raise'
     ) == [sentinel.annotation0, sentinel.annotation2]
 
@@ -368,7 +368,7 @@ def test_filter_annotations_multiple_raise_with_zero(
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         action_if_multiple='raise'
     ) == []
 
@@ -392,7 +392,7 @@ def test_filter_annotations_zero_raise_with_one(mock_get_annotation_field):
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+        foo=3, bar=4,
     ) == [sentinel.annotation1]
 
 
@@ -415,7 +415,7 @@ def test_filter_annotations_multiple_raise_with_one(mock_get_annotation_field):
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4))
+        foo=3, bar=4,
     ) == [sentinel.annotation1]
 
 
@@ -439,7 +439,7 @@ def test_filter_annotations_multiple_first(
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         action_if_multiple='first'
     ) == [sentinel.annotation0]
 
@@ -464,7 +464,7 @@ def test_filter_annotations_multiple_last(
             sentinel.annotation1,
             sentinel.annotation2,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         action_if_multiple='last'
     ) == [sentinel.annotation2]
 
@@ -495,7 +495,7 @@ def test_filter_annotations_multiple_sort_first(mock_get_annotation_field):
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_field='baz',
         action_if_multiple='first'
     ) == [sentinel.annotation2]
@@ -527,7 +527,7 @@ def test_filter_annotations_multiple_sort_last(mock_get_annotation_field):
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_field='baz',
         action_if_multiple='last'
     ) == [sentinel.annotation3]
@@ -560,7 +560,7 @@ def test_filter_annotations_multiple_sort_reverse_first(
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_field='baz',
         sort_reverse=True,
         action_if_multiple='first'
@@ -594,7 +594,7 @@ def test_filter_annotations_multiple_sort_reverse_last(
             sentinel.annotation2,
             sentinel.annotation3,
         ],
-        filter_field_value_pairs=(('foo', 3), ('bar', 4)),
+        foo=3, bar=4,
         sort_field='baz',
         sort_reverse=True,
         action_if_multiple='last'

@@ -12,7 +12,7 @@ from concrete import (
 from concrete.util import create_comm
 from concrete.util import (
     get_tokens, get_ner, get_pos, get_lemmas, get_tagged_tokens,
-    compute_lattice_expected_counts
+    compute_lattice_expected_counts, get_token_taggings
 )
 
 import mock
@@ -186,6 +186,49 @@ def test_get_tagged_tokens_non_unique_tagging_specify_tool_uppercase(tokenizatio
 def test_get_tagged_tokens_no_tagging_specify_tool(tokenization):
     with raises(Exception):
         get_tagged_tokens(tokenization, 'NUMERAL', tool='z')
+
+
+def test_get_token_taggings(tokenization):
+    assert [[(0, 'N'), (1, 'N'), (2, 'Y')]] == [
+        [(t.tokenIndex, t.tag) for t in tt.taggedTokenList]
+        for tt in get_token_taggings(tokenization, 'NUMERAL')
+    ]
+
+
+def test_get_token_taggings_lowercase(tokenization):
+    assert [[(0, 'N'), (1, 'N'), (2, 'Y')]] == [
+        [(t.tokenIndex, t.tag) for t in tt.taggedTokenList]
+        for tt in get_token_taggings(tokenization, 'numeral')
+    ]
+
+
+def test_get_token_taggings_lowercase_case_sensitive(tokenization):
+    assert [] == get_token_taggings(tokenization, 'numeral',
+                                    case_sensitive=True)
+
+
+def test_get_token_taggings_no_tagging(tokenization):
+    assert [] == get_token_taggings(tokenization, '!NUMERAL')
+
+
+def test_get_token_taggings_non_unique_tagging(tokenization):
+    tokenization.tokenTaggingList.append(
+        TokenTagging(
+            taggingType='NUMERAL',
+            taggedTokenList=[
+                TaggedToken(tokenIndex=0, tag='N'),
+                TaggedToken(tokenIndex=1, tag='Y'),
+                TaggedToken(tokenIndex=2, tag='Y'),
+            ],
+        ),
+    )
+    assert [
+        [(0, 'N'), (1, 'N'), (2, 'Y')],
+        [(0, 'N'), (1, 'Y'), (2, 'Y')],
+    ] == [
+        [(t.tokenIndex, t.tag) for t in tt.taggedTokenList]
+        for tt in get_token_taggings(tokenization, 'NUMERAL')
+    ]
 
 
 def test_no_lattice():

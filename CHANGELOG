@@ -1,6 +1,16 @@
 4.12.10 (unreleased)
 --------------------
 
+- Breaking change: update concrete-inspect.py to support multiple
+  annotations of the same type.  Changes CoNLL output for an annotation
+  type that is not present: an empty column is no longer printed.
+
+- Refactor concrete.inspect to use annotation filter callbacks to select
+  annotations rather than tool names, as tool names no longer uniquely
+  identify an annotation.  The new filter_annotations function can be
+  used to create simple filters; that functionality is exposed in
+  concrete-inspect.py.
+
 - Add timestamp_to_datetime in concrete.util.metadata
 
 - Add optional gzip compression to CommunicationWriter

@@ -6,13 +6,13 @@ interact with many different Concrete datastructures.
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from .util.metadata import get_index_of_tool
-from .util.unnone import lun
-from .util.tokenization import (
-    get_tokenizations, get_tagged_tokens, NoSuchTokenTagging,
-)
+import logging
 from collections import defaultdict
 from operator import attrgetter
+
+from .util.metadata import filter_unnone, tool_to_filter
+from .util.unnone import lun
+from .util.tokenization import get_tokenizations, get_token_taggings
 
 try:
     unicode
@@ -20,38 +20,19 @@ except NameError:
     unicode = str
 
 
-def _reconcile_index_and_tool(lst_of_conc, given_idx, tool):
-    """Given a list of Concrete objects with metadata (e.g., `DependencyParse`s)
-    and a default index, find the index of the object whose `.metadata.tool`
-    matches the provided query tool name `tool`.
-
-    When no tool is provided (but with an iterable list), this returns the
-    provided default index (even if it\'s not a valid index).
-    If the tool isn't found, the list is None or empty, this returns -1.
-    """
-    valid_lst = lst_of_conc is not None and len(lst_of_conc) > 0
-    idx = given_idx if valid_lst else -1
-    if tool is not None:
-        idx = get_index_of_tool(lst_of_conc, tool)
-    return idx
-
-
-def _valid_index_lun(lst, idx):
-    """Return True iff `idx` is a valid index into
-    the given (non-None) list. If `lst` is None,
-    return False.
-    """
-
-    if lst is None or len(lst) == 0:
-        return False
-    return idx >= 0 and idx < len(lst)
-
-
-def _filter_by_tool(lst, tool):
-    return filter(lambda x: tool is None or x.metadata.tool == tool, lst)
-
-
 def _get_tagged_token_strs_by_token_index(tagged_tokens, num_tokens):
+    '''
+    Return list of `num_tokens` strings:
+    the specified token tag at each token index if a tag exists at that
+    index, else the empty string.
+
+    Args:
+        tagged_tokens (list): list of :class:`.TaggedToken` objects
+        num_tokens (int): number of tokens
+
+    Returns:
+        list of token tags (or empty strings for untagged tokens)
+    '''
     tagged_tokens_by_token_index = dict(
         (tagged_token.tokenIndex, tagged_token)
         for tagged_token in tagged_tokens
@@ -66,112 +47,218 @@ def _get_tagged_token_strs_by_token_index(tagged_tokens, num_tokens):
     ]
 
 
-def _get_tagged_tokens_or_empty(*args, **kwargs):
-    try:
-        return get_tagged_tokens(*args, **kwargs)
-    except NoSuchTokenTagging:
-        return []
-
-
 def print_conll_style_tags_for_communication(
         comm, char_offsets=False, dependency=False, lemmas=False, ner=False,
-        pos=False, other_tags=None,
-        dependency_tool=None, lemmas_tool=None, ner_tool=None, pos_tool=None):
+        pos=False,
+        dependency_tool=None, dependency_parse_filter=None,
+        lemmas_tool=None, lemmas_filter=None,
+        ner_tool=None, ner_filter=None,
+        pos_tool=None, pos_filter=None,
+        other_tags=None):
 
-    """Print 'ConLL-style' tags for the tokens in a Communication
+    """
+    Print 'CoNLL-style' tags for the tokens in a Communication.
+    If column is requested (for example, `ner` is set to `True`) but
+    there is no such annotation in the communication, that column is
+    not printed (the header is not printed either).  If there is more
+    than one such annotation in the communication, one column is printed
+    for each annotation.  In the event of differing numbers of
+    annotations per Tokenization, all annotations are printed, but it is
+    not guaranteed that the columns of two different tokenizations
+    correspond to one another.
 
     Args:
         comm (Communication):
         char_offsets (bool): Flag for printing token text specified by
           a :class:`.Token`'s (optional) :class:`.TextSpan`
         dependency (bool): Flag for printing dependency parse HEAD tags
+        dependency_tool (str): Deprecated.
+            If not `None`, only print information for
+            :class:`.DependencyParse` objects if they have a matching
+            `metadata.tool` field
+        dependency_parse_filter (func): If not None, print information
+            for only those :class:`.DependencyParse` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
         lemmas (bool): Flag for printing lemma tags
+            (:class:`.TokenTagging` objects of type LEMMA)
+        lemmas_tool (str): Deprecated.
+            If not `None`, only print information for
+            :class:`.TokenTagging` objects of type LEMMA if they have
+            a matching `metadata.tool` field
+        lemmas_filter (func): If not None, print information
+            for only those LEMMA taggings that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
         ner (bool): Flag for printing Named Entity Recognition tags
+            (:class:`.TokenTagging` objects of type NER)
+        ner_tool (str): Deprecated.
+            If not `None`, only print information for
+            :class:`.TokenTagging` objects of type NER if they have
+            a matching `metadata.tool` field
+        ner_filter (func): If not None, print information
+            for only those NER taggings that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
         pos (bool): Flag for printing Part-of-Speech tags
+            (:class:`.TokenTagging` objects of type POS)
+        pos_tool (str): Deprecated.
+            If not `None`, only print information for
+            :class:`.TokenTagging` objects of type POS if they have
+            a matching `metadata.tool` field
+        pos_filter (func): If not None, print information
+            for only those POS taggings that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
+        other_tags (dict): Map of other tagging types to print (as keys)
+            to annotation filters, or None.  If the value (annotation
+            filter) of a given tagging type is not None, print
+            information for only those taggings that pass
+            the filter (should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered)).
     """
-    if other_tags is None:
-        other_tags = ()
+    dependency_parse_filter = filter_unnone(tool_to_filter(
+        dependency_tool, dependency_parse_filter))
+    lemmas_filter = filter_unnone(tool_to_filter(
+        lemmas_tool, lemmas_filter))
+    ner_filter = filter_unnone(tool_to_filter(
+        ner_tool, ner_filter))
+    pos_filter = filter_unnone(tool_to_filter(
+        pos_tool, pos_filter))
 
-    header_fields = [u"INDEX", u"TOKEN"]
-    if char_offsets:
-        header_fields.append(u"CHAR")
-    if lemmas:
-        header_fields.append(u"LEMMA")
-    if pos:
-        header_fields.append(u"POS")
-    if ner:
-        header_fields.append(u"NER")
-    if dependency:
-        header_fields.append(u"HEAD")
-        header_fields.append(u"DEPREL")
-    for tag in other_tags:
-        header_fields.append(tag)
-    print(u"\t".join(header_fields))
-    dashes = ["-" * len(fieldname) for fieldname in header_fields]
-    print(u"\t".join(dashes))
+    if other_tags is None:
+        other_tags = dict()
+
+    header_fields_by_tokenization = []
+    field_lists_by_tokenization = []
 
     for tokenization in get_tokenizations(comm):
-        token_tag_lists = []
+        header_fields = []
+        field_lists = []
+
+        header_fields.append(u'INDEX')
+        field_lists.append([
+            unicode(i + 1)
+            for i in range(len(tokenization.tokenList.tokenList))
+        ])
+
+        header_fields.append(u'TOKEN')
+        field_lists.append([
+            token.text
+            for token in tokenization.tokenList.tokenList
+        ])
 
         if char_offsets:
-            token_tag_lists.append(
+            header_fields.append(u'CHAR')
+            field_lists.append(
                 _get_char_offset_tags_for_tokenization(comm, tokenization))
+
         if lemmas:
-            token_tag_lists.append(
-                _get_tagged_token_strs_by_token_index(
-                    _get_tagged_tokens_or_empty(
-                        tokenization, tagging_type=u'LEMMA', tool=lemmas_tool),
-                    len(tokenization.tokenList.tokenList)))
+            for token_tagging in lemmas_filter(
+                    get_token_taggings(tokenization, u'LEMMA')):
+                header_fields.append(u'LEMMA')
+                field_lists.append(
+                    _get_tagged_token_strs_by_token_index(
+                        token_tagging.taggedTokenList,
+                        len(tokenization.tokenList.tokenList)))
+
         if pos:
-            token_tag_lists.append(
-                _get_tagged_token_strs_by_token_index(
-                    _get_tagged_tokens_or_empty(
-                        tokenization, tagging_type=u'POS', tool=pos_tool),
-                    len(tokenization.tokenList.tokenList)))
+            for token_tagging in pos_filter(
+                    get_token_taggings(tokenization, u'POS')):
+                header_fields.append(u'POS')
+                field_lists.append(
+                    _get_tagged_token_strs_by_token_index(
+                        token_tagging.taggedTokenList,
+                        len(tokenization.tokenList.tokenList)))
+
         if ner:
-            token_tag_lists.append([
-                (tag if tag != u'NONE' else u'')
-                for tag in _get_tagged_token_strs_by_token_index(
-                    _get_tagged_tokens_or_empty(
-                        tokenization, tagging_type=u'NER', tool=ner_tool),
-                    len(tokenization.tokenList.tokenList)
-                )
-            ])
+            for token_tagging in ner_filter(
+                    get_token_taggings(tokenization, u'NER')):
+                header_fields.append(u'NER')
+                field_lists.append([
+                    (tag if tag != u'NONE' else u'')
+                    for tag in _get_tagged_token_strs_by_token_index(
+                        token_tagging.taggedTokenList,
+                        len(tokenization.tokenList.tokenList)
+                    )
+                ])
+
         if dependency:
-            token_tag_lists.append(
-                _get_conll_head_tags_for_tokenization(tokenization,
-                                                      tool=dependency_tool))
-            token_tag_lists.append(
-                _get_conll_deprel_tags_for_tokenization(tokenization,
-                                                        tool=dependency_tool))
-        for tag in other_tags:
-            token_tag_lists.append(
-                _get_tagged_token_strs_by_token_index(
-                    _get_tagged_tokens_or_empty(
-                        tokenization, tagging_type=tag),
-                    len(tokenization.tokenList.tokenList)))
-        print_conll_style_tags_for_tokenization(tokenization,
-                                                token_tag_lists)
+            for conll_tag_pair_list in _get_conll_tags_for_tokenization(
+                    tokenization,
+                    dependency_parse_filter=dependency_parse_filter):
+                header_fields.append(u'HEAD')
+                field_lists.append([p[0] for p in conll_tag_pair_list])
+                header_fields.append(u'DEPREL')
+                field_lists.append([p[1] for p in conll_tag_pair_list])
+
+        for (tag, tag_filter) in other_tags.items():
+            _filter = filter_unnone(tag_filter)
+            for token_tagging in _filter(get_token_taggings(tokenization, tag)):
+                header_fields.append(tag)
+                field_lists.append(
+                    _get_tagged_token_strs_by_token_index(
+                        token_tagging.taggedTokenList,
+                        len(tokenization.tokenList.tokenList)))
+
+        header_fields_by_tokenization.append(header_fields)
+        field_lists_by_tokenization.append(field_lists)
+
+    if len(set(map(tuple, header_fields_by_tokenization))) > 1:
+        logging.warning(
+            'communication does not have same taggings for each tokenization')
+
+    def _max_num_header_fields(header_field):
+        return max(
+            header_fields.count(header_field)
+            for header_fields
+            in header_fields_by_tokenization
+        )
+
+    overall_header_fields = (
+        ([u'INDEX'] * _max_num_header_fields(u'INDEX')) +
+        ([u'TOKEN'] * _max_num_header_fields(u'TOKEN')) +
+        ([u'CHAR'] * _max_num_header_fields(u'CHAR')) +
+        ([u'LEMMA'] * _max_num_header_fields(u'LEMMA')) +
+        ([u'POS'] * _max_num_header_fields(u'POS')) +
+        ([u'NER'] * _max_num_header_fields(u'NER')) +
+        ([u'HEAD', u'DEPREL'] * _max_num_header_fields(u'HEAD'))
+    )
+    for tag in other_tags:
+        overall_header_fields.extend([tag] * _max_num_header_fields(tag))
+
+    print(u'\t'.join(overall_header_fields))
+    print(u'\t'.join(u'-' * len(header) for header in overall_header_fields))
+
+    for (header_fields, field_lists) in zip(
+            header_fields_by_tokenization, field_lists_by_tokenization):
+        for row in zip(*field_lists):
+            def _generate_row():
+                overall_field_num = 0
+                for (field_num, header) in enumerate(header_fields):
+                    while header != overall_header_fields[overall_field_num]:
+                        yield u''
+                        overall_field_num += 1
+                    yield row[field_num]
+                    overall_field_num += 1
+            print('\t'.join(_generate_row()))
         print()
 
 
-def print_conll_style_tags_for_tokenization(tokenization, token_tag_lists):
-    """Print 'ConLL-style' tags for the tokens in a tokenization
+def _print_entity_mention_content(em, prefix=''):
+    '''
+    Print information for :class:`.EntityMention` `em`, prefixing each
+    line by `prefix`.
 
     Args:
-        tokenization (Tokenization):
-        token_tag_lists: A list of lists of token tag strings
-    """
-    if tokenization.tokenList:
-        for i, token in enumerate(tokenization.tokenList.tokenList):
-            token_tags = [unicode(token_tag_list[i])
-                          for token_tag_list in token_tag_lists]
-            fields = [unicode(i + 1), token.text]
-            fields.extend(token_tags)
-            print(u"\t".join(fields))
-
-
-def _print_entity_mention_content(em, prefix=''):
+        em (EntityMention):
+        prefix (str):
+    '''
     print(prefix + u"tokens:     %s" % (
         u" ".join(_get_tokens_for_entityMention(em))))
     if em.text:
@@ -180,73 +267,82 @@ def _print_entity_mention_content(em, prefix=''):
     print(prefix + u"phraseType: %s" % em.phraseType)
 
 
-def print_entities(comm, tool=None):
+def print_entities(comm, tool=None, entity_set_filter=None):
     """Print information for :class:`.Entity` objects and their
     associated :class:`.EntityMention` objects
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for
+        tool (str): Deprecated.
+                    If not `None`, only print information for
                     :class:`.EntitySet` objects with a matching
                     `metadata.tool` field
+        entity_set_filter (func): If not None, print information
+            for only those :class:`.EntitySet` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
-    if comm.entitySetList:
-        for entitySet_index, entitySet in enumerate(comm.entitySetList):
-            if tool is None or entitySet.metadata.tool == tool:
-                print(u"Entity Set %d (%s):" % (entitySet_index,
-                                                entitySet.metadata.tool))
-                for entity_index, entity in enumerate(entitySet.entityList):
-                    print(u"  Entity %d-%d:" % (entitySet_index, entity_index))
-                    for em_index, em in enumerate(entity.mentionList):
-                        print(u"      EntityMention %d-%d-%d:" % (
-                            entitySet_index, entity_index, em_index))
-                        _print_entity_mention_content(em, prefix=' ' * 10)
-                        for (cm_index, cm) in enumerate(em.childMentionList):
-                            print(u"          child EntityMention #%d:" % cm_index)
-                            _print_entity_mention_content(cm, prefix=' ' * 14)
-                    print()
+    _filter = filter_unnone(tool_to_filter(tool, entity_set_filter))
+    for (entitySet_index, entitySet) in enumerate(lun(comm.entitySetList)):
+        if _filter([entitySet]):
+            print(u"Entity Set %d (%s):" % (entitySet_index,
+                                            entitySet.metadata.tool))
+            for entity_index, entity in enumerate(entitySet.entityList):
+                print(u"  Entity %d-%d:" % (entitySet_index, entity_index))
+                for em_index, em in enumerate(entity.mentionList):
+                    print(u"      EntityMention %d-%d-%d:" % (
+                        entitySet_index, entity_index, em_index))
+                    _print_entity_mention_content(em, prefix=' ' * 10)
+                    for (cm_index, cm) in enumerate(em.childMentionList):
+                        print(u"          child EntityMention #%d:" % cm_index)
+                        _print_entity_mention_content(cm, prefix=' ' * 14)
                 print()
+            print()
 
 
-def print_metadata(comm, tool=None):
-    """Print metadata for tools used to annotate Communication
+def print_metadata(comm, tool=None, annotation_filter=None):
+    """Print metadata tools used to annotate Communication
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print :class:`.AnnotationMetadata`
+        tool (str): Deprecated.
+                    If not `None`, only print :class:`.AnnotationMetadata`
                     information for objects with a matching
                     `metadata.tool` field
+        annotation_filter (func): If not None, print information
+            for only those objects that pass this filter.  Should be a
+            function that takes a list of annotations (objects with
+            metadata fields) and returns a list of annotations (possibly
+            filtered and re-ordered).
     """
-    if tool is None or comm.metadata.tool == tool:
+    _filter = filter_unnone(tool_to_filter(tool, annotation_filter))
+    if _filter([comm]):
         print(u"Communication:  %s\n" % comm.metadata.tool)
 
     dependency_parse_tools = set()
     parse_tools = set()
     tokenization_tools = set()
     token_tagging_tools = set()
-    for tokenization in get_tokenizations(comm):
-        tokenization_tools.add(tokenization.metadata.tool)
-        if tokenization.tokenTaggingList:
-            for tokenTagging in tokenization.tokenTaggingList:
-                token_tagging_tools.add(tokenTagging.metadata.tool)
-        if tokenization.dependencyParseList:
-            for dependencyParse in tokenization.dependencyParseList:
-                dependency_parse_tools.add(dependencyParse.metadata.tool)
-        if tokenization.parseList:
-            for parse in tokenization.parseList:
-                parse_tools.add(parse.metadata.tool)
 
-    communication_tagging_tools = set()
-    for communication_tagging in lun(comm.communicationTaggingList):
-        communication_tagging_tools.add(communication_tagging.metadata.tool)
+    tokenizations = get_tokenizations(comm)
+    tokenization_tools.update(
+        ann.metadata.tool
+        for ann in _filter(tokenizations))
+    for tokenization in tokenizations:
+        token_tagging_tools.update(
+            ann.metadata.tool
+            for ann in _filter(lun(tokenization.tokenTaggingList)))
+        dependency_parse_tools.update(
+            ann.metadata.tool
+            for ann in _filter(lun(tokenization.dependencyParseList)))
+        parse_tools.update(
+            ann.metadata.tool
+            for ann in _filter(lun(tokenization.parseList)))
 
-    if tool is not None:
-        dependency_parse_tools = dependency_parse_tools.intersection([tool])
-        parse_tools = parse_tools.intersection([tool])
-        tokenization_tools = tokenization_tools.intersection([tool])
-        token_tagging_tools = token_tagging_tools.intersection([tool])
-        communication_tagging_tools = communication_tagging_tools.intersection(
-            [tool])
+    communication_tagging_tools = set(
+        ann.metadata.tool
+        for ann in _filter(lun(comm.communicationTaggingList)))
 
     if tokenization_tools:
         for toolname in sorted(tokenization_tools):
@@ -267,25 +363,25 @@ def print_metadata(comm, tool=None):
 
     if comm.entityMentionSetList:
         for i, em_set in enumerate(comm.entityMentionSetList):
-            if tool is None or em_set.metadata.tool == tool:
+            if _filter([em_set]):
                 print(u"  EntityMentionSet #%d:  %s" % (
                     i, em_set.metadata.tool))
         print()
     if comm.entitySetList:
         for i, entitySet in enumerate(comm.entitySetList):
-            if tool is None or entitySet.metadata.tool == tool:
+            if _filter([entitySet]):
                 print(u"  EntitySet #%d:  %s" % (
                     i, entitySet.metadata.tool))
         print()
     if comm.situationMentionSetList:
         for i, sm_set in enumerate(comm.situationMentionSetList):
-            if tool is None or sm_set.metadata.tool == tool:
+            if _filter([sm_set]):
                 print(u"  SituationMentionSet #%d:  %s" % (
                     i, sm_set.metadata.tool))
         print()
     if comm.situationSetList:
         for i, situationSet in enumerate(comm.situationSetList):
-            if tool is None or situationSet.metadata.tool == tool:
+            if _filter([situationSet]):
                 print(u"  SituationSet #%d:  %s" % (
                     i, situationSet.metadata.tool))
         print()
@@ -296,16 +392,25 @@ def print_metadata(comm, tool=None):
         print()
 
 
-def print_sections(comm, tool=None):
-    """Print information for all :class:`.Section` object, according to their spans.
+def print_sections(comm, tool=None, communication_filter=None):
+    """
+    Print information for all :class:`.Section` object, according to
+    their spans.
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for
+        tool (str): Deprecated.
+                    If not `None`, only print information for
                     :class:`.Section` objects with a matching
                     `metadata.tool` field
+        communication_filter (func): If not None, print information
+            for only those :class:`.Communication` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
-    if tool is None or comm.metadata.tool == tool:
+    _filter = filter_unnone(tool_to_filter(tool, communication_filter))
+    if _filter([comm]):
         text = comm.text
         for sect_idx, sect in enumerate(lun(comm.sectionList)):
             ts = sect.textSpan
@@ -320,18 +425,26 @@ def print_sections(comm, tool=None):
         print()
 
 
-def print_situation_mentions(comm, tool=None):
-    """Print information for all :class:`.SituationMention` (some of which
+def print_situation_mentions(comm, tool=None, situation_mention_set_filter=None):
+    """
+    Print information for all :class:`.SituationMention`s (some of which
     may not have a :class:`.Situation`)
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for
+        tool (str): Deprecated.
+                    If not `None`, only print information for
                     :class:`.SituationMention` objects with a matching
                     `metadata.tool` field
+        situation_mention_set_filter (func): If not None, print information
+            for only those :class:`.SituationMentionSet` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
+    _filter = filter_unnone(tool_to_filter(tool, situation_mention_set_filter))
     for sm_set_idx, sm_set in enumerate(lun(comm.situationMentionSetList)):
-        if tool is None or sm_set.metadata.tool == tool:
+        if _filter([sm_set]):
             print(u"Situation Set %d (%s):" % (sm_set_idx,
                                                sm_set.metadata.tool))
             for sm_idx, sm in enumerate(sm_set.mentionList):
@@ -341,18 +454,26 @@ def print_situation_mentions(comm, tool=None):
             print()
 
 
-def print_situations(comm, tool=None):
-    """Print information for all :class:`.Situation` objects and their
+def print_situations(comm, tool=None, situation_set_filter=None):
+    """
+    Print information for all :class:`.Situation` objects and their
     associated :class:`.SituationMention` objects
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for
+        tool (str): Deprecated.
+                    If not `None`, only print information for
                     :class:`.Situation` objects with a matching
                     `metadata.tool` field
+        situation_set_filter (func): If not None, print information
+            for only those :class:`.SituationSet` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
+    _filter = filter_unnone(tool_to_filter(tool, situation_set_filter))
     for s_set_idx, s_set in enumerate(lun(comm.situationSetList)):
-        if tool is None or s_set.metadata.tool == tool:
+        if _filter([s_set]):
             print(u"Situation Set %d (%s):" % (s_set_idx,
                                                s_set.metadata.tool))
             for s_idx, situation in enumerate(s_set.situationList):
@@ -367,7 +488,13 @@ def print_situations(comm, tool=None):
 
 
 def _print_situation_mention(situationMention):
-    """Helper function for printing info for a SituationMention"""
+    """
+    Print SituationMention information needed to display both
+    Situation and SituationMention types.
+
+    Args:
+        situationMention (SituationMention):
+    """
     if situationMention.text:
         _p(10, 20, u"text", situationMention.text)
     if situationMention.situationType:
@@ -410,53 +537,83 @@ def _print_situation_mention(situationMention):
 
 
 def _p(indent_level, justified_width, fieldname, content):
-    """Text alignment helper function"""
-    print (
+    """
+    Print field-value pair, indented and justified.
+
+    Args:
+        indent_level (int): number of spaces by which to prefix output
+        justified_width (int): number of characters fieldname and colon
+            should occupy (justified on left, padded with spaces)
+        fieldname (str): field name
+        content (str): field value
+    """
+    print(
         (u" " * indent_level) +
         (fieldname + u":").ljust(justified_width) +
         content
     )
 
 
-def print_text_for_communication(comm, tool=None):
+def print_text_for_communication(comm, tool=None, communication_filter=None):
     """Print `text field of :class:`.Communication`
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print `text` field of
+        tool (str): Deprecated.
+                    If not `None`, only print `text` field of
                     :class:`.Communication` objects with a matching
                     `metadata.tool` field
+        communication_filter (func): If not None, print information
+            for only those :class:`.Communication` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
-    if tool is None or comm.metadata.tool == tool:
+    _filter = filter_unnone(tool_to_filter(tool, communication_filter))
+    if _filter([comm]):
         print(comm.text)
 
 
-def print_id_for_communication(comm, tool=None):
+def print_id_for_communication(comm, tool=None, communication_filter=None):
     """Print ID field of :class:`.Communication`
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print ID of
+        tool (str): Deprecated.
+                    If not `None`, only print ID of
                     :class:`.Communication` objects with a matching
                     `metadata.tool` field
+        communication_filter (func): If not None, print information
+            for only those :class:`.Communication` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
 
     """
-    if tool is None or comm.metadata.tool == tool:
+    _filter = filter_unnone(tool_to_filter(tool, communication_filter))
+    if _filter([comm]):
         print(comm.id)
 
 
-def print_communication_taggings_for_communication(comm, tool=None):
+def print_communication_taggings_for_communication(
+        comm, tool=None, communication_tagging_filter=None):
     """Print information for :class:`.CommunicationTagging` objects
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for
+        tool (str): Deprecated.
+                    If not `None`, only print information for
                     :class:`.CommunicationTagging` objects with a
                     matching `metadata.tool` field
+        communication_tagging_filter (func): If not None, print information
+            for only those :class:`.CommunicationTagging` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
-    communication_taggings = _filter_by_tool(
-        lun(comm.communicationTaggingList), tool)
-    for tagging in communication_taggings:
+    _filter = filter_unnone(tool_to_filter(
+        tool, communication_tagging_filter))
+    for tagging in _filter(lun(comm.communicationTaggingList)):
         print('%s: %s' % (
             tagging.taggingType,
             ' '.join('%s:%.3f' % p for p in
@@ -464,20 +621,29 @@ def print_communication_taggings_for_communication(comm, tool=None):
         ))
 
 
-def print_tokens_with_entityMentions(comm, tool=None):
+def print_tokens_with_entityMentions(comm, tool=None, entity_mention_set_filter=None):
     """Print information for :class:`.Token` objects that are part of an :class:`.EntityMention`
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for tokens
+        tool (str): Deprecated.
+                    If not `None`, only print information for tokens
                     that are associated with an
                     :class:`.EntityMention` that is part of an
                     :class:`.EntityMentionSet` with a matching
                     `metadata.tool` field
+        entity_mention_set_filter (func): If not None, print information
+            for only those :class:`.EntityMentionSet` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
+    _filter = tool_to_filter(tool, entity_mention_set_filter)
+
     em_by_tkzn_id = _get_entityMentions_by_tokenizationId(
-        comm, tool=tool)
-    em_entity_num = _get_entity_number_for_entityMention_uuid(comm, tool=tool)
+        comm, entity_mention_set_filter=_filter)
+    em_entity_num = _get_entity_number_for_entityMention_uuid(
+        comm, entity_mention_set_filter=_filter)
     tokenizations_by_section = _get_tokenizations_grouped_by_section(comm)
 
     for tokenizations_in_section in tokenizations_by_section:
@@ -503,17 +669,23 @@ def print_tokens_with_entityMentions(comm, tool=None):
         print()
 
 
-def print_tokens_for_communication(comm, tool=None):
+def print_tokens_for_communication(comm, tool=None, tokenization_filter=None):
     """Print token text for a :class:`.Communication`
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print token text for
+        tool (str): Deprecated.
+                    If not `None`, only print token text for
                     :class:`.Communication` objects with a matching
                     `metadata.tool` field
+        tokenization_filter (func): If not None, print information
+            for only those :class:`.Tokenization` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
     tokenizations_by_section = _get_tokenizations_grouped_by_section(
-        comm, tool=tool)
+        comm, tokenization_filter=tool_to_filter(tool, tokenization_filter))
 
     for tokenizations_in_section in tokenizations_by_section:
         for tokenization in tokenizations_in_section:
@@ -525,32 +697,37 @@ def print_tokens_for_communication(comm, tool=None):
         print()
 
 
-def print_penn_treebank_for_communication(comm, tool=None):
+def print_penn_treebank_for_communication(comm, tool=None, parse_filter=None):
     """Print Penn-Treebank parse trees for all :class:`.Tokenization` objects
 
     Args:
         comm (Communication):
-        tool (str): If not `None`, only print information for
+        tool (str): Deprecated.
+                    If not `None`, only print information for
                     :class:`.Tokenization` objects with a matching
                     `metadata.tool` field
+        parse_filter (func): If not None, print information
+            for only those :class:`.Parse` objects that pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
-    tokenizations = get_tokenizations(comm)
-
-    for tokenization in tokenizations:
-        if tokenization.parseList:
-            for parse in tokenization.parseList:
-                if tool is None or tool == parse.metadata.tool:
-                    print(penn_treebank_for_parse(parse) + u"\n\n")
+    _filter = filter_unnone(tool_to_filter(tool, parse_filter))
+    for tokenization in get_tokenizations(comm):
+        for parse in _filter(lun(tokenization.parseList)):
+            print(penn_treebank_for_parse(parse) + u"\n\n")
 
 
 def penn_treebank_for_parse(parse):
-    """Get a Penn-Treebank style string for a Concrete Parse object
+    """
+    Return a Penn-Treebank style representation of a Parse object
 
     Args:
         parse (Parse):
 
     Returns:
-        str: A string containing a Penn Treebank style parse tree representation
+        str: A string containing a Penn Treebank style parse tree
+        representation
     """
     def _traverse_parse(nodes, node_index, indent=0):
         s = u""
@@ -571,6 +748,16 @@ def penn_treebank_for_parse(parse):
 
 
 def _get_char_offset_tags_for_tokenization(comm, tokenization):
+    '''
+    Return list of `comm.text` substrings corresponding to the tokens in
+    :class:`.Tokenization` `tokenization` (where tokens without
+    `textSpan` fields are represented by None in the output list), or
+    return None if `tokenization` is None.
+
+    Args:
+        comm (Communication):
+        tokenization (Tokenization):
+    '''
     if tokenization.tokenList:
         char_offset_tags = [None] * len(tokenization.tokenList.tokenList)
 
@@ -582,53 +769,42 @@ def _get_char_offset_tags_for_tokenization(comm, tokenization):
         return char_offset_tags
 
 
-def _deps_for_tokenization(tokenization,
-                           dependency_parse_index=0,
-                           tool=None):
+def _sorted_dep_lists_for_tokenization(tokenization,
+                                       dependency_parse_filter=None):
     """
-    Return a generator of the dependencies (Dependency objects) for
-    a tokenization under the given tool.
-    """
-    if tokenization.tokenList is not None:
-        # Tokens that are not part of the dependency parse
-        # (e.g. punctuation) are represented using an empty string
-        dp_idx = _reconcile_index_and_tool(tokenization.dependencyParseList,
-                                           dependency_parse_index,
-                                           tool)
-
-        if _valid_index_lun(tokenization.dependencyParseList, dp_idx):
-            dp = tokenization.dependencyParseList[dp_idx]
-            if tool is None or dp.metadata.tool == tool:
-                for dependency in dp.dependencyList:
-                    yield dependency
-
-
-def _sorted_dep_list_for_tokenization(tokenization,
-                                      dependency_parse_index=0,
-                                      tool=None):
-    """
-    Return output of _deps_for_tokenization in a list whose length
+    Return list of lists of dependencies whose parses match the provided
+    annotation filter.  Each list of dependencies has length
     is equal to the number of tokens in this tokenization's token list,
     where the element at index i is a dependency if there is a
     dependency whose dep field is i and None otherwise.
+
+    Args:
+        tokenization (Tokenization):
+        dependency_parse_filter (func): If not None, ignore
+            those :class:`.DependencyParse` objects that do not pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
     """
-    if tokenization.tokenList is not None:
-        dep_list = [None] * len(tokenization.tokenList.tokenList)
-        for dep in _deps_for_tokenization(
-                tokenization, dependency_parse_index=dependency_parse_index,
-                tool=tool):
-            dep_list[dep.dep] = dep
-        return dep_list
-    else:
-        return []
+    _filter = filter_unnone(dependency_parse_filter)
+
+    def _dep_lists():
+        if tokenization.tokenList is not None:
+            for dependency_parse in _filter(tokenization.dependencyParseList):
+                sorted_dep_list = [None] * len(tokenization.tokenList.tokenList)
+                for dep in dependency_parse.dependencyList:
+                    sorted_dep_list[dep.dep] = dep
+                yield sorted_dep_list
+
+    return list(_dep_lists())
 
 
-def _get_conll_head_tags_for_tokenization(tokenization,
-                                          dependency_parse_index=0,
-                                          tool=None):
-    """Get a list of ConLL 'HEAD tags' for a tokenization
+def _get_conll_tags_for_tokenization(tokenization, dependency_parse_filter=None):
+    """
+    Return a list of lists of CoNLL 'HEAD' and 'DEPREL' tag pairs for a
+    tokenization
 
-    In the ConLL data format:
+    In the CoNLL data format:
 
         http://ufal.mff.cuni.cz/conll2009-st/task-description.html
 
@@ -638,86 +814,82 @@ def _get_conll_head_tags_for_tokenization(tokenization,
 
     Args:
         tokenization (Tokenization):
+        dependency_parse_filter (func): If not None, ignore
+            those :class:`.DependencyParse` objects that do not pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
 
     Returns:
-        str[]: A list of ConLL 'HEAD tag' strings, with one HEAD tag
-               for each token in the supplied tokenization.  If a
-               token does not have a HEAD tag (e.g. punctuation
-               tokens), the HEAD tag is an empty string.
-
-               If the tokenization does not have a Dependency Parse,
-               this function returns a list of empty strings for each
-               token in the supplied tokenization.
+        list: A list of lists of pairs, each of which contains a
+              CoNLL HEAD tag and CoNLL DEPREL tag (as strings), one
+              pair for each token in the supplied tokenization.  If a
+              token does not have a HEAD tag (e.g. punctuation
+              tokens), the HEAD tag is an empty string.  If a token
+              does not have a DEPREL tag (e.g. punctuation tokens),
+              the DEPREL tag is an empty string.
     """
-    return list(map(
-        lambda dep: '' if dep is None else (
-            0 if dep.gov is None else dep.gov + 1),
-        _sorted_dep_list_for_tokenization(
-            tokenization, dependency_parse_index=dependency_parse_index,
-            tool=tool)))
+    return [
+        list(map(
+            lambda dep: (
+                unicode(
+                    '' if dep is None else (
+                        0 if dep.gov is None else dep.gov + 1
+                    )
+                ),
+                unicode(
+                    '' if dep is None else (
+                        '' if dep.edgeType is None else dep.edgeType
+                    )
+                ),
+            ),
+            dep_list
+        ))
+        for dep_list in _sorted_dep_lists_for_tokenization(
+            tokenization,
+            dependency_parse_filter=dependency_parse_filter)
+    ]
 
 
-def _get_conll_deprel_tags_for_tokenization(tokenization,
-                                            dependency_parse_index=0,
-                                            tool=None):
-    """Get a list of ConLL 'DEPREL tags' for a tokenization
-
-    In the ConLL data format:
-
-        http://ufal.mff.cuni.cz/conll2009-st/task-description.html
-
-    the DEPREL for a token is the type of that token's dependency with
-    its parent.
-
-    Args:
-        tokenization (Tokenization):
-
-    Returns:
-        A list of ConLL 'DEPREL tag' strings, with one DEPREL tag for
-        each token in the supplied tokenization.  If a token does not
-        have a DEPREL tag (e.g. punctuation tokens), the DEPREL tag is
-        an empty string.
-
-        If the tokenization does not have a Dependency Parse, this
-        function returns a list of empty strings for each token in the
-        supplied tokenization.
+def _get_entityMentions_by_tokenizationId(comm, entity_mention_set_filter=None):
     """
-    return list(map(
-        lambda dep: '' if dep is None else (
-            '' if dep.edgeType is None else dep.edgeType),
-        _sorted_dep_list_for_tokenization(
-            tokenization, dependency_parse_index=dependency_parse_index,
-            tool=tool)))
-
-
-def _get_entityMentions_by_tokenizationId(comm, tool=None):
-    """Get entity mentions for a Communication grouped by Tokenization
+    Return entity mentions for a Communication grouped by Tokenization
     UUID string
 
     Args:
         comm (Communication):
+        entity_mention_set_filter (func): If not None, ignore
+            those :class:`.EntityMentionSet` objects that do not pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
 
     Returns:
         A dictionary of lists of EntityMentions, where the dictionary
         keys are Tokenization UUID strings.
     """
+    _filter = filter_unnone(entity_mention_set_filter)
     mentions_by_tkzn_id = defaultdict(list)
     for entitySet in lun(comm.entitySetList):
         for entity in entitySet.entityList:
             for entityMention in entity.mentionList:
-                if (tool is None or
-                        entityMention.entityMentionSet.metadata.tool == tool):
+                if _filter([entityMention.entityMentionSet]):
                     u = entityMention.tokens.tokenizationId.uuidString
                     mentions_by_tkzn_id[u].append(entityMention)
     return mentions_by_tkzn_id
 
 
-def _get_entity_number_for_entityMention_uuid(comm, tool=None):
+def _get_entity_number_for_entityMention_uuid(comm, entity_mention_set_filter=None):
     """Create mapping from EntityMention UUID to (zero-indexed)
     'Entity Number'
 
     Args:
         comm (Communication):
+        entity_mention_set_filter (func): If not None, ignore
+            those :class:`.EntityMentionSet` objects that do not pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
 
     Returns:
         A dictionary where the keys are EntityMention UUID strings,
@@ -725,6 +897,7 @@ def _get_entity_number_for_entityMention_uuid(comm, tool=None):
         assigned number 0, the second Entity is assigned number 1,
         etc.
     """
+    _filter = filter_unnone(entity_mention_set_filter)
     entity_number_for_entityMention_uuid = {}
     entity_number_counter = 0
 
@@ -733,9 +906,7 @@ def _get_entity_number_for_entityMention_uuid(comm, tool=None):
             for entity in entitySet.entityList:
                 any_mention = False
                 for entityMention in entity.mentionList:
-                    if (tool is None or
-                            entityMention.entityMentionSet.metadata.tool ==
-                            tool):
+                    if _filter([entityMention.entityMentionSet]):
                         entity_number_for_entityMention_uuid[
                             entityMention.uuid.uuidString
                         ] = entity_number_counter
@@ -745,35 +916,36 @@ def _get_entity_number_for_entityMention_uuid(comm, tool=None):
     return entity_number_for_entityMention_uuid
 
 
-def _get_tokenizations_grouped_by_section(comm, tool=None):
-    """Returns a list of lists of Tokenization objects in a Communication
+def _get_tokenizations_grouped_by_section(comm, tokenization_filter=None):
+    """
+    Return a list of lists of Tokenization objects in a Communication
 
     Args:
         comm (Communication):
+        tokenization_filter (func): If not None, ignore
+            those :class:`.Tokenization` objects that do not pass
+            this filter.  Should be a function that takes a list of
+            annotations (objects with metadata fields) and returns a
+            list of annotations (possibly filtered and re-ordered).
 
     Returns:
         Returns a list of lists of Tokenization objects, where the
         Tokenization objects are grouped by Section
     """
-    tokenizations_by_section = []
+    _filter = filter_unnone(tokenization_filter)
 
-    if comm.sectionList:
-        for section in comm.sectionList:
-            tokenizations_in_section = []
-            if section.sentenceList:
-                for sentence in section.sentenceList:
-                    if sentence.tokenization:
-                        if (tool is None or
-                                sentence.tokenization.metadata.tool == tool):
-                            tokenizations_in_section.append(
-                                sentence.tokenization)
-            tokenizations_by_section.append(tokenizations_in_section)
-
-    return tokenizations_by_section
+    return [
+        _filter([
+            sentence.tokenization
+            for sentence in lun(section.sentenceList)
+        ])
+        for section in lun(comm.sectionList)
+    ]
 
 
 def _get_tokens_for_entityMention(entityMention):
-    """Get list of token strings for an EntityMention
+    """
+    Return list of token strings for an EntityMention
 
     Args:
         entityMention (EntityMention):
@@ -786,20 +958,3 @@ def _get_tokens_for_entityMention(entityMention):
         tokens.append(entityMention.tokens.tokenization.tokenList.tokenList[
                       tokenIndex].text)
     return tokens
-
-
-def _get_tokentaggings_of_type(tokenization, taggingType, tool=None):
-    """Returns a list of :class:`.TokenTagging` objects with the specified taggingType
-
-    Args:
-        tokenization (Tokenization):
-        taggingType (str): A string value for the specified TokenTagging.taggingType
-
-    Returns:
-        A list of TokenTagging objects
-    """
-    return [
-        tt for tt in tokenization.tokenTaggingList
-        if tt.taggingType.lower() == taggingType.lower() and (
-            tool is None or tt.metadata.tool == tool)
-    ]

@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import os
 import sys
+import json
 from pytest import fixture, mark
 from subprocess import Popen, PIPE
 
@@ -28,44 +29,74 @@ def simple_comms_tgz_path(request):
     return 'tests/testdata/simple.tar.gz'
 
 
-@mark.parametrize('which,args,output_prefix', [
-    (range(8), (), ''),
-    (range(8), ('--annotation-headers',), '\nconll\n-----\n'),
-    (range(8),
+def _augment_args(args_idx, params_list):
+    augmented_params_list = []
+
+    for params in params_list:
+        augmented_params_list.append(params)
+
+        args = params[args_idx]
+        augmented_args = []
+        i = 0
+        while i < len(args):
+            if args[i].startswith('--') and args[i].endswith('-tool'):
+                augmented_args.extend([
+                    '--filter-annotations',
+                    args[i][2:-5],
+                    json.dumps(dict(filter_fields=dict(tool=args[i + 1])))
+                ])
+                i += 2
+            else:
+                augmented_args.append(args[i])
+                i += 1
+
+        augmented_params = params[:args_idx] + (tuple(augmented_args),) + params[args_idx + 1:]
+        if augmented_params != params:
+            augmented_params_list.append(tuple(augmented_params))
+
+    return augmented_params_list
+
+
+@mark.parametrize('which,args,output_prefix', _augment_args(1, [
+    ((0, 1, 2, 4, 5, 6, 7), (), ''),
+    ((0, 1, 2, 4, 5, 6, 7), ('--annotation-headers',), '\nconll\n-----\n'),
+    ((0, 1, 2, 4, 5, 6, 7),
         ('--pos-tool', 'Serif: part-of-speech'), ''),
-    (range(8),
+    ((0, 1, 2, 4, 5, 6, 7),
         ('--pos-tool', 'Serif: part-of-speech', '--annotation-headers',),
         '\nconll\n-----\n'),
-    ((0, 1, 2, 3, 5, 6, 7), ('--pos-tool', 'fake'), ''),
-    ((0, 1, 2, 3, 5, 6, 7), ('--pos-tool', 'fake', '--annotation-headers',),
+    ((0, 1, 2, 5, 6, 7), ('--pos-tool', 'fake'), ''),
+    ((0, 1, 2, 5, 6, 7), ('--pos-tool', 'fake', '--annotation-headers',),
         '\nconll\n-----\n'),
-    (range(8), ('--ner-tool', 'Serif: names'), ''),
-    (range(8), ('--ner-tool', 'Serif: names', '--annotation-headers',),
+    ((0, 1, 2, 4, 5, 6, 7), ('--ner-tool', 'Serif: names'), ''),
+    ((0, 1, 2, 4, 5, 6, 7),
+        ('--ner-tool', 'Serif: names', '--annotation-headers',),
         '\nconll\n-----\n'),
-    ((0, 1, 2, 3, 4, 6, 7), ('--ner-tool', 'fake'), ''),
-    ((0, 1, 2, 3, 4, 6, 7), ('--ner-tool', 'fake', '--annotation-headers',),
+    ((0, 1, 2, 4, 6, 7), ('--ner-tool', 'fake'), ''),
+    ((0, 1, 2, 4, 6, 7), ('--ner-tool', 'fake', '--annotation-headers',),
         '\nconll\n-----\n'),
-    (range(8), ('--dependency-tool', 'Stanford'), ''),
-    (range(8), ('--dependency-tool', 'Stanford', '--annotation-headers',),
+    ((0, 1, 2, 4, 5, 6, 7), ('--dependency-tool', 'Stanford'), ''),
+    ((0, 1, 2, 4, 5, 6, 7),
+        ('--dependency-tool', 'Stanford', '--annotation-headers',),
         '\nconll\n-----\n'),
-    ((0, 1, 2, 3, 4, 5), ('--dependency-tool', 'fake'), ''),
-    ((0, 1, 2, 3, 4, 5),
+    ((0, 1, 2, 4, 5), ('--dependency-tool', 'fake'), ''),
+    ((0, 1, 2, 4, 5),
         ('--dependency-tool', 'fake', '--annotation-headers',),
         '\nconll\n-----\n'),
-    ((0, 1, 2, 3, 4, 5),
+    ((0, 1, 2, 4, 5),
         ('--pos-tool', 'Serif: part-of-speech', '--dependency-tool', 'fake'),
         ''),
-    ((0, 1, 2, 3, 4, 5),
+    ((0, 1, 2, 4, 5),
         ('--pos-tool', 'Serif: part-of-speech', '--dependency-tool', 'fake',
             '--annotation-headers',),
         '\nconll\n-----\n'),
-    ((0, 1, 2, 3, 5),
+    ((0, 1, 2, 5),
         ('--pos-tool', 'fake', '--dependency-tool', 'fake'), ''),
-    ((0, 1, 2, 3, 5),
+    ((0, 1, 2, 5),
         ('--pos-tool', 'fake', '--dependency-tool', 'fake',
             '--annotation-headers',),
         '\nconll\n-----\n'),
-])
+]))
 def test_print_conll_style_tags_for_communication(comm_path, which, args,
                                                   output_prefix):
     p = Popen([
@@ -79,12 +110,11 @@ def test_print_conll_style_tags_for_communication(comm_path, which, args,
         comm_path
     ], stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = p.communicate()
-    expected_output = output_prefix + '''\
-INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
------\t-----\t----\t-----\t---\t---\t----\t------
-''' + u'\n'.join(
-        u'\t'.join((w if i in which else '') for (i, w) in enumerate(row))
+    expected_output = output_prefix + u'\n'.join(
+        u'\t'.join(w for (i, w) in enumerate(row) if i in which)
         for row in (
+            ('INDEX', 'TOKEN', 'CHAR', 'LEMMA', 'POS', 'NER', 'HEAD', 'DEPREL'),
+            ('-----', '-----', '----', '-----', '---', '---', '----', '------'),
             ('1', 'John', 'John', '', 'NNP', 'PER', '2', 'compound'),
             ('2', 'Smith', 'Smith', '', 'NNP', 'PER', '10', 'nsubjpass'),
             ('3', ',', ',', '', ',', '', '', ''),
@@ -119,12 +149,15 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
             (),
         )
     ) + '\n'
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,args,output_prefix', [
+@mark.parametrize('first,second,args,output_prefix', _augment_args(2, [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\nentities\n--------\n'),
     (False, False, ('--entities-tool', 'fake'), ''),
@@ -138,7 +171,7 @@ INDEX\tTOKEN\tCHAR\tLEMMA\tPOS\tNER\tHEAD\tDEPREL
     (False, True,
         ('--entities-tool', 'Serif: doc-values', '--annotation-headers',),
         '\nentities\n--------\n'),
-])
+]))
 def test_print_entities(comm_path, first, second, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete-inspect.py',
@@ -226,12 +259,15 @@ Entity Set 1 (Serif: doc-values):
 
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,args,output_prefix', [
+@mark.parametrize('first,second,args,output_prefix', _augment_args(2, [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',),
         '\nsituation mentions\n------------------\n'),
@@ -249,7 +285,7 @@ Entity Set 1 (Serif: doc-values):
         ('--situation-mentions-tool', 'Serif: events',
             '--annotation-headers',),
         '\nsituation mentions\n------------------\n'),
-])
+]))
 def test_print_situation_mentions(comm_path, first, second, args,
                                   output_prefix):
     p = Popen([
@@ -295,12 +331,15 @@ Situation Set 1 (Serif: events):
 
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,args,output_prefix', [
+@mark.parametrize('first,second,args,output_prefix', _augment_args(2, [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',),
         '\nsituations\n----------\n'),
@@ -315,7 +354,7 @@ Situation Set 1 (Serif: events):
     (False, True,
         ('--situations-tool', 'Serif: events', '--annotation-headers',),
         '\nsituations\n----------\n'),
-])
+]))
 def test_print_situations(comm_path, first, second, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete-inspect.py',
@@ -338,12 +377,15 @@ Situation Set 1 (Serif: events):
 
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,args,output_prefix', [
+@mark.parametrize('first,args,output_prefix', _augment_args(1, [
     (True, (), ''),
     (True, ('--annotation-headers',), '\ntext\n----\n'),
     (False, ('--text-tool', 'fake'), ''),
@@ -353,7 +395,7 @@ Situation Set 1 (Serif: events):
     (True,
         ('--text-tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
         '\ntext\n----\n'),
-])
+]))
 def test_print_text_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete-inspect.py',
@@ -383,12 +425,15 @@ John's daughter Mary expressed sorrow.
 </DOC>
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,third,args,output_prefix', [
+@mark.parametrize('first,second,third,args,output_prefix', _augment_args(3, [
     (True, True, True, (), ''),
     (True, True, True, ('--annotation-headers',),
         '\nmentions\n--------\n'),
@@ -407,7 +452,7 @@ John's daughter Mary expressed sorrow.
     (False, False, True,
         ('--mentions-tool', 'Serif: mentions', '--annotation-headers',),
         '\nmentions\n--------\n'),
-])
+]))
 def test_print_tokens_with_entityMentions(comm_path, first, second, third,
                                           args, output_prefix):
     p = Popen([
@@ -444,12 +489,15 @@ Mary expressed sorrow .
     expected_output = expected_output % (
         '<ENTITY ID=3>' if second else '',
         '</ENTITY>' if second else '')
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,args,output_prefix', [
+@mark.parametrize('first,args,output_prefix', _augment_args(1, [
     (True, (), ''),
     (True, ('--annotation-headers',),
         '\ntokens\n------\n'),
@@ -459,7 +507,7 @@ Mary expressed sorrow .
     (True, ('--tokens-tool', 'Serif: tokens',), ''),
     (True, ('--tokens-tool', 'Serif: tokens', '--annotation-headers',),
         '\ntokens\n------\n'),
-])
+]))
 def test_print_tokens_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete-inspect.py',
@@ -484,12 +532,15 @@ He died !
 John 's daughter Mary expressed sorrow .\
 '''
     expected_output += '\n\n'
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,args,output_prefix', [
+@mark.parametrize('first,args,output_prefix', _augment_args(1, [
     (True, (), ''),
     (True, ('--annotation-headers',), '\ntreebank\n--------\n'),
     (False, ('--treebank-tool', 'fake',), ''),
@@ -498,7 +549,7 @@ John 's daughter Mary expressed sorrow .\
     (True, ('--treebank-tool', 'Serif: parse',), ''),
     (True, ('--treebank-tool', 'Serif: parse', '--annotation-headers',),
         '\ntreebank\n--------\n'),
-])
+]))
 def test_print_penn_treebank_for_communication(comm_path, first, args,
                                                output_prefix):
     p = Popen([
@@ -547,12 +598,15 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
 
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('which,args,output_prefix', [
+@mark.parametrize('which,args,output_prefix', _augment_args(1, [
     (range(17), (), ''),
     (range(17), ('--annotation-headers',), '\nmetadata\n--------\n'),
     ((0,), ('--metadata-tool', 'concrete_serif v3.10.1pre'), ''),
@@ -601,7 +655,7 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
     ((16,), ('--metadata-tool', 'urgency'), ''),
     ((16,), ('--metadata-tool', 'urgency', '--annotation-headers',),
         '\nmetadata\n--------\n'),
-])
+]))
 def test_print_metadata_for_communication(comm_path, which, args,
                                           output_prefix):
     p = Popen([
@@ -658,12 +712,15 @@ def test_print_metadata_for_communication(comm_path, which, args,
         expected_output += '  CommunicationTagging:  urgency\n'
     if 15 in which or 16 in which:
         expected_output += '\n'
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,args,output_prefix', [
+@mark.parametrize('first,args,output_prefix', _augment_args(1, [
     (True, (), ''),
     (True, ('--annotation-headers',), '\nsections\n--------\n'),
     (False, ('--sections-tool', 'fake',), ''),
@@ -674,7 +731,7 @@ def test_print_metadata_for_communication(comm_path, which, args,
         ('--sections-tool', 'concrete_serif v3.10.1pre',
             '--annotation-headers',),
         '\nsections\n--------\n'),
-])
+]))
 def test_print_sections_for_communication(comm_path, first, args,
                                           output_prefix):
     p = Popen([
@@ -711,12 +768,15 @@ John's daughter Mary expressed sorrow.
 
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,args,output_prefix', [
+@mark.parametrize('first,args,output_prefix', _augment_args(1, [
     (True, (), ''),
     (True, ('--annotation-headers',), '\nid\n--\n'),
     (False, ('--id-tool', 'fake'), ''),
@@ -724,7 +784,7 @@ John's daughter Mary expressed sorrow.
     (True, ('--id-tool', 'concrete_serif v3.10.1pre'), ''),
     (True, ('--id-tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
         '\nid\n--\n'),
-])
+]))
 def test_print_id_for_communication(comm_path, first, args, output_prefix):
     p = Popen([
         sys.executable, 'scripts/concrete-inspect.py',
@@ -738,12 +798,15 @@ def test_print_id_for_communication(comm_path, first, args, output_prefix):
         expected_output += u'''\
 tests/testdata/serif_dog-bites-man.xml
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,args,output_prefix', [
+@mark.parametrize('first,second,args,output_prefix', _augment_args(2, [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',),
         '\ncommunication taggings\n----------------------\n'),
@@ -759,7 +822,7 @@ tests/testdata/serif_dog-bites-man.xml
     (False, False,
         ('--communication-taggings-tool', 'fake', '--annotation-headers',),
         '\ncommunication taggings\n----------------------\n'),
-])
+]))
 def test_print_communication_taggings_for_communication(comm_path, first,
                                                         second, args,
                                                         output_prefix):
@@ -779,13 +842,17 @@ topic: animals:-1.500 crime:-3.000 humanity:-4.000
         expected_output += u'''\
 urgency: low:0.750
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
 @mark.parametrize(
-    'first,second,third,args,first_output_prefix,second_output_prefix', [
+    'first,second,third,args,first_output_prefix,second_output_prefix',
+    _augment_args(3, [
         (True, True, True,
             ('--id', '--situation-mentions'),
             '', ''),
@@ -871,7 +938,7 @@ urgency: low:0.750
                 '--id-tool', 'concrete_serif v3.10.1pre',
                 '--annotation-headers',),
             '\nid\n--\n', '\nsituation mentions\n------------------\n'),
-    ])
+    ]))
 def test_print_multiple_for_communication(comm_path, first, second, third,
                                           args, first_output_prefix,
                                           second_output_prefix):
@@ -922,12 +989,15 @@ Situation Set 1 (Serif: events):
 
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,args,output_prefix', [
+@mark.parametrize('first,second,args,output_prefix', _augment_args(2, [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),
     (False, True, ('--text-tool', 'concrete-python'), ''),
@@ -937,7 +1007,7 @@ Situation Set 1 (Serif: events):
     (True, False,
         ('--text-tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
         '\ntext\n----\n'),
-])
+]))
 def test_print_multiple_communications(comms_path, first, second, args,
                                        output_prefix):
     p = Popen([
@@ -981,12 +1051,15 @@ Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,args,output_prefix', [
+@mark.parametrize('first,second,args,output_prefix', _augment_args(2, [
     (True, True, (), ''),
     (True, True, ('--annotation-headers',), '\ntext\n----\n'),
     (False, True, ('--text-tool', 'concrete-python'), ''),
@@ -996,7 +1069,7 @@ malheureux.
     (True, False,
         ('--text-tool', 'concrete_serif v3.10.1pre', '--annotation-headers',),
         '\ntext\n----\n'),
-])
+]))
 def test_print_multiple_communications_tgz(comms_tgz_path, first, second, args,
                                            output_prefix):
     p = Popen([
@@ -1040,12 +1113,15 @@ Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
 malheureux.
 
 '''
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
 
 
-@mark.parametrize('first,second,third,args,output_prefix', [
+@mark.parametrize('first,second,third,args,output_prefix', _augment_args(3, [
     (True, True, True, (), ''),
     (True, True, True, ('--annotation-headers',), '\nid\n--\n'),
     (False, False, False, ('--count', '0'), ''),
@@ -1060,7 +1136,7 @@ malheureux.
     (True, True, True, ('--count', '3'), ''),
     (True, True, True, ('--count', '3', '--annotation-headers',),
         '\nid\n--\n'),
-])
+]))
 def test_print_multiple_communications_count(simple_comms_tgz_path, first,
                                              second, third, args,
                                              output_prefix):
@@ -1081,6 +1157,9 @@ def test_print_multiple_communications_count(simple_comms_tgz_path, first,
     if third:
         expected_output += output_prefix
         expected_output += 'three\n'
-    assert '' == stderr.decode('utf-8')
+    assert [] == [
+        line for line in stderr.decode('utf-8').split(os.linesep)
+        if line.strip() and u'deprecated' not in line
+    ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode

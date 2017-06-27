@@ -60,6 +60,33 @@ def get_tokens(tokenization, suppress_warnings=False):
     return None
 
 
+def get_token_taggings(tokenization, tagging_type, case_sensitive=False):
+
+    """Return list of :class:`.TokenTagging` objects of `taggingType`
+    equal to `tagging_type`.
+
+    Args:
+        tokenization (Tokenization): tokenization from which taggings
+            will be selected
+        tagging_type (str): value of `taggingType` to filter to
+        case_sensitive (bool): True to do case-sensitive matching
+            on `taggingType`.
+
+    Returns:
+        List of :class:`.TokenTagging` objects of `taggingType` equal
+        to `tagging_type`, in same order as they appeared in the
+        tokenization.
+    """
+    return [
+        tt for tt in tokenization.tokenTaggingList
+        if (
+            (tt.taggingType == tagging_type)
+            if case_sensitive else
+            (tt.taggingType.lower() == tagging_type.lower())
+        )
+    ]
+
+
 def get_tagged_tokens(tokenization, tagging_type, tool=None):
 
     """Return list of :class:`.TaggedToken` objects of taggingType equal
@@ -82,10 +109,8 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
     """
     tts = [
         tt
-        for tt in tokenization.tokenTaggingList
-        if tt.taggingType.lower() == tagging_type.lower() and (
-            tool is None or tt.metadata.tool.lower() == tool.lower()
-        )
+        for tt in get_token_taggings(tokenization, tagging_type)
+        if tool is None or tt.metadata.tool.lower() == tool.lower()
     ]
     if len(tts) == 0:
         raise NoSuchTokenTagging('No matching %s tagging.' % tagging_type)

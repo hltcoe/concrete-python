@@ -19,9 +19,10 @@ def test_imports():
     root = 'concrete'
     for (parent_path, dir_entries, file_entries) in os.walk(root):
         for basename in dir_entries:
-            dir_path = os.path.join(parent_path, basename)
-            module_name = dir_path.replace(os.sep, '.')
-            assert import_ok(module_name)
+            if not basename.endswith('__pycache__'):
+                dir_path = os.path.join(parent_path, basename)
+                module_name = dir_path.replace(os.sep, '.')
+                assert import_ok(module_name)
         for basename in file_entries:
             if basename.endswith('.py') and basename != '__init__.py':
                 file_path = os.path.join(parent_path, basename)

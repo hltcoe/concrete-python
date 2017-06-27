@@ -1,4 +1,4 @@
-4.12.10 (unreleased)
+4.12.10 (2017-06-27)
 --------------------
 
 - Breaking change: update concrete-inspect.py to support multiple

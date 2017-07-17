@@ -31,8 +31,12 @@ class Entity(object):
 
     Attributes:
      - uuid: Unique identifier for this entity.
+     - id: A corpus-specific and stable id such as a Freebase mid
+    or a DBpedia id.
      - mentionIdList: An list of pointers to all of the mentions of this Entity's
     referent.  (type=EntityMention)
+     - rawMentionList: An list of pointers to all of the sentences which contain a
+    mention of this Entity.
      - type: The basic type of this entity's referent.
      - confidence: Confidence score for this individual entity.  You can also set a
     confidence score for an entire EntitySet using the EntitySet's
@@ -49,11 +53,15 @@ class Entity(object):
         (3, TType.STRING, 'type', 'UTF8', None, ),  # 3
         (4, TType.DOUBLE, 'confidence', None, None, ),  # 4
         (5, TType.STRING, 'canonicalName', 'UTF8', None, ),  # 5
+        (6, TType.STRING, 'id', 'UTF8', None, ),  # 6
+        (7, TType.LIST, 'rawMentionList', (TType.STRUCT, (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), False), None, ),  # 7
     )
 
-    def __init__(self, uuid=None, mentionIdList=None, type=None, confidence=None, canonicalName=None,):
+    def __init__(self, uuid=None, id=None, mentionIdList=None, rawMentionList=None, type=None, confidence=None, canonicalName=None,):
         self.uuid = uuid
+        self.id = id
         self.mentionIdList = mentionIdList
+        self.rawMentionList = rawMentionList
         self.type = type
         self.confidence = confidence
         self.canonicalName = canonicalName
@@ -73,6 +81,11 @@ class Entity(object):
                     self.uuid.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.id = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.LIST:
                     self.mentionIdList = []
@@ -81,6 +94,17 @@ class Entity(object):
                         _elem5 = concrete.uuid.ttypes.UUID()
                         _elem5.read(iprot)
                         self.mentionIdList.append(_elem5)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.LIST:
+                    self.rawMentionList = []
+                    (_etype9, _size6) = iprot.readListBegin()
+                    for _i10 in range(_size6):
+                        _elem11 = concrete.structure.ttypes.TokenRefSequence()
+                        _elem11.read(iprot)
+                        self.rawMentionList.append(_elem11)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -116,8 +140,8 @@ class Entity(object):
         if self.mentionIdList is not None:
             oprot.writeFieldBegin('mentionIdList', TType.LIST, 2)
             oprot.writeListBegin(TType.STRUCT, len(self.mentionIdList))
-            for iter6 in self.mentionIdList:
-                iter6.write(oprot)
+            for iter12 in self.mentionIdList:
+                iter12.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.type is not None:
@@ -131,6 +155,17 @@ class Entity(object):
         if self.canonicalName is not None:
             oprot.writeFieldBegin('canonicalName', TType.STRING, 5)
             oprot.writeString(self.canonicalName.encode('utf-8') if sys.version_info[0] == 2 else self.canonicalName)
+            oprot.writeFieldEnd()
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.STRING, 6)
+            oprot.writeString(self.id.encode('utf-8') if sys.version_info[0] == 2 else self.id)
+            oprot.writeFieldEnd()
+        if self.rawMentionList is not None:
+            oprot.writeFieldBegin('rawMentionList', TType.LIST, 7)
+            oprot.writeListBegin(TType.STRUCT, len(self.rawMentionList))
+            for iter13 in self.rawMentionList:
+                iter13.write(oprot)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -211,22 +246,22 @@ class EntitySet(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.entityList = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = Entity()
-                        _elem12.read(iprot)
-                        self.entityList.append(_elem12)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = Entity()
+                        _elem19.read(iprot)
+                        self.entityList.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.linkingList = []
-                    (_etype16, _size13) = iprot.readListBegin()
-                    for _i17 in range(_size13):
-                        _elem18 = concrete.linking.ttypes.Linking()
-                        _elem18.read(iprot)
-                        self.linkingList.append(_elem18)
+                    (_etype23, _size20) = iprot.readListBegin()
+                    for _i24 in range(_size20):
+                        _elem25 = concrete.linking.ttypes.Linking()
+                        _elem25.read(iprot)
+                        self.linkingList.append(_elem25)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -257,15 +292,15 @@ class EntitySet(object):
         if self.entityList is not None:
             oprot.writeFieldBegin('entityList', TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.entityList))
-            for iter19 in self.entityList:
-                iter19.write(oprot)
+            for iter26 in self.entityList:
+                iter26.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.linkingList is not None:
             oprot.writeFieldBegin('linkingList', TType.LIST, 4)
             oprot.writeListBegin(TType.STRUCT, len(self.linkingList))
-            for iter20 in self.linkingList:
-                iter20.write(oprot)
+            for iter27 in self.linkingList:
+                iter27.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.mentionSetId is not None:
@@ -403,11 +438,11 @@ class EntityMention(object):
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.childMentionIdList = []
-                    (_etype24, _size21) = iprot.readListBegin()
-                    for _i25 in range(_size21):
-                        _elem26 = concrete.uuid.ttypes.UUID()
-                        _elem26.read(iprot)
-                        self.childMentionIdList.append(_elem26)
+                    (_etype31, _size28) = iprot.readListBegin()
+                    for _i32 in range(_size28):
+                        _elem33 = concrete.uuid.ttypes.UUID()
+                        _elem33.read(iprot)
+                        self.childMentionIdList.append(_elem33)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -448,8 +483,8 @@ class EntityMention(object):
         if self.childMentionIdList is not None:
             oprot.writeFieldBegin('childMentionIdList', TType.LIST, 7)
             oprot.writeListBegin(TType.STRUCT, len(self.childMentionIdList))
-            for iter27 in self.childMentionIdList:
-                iter27.write(oprot)
+            for iter34 in self.childMentionIdList:
+                iter34.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -528,22 +563,22 @@ class EntityMentionSet(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.mentionList = []
-                    (_etype31, _size28) = iprot.readListBegin()
-                    for _i32 in range(_size28):
-                        _elem33 = EntityMention()
-                        _elem33.read(iprot)
-                        self.mentionList.append(_elem33)
+                    (_etype38, _size35) = iprot.readListBegin()
+                    for _i39 in range(_size35):
+                        _elem40 = EntityMention()
+                        _elem40.read(iprot)
+                        self.mentionList.append(_elem40)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.linkingList = []
-                    (_etype37, _size34) = iprot.readListBegin()
-                    for _i38 in range(_size34):
-                        _elem39 = concrete.linking.ttypes.Linking()
-                        _elem39.read(iprot)
-                        self.linkingList.append(_elem39)
+                    (_etype44, _size41) = iprot.readListBegin()
+                    for _i45 in range(_size41):
+                        _elem46 = concrete.linking.ttypes.Linking()
+                        _elem46.read(iprot)
+                        self.linkingList.append(_elem46)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -568,15 +603,15 @@ class EntityMentionSet(object):
         if self.mentionList is not None:
             oprot.writeFieldBegin('mentionList', TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.mentionList))
-            for iter40 in self.mentionList:
-                iter40.write(oprot)
+            for iter47 in self.mentionList:
+                iter47.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.linkingList is not None:
             oprot.writeFieldBegin('linkingList', TType.LIST, 4)
             oprot.writeListBegin(TType.STRUCT, len(self.linkingList))
-            for iter41 in self.linkingList:
-                iter41.write(oprot)
+            for iter48 in self.linkingList:
+                iter48.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()

@@ -1,5 +1,5 @@
 concrete.summarization package
-=========================
+==============================
 
 Submodules
 ----------

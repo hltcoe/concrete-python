@@ -1,5 +1,5 @@
 concrete.summarization.ttypes module
-===============================
+====================================
 
 .. automodule:: concrete.summarization.ttypes
     :members:

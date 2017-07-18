@@ -1,5 +1,5 @@
 concrete.summarization.constants module
-==================================
+=======================================
 
 .. automodule:: concrete.summarization.constants
     :members:

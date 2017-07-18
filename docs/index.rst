@@ -12,6 +12,7 @@ Welcome to concrete's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   README <README>
    concrete.rst
 
 

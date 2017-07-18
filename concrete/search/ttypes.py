@@ -15,6 +15,7 @@ import concrete.services.ttypes
 import concrete.structure.ttypes
 import concrete.uuid.ttypes
 import concrete.metadata.ttypes
+import concrete.entities.ttypes
 
 from thrift.transport import TTransport
 
@@ -429,10 +430,11 @@ class SearchResultItem(object):
      - score: Values are not restricted in range (e.g., do not have to be
     within [0,1]).  Higher is better.
 
-     - tokens: If the Search is meant to result in a tokenRefSequence, this is
-    that result.  Otherwise, this field may be optionally populated
-    in order to provide a hint to the client as to where to center a
+     - tokens: If SearchType=ENTITY_MENTIONS then this field should be populated.
+    Otherwise, this field may be optionally populated in order to
+    provide a hint to the client as to where to center a
     visualization, or the extraction of context, etc.
+     - entity: If SearchType=ENTITIES then this field should be populated.
     """
 
     thrift_spec = (
@@ -441,13 +443,15 @@ class SearchResultItem(object):
         (2, TType.STRUCT, 'sentenceId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 2
         (3, TType.DOUBLE, 'score', None, None, ),  # 3
         (4, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ),  # 4
+        (5, TType.STRUCT, 'entity', (concrete.entities.ttypes.Entity, concrete.entities.ttypes.Entity.thrift_spec), None, ),  # 5
     )
 
-    def __init__(self, communicationId=None, sentenceId=None, score=None, tokens=None,):
+    def __init__(self, communicationId=None, sentenceId=None, score=None, tokens=None, entity=None,):
         self.communicationId = communicationId
         self.sentenceId = sentenceId
         self.score = score
         self.tokens = tokens
+        self.entity = entity
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -480,6 +484,12 @@ class SearchResultItem(object):
                     self.tokens.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRUCT:
+                    self.entity = concrete.entities.ttypes.Entity()
+                    self.entity.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -505,6 +515,10 @@ class SearchResultItem(object):
         if self.tokens is not None:
             oprot.writeFieldBegin('tokens', TType.STRUCT, 4)
             self.tokens.write(oprot)
+            oprot.writeFieldEnd()
+        if self.entity is not None:
+            oprot.writeFieldBegin('entity', TType.STRUCT, 5)
+            self.entity.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

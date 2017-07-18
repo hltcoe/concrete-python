@@ -28,6 +28,7 @@ from .services.results.ttypes import *  # noqa
 from .situations.ttypes import *  # noqa
 from .spans.ttypes import *  # noqa
 from .structure.ttypes import *  # noqa
+from .summarization.ttypes import *  # noqa
 from .twitter.ttypes import *  # noqa
 from .uuid.ttypes import *  # noqa
 

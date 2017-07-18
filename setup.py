@@ -47,6 +47,7 @@ if __name__ == '__main__':
             'concrete.situations',
             'concrete.spans',
             'concrete.structure',
+            'concrete.summarization',
             'concrete.twitter',
             'concrete.uuid',
 

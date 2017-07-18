@@ -21,15 +21,18 @@ class AnnotationTaskType(object):
     """
     TRANSLATION = 1
     NER = 2
+    TOPICID = 3
 
     _VALUES_TO_NAMES = {
         1: "TRANSLATION",
         2: "NER",
+        3: "TOPICID",
     }
 
     _NAMES_TO_VALUES = {
         "TRANSLATION": 1,
         "NER": 2,
+        "TOPICID": 3,
     }
 
 

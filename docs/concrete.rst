@@ -24,6 +24,7 @@ Subpackages
     concrete.situations
     concrete.spans
     concrete.structure
+    concrete.summarization
     concrete.twitter
     concrete.util
     concrete.uuid

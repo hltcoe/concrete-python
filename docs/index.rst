@@ -14,6 +14,7 @@ Welcome to concrete's documentation!
 
    README <README>
    concrete.rst
+   CONTRIBUTING.rst
 
 
 Indices and tables

@@ -1,8 +1,25 @@
-concrete package
-================
+API
+===
 
-Subpackages
------------
+.. automodule:: concrete
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Human-written code
+------------------
+
+.. toctree::
+
+   concrete.inspect
+   concrete.util
+   concrete.validate
+   concrete.version
+
+
+Thrift-generated code
+---------------------
 
 .. toctree::
 
@@ -26,22 +43,4 @@ Subpackages
     concrete.structure
     concrete.summarization
     concrete.twitter
-    concrete.util
     concrete.uuid
-
-Submodules
-----------
-
-.. toctree::
-
-   concrete.inspect
-   concrete.validate
-   concrete.version
-
-Module contents
----------------
-
-.. automodule:: concrete
-    :members:
-    :undoc-members:
-    :show-inheritance:

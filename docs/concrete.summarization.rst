@@ -1,18 +1,11 @@
 concrete.summarization package
 ==============================
 
-Submodules
-----------
-
 .. toctree::
 
-   concrete.summarization.constants
-   concrete.summarization.ttypes
+   concrete.summarization.SummarizationService
 
-Module contents
----------------
-
-.. automodule:: concrete.summarization
-    :members: ttypes
+.. automodule:: concrete.summarization.ttypes
+    :members:
     :undoc-members:
     :show-inheritance:

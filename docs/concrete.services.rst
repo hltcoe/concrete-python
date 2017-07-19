@@ -1,26 +1,12 @@
 concrete.services package
 =========================
 
-Subpackages
------------
-
 .. toctree::
 
-    concrete.services.results
+    concrete.services.results.ResultsServerService
+    concrete.services.Service
 
-Submodules
-----------
-
-.. toctree::
-
-   concrete.services.Service
-   concrete.services.constants
-   concrete.services.ttypes
-
-Module contents
----------------
-
-.. automodule:: concrete.services
-    :members: ttypes
+.. automodule:: concrete.services.ttypes
+    :members:
     :undoc-members:
     :show-inheritance:

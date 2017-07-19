@@ -1,8 +1,10 @@
 concrete.util package
 =====================
 
-Submodules
-----------
+.. automodule:: concrete.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 .. toctree::
 
@@ -28,11 +30,3 @@ Submodules
    concrete.util.tokenization
    concrete.util.twitter
    concrete.util.unnone
-
-Module contents
----------------
-
-.. automodule:: concrete.util
-    :members:
-    :undoc-members:
-    :show-inheritance:

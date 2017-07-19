@@ -1,18 +1,7 @@
 concrete.exceptions package
 ===========================
 
-Submodules
-----------
-
-.. toctree::
-
-   concrete.exceptions.constants
-   concrete.exceptions.ttypes
-
-Module contents
----------------
-
-.. automodule:: concrete.exceptions
-    :members: ttypes
+.. automodule:: concrete.exceptions.ttypes
+    :members:
     :undoc-members:
     :show-inheritance:

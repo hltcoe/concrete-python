@@ -9,6 +9,7 @@ Welcome to concrete's documentation!
 .. automodule:: concrete
 
 .. toctree::
+   :maxdepth: 2
    :caption: Contents:
 
    README <README>

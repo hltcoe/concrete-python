@@ -1,8 +1,31 @@
-concrete package
-================
+API Reference
+=============
 
-Subpackages
------------
+.. automodule:: concrete
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+High-level interface
+--------------------
+
+.. toctree::
+
+   concrete.inspect
+   concrete.util
+   concrete.validate
+   concrete.version
+
+
+Low-level interface (Concrete schema)
+-------------------------------------
+
+Note that all data types defined by the Concrete schema---except for
+services---can be imported directly from the top-level ``concrete``
+package.  For example, instead of
+``from concrete.communication.ttypes import Communication`` you can
+write ``from concrete import Communication``.
 
 .. toctree::
 
@@ -26,22 +49,4 @@ Subpackages
     concrete.structure
     concrete.summarization
     concrete.twitter
-    concrete.util
     concrete.uuid
-
-Submodules
-----------
-
-.. toctree::
-
-   concrete.inspect
-   concrete.validate
-   concrete.version
-
-Module contents
----------------
-
-.. automodule:: concrete
-    :members:
-    :undoc-members:
-    :show-inheritance:

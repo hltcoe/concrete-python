@@ -1,10 +1,5 @@
-Copyright 2012-2017 Johns Hopkins University HLTCOE. All rights
-reserved.  This software is released under the 2-clause BSD license.
-Please see ``LICENSE`` for more information.
-
-
-concrete-python
-===============
+Tutorial
+========
 
 .. image:: https://travis-ci.org/hltcoe/concrete-python.svg
    :target: https://travis-ci.org/hltcoe/concrete-python
@@ -12,8 +7,10 @@ concrete-python
    :target: https://ci.appveyor.com/project/cjmay/concrete-python-f3iqf
 
 
-Concrete-python is the Python interface to Concrete_, an HLT data
-specification defined using Thrift_.  Concrete-python contains generated Python
+Concrete-python is the Python interface to Concrete_, a
+natural language processing data format and set of service protocols
+that work across different operating systems and programming languages
+via `Apache Thrift`_.  Concrete-python contains generated Python
 classes, utility classes and functions, and scripts.  It does not contain the
 Thrift schema for Concrete, which can be found in the
 `Concrete GitHub repository`_.
@@ -25,6 +22,14 @@ For information about installing and using concrete-python, please see the
 .. contents:: **Table of Contents**
    :local:
    :backlinks: none
+
+
+License
+-------
+
+Copyright 2012-2017 Johns Hopkins University HLTCOE. All rights
+reserved.  This software is released under the 2-clause BSD license.
+Please see LICENSE_ for more information.
 
 
 Requirements
@@ -762,20 +767,13 @@ Communication object for required fields, plus additional checks for
 UUID mismatches.
 
 
-Development
------------
-
-Please see ``CONTRIBUTING.rst`` in the source repository for
-information about contributing to concrete-python.
-
-Contributors to concrete-python are listed in ``AUTHORS``.
-Please contact us if there is an error in this list.
 
 
 
 .. _Concrete: http://hltcoe.github.io/concrete/
 .. _`online documentation`: http://hltcoe.github.io/concrete-python/
-.. _Thrift: http://thrift.apache.org
+.. _`Apache Thrift`: http://thrift.apache.org
 .. _`Concrete GitHub repository`: https://github.com/hltcoe/concrete
 .. _serif_dog-bites-man.concrete: https://github.com/hltcoe/concrete-python/raw/master/tests/testdata/serif_dog-bites-man.concrete
 .. _CoNLL: http://ufal.mff.cuni.cz/conll2009-st/task-description.html
+.. _LICENSE: https://github.com/hltcoe/concrete-python/blob/master/LICENSE

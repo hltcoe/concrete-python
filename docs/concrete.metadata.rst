@@ -1,18 +1,7 @@
 concrete.metadata package
 =========================
 
-Submodules
-----------
-
-.. toctree::
-
-   concrete.metadata.constants
-   concrete.metadata.ttypes
-
-Module contents
----------------
-
-.. automodule:: concrete.metadata
-    :members: ttypes
+.. automodule:: concrete.metadata.ttypes
+    :members:
     :undoc-members:
     :show-inheritance:

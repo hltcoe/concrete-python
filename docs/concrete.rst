@@ -1,5 +1,5 @@
-API
-===
+API Reference
+=============
 
 .. automodule:: concrete
     :members:
@@ -7,8 +7,8 @@ API
     :show-inheritance:
 
 
-Human-written code
-------------------
+High-level interface
+--------------------
 
 .. toctree::
 
@@ -18,8 +18,14 @@ Human-written code
    concrete.version
 
 
-Thrift-generated code
----------------------
+Low-level interface (Concrete schema)
+-------------------------------------
+
+Note that all data types defined by the Concrete schema---except for
+services---can be imported directly from the top-level ``concrete``
+package.  For example, instead of
+``from concrete.communication.ttypes import Communication`` you can
+write ``from concrete import Communication``.
 
 .. toctree::
 

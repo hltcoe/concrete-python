@@ -26,6 +26,9 @@ from .thrift_factory import factory
 
 
 if os.name == 'nt':
+    # Windows NT does not have os.{uid,gid,username,groupname} so we
+    # define stubs.
+
     def _get_uid():
         return 0
 
@@ -90,7 +93,7 @@ def read_communication_from_file(communication_filename, add_references=True):
            on :class:`.Communication` read from file
 
     Returns:
-        Communication:
+        Communication: Communication read from file
     """
     comm = read_thrift_from_file(Communication(), communication_filename)
     if add_references:
@@ -106,7 +109,7 @@ def read_tokenlattice_from_file(tokenlattice_filename):
             :class:`.TokenLattice`
 
     Returns:
-        TokenLattice:
+        TokenLattice: TokenLattice read from file
     """
     return read_thrift_from_file(TokenLattice(), tokenlattice_filename)
 
@@ -118,7 +121,7 @@ def write_communication_to_file(communication, communication_filename):
         communication (Communication): communication to write
         communication_filename (str): path of file to write to
     """
-    return write_thrift_to_file(communication, communication_filename)
+    write_thrift_to_file(communication, communication_filename)
 
 
 def write_thrift_to_file(thrift_obj, filename):
@@ -138,20 +141,42 @@ def write_thrift_to_file(thrift_obj, filename):
 
 class _FileTypeClass(object):
     '''
-    An instance of this class represents filetypes abstractly; its
-    members correspond to individual filetypes.  It probably doesn't
-    make sense to have more than one instance of this class.
+    Enum-like object representing the set of known filetypes.
+    Filetype integer IDs can be accessed directly (by retrieving
+    the corresponding constant public member variable of this object)
+    or can be looked up from their integer IDs or string names (using
+    the `lookup` method).  A tuple of all filetype names is provided
+    in the member variable `CHOICES`.  There should only be one member
+    of this class.
     '''
 
     def __init__(self, *names):
+        '''
+        Initialize from given filetype names.  Each name will be
+        associated with a unique integer id.
+
+        Args:
+            names: known filetype names (each of type str)
+
+        Raises:
+            ValueError: if a filetype name conflicts with a member
+                variable/method name
+        '''
         self.CHOICES = tuple(names)
         for (i, name) in enumerate(names):
-            if name == 'CHOICES':
+            if name in ('CHOICES', '_normalize', 'lookup', 'add_argument'):
                 raise ValueError('%s is an invalid filetype name' % name)
             setattr(self, self._normalize(name), i)
 
     @classmethod
     def _normalize(cls, name):
+        '''
+        Return upper-cased name with underscores instead of hyphens
+        (suitable for use as a member variable name).
+
+        Args:
+            name (str): string filetype name
+        '''
         return name.replace('-', '_').upper()
 
     def lookup(self, ft):
@@ -165,6 +190,9 @@ class _FileTypeClass(object):
 
         Returns:
             filetype (integer value) for ft
+
+        Raises:
+            ValueError: if ft is not a known filetype name or id
         '''
 
         if isinstance(ft, int):
@@ -238,6 +266,9 @@ class ThriftReader(object):
             filetype (FileType): Expected type of file.  Default value is
                 `FileType.AUTO`, where function will try to automatically
                 determine file type.
+
+        Raises:
+            ValueError: if filetype is not a known filetype name or id
         """
         filetype = FileType.lookup(filetype)
 
@@ -330,6 +361,10 @@ class ThriftReader(object):
         from a concatenated file (instead of an archive), then all
         Thrift structures extracted from the concatenated file will have
         the same value for the `filename` field.
+
+        Raises:
+            ValueError: if self.filetype (normally validated by
+            constructor) is not a known filetype name or id
         """
         if self.filetype == 'stream':
             return self._next_from_stream()
@@ -341,9 +376,29 @@ class ThriftReader(object):
             raise ValueError('unknown filetype %s' % self.filetype)
 
     def next(self):
+        '''
+        Return tuple containing next communication (and filename)
+        in the sequence.
+
+        Raises:
+            StopIteration: if there are no more communications
+
+        Returns:
+            tuple containing Communication object and its filename
+        '''
         return self.__next__()
 
     def _next_from_stream(self):
+        '''
+        Return tuple containing next communication (and filename)
+        from an uncompressed stream.
+
+        Raises:
+            StopIteration: if there are no more communications
+
+        Returns:
+            tuple containing Communication object and its filename
+        '''
         try:
             comm = self._thrift_type()
             comm.read(self.protocol)
@@ -354,6 +409,16 @@ class ThriftReader(object):
             raise StopIteration
 
     def _next_from_tar(self):
+        '''
+        Return tuple containing next communication (and filename)
+        from a tar file.
+
+        Raises:
+            StopIteration: if there are no more communications
+
+        Returns:
+            tuple containing Communication object and its filename
+        '''
         while True:
             tarinfo = self.tar.next()
             if tarinfo is None:
@@ -376,6 +441,16 @@ class ThriftReader(object):
             return (comm, tarinfo.name)
 
     def _next_from_zip(self):
+        '''
+        Return tuple containing next communication (and filename)
+        from a zip file.
+
+        Raises:
+            StopIteration: if there are no more communications
+
+        Returns:
+            tuple containing Communication object and its filename
+        '''
         if self.zip_infolist_index >= len(self.zip_infolist):
             raise StopIteration
         zipinfo = self.zip_infolist[self.zip_infolist_index]

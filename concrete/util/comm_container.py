@@ -231,17 +231,17 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
 
 
 class RedisHashBackedCommunicationContainer(collections.Mapping):
-    """Maps Comm IDs to Comms, retrieving Comms from a Redis hash
+    """Maps Comm IDs to Comms, retrieving Comms from a Redis hash.
 
     `RedisHashBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
-    Communications are lazily-retrieved from a Redis hash.
+    Communications are lazily retrieved from a Redis hash.
     """
 
     def __init__(self, redis_db, key):
         """
         Args:
-            redis_db (redis.Redis): redis database connection
+            redis_db (redis.Redis): Redis database connection object
             key (str): Key in redis database where hash is located
         """
         self.redis_db = redis_db

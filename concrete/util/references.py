@@ -9,7 +9,8 @@ def add_references_to_communication(comm):
     """Create references for each :class:`.UUID` 'pointer'
 
     Args:
-        comm (Communication): A Concrete Communication object
+        comm (Communication): A Concrete Communication object,
+            will be modified by this function
 
     The Concrete schema uses :class:`.UUID` objects as internal
     pointers between Concrete objects.  This function adds member

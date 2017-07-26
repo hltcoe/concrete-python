@@ -37,7 +37,8 @@ def add_annotation_level_argparse_argument(parser):
     See :func:`create_comm` for details.
 
     Args:
-        parser (argparse.ArgumentParser)
+        parser (argparse.ArgumentParser): the parser to add the argument
+            to
     """
     parser.add_argument('--annotation-level', type=str,
                         choices=(AL_NONE, AL_SECTION, AL_SENTENCE, AL_TOKEN),
@@ -54,6 +55,21 @@ def add_annotation_level_argparse_argument(parser):
 
 
 def _split(s, delim):
+    '''
+    Split string and return list of tuples representing the pieces of
+    the string and their offsets in the string.
+
+    Args:
+        s (str): string to split
+        delim (str): delimiter by which to split string
+
+    Returns:
+        list of tuples representing the split pieces of the string;
+        each tuple contains a string (a piece of `s`), an integer
+        indicating where that string starts in `s`, and an integer
+        indicating where that string ends in `s` (exclusive), in
+        that order
+    '''
     pieces = s.split(delim)
     indexed_pieces = []
     offset = 0
@@ -71,16 +87,20 @@ def create_sentence(sen_text, sen_start, sen_end,
     Lower-level routine (called indirectly by :func:`create_comm`)
 
     Args:
-        sen_text (str):
-        sen_start (int):
-        sen_end (int):
-        aug (_AnalyticUUIDGenerator):
-        metadata_tool (str):
+        sen_text (str): text to create sentence from
+        sen_start (int): starting position of sentence in Communication
+            text (inclusive)
+        sen_end (int): ending position of sentence in Communication text
+            (inclusive)
+        aug (_AnalyticUUIDGenerator): compressible UUID generator for
+            the analytic that generated this sentence
+        metadata_tool (str): tool name of the analytic that generated
+            this sentence
         metadata_timestamp (int): Time in seconds since the Epoch
         annotation_level (str): See :func:`create_comm` for details
 
     Returns:
-        Sentence:
+        Concrete Sentence containing given text and metadata
     """
 
     sections = (annotation_level is not None) and (annotation_level != AL_NONE)
@@ -117,21 +137,28 @@ def create_section(sec_text, sec_start, sec_end, section_kind,
                    aug, metadata_tool, metadata_timestamp,
                    annotation_level):
     """Create :class:`.Section` from provided text and metadata.
+    Section text will be split into sentence texts by newlines and
+    each sentence will be created with a call to
+    :func:`create_sentence`.
 
     Lower-level routine (called by :func:`create_comm`).
 
     Args:
-        sec_text (str):
-        sec_start (int):
-        sec_end (int):
-        section_kind (str):
-        aug (_AnalyticUUIDGenerator):
-        metadata_tool (str):
+        sec_text (str): text to create section from
+        sec_start (int): starting position of section in Communication
+            text (inclusive)
+        sec_end (int): ending position of section in Communication text
+            (inclusive)
+        section_kind (str): value for `Section.kind` field to be set to
+        aug (_AnalyticUUIDGenerator): compressible UUID generator for
+            the analytic that generated this section
+        metadata_tool (str): tool name of the analytic that generated
+            this section
         metadata_timestamp (int): Time in seconds since the Epoch
         annotation_level (str): See :func:`create_comm` for details
 
     Returns:
-        Section:
+        Concrete Section containing given text and metadata
     """
 
     sections = (annotation_level is not None) and (annotation_level != AL_NONE)
@@ -163,6 +190,7 @@ def create_comm(comm_id, text='',
 
     By default the text will be split by double-newlines into sections
     and then by single newlines into sentences within those sections.
+    Each section will be created with a call to :func:`create_section`.
 
     `annotation_level` controls the amount of annotation that is added:
 
@@ -172,17 +200,19 @@ def create_comm(comm_id, text='',
      - AL_TOKEN:     add all annotations, up to tokens (the default)
 
     Args:
-        comm_id (str):
-        text (str):
-        comm_type (str):
-        section_kind (str):
-        metadata_tool (str):
+        comm_id (str): Communication id
+        text (str): Communication text
+        comm_type (str): Communication type
+        section_kind (str): Section kind to set on all sections
+        metadata_tool (str): tool name of analytic that generated
+            this text
         metadata_timestamp (int): Time in seconds since the Epoch.
             If `None`, the current time will be used.
-        annotation_level (str):
+        annotation_level (str): string representing annotation
+            level to add to communication (see above)
 
     Returns:
-        Communication:
+        Communication containing given text and metadata
     """
 
     if metadata_timestamp is None:
@@ -220,12 +250,11 @@ def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):
     a single :class:`.Sentence`.
 
     Args:
-        comm_id (str): Specifies a Communication ID
-        sentence_string (str): String to be used for the sentence text.
-            The string will be whitespace-tokenized.
+        comm_id (str): Communication id
+        sentence_string (str): Communication text
 
     Returns:
-        Communication:
+        Communication containing given text and having the given id
     """
     logging.warning('create_simple_comm will be removed in a future'
                     ' release, please use create_comm instead')

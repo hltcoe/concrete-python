@@ -46,7 +46,9 @@ def json_tweet_object_to_Communication(tweet):
         tweet (object): Object created by deserializing a JSON Tweet string
 
     Returns:
-        Communication:
+        Communication: Communication representing the Tweet, with
+        `tweetInfo` and `text` fields set (among others) but with
+        a null (None) `sectionList`.
     """
     tweet_info = json_tweet_object_to_TweetInfo(tweet)
 
@@ -90,10 +92,12 @@ def snake_case_to_camelcase(value):
     http://goo.gl/SSgo9k
 
     Args:
-        value (unicode):
+        value (str): snake case (lower case with underscores) value
 
     Returns:
-        unicode
+        str: camel case string corresponding to value (with isolated
+        unscores stripped and sequences of two or more underscores
+        reduced by one underscore)
     """
     def camelcase():
         yield lambda c: c.lower()
@@ -104,13 +108,16 @@ def snake_case_to_camelcase(value):
 
 
 def json_tweet_object_to_TweetInfo(tweet):
-    """Create :class:`.TweetInfo` object from deserialized JSON Tweet object
+    """Create :class:`.TweetInfo` object from deserialized JSON Tweet
+    object
 
     Args:
-        tweet (object): Object created by deserializing a JSON Tweet string
+        tweet (dict): Object created by deserializing a JSON Tweet
+            string
 
     Returns:
-        TweetInfo:
+        TweetInfo: concrete object representing twitter metadata from
+        tweet
     """
 
     def set_flat_fields(concrete_object, twitter_dict):
@@ -120,6 +127,13 @@ def json_tweet_object_to_TweetInfo(tweet):
 
         The Twitter API uses snake_case for field names while the Concrete
         schema uses CamelCase for the same fields.
+
+        Args:
+            concrete_object (object): concrete object whose fields will
+                be set according to the content in twitter_dict;
+                will be modified
+            twitter_dict (dict): twitter object (dictionary) whose
+                entries will be used to set fields on concrete_object
         """
         for key in twitter_dict.keys():
             if type(twitter_dict[key]) != dict:
@@ -218,11 +232,14 @@ def json_tweet_string_to_Communication(json_tweet_string, check_empty=False,
     Args:
         json_tweet_string (str): JSON Tweet string from Twitter API
         check_empty (bool): If `True`, check if `json_tweet_string` is empty
+            (return None if it is)
         check_delete (bool): If `True`, check for presence of `delete` field
             in Tweet JSON, and if the 'delete' field is present, return `None`
 
     Returns:
-        Communication:
+        Communication: Communication representing the Tweet, with
+        `tweetInfo` and `text` fields set (among others) but with
+        a null (None) `sectionList`.
     """
 
     json_tweet_string = json_tweet_string.strip()
@@ -240,10 +257,11 @@ def json_tweet_string_to_TweetInfo(json_tweet_string):
     """Create :class:`.TweetInfo` object from JSON Tweet string
 
     Args:
-        tweet (object): JSON Tweet string from Twitter API
+        json_tweet_string (str): JSON Tweet string from Twitter API
 
     Returns:
-        TweetInfo:
+        TweetInfo: concrete twitter metadata object with fields
+        set from json_tweet_string
     """
     tweet = json.loads(json_tweet_string)
     return json_tweet_object_to_TweetInfo(tweet)
@@ -251,15 +269,16 @@ def json_tweet_string_to_TweetInfo(json_tweet_string):
 
 def capture_tweet_lid(tweet):
     """
-    Attempts to capture the 'lang' field in the twitter API, if it
-    exists.
+    Reads the `lang` field from a tweet from the twitter API, if it
+    exists, and return corresponding concrete
+    :class:`LanguageIdentification` object.
 
     Args:
-        tweet (object): Object created by deserializing a JSON Tweet string
+        tweet (dict): Object created by deserializing a JSON Tweet string
 
     Returns:
-        List of :class:`.LanguageIdentification` objects, or `None`
-        if the field is not present in the Tweet JSON
+        :class:`.LanguageIdentification` object, or None
+        if the `lang` field is not present in the Tweet JSON
     """
     if u'lang' in tweet:
         amd = AnnotationMetadata(tool="Twitter LID",
@@ -274,7 +293,8 @@ def capture_tweet_lid(tweet):
 
 
 def twitter_lid_to_iso639_3(twitter_lid):
-    """Convert Twitter Language ID string to ISO639-3 code
+    """
+    Convert Twitter Language ID string to ISO639-3 code
 
     Ref: https://dev.twitter.com/rest/reference/get/help/languages
 
@@ -284,7 +304,7 @@ def twitter_lid_to_iso639_3(twitter_lid):
             (split by '-', then first part converted)
 
     Returns:
-        str: An ISO639-3 code
+        str: the ISO639-3 code corresponding to twitter_lid
     """
     if len(twitter_lid) == 2:
         return ISO_LANGS.get(iso639_1_code=twitter_lid).iso639_3_code

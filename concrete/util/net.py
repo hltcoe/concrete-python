@@ -6,8 +6,8 @@ def find_port():
     '''
     Find and return an available TCP port.
 
-    >>> find_port() > 1023
-    True
+    Returns:
+        an unused TCP port (an integer)
     '''
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 0))

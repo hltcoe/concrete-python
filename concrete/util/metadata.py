@@ -8,11 +8,19 @@ EPOCH = datetime.utcfromtimestamp(0)
 
 
 class ZeroAnnotationsError(Exception):
+    '''
+    Exception representing zero annotations present in a concrete object
+    when one (or more) is expected.
+    '''
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
 
 class MultipleAnnotationsError(Exception):
+    '''
+    Exception representing more than one annotations present in a
+    concrete object when one (or zero) is expected.
+    '''
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
@@ -23,8 +31,11 @@ def datetime_to_timestamp(dt):
     in UTC, return corresponding Concrete timestamp.
 
     Args:
-        dt(datetime): time-zone--unaware datetime object representing
-        date and time (in UTC) to convert
+        dt (datetime): time-zone--unaware datetime object representing
+            date and time (in UTC) to convert
+
+    Returns:
+        concrete timestamp representing datetime dt
 
     Source:
     http://stackoverflow.com/questions/6999726/how-can-i-convert-a-datetime-object-to-milliseconds-since-epoch-unix-time-in-p
@@ -42,6 +53,9 @@ def timestamp_to_datetime(timestamp):
             seconds since the epoch in UTC) representing date and time
             to convert
 
+    Returns:
+        datetime representing timestamp dt
+
     Source:
     https://stackoverflow.com/questions/3694487/initialize-a-datetime-object-with-seconds-since-epoch
     '''
@@ -51,6 +65,9 @@ def timestamp_to_datetime(timestamp):
 def now_timestamp():
     '''
     Return timestamp representing the current time.
+
+    Returns:
+        concrete timestamp representing the current time
     '''
     return datetime_to_timestamp(datetime.now())
 
@@ -67,10 +84,9 @@ def get_index_of_tool(lst_of_conc, tool):
       * no object in `lst_of_conc` matches `tool`.
 
     Args:
-
-    - `lst_of_conc`: A list of Concrete objects, each of which
-      has a `.metadata` field.
-    - `tool`: A tool name to match.
+        lst_of_conc (list): list of Concrete objects, each of which
+            has a `.metadata` field.
+        tool (str): A tool name to match.
     """
     idx = -1
     if lst_of_conc is not None and len(lst_of_conc) > 0:
@@ -89,12 +105,15 @@ def get_annotation_field(annotation, field):
     Return requested field of annotation metadata.
 
     Args:
-        annotation: object containing a `metadata` field of
+        annotation (object): object containing a `metadata` field of
             type :class:`..metadata.ttypes.AnnotationMetadata`.
-        field: name of metadata field: kBest, timestamp, or tool.
+        field (str): name of metadata field: kBest, timestamp, or tool.
 
     Returns:
         value of requested field in annotation metadata.
+
+    Raises:
+        ValueError: on unknown field name
     '''
     if field == 'kBest':
         return annotation.metadata.kBest
@@ -147,6 +166,15 @@ def filter_annotations(annotations,
 
     Returns:
         filtered and/or re-ordered list of annotations
+
+    Raises:
+        ValueError: if the value of action_if_multiple or action_if_zero
+            is not recognized
+        MultipleAnnotationsError: if the value of action_if_multiple is
+            'raise' and there are multiple annotations passing the
+            filter
+        ZeroAnnotationsError: if the value of action_if_zero is
+            'raise' and there are no annotations passing the filter
     '''
     annotations = list(annotations)
 
@@ -208,6 +236,15 @@ def filter_annotations_json(annotations, kwargs_json):
     Returns:
         `annotations` filtered by :func:`filter_annotations` according
         to provided JSON-encoded keyword arguments.
+
+    Raises:
+        ValueError: if the value of 'action_if_multiple' or
+            'action_if_zero' is not recognized
+        MultipleAnnotationsError: if the value of 'action_if_multiple'
+            is 'raise' and there are multiple annotations passing the
+            filter
+        ZeroAnnotationsError: if the value of 'action_if_zero' is
+            'raise' and there are no annotations passing the filter
     '''
 
     return filter_annotations(annotations, **json.loads(kwargs_json))
@@ -251,6 +288,9 @@ def tool_to_filter(tool, explicit_filter=None):
         or filtering them by tool `tool` and returning that filtered
         list.  If both `tool` and `explicit_filter` are not None,
         raise ValueError.
+
+    Raises:
+        ValueError: if both `tool` and `explicit_filter` are not None
     '''
     if tool is None:
         return explicit_filter

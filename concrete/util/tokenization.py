@@ -10,6 +10,10 @@ from functools import reduce
 
 
 class NoSuchTokenTagging(Exception):
+    '''
+    Exception representing there is no :class:`TokenTagging` annotation
+    that matches the given criteria in a given concrete object
+    '''
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
@@ -25,11 +29,17 @@ def get_tokens(tokenization, suppress_warnings=False):
     Return None if kind is set but the respective data fields are not.
 
     Args:
-        tokenization (Tokenization):
-        suppress_warnings (bool):
+        tokenization (Tokenization): tokenization to extract tokens
+            from
+        suppress_warnings (bool): True to suppress warning messages
+            that `tokenization.kind` is None
 
     Returns:
         List of :class:`.Token` objects, or `None`
+
+    Raises:
+        ValueError: if `tokenization.kind` is not a recognized
+            tokenization kind
     """
 
     if tokenization.kind is None:
@@ -93,11 +103,14 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
     to tagging_type, if there is a unique choice.
 
     Args:
-        tokenization (Tokenization):
-        tagging_type (str):
-        tool (str): If tool is not None, filter the candidate
-            TokenTaggings to those whose metadata.tool field
-            matches tool.
+        tokenization (Tokenization): tokenization to return
+            tagged tokens for
+        tagging_type (str): only return tagged tokens for
+            :class:`TokenTagging` objects whose `taggingType`
+            field is equal to `tagging_type`
+        tool (str): If not None, only return tagged tokens for
+            :class:`TokenTagging` objects whose `metadata.tool`
+            field is equal to `tool`
 
     Returns:
         List of :class:`.TaggedToken` objects of `taggingType` equal
@@ -121,33 +134,74 @@ def get_tagged_tokens(tokenization, tagging_type, tool=None):
 
 
 def get_lemmas(t, tool=None):
-    """Calls :func:`get_tagged_tokens` with a `tagging_type` of "LEMMA"
+    """
+    Returns the result of :func:`get_tagged_tokens` with a
+    `tagging_type` of "LEMMA"
+
+    Args:
+        t (Tokenization): tokenization to extract tagged tokens from
+        tool (str): If not None, only return tagged tokens for
+            :class:`TokenTagging` objects whose `metadata.tool`
+            field is equal to `tool`
+
+    Returns:
+        list of 'LEMMA'-tagged tokens matching `tool` (if specified)
     """
     return get_tagged_tokens(t, 'LEMMA', tool=tool)
 
 
 def get_pos(t, tool=None):
-    """Calls :func:`get_tagged_tokens` with a `tagging_type` of "POS"
+    """
+    Returns the result of :func:`get_tagged_tokens` with a
+    `tagging_type` of "LEMMA"
+
+    Args:
+        t (Tokenization): tokenization to extract tagged tokens from
+        tool (str): If not None, only return tagged tokens for
+            :class:`TokenTagging` objects whose `metadata.tool`
+            field is equal to `tool`
+
+    Returns:
+        list of 'POS'-tagged tokens matching `tool` (if specified)
     """
     return get_tagged_tokens(t, 'POS', tool=tool)
 
 
 def get_ner(t, tool=None):
-    """Calls :func:`get_tagged_tokens` with a `tagging_type` of "NER"
+    """
+    Returns the result of :func:`get_tagged_tokens` with a
+    `tagging_type` of "NER"
+
+    Args:
+        t (Tokenization): tokenization to extract tagged tokens from
+        tool (str): If not None, only return tagged tokens for
+            :class:`TokenTagging` objects whose `metadata.tool`
+            field is equal to `tool`
+
+    Returns:
+        list of 'NER'-tagged tokens matching `tool` (if specified)
     """
     return get_tagged_tokens(t, 'NER', tool=tool)
 
 
 def plus(x, y):
     """
+    Return concatenation of two lists.
+
+    Args:
+        x (list):
+        y (list)
+
     Returns:
-        x + y
+        list concatenation of x and y
     """
     return x + y
 
 
 def flatten(a):
     """
+    Returned flattened version of input list.
+
     Args:
         a (list):
     Returns:
@@ -160,11 +214,12 @@ def get_comm_tokens(comm, sect_pred=None, suppress_warnings=False):
     """Get list of :class:`.Token` objects in :class:`.Communication`.
 
     Args:
-        comm (Communication):
+        comm (Communication): communications to extract tokens from
         sect_pred (function): Function that takes a :class:`.Section`
             and returns false if the :class:`.Section` should be
             excluded.
-        suppress_warnings (bool):
+        suppress_warnings (bool): True to suppress warning messages
+            that `Tokenization.kind` is None
 
     Returns:
         List of :class:`.Token` objects in :class:`.Communication`,
@@ -184,9 +239,10 @@ def get_comm_tokenizations(comm, tool=None):
     """Get list of :class:`.Tokenization` objects in a :class:`.Communication`
 
     Args:
-        comm (Communication):
-        tool (str): If given, only return :class:`.Tokenization` objects
-            whose `metadata.tool` field is equal to `tool`
+        comm (Communication): communications to extract tokenizations
+            from
+        tool (str): If not None, only return :class:`.Tokenization`
+            objects whose `metadata.tool` field is equal to `tool`
 
     Returns:
         List of :class:`.Tokenization` objects
@@ -198,6 +254,20 @@ def get_comm_tokenizations(comm, tool=None):
 
 
 def _lattice_to_fsm(lattice):
+    '''
+    Return FSM representation of token lattice.
+
+    Args:
+        lattice (TokenLattice): the token lattice to process
+
+    Returns:
+        tuple containing four items: 0. arcs represented as
+        a dictionary from source states to dictionaries from
+        destination states to lists of (token, weight) pairs;
+        1. arcs represented as a dictionary from destination states to
+        dictionaries from source states to lists of (token, weight)
+        pairs; 2. the set of tokens; and 3. the set of states.
+    '''
     fsm = {}
     bkFsm = {}
 
@@ -240,6 +310,15 @@ def _lattice_to_fsm(lattice):
 
 
 def _logsumexp(a):
+    '''
+    Return log of sum of exponentiations of elements in a.
+
+    Args:
+        a: list or vector (of numbers)
+
+    Returns:
+        log of sum of exponentiations of elements in a.
+    '''
     try:
         from scipy.misc import logsumexp
         return logsumexp(a)
@@ -284,7 +363,7 @@ def compute_lattice_expected_counts(lattice):
     Input arc weights are treated as unnormalized log-probabilities.
 
     Args:
-        lattice (TokenLattice):
+        lattice (TokenLattice): lattice to compute expected counts for
 
     Returns:
         List of floats (expected log-probabilities) with the float
@@ -325,13 +404,17 @@ def compute_lattice_expected_counts(lattice):
 
 
 def get_tokenizations(comm, tool=None):
-    """Returns a flat list of all Tokenization objects in a Communication
+    """
+    Returns a flat list of all Tokenization objects in a Communication
 
     Args:
-        comm (Communication):
+        comm (Communication): communication to get tokenizations from
+        tool (str): if not None, return only tokenizations whose
+            `metadata.tool` field matches `tool`
 
     Returns:
         A list of all Tokenization objects within the Communication
+        matching `tool` (if it is not None)
     """
     tokenizations = []
 

@@ -25,19 +25,48 @@ except NameError:
 
 
 def generate_UUID():
-    """Helper function for generating a Concrete UUID object
+    """Return a Concrete UUID object with a random UUID4 value.
 
     Returns:
-        UUID: Concrete UUID object
+        a Concrete :class:`.UUID` object
     """
     return UUID(uuidString=str(python_uuid.uuid4()))
 
 
 def hex_to_bin(h):
+    '''
+    Return binary encoding of hexadecimal string
+
+    Args:
+        h (str): string of hexadecimal characters
+
+    Returns:
+        an integer whose bit representation corresponds to the
+        hexadecimal representation in h
+    '''
     return int(h, 16)
 
 
 def bin_to_hex(b, n=None):
+    '''
+    Return hexadecimal representation of binary value
+
+    Args:
+        b (int): integer whose bit representation will be converted
+        n (int): length of returned hexadecimal string (the string will
+            be left-padded with 0s if it is originally shorter than n;
+            an exception will be thrown if it is longer; the string
+            will be returned as-is if n is None)
+
+    Returns:
+        a string of hexadecimal characters representing the bit
+        sequence in b, padded to be n characters long if n is not
+        None
+
+    Raises:
+        ValueError: if `n` is not None and the hexadecimal string
+            representing b is longer than n
+    '''
     h = hex(b)[2:]
     if h.endswith('L'):
         h = h[:-1]
@@ -49,6 +78,23 @@ def bin_to_hex(b, n=None):
 
 
 def split_uuid(u):
+    '''
+    Split UUID string into three hexadecimal strings of sizes 12, 8, and
+    12, returning those three strings (with hyphens stripped) in a
+    tuple.
+
+    Args:
+        u (str): UUID string
+
+    Returns:
+        a tuple of three hexadecimal strings of sizes 12, 8, and 12,
+        corresponding to the first two segments, middle two segments,
+        and last segment of the input UUID string (with all hyphens
+        stripped)
+
+    Raises:
+        ValueError: if UUID string is malformatted
+    '''
     p = u.split('-')
 
     valid_input = (
@@ -73,6 +119,27 @@ def split_uuid(u):
 
 
 def join_uuid(xs, ys, zs):
+    '''
+    Given three hexadecimal strings of sizes 12, 8, and 12, join them
+    into a UUID string (inserting hyphens appropriately) and return the
+    result.
+
+    Args:
+        xs (str): 12 hexadecimal characters that will form first
+            two segments of the UUID string (size 8 and size 4
+            respectively)
+        ys (str): 8 hexadecimal characters that will form the third
+            and fourth segment of the UUID string (each of size 4)
+        zs (str): 12 hexadecimal characters that will form the last
+            segment of the UUID string (size 12)
+
+    Returns:
+        string of size 36 (12 + 8 + 12 = 32, plus four hyphens inserted
+        appropriately) comprising UUID formed from xs, ys, and zs
+
+    Raises:
+        ValueError: if xs, ys, or zs have incorrect length
+    '''
     valid_input = (
         len(xs) == 12 and
         len(ys) == 8 and
@@ -87,10 +154,27 @@ def join_uuid(xs, ys, zs):
 
 
 def generate_hex_unif(n):
+    '''
+    Generate and return random string of n hexadecimal characters.
+
+    Args:
+        n (int): number of characters of string to return
+
+    Returns:
+        string of n i.i.d. uniform hexadecimal characters
+    '''
     return ''.join(random.choice('abcdef0123456789') for i in range(n))
 
 
 def generate_uuid_unif():
+    '''
+    Generate and return random UUID string whose characters are drawn
+    uniformly from the hexadecimal alphabet.
+
+    Returns:
+        string of hexadecimal characters drawn uniformly at random
+        (delimited into five UUID-like segments by hyphens)
+    '''
     return join_uuid(generate_hex_unif(12),
                      generate_hex_unif(8),
                      generate_hex_unif(12))
@@ -98,10 +182,22 @@ def generate_uuid_unif():
 
 class _AnalyticUUIDGenerator(object):
     """
-    UUID generator for a given analytic in a given Communication.
+    Compressible UUID generator for a given analytic in a given
+    Communication.
+
+    Given a starting UUID, a consecutive (incrementing) sequence of
+    UUIDs is generated; incrementation affects only the last twelve
+    characters of the UUID and wraps around (those twelve characters
+    only) when the end is reached.  The first four segments of the
+    generated UUID are constant.
     """
 
     def __init__(self, u):
+        '''
+        Args:
+            u (str): UUID string containing base characters and initial
+                offset of UUIDs to generate
+        '''
         (self._xs, ys, zs) = split_uuid(u)
         self._ys = generate_hex_unif(len(ys))
         self._z = hex_to_bin(generate_hex_unif(len(zs)))
@@ -114,8 +210,11 @@ class _AnalyticUUIDGenerator(object):
 
     def __next__(self):
         """
-        Generate and return a new concrete UUID.
-        StopIteration will never be raised.
+        Generate and return a new concrete :class:`.UUID` object.
+        (StopIteration will never be raised.)
+
+        Returns:
+            next concrete :class:`.UUID` object in the sequence
         """
         self._z = (self._z + 1) % self._z_bound
         self.n += 1
@@ -124,6 +223,13 @@ class _AnalyticUUIDGenerator(object):
         ))
 
     def next(self):
+        """
+        Generate and return a new concrete :class:`.UUID` object.
+        (StopIteration will never be raised.)
+
+        Returns:
+            next concrete :class:`.UUID` object in the sequence
+        """
         return self.__next__()
 
 
@@ -295,14 +401,32 @@ class UUIDClustering(object):
 
 
 class UUIDCompressor(object):
+    '''
+    Interface to replacing a Communication's UUIDs with compressible
+    UUIDs.
+    '''
 
     def __init__(self, single_analytic=False):
+        '''
+        Args:
+            single_analytic (bool): True to generate new UUIDs using
+                a single analytic for all annotations, false to use
+                the annotation metadata tool name as the analytic id
+        '''
         self.single_analytic = single_analytic
 
     def compress(self, comm):
         """
+        Return a copy of a communication whose UUIDs have been
+        replaced by compressible UUIDs using
+        :class:`.AnalyticUUIDGeneratorFactory`.
+        When this method returns this object's public member variable
+        `uuid_map` will contain a dictionary mapping the original
+        UUIDs to the new UUIDs.
+
         Args:
-            comm (Communication)
+            comm (Communication): communication to be copied
+                (the UUIDs of the copy will be made compressible)
 
         Returns:
             Communication: Deep copy of `comm` with compressed UUIDs

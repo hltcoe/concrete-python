@@ -13,6 +13,15 @@ except NameError:
 
 
 def _identity(o):
+    '''
+    Return input unchanged (identity function).
+
+    Args:
+        o (object): anything
+
+    Returns:
+        `o`
+    '''
     return o
 
 
@@ -25,9 +34,12 @@ def read_communication_from_redis_key(redis_db, key, add_references=True):
     block is True and key does not exist after specified timeout.
 
     Args:
-        redis_db:
-        key:
-        add_references:
+        redis_db (redis.Redis): Redis database connection object
+        key (str): simple (string) key to read serialized
+            communication from
+        add_references (bool): If True, calls
+           :func:`concrete.util.references.add_references_to_communication`
+           on :class:`.Communication` read from file
     '''
     buf = redis_db.get(key)
     if buf is None:
@@ -74,25 +86,47 @@ class RedisReader(object):
         redis_db.
 
         Args:
-            redis_db: object of class redis.Redis
-            key: name of redis key containing your object(s)
-            key_type: 'set', 'list', 'hash', or None; if None, look up
-                type in redis (only works if the key exists, so
+            redis_db (redis.Redis): Redis database connection object
+            key (str): name of redis key containing your object(s)
+            key_type (str): 'set', 'list', 'hash', or None; if None,
+                look up type in redis (only works if the key exists, so
                 probably not suitable for block and/or pop modes)
-            pop: boolean, True to remove objects from redis
+            pop (bool): True to remove objects from redis
                 as we iterate over them, and False to leave redis
                 unaltered
-            block: boolean, True to block for data (i.e., wait for
+            block (bool): True to block for data (i.e., wait for
                 something to be added to the list if it is empty),
                 False to end iteration when there is no more data
-            right_to_left: boolean, True to iterate over and index in
+            right_to_left (bool): True to iterate over and index in
                 lists from right to left, False to iterate/index
                 from left to right
-            deserialize_func: function, maps blobs from redis to some more
+            deserialize_func (func): maps blobs from redis to some more
                 friendly representation (e.g., if all your items
                 are unicode strings, you might want to specify
                 lambda s: s.decode('utf-8')); return blobs
                 unchanged if deserialize_func is None
+            block_timeout (int): number of seconds to block during
+                operations if `block` is True; if 0, block forever
+            temp_key_ttl (int): time-to-live (in seconds) of temporary
+                keys created during scans (amount of time to process
+                a batch of items returned by a scan should be much less
+                than the time-to-live of the temporary key, or duplicate
+                items will be returned)
+            temp_key_leaf_len (int): length (in bytes) of random
+                part of temporary key (longer is less likely to cause
+                conflicts with other processes but slower)
+            cycle_list (bool): iterate over list by popping items from
+                the right end and pushing them onto the left end
+                (atomically), note iteration thus modifies the list
+                (although a full iteration ultimately leaves the list in
+                the same state as it began)
+
+        Raises:
+            Exception: if `key_type` is None but the key does not exist
+                in the database (so its type cannot be guessed)
+            ValueError: if key type is not recognized or the options
+                that were specified are not supported for a recognized
+                key type
         '''
         self.redis_db = redis_db
         self.key = key
@@ -102,7 +136,7 @@ class RedisReader(object):
             if redis_db.exists(key):
                 key_type = redis_db.type(key).decode('utf-8')
             else:
-                raise ValueError('can only guess type of key that exists')
+                raise Exception('can only guess type of key that exists')
 
         if key_type not in ('set', 'hash', 'list'):
             raise ValueError('unrecognized key type %s' % key_type)
@@ -140,6 +174,16 @@ class RedisReader(object):
         )
 
     def __iter__(self):
+        '''
+        Return iterator over respective redis data structure.
+
+        Returns:
+            iterator over data structure
+
+        Raises:
+            Exception: if key type is not recognized or unsupported
+                options were used with a recognized key type
+        '''
         if self.key_type in ('list', 'set') and self.pop:
             buf = self._pop_buf()
             while buf is not None:
@@ -198,6 +242,14 @@ class RedisReader(object):
     def __len__(self):
         '''
         Return instantaneous length of dataset.
+
+        Returns:
+            instantaneous length of data set in redis (subject to change
+            if database is modified)
+
+        Raises:
+            Exception: if called on redis key type that is not a
+                list, hash, or set
         '''
         if self.key_type == 'list':
             return self.redis_db.llen(self.key)
@@ -214,7 +266,11 @@ class RedisReader(object):
         never pop or block.
 
         Args:
-            k:
+            k: list index (int) or hash key (str)
+
+        Raises:
+            Exception: if called on redis key type that is not a
+                list or hash
         '''
         if self.key_type in ('list', 'hash'):
             if self.key_type == 'list':
@@ -236,7 +292,11 @@ class RedisReader(object):
         http://redis.io/commands/spop .
 
         Args:
-            n:
+            n (int): number of objects to return
+
+        Raises:
+            Exception: if key type is not a set, or if it is a set
+                but popping or blocking operation is specified
         '''
         if self.key_type == 'set' and not self.pop and not self.block:
             return [
@@ -252,6 +312,11 @@ class RedisReader(object):
         '''
         Pop and return a serialized object, or None if there is
         none (or we blocked and timed out).
+
+        Raises:
+            Exception: if called on redis key type that is not a
+                list or set, or if the key type is a set and blocking
+                operation is specified
         '''
         if self.key_type == 'list':
             if self.block:
@@ -280,6 +345,10 @@ class RedisReader(object):
         '''
         Generate temporary (random, unused) key.  Do not set in redis
         (leave that to the caller).
+
+        Returns:
+            random unused redis key (note: could be no longer unused
+            by the time the caller reads it, however unlikely)
         '''
         temp_key = None
         while temp_key is None or self.redis_db.exists(temp_key):
@@ -312,26 +381,42 @@ class RedisCommunicationReader(RedisReader):
         redis_db.
 
         Args:
-            redis_db: object of class redis.Redis
-            key: name of redis key containing your communication(s)
-            add_references: boolean, True to fill in members in the
+            redis_db (redis.Redis): Redis database connection object
+            key (str): name of redis key containing your
+                communication(s)
+            add_references (bool): True to fill in members in the
                 communication according to UUID relationships (see
                 concrete.util.add_references), False to return
                 communication as-is (note: you may need this False
                 if you are dealing with incomplete communications)
 
-        All other keyword arguments are passed through to RedisReader.
+        All other keyword arguments are passed through to RedisReader;
+        see :class:`.RedisReader` for a description of those
+        arguments.
+
+        Raises:
+            Exception: if `deserialize_func` is specified (it is set
+                to the appropriate concrete deserializer internally)
         '''
 
         if 'deserialize_func' in kwargs:
-            raise ValueError('RedisCommunicationReader does not allow custom '
-                             'deserialize_func')
+            raise Exception('RedisCommunicationReader does not allow custom '
+                            'deserialize_func')
         self.add_references = add_references
         super(RedisCommunicationReader, self).__init__(
             redis_db, key, deserialize_func=self._load_from_buffer, **kwargs
         )
 
     def _load_from_buffer(self, buf):
+        '''
+        Deserialize communication from string buffer and return.
+
+        Args:
+            buf (str): buffer containing serialized communication
+
+        Returns:
+            Communication deserialized from `buf`
+        '''
         return read_communication_from_buffer(
             buf, add_references=self.add_references)
 
@@ -339,6 +424,12 @@ class RedisCommunicationReader(RedisReader):
 def write_communication_to_redis_key(redis_db, key, comm):
     '''
     Serialize communication and store result in redis key.
+
+    Args:
+        redis_db (redis.Redis): Redis database connection object
+        key (str): name of simple (string) redis key to write
+            communication to
+        comm (Communication): communication to serialize
     '''
     redis_db.set(key, write_communication_to_buffer(comm))
 
@@ -368,18 +459,18 @@ class RedisWriter(object):
         redis_db.
 
         Args:
-            redis_db: object of class redis.Redis
-            key: name of redis key containing your object(s)
-            key_type: 'set', 'list', 'hash', or None; if None, look up
-                type in redis (only works if the key exists)
-            right_to_left: boolean, True to write elements to the left
+            redis_db (redis.Redis): Redis database connection object
+            key (str): name of redis key containing your object(s)
+            key_type (str): 'set', 'list', 'hash', or None; if None,
+                look up type in redis (only works if the key exists)
+            right_to_left (bool): True to write elements to the left
                 end of lists, False to write to the right end
-            serialize_func: function, maps objects to blobs before
+            serialize_func (func): maps objects to blobs before
                 sending to Redis (e.g., if everything you write
                 will be a unicode string, you might want to use
                 lambda u: u.encode('utf-8')); pass objects to
                 Redis unchanged if serialize_func is None
-            hash_key_func: function, maps objects to keys when key_type
+            hash_key_func (func): maps objects to keys when key_type
                 is hash (None: use Python's hash function)
         '''
         self.redis_db = redis_db
@@ -410,9 +501,24 @@ class RedisWriter(object):
         )
 
     def clear(self):
+        '''
+        Remove all data from redis data structure.
+        '''
         self.redis_db.delete(self.key)
 
     def write(self, obj):
+        '''
+        Write object obj to redis data structure.
+
+        Args:
+            obj (object): object to be serialized by
+            `self.serialize_func` and written to database, according
+            to key type
+
+        Raises:
+            Exception: if called on redis key type that is not a
+                list, set, or hash
+        '''
         buf = self.serialize_func(obj)
 
         if self.key_type == 'list':
@@ -456,17 +562,28 @@ class RedisCommunicationWriter(RedisWriter):
         redis_db.
 
         Args:
-            redis_db: object of class redis.Redis
-            key: name of redis key containing your communication(s)
-            uuid_hash_key: boolean, True to use the UUID as the hash key
+            redis_db (redis.Redis): Redis database connection object
+            key (str): name of redis key containing your
+                communication(s)
+            uuid_hash_key (bool): True to use the UUID as the hash key
                  for a communication, False to use the id
+
+        All other keyword arguments are passed through to RedisWriter;
+        see :class:`.RedisWriter` for a description of those
+        arguments.
+
+        Raises:
+            Exception: if `serialize_func` is specified (it is set
+                to the appropriate concrete serializer internally),
+                or if `hash_key_func` is specified (it is set to an
+                appropriate function internally)
         '''
         if 'serialize_func' in kwargs:
-            raise ValueError('RedisCommunicationWriter does not allow custom '
-                             'serialize_func')
+            raise Exception('RedisCommunicationWriter does not allow custom '
+                            'serialize_func')
         if 'hash_key_func' in kwargs:
-            raise ValueError('RedisCommunicationWriter does not allow custom '
-                             'hash_key_func')
+            raise Exception('RedisCommunicationWriter does not allow custom '
+                            'hash_key_func')
         self.uuid_hash_key = uuid_hash_key
         super(RedisCommunicationWriter, self).__init__(
             redis_db, key, serialize_func=self._write_to_buffer,
@@ -474,9 +591,28 @@ class RedisCommunicationWriter(RedisWriter):
         )
 
     def _write_to_buffer(self, comm):
+        '''
+        Serialize communication and return result as a string.
+
+        Args:
+            comm (Communication): communication to serialize
+
+        Returns:
+            string representing serialized `comm`
+        '''
         return write_communication_to_buffer(comm)
 
     def _to_key(self, comm):
+        '''
+        Return hash key of given communication.
+
+        Args:
+            comm (Communication): communication to return hash key for
+
+        Returns:
+            Communication UUID string if `self.uuid_hash_key` is True,
+            Communication id otherwise.
+        '''
         return (comm.uuid.uuidString if self.uuid_hash_key else comm.id)
 
     def __str__(self):

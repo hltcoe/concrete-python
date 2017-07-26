@@ -21,6 +21,7 @@ from .results_wrapper import *  # noqa
 from .search_wrapper import *  # noqa
 from .service_wrapper import *  # noqa
 from .simple_comm import *  # noqa
+from .summarization_wrapper import * # noqa
 from .thrift_factory import *  # noqa
 from .tokenization import *  # noqa
 from .twitter import *  # noqa

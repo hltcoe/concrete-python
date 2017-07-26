@@ -1,7 +1,8 @@
 4.13.1 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added concrete.util.summarization_wrapper submodule for
+  SummarizationService introduced with concrete 4.13
 
 
 4.13.0 (2017-07-18)

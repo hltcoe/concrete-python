@@ -26,6 +26,7 @@ concrete.util package
    concrete.util.search_wrapper
    concrete.util.service_wrapper
    concrete.util.simple_comm
+   concrete.util.summarization_wrapper
    concrete.util.thrift_factory
    concrete.util.tokenization
    concrete.util.twitter

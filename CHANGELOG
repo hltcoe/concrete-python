@@ -1,6 +1,8 @@
 4.13.1 (unreleased)
 -------------------
 
+- Added 'bottle' dependency needed by scripts/access-http-server.py
+
 - Add S3 fetch (communication container) and store handler.
 
 - Add Redis store handler.

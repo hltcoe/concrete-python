@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
         install_requires=[
             'boto',
+            'bottle',
             'humanfriendly',
             'networkx',
             'thrift==0.10.0',

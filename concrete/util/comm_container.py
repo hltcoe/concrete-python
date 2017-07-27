@@ -231,7 +231,9 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
 
 
 class RedisHashBackedCommunicationContainer(collections.Mapping):
-    """Maps Comm IDs to Comms, retrieving Comms from a Redis hash.
+    """
+    Provides access to Communications stored in a Redis hash,
+    assuming the key of each communication is its Communication id.
 
     `RedisHashBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
@@ -262,3 +264,54 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
 
     def __len__(self):
         return self.redis_db.hlen(self.key)
+
+
+class S3BackedCommunicationContainer(collections.Mapping):
+    """
+    Provides access to Communications stored in an AWS S3 bucket,
+    assuming the key of each communication is its Communication id.
+
+    `S3HashBackedCommunicationContainer` instances behave as dict-like
+    data structures that map Communication IDs to Communications.
+    Communications are lazily retrieved from an S3 bucket.
+    """
+
+    def __init__(self, bucket, prefix=None):
+        """
+        Args:
+            bucket (boto.s3.bucket.Bucket): S3 bucket object
+            prefix (str): Prefix of keys in bucket to consider (if
+                None, consider all keys)
+        """
+        if prefix is None:
+            prefix = ''
+        self.bucket = bucket
+        self.prefix = prefix
+
+    def __getitem__(self, communication_id):
+        if not communication_id.startswith(self.prefix):
+            raise KeyError
+        key = self.bucket.get_key(communication_id)
+        if key is None:
+            raise KeyError
+        buf = key.get_contents_as_string()
+        comm = read_communication_from_buffer(buf)
+        return comm
+
+    def __contains__(self, communication_id):
+        if communication_id.startswith(self.prefix):
+            return self.bucket.get_key(communication_id) is not None
+        else:
+            return False
+
+    def __iter__(self):
+        print('iter')
+        return iter(key.name for key in self.bucket.list(prefix=self.prefix))
+
+    def __len__(self):
+        n = 0
+        print(n)
+        for comm_id in self:
+            n += 1
+            print(n)
+        return n

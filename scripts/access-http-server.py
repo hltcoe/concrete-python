@@ -114,8 +114,9 @@ def main():
     parser.add_argument('--host', default='localhost',
                         help='Host interface to listen on')
     parser.add_argument('-p', '--port', type=int, default=8080)
-    parser.add_argument('-l', '--loglevel', choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
-                        help='Logging verbosity level threshold (to stderr)')
+    parser.add_argument('-l', '--loglevel',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument('--static-path', default='.',
                         help='Path where HTML files are stored')
     parser.add_argument('--store-path', default='.',
@@ -125,7 +126,7 @@ def main():
                         "(e.g. '2G', '300MB')")
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel)
+    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel.upper())
 
     comm_container = {}
     if os.path.isdir(args.fetch_source):

@@ -6,6 +6,8 @@ from ..access.ttypes import FetchResult
 from ..services.ttypes import ServiceInfo
 from .access_wrapper import FetchCommunicationClientWrapper
 from .file_io import write_communication_to_file
+from .mem_io import write_communication_to_buffer
+from .redis_io import RedisCommunicationWriter
 from ..version import concrete_library_version
 
 
@@ -23,6 +25,7 @@ class CommunicationContainerFetchHandler(object):
     - :class:`.MemoryBackedCommunicationContainer`
     - :class:`.RedisHashBackedCommunicationContainer`
     - :class:`.ZipFileBackedCommunicationContainer`
+    - :class:`.S3BackedCommunicationContainer`
 
     Usage::
 
@@ -174,3 +177,82 @@ class RelayFetchHandler(object):
                      (offset, count))
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.getCommunicationIDs(offset, count)
+
+
+class S3BackedStoreHandler(object):
+    """Simple StoreCommunicationService implementation using an AWS S3
+    bucket.
+
+    Implements the :mod:`.StoreCommunicationService` interface, storing
+    Communications in an S3 bucket, indexed by id.
+    """
+    def __init__(self, bucket):
+        """
+        Args:
+            bucket (boto.s3.bucket.Bucket): S3 bucket object
+        """
+        self.bucket = bucket
+
+    def about(self):
+        logging.info("S3BackedStoreHandler.about() called")
+        service_info = ServiceInfo()
+        service_info.name = 'S3BackedStoreHandler'
+        service_info.version = concrete_library_version()
+        return service_info
+
+    def alive(self):
+        logging.info("S3BackedStoreHandler.alive() called")
+        return True
+
+    def store(self, communication):
+        """Save Communication to an S3 bucket, using the Communication
+        id as a key.
+
+        Args:
+            communication (Communication): communication to store
+        """
+        logging.info(
+            "S3BackedStoreHandler.store() called with Communication "
+            "with ID '%s'" % communication.id)
+        buf = write_communication_to_buffer(communication)
+        key = self.bucket.get_key(communication.id, validate=False)
+        key.set_contents_from_string(buf)
+
+
+class RedisHashBackedStoreHandler(object):
+    """Simple StoreCommunicationService implementation using a Redis
+    hash.
+
+    Implements the :mod:`.StoreCommunicationService` interface, storing
+    Communications in a Redis hash, indexed by id.
+    """
+    def __init__(self, redis_db, key):
+        """
+        Args:
+            redis_db (redis.Redis): Redis database connection object
+            key (str): key of hash in redis database
+        """
+        self.writer = RedisCommunicationWriter(redis_db, key, key_type='hash')
+
+    def about(self):
+        logging.info("RedisHashBackedStoreHandler.about() called")
+        service_info = ServiceInfo()
+        service_info.name = 'RedisHashBackedStoreHandler'
+        service_info.version = concrete_library_version()
+        return service_info
+
+    def alive(self):
+        logging.info("RedisHashBackedStoreHandler.alive() called")
+        return True
+
+    def store(self, communication):
+        """Save Communication to a Redis hash, using the Communication
+        id as a key.
+
+        Args:
+            communication (Communication): communication to store
+        """
+        logging.info(
+            "RedisHashBackedStoreHandler.store() called with Communication "
+            "with ID '%s'" % communication.id)
+        self.writer.write(communication)

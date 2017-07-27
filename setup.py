@@ -59,6 +59,7 @@ if __name__ == '__main__':
                   + glob.glob('concrete/services/*-remote'),
 
         install_requires=[
+            'boto',
             'humanfriendly',
             'networkx',
             'thrift==0.10.0',

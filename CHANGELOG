@@ -1,14 +1,18 @@
 4.13.1 (unreleased)
 -------------------
 
-- Added concrete.util.summarization_wrapper submodule for
+- Add S3 fetch (communication container) and store handler.
+
+- Add Redis store handler.
+
+- Add concrete.util.summarization_wrapper submodule for
   SummarizationService introduced with concrete 4.13
 
 
 4.13.0 (2017-07-18)
 -------------------
 
-- Updated to concrete 4.13 schema.
+- Update to concrete 4.13 schema.
 
 
 4.12.10 (2017-06-27)

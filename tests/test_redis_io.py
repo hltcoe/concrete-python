@@ -241,6 +241,43 @@ def test_redis_communication_reader_set(
     list(product((False, True), (False, True))),
 )
 @patch('concrete.util.redis_io.read_communication_from_buffer')
+def test_redis_communication_reader_set_batch(
+        mock_read_communication_from_buffer, right_to_left, inferred):
+    redis = Mock(
+        srandmember=Mock(side_effect=[
+            [sentinel.buf0, sentinel.buf1],
+        ]),
+        type=Mock(return_value=b'set'),
+    )
+    mock_read_communication_from_buffer.side_effect = [
+        sentinel.comm0, sentinel.comm1
+    ]
+
+    reader = RedisCommunicationReader(
+        redis, sentinel.key, key_type=None if inferred else 'set',
+        add_references=sentinel.add_references,
+        right_to_left=right_to_left)
+
+    assert reader.batch(sentinel.batch_size) == [sentinel.comm0, sentinel.comm1]
+
+    if inferred:
+        redis.type.assert_called_once_with(sentinel.key)
+    else:
+        assert not redis.type.called
+
+    redis.srandmember.assert_called_once_with(sentinel.key, sentinel.batch_size)
+
+    mock_read_communication_from_buffer.assert_has_calls([
+        call(sentinel.buf0, add_references=sentinel.add_references),
+        call(sentinel.buf1, add_references=sentinel.add_references),
+    ])
+
+
+@mark.parametrize(
+    'right_to_left,inferred',
+    list(product((False, True), (False, True))),
+)
+@patch('concrete.util.redis_io.read_communication_from_buffer')
 def test_redis_communication_reader_hash(
         mock_read_communication_from_buffer, right_to_left, inferred):
 
@@ -448,6 +485,33 @@ def test_redis_communication_reader_failed_block(right_to_left, inferred, key_ty
 
     if not inferred:
         assert not redis.type.called
+
+
+@mark.parametrize(
+    'right_to_left,inferred,key_type,pop,block',
+    list(product((False, True), (False, True), ('set',), (False, True), (False,))) +
+    list(product((False, True), (False, True), ('hash',), (False,), (False,))) +
+    list(product((False, True), (False, True), ('list',), (False, True), (False,))) +
+    list(product((False, True), (False, True), ('list',), (True,), (True,))),
+)
+def test_redis_communication_reader_failed_batch(right_to_left, inferred,
+                                                 key_type, pop, block):
+    redis = Mock(
+        type=Mock(return_value=key_type.encode('utf-8')),
+    )
+
+    reader = RedisCommunicationReader(
+            redis, sentinel.key, key_type=None if inferred else key_type,
+            add_references=sentinel.add_references,
+            pop=pop, block=block)
+
+    if inferred:
+        redis.type.assert_called_once_with(sentinel.key)
+    else:
+        assert not redis.type.called
+
+    with raises(Exception):
+        reader.batch(sentinel.batch_size)
 
 
 @mark.parametrize(

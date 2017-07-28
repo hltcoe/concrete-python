@@ -12,7 +12,7 @@ from concrete.util import write_communication_to_buffer
 from concrete.validate import validate_communication
 
 from pytest import raises, fixture
-from mock import Mock, sentinel, patch
+from mock import Mock, sentinel, patch, call
 
 
 @fixture
@@ -132,13 +132,19 @@ def test_redis_hash_backed_comm_container_getitem(
     mock_read_communication_from_buffer.assert_called_once_with(sentinel.comm_buf)
 
 
-def test_s3_backed_comm_container_iter():
+@patch('concrete.util.comm_container.unprefix_s3_key')
+def test_s3_backed_comm_container_iter(mock_unprefix_s3_key):
     keys = [Mock(), Mock(), Mock()]
-    keys[0].name = sentinel.name0
-    keys[1].name = sentinel.name1
-    keys[2].name = sentinel.name2
+    keys[0].name = sentinel.prefixed_name0
+    keys[1].name = sentinel.prefixed_name1
+    keys[2].name = sentinel.prefixed_name2
     bucket = Mock(list=Mock(side_effect=[keys]))
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
+    mock_unprefix_s3_key.side_effect = [
+        sentinel.name0,
+        sentinel.name1,
+        sentinel.name2,
+    ]
+    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix_len)
 
     it = iter(cc)
     assert next(it) == sentinel.name0
@@ -146,90 +152,76 @@ def test_s3_backed_comm_container_iter():
     assert next(it) == sentinel.name2
     with raises(StopIteration):
         next(it)
-    bucket.list.assert_called_once_with(prefix=sentinel.prefix)
+    bucket.list.assert_called_once_with()
+    mock_unprefix_s3_key.assert_has_calls([
+        call(sentinel.prefixed_name0, sentinel.prefix_len),
+        call(sentinel.prefixed_name1, sentinel.prefix_len),
+        call(sentinel.prefixed_name2, sentinel.prefix_len),
+    ])
 
 
-def test_s3_backed_comm_container_len():
+@patch('concrete.util.comm_container.unprefix_s3_key')
+def test_s3_backed_comm_container_len(mock_unprefix_s3_key):
     keys = [Mock(), Mock(), Mock()]
-    keys[0].name = sentinel.name0
-    keys[1].name = sentinel.name1
-    keys[2].name = sentinel.name2
+    keys[0].name = sentinel.prefixed_name0
+    keys[1].name = sentinel.prefixed_name1
+    keys[2].name = sentinel.prefixed_name2
     bucket = Mock(list=Mock(side_effect=[keys]))
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
+    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix_len)
 
     assert 3 == len(cc)
-    bucket.list.assert_called_once_with(prefix=sentinel.prefix)
+    bucket.list.assert_called_once_with()
 
 
-def test_s3_backed_comm_container_not_contains():
+@patch('concrete.util.comm_container.prefix_s3_key')
+def test_s3_backed_comm_container_not_contains(mock_prefix_s3_key):
     bucket = Mock(get_key=Mock(side_effect=[None]))
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
-    comm_id = Mock(startswith=Mock(return_value=True))
+    mock_prefix_s3_key.side_effect = [sentinel.prefixed_name]
+    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix_len)
 
-    assert comm_id not in cc
-    bucket.get_key.assert_called_once_with(comm_id)
-    comm_id.startswith.assert_called_once_with(sentinel.prefix)
-
-
-def test_s3_backed_comm_container_not_contains_prefix():
-    bucket = Mock()
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
-    comm_id = Mock(startswith=Mock(return_value=False))
-
-    assert comm_id not in cc
-    assert not bucket.get_key.called
-    comm_id.startswith.assert_called_once_with(sentinel.prefix)
+    assert sentinel.comm_id not in cc
+    bucket.get_key.assert_called_once_with(sentinel.prefixed_name)
+    mock_prefix_s3_key.assert_called_once_with(sentinel.comm_id, sentinel.prefix_len)
 
 
-def test_s3_backed_comm_container_contains():
+@patch('concrete.util.comm_container.prefix_s3_key')
+def test_s3_backed_comm_container_contains(mock_prefix_s3_key):
     bucket = Mock(get_key=Mock(side_effect=[sentinel.key]))
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
-    comm_id = Mock(startswith=Mock(return_value=True))
+    mock_prefix_s3_key.side_effect = [sentinel.prefixed_name]
+    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix_len)
 
-    assert comm_id in cc
-    bucket.get_key.assert_called_once_with(comm_id)
-    comm_id.startswith.assert_called_once_with(sentinel.prefix)
+    assert sentinel.comm_id in cc
+    bucket.get_key.assert_called_once_with(sentinel.prefixed_name)
+    mock_prefix_s3_key.assert_called_once_with(sentinel.comm_id, sentinel.prefix_len)
 
 
+@patch('concrete.util.comm_container.prefix_s3_key')
 @patch('concrete.util.comm_container.read_communication_from_buffer')
 def test_s3_backed_comm_container_not_getitem(
-        mock_read_communication_from_buffer):
+        mock_read_communication_from_buffer, mock_prefix_s3_key):
     bucket = Mock(get_key=Mock(side_effect=[None]))
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
-    comm_id = Mock(startswith=Mock(return_value=True))
+    mock_prefix_s3_key.side_effect = [sentinel.prefixed_name]
+    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix_len)
 
     with raises(KeyError):
-        cc[comm_id]
-    bucket.get_key.assert_called_once_with(comm_id)
+        cc[sentinel.comm_id]
+    bucket.get_key.assert_called_once_with(sentinel.prefixed_name)
+    mock_prefix_s3_key.assert_called_once_with(sentinel.comm_id, sentinel.prefix_len)
     assert not mock_read_communication_from_buffer.called
-    comm_id.startswith.assert_called_once_with(sentinel.prefix)
 
 
-@patch('concrete.util.comm_container.read_communication_from_buffer')
-def test_s3_backed_comm_container_not_getitem_prefix(
-        mock_read_communication_from_buffer):
-    bucket = Mock()
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
-    comm_id = Mock(startswith=Mock(return_value=False))
-
-    with raises(KeyError):
-        cc[comm_id]
-    assert not bucket.get_key.called
-    assert not mock_read_communication_from_buffer.called
-    comm_id.startswith.assert_called_once_with(sentinel.prefix)
-
-
+@patch('concrete.util.comm_container.prefix_s3_key')
 @patch('concrete.util.comm_container.read_communication_from_buffer')
 def test_s3_backed_comm_container_getitem(
-        mock_read_communication_from_buffer):
+        mock_read_communication_from_buffer, mock_prefix_s3_key):
     bucket = Mock(get_key=Mock(side_effect=[
         Mock(get_contents_as_string=Mock(side_effect=[sentinel.comm_buf])),
     ]))
-    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix)
-    comm_id = Mock(startswith=Mock(return_value=True))
-
+    mock_prefix_s3_key.side_effect = [sentinel.prefixed_name]
     mock_read_communication_from_buffer.side_effect = [sentinel.comm]
-    assert cc[comm_id] == sentinel.comm
-    bucket.get_key.assert_called_once_with(comm_id)
+    cc = S3BackedCommunicationContainer(bucket, sentinel.prefix_len)
+
+    assert cc[sentinel.comm_id] == sentinel.comm
+    bucket.get_key.assert_called_once_with(sentinel.prefixed_name)
+    mock_prefix_s3_key.assert_called_once_with(sentinel.comm_id, sentinel.prefix_len)
     mock_read_communication_from_buffer.assert_called_once_with(sentinel.comm_buf)
-    comm_id.startswith.assert_called_once_with(sentinel.prefix)

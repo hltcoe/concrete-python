@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import logging
 import os
+from hashlib import md5
 
 from ..access.ttypes import FetchResult
 from ..services.ttypes import ServiceInfo
@@ -9,6 +10,9 @@ from .file_io import write_communication_to_file
 from .mem_io import write_communication_to_buffer
 from .redis_io import RedisCommunicationWriter
 from ..version import concrete_library_version
+
+
+DEFAULT_S3_KEY_PREFIX_LEN = 4
 
 
 class CommunicationContainerFetchHandler(object):
@@ -179,21 +183,78 @@ class RelayFetchHandler(object):
             return fc.getCommunicationIDs(offset, count)
 
 
+def prefix_s3_key(key_str, prefix_len):
+    '''
+    Given unprefixed S3 key `key_str`, prefix the key with a
+    deterministic prefix of hex characters of length `prefix_len` and
+    return the result.  Keys with such prefixes enable better
+    performance on S3 and reduce the likelihood of rate-limiting.
+
+    Args:
+        key_str (str): original (unprefixed) key, as a string
+        prefix_len (int): length of prefix to add to key
+
+    Returns:
+        prefixed key
+
+    References:
+        http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.html
+    '''
+    return md5(key_str.encode('utf-8')).hexdigest()[:prefix_len] + key_str
+
+
+def unprefix_s3_key(prefixed_key_str, prefix_len):
+    '''
+    Given prefixed S3 key `key_str`, remove prefix of length
+    `prefix_len` from the key and return the result.
+    Keys with random-looking prefixes enable better performance on S3
+    and reduce the likelihood of rate-limiting.
+
+    Args:
+        preixed_key_str (str): prefixed key, as a string
+        prefix_len (int): length of prefix to remove from key
+
+    Returns:
+        unprefixed key
+
+    References:
+        http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.html
+    '''
+    return prefixed_key_str[prefix_len:]
+
+
 class S3BackedStoreHandler(object):
     """Simple StoreCommunicationService implementation using an AWS S3
     bucket.
 
     Implements the :mod:`.StoreCommunicationService` interface, storing
-    Communications in an S3 bucket, indexed by id.
+    Communications in an S3 bucket, indexed by id, optionally prefixed
+    with a fixed-length, random-looking but deterministic hash to
+    improve performance.
+
+    References:
+        http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.html
     """
-    def __init__(self, bucket):
+    def __init__(self, bucket, prefix_len=DEFAULT_S3_KEY_PREFIX_LEN):
         """
         Args:
             bucket (boto.s3.bucket.Bucket): S3 bucket object
+            prefix_len (int): length of prefix to add to
+                a Communication id to form its key.  A
+                prefix of length four enables S3 to better partition the
+                bucket contents, yielding higher performance and a lower
+                chance of getting rate-limited by AWS.
         """
         self.bucket = bucket
+        self.prefix_len = prefix_len
 
     def about(self):
+        """
+        Return S3BackedStoreHandler service information.
+
+        Returns:
+            An object of type :class:`.ServiceInfo`
+        """
         logging.info("S3BackedStoreHandler.about() called")
         service_info = ServiceInfo()
         service_info.name = 'S3BackedStoreHandler'
@@ -201,12 +262,20 @@ class S3BackedStoreHandler(object):
         return service_info
 
     def alive(self):
+        """
+        Return whether service is alive and running.
+
+        Returns:
+            True or False
+        """
         logging.info("S3BackedStoreHandler.alive() called")
         return True
 
     def store(self, communication):
-        """Save Communication to an S3 bucket, using the Communication
-        id as a key.
+        """
+        Save Communication to an S3 bucket, using the Communication
+        id with a hash prefix of length `self.prefix_len`
+        as a key.
 
         Args:
             communication (Communication): communication to store
@@ -215,7 +284,8 @@ class S3BackedStoreHandler(object):
             "S3BackedStoreHandler.store() called with Communication "
             "with ID '%s'" % communication.id)
         buf = write_communication_to_buffer(communication)
-        key = self.bucket.get_key(communication.id, validate=False)
+        prefixed_key_str = prefix_s3_key(communication.id, self.prefix_len)
+        key = self.bucket.get_key(prefixed_key_str, validate=False)
         key.set_contents_from_string(buf)
 
 

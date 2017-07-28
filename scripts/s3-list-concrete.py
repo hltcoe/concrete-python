@@ -8,7 +8,10 @@ import logging
 
 from boto import connect_s3
 import concrete.version
-from concrete.util import set_stdout_encoding, S3BackedCommunicationContainer
+from concrete.util import (
+    set_stdout_encoding, S3BackedCommunicationContainer,
+    DEFAULT_S3_KEY_PREFIX_LEN,
+)
 
 
 def main():
@@ -20,8 +23,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('bucket_name', help='name of S3 bucket to read from')
-    parser.add_argument('--prefix',
-                        help='fetch only those keys starting with this prefix')
+    parser.add_argument('--prefix-len', type=int, default=DEFAULT_S3_KEY_PREFIX_LEN,
+                        help='S3 keys are prefixed with hashes of this length')
     parser.add_argument('-l', '--loglevel',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
@@ -34,12 +37,9 @@ def main():
     conn = connect_s3()
     logging.info('retrieving bucket {}'.format(args.bucket_name))
     bucket = conn.get_bucket(args.bucket_name)
-    if args.prefix:
-        logging.info('reading from s3 bucket {}, prefix {}'.format(
-            args.bucket_name, args.prefix))
-    else:
-        logging.info('reading from s3 bucket {}'.format(args.bucket_name))
-    container = S3BackedCommunicationContainer(bucket, args.prefix)
+    logging.info('reading from s3 bucket {}, prefix length {}'.format(
+        args.bucket_name, args.prefix_len))
+    container = S3BackedCommunicationContainer(bucket, args.prefix_len)
     for comm_id in container:
         print(comm_id)
 

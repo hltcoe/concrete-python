@@ -19,6 +19,9 @@ import zipfile
 import humanfriendly
 
 from ..access.ttypes import FetchRequest
+from .access import (
+    prefix_s3_key, unprefix_s3_key, DEFAULT_S3_KEY_PREFIX_LEN,
+)
 from .access_wrapper import FetchCommunicationClientWrapper
 from .file_io import (
     CommunicationReader,
@@ -269,29 +272,39 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
 class S3BackedCommunicationContainer(collections.Mapping):
     """
     Provides access to Communications stored in an AWS S3 bucket,
-    assuming the key of each communication is its Communication id.
+    assuming the key of each communication is its Communication id
+    (optionally prefixed with a fixed-length, random-looking but
+    deterministic hash to improve performance).
 
     `S3HashBackedCommunicationContainer` instances behave as dict-like
-    data structures that map Communication IDs to Communications.
-    Communications are lazily retrieved from an S3 bucket.
+    data structures that map Communication IDs (with or without
+    prefixes) to Communications.  Communications are lazily retrieved
+    from an S3 bucket.
+
+    References:
+        http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.html
     """
 
-    def __init__(self, bucket, prefix=None):
+    def __init__(self, bucket, prefix_len=DEFAULT_S3_KEY_PREFIX_LEN):
         """
         Args:
             bucket (boto.s3.bucket.Bucket): S3 bucket object
-            prefix (str): Prefix of keys in bucket to consider (if
-                None, consider all keys)
+            prefix_len (int): length of prefix in each
+                Communication's key in the bucket.  This number of
+                characters will be removed from the beginning of the
+                key to determine the Communication id (without incurring
+                the cost of fetching and deserializing the
+                Communication).  A prefix
+                enables S3 to better partition the bucket contents,
+                yielding higher performance and a lower chance of
+                getting rate-limited by AWS.
         """
-        if prefix is None:
-            prefix = ''
         self.bucket = bucket
-        self.prefix = prefix
+        self.prefix_len = prefix_len
 
     def __getitem__(self, communication_id):
-        if not communication_id.startswith(self.prefix):
-            raise KeyError
-        key = self.bucket.get_key(communication_id)
+        prefixed_key_str = prefix_s3_key(communication_id, self.prefix_len)
+        key = self.bucket.get_key(prefixed_key_str)
         if key is None:
             raise KeyError
         buf = key.get_contents_as_string()
@@ -299,19 +312,16 @@ class S3BackedCommunicationContainer(collections.Mapping):
         return comm
 
     def __contains__(self, communication_id):
-        if communication_id.startswith(self.prefix):
-            return self.bucket.get_key(communication_id) is not None
-        else:
-            return False
+        prefixed_key_str = prefix_s3_key(communication_id, self.prefix_len)
+        return self.bucket.get_key(prefixed_key_str) is not None
 
     def __iter__(self):
-        print('iter')
-        return iter(key.name for key in self.bucket.list(prefix=self.prefix))
+        return iter(
+            unprefix_s3_key(key.name, self.prefix_len)
+            for key in self.bucket.list())
 
     def __len__(self):
         n = 0
-        print(n)
         for comm_id in self:
             n += 1
-            print(n)
         return n

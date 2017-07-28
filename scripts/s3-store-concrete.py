@@ -9,7 +9,8 @@ import logging
 from boto import connect_s3
 import concrete.version
 from concrete.util import (
-    CommunicationReader, FileType, set_stdout_encoding, S3BackedStoreHandler
+    CommunicationReader, FileType, set_stdout_encoding, S3BackedStoreHandler,
+    DEFAULT_S3_KEY_PREFIX_LEN,
 )
 
 
@@ -26,6 +27,8 @@ def main():
                              'gz, bz2, tar, zip, etc.) (if "-", read from '
                              'stdin)')
     parser.add_argument('bucket_name', help='name of S3 bucket to write to')
+    parser.add_argument('--prefix-len', type=int, default=DEFAULT_S3_KEY_PREFIX_LEN,
+                        help='S3 keys are prefixed with hashes of this length')
     parser.add_argument('-l', '--loglevel',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
@@ -44,9 +47,9 @@ def main():
     conn = connect_s3()
     logging.info('retrieving bucket {}'.format(args.bucket_name))
     bucket = conn.get_bucket(args.bucket_name)
-    logging.info('reading from {} and writing to s3 bucket {}'.format(
-        args.input_path, args.bucket_name))
-    handler = S3BackedStoreHandler(bucket)
+    logging.info('reading from {}; writing to s3 bucket {}, prefix length {}'.format(
+        args.input_path, args.bucket_name, args.prefix_len))
+    handler = S3BackedStoreHandler(bucket, args.prefix_len)
     for (comm, _) in pairs:
         logging.info('storing {}'.format(comm.id))
         handler.store(comm)

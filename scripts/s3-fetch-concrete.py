@@ -10,7 +10,8 @@ from boto import connect_s3
 import concrete.version
 from concrete.util import (
     CommunicationWriterTGZ, set_stdout_encoding,
-    S3BackedCommunicationContainer
+    S3BackedCommunicationContainer,
+    DEFAULT_S3_KEY_PREFIX_LEN,
 )
 
 
@@ -26,8 +27,8 @@ def main():
     parser.add_argument('output_path',
                         help='path to input communications (uncompressed, '
                              'gz, bz2, tar, zip, etc.)')
-    parser.add_argument('--prefix',
-                        help='fetch only those keys starting with this prefix')
+    parser.add_argument('--prefix-len', type=int, default=DEFAULT_S3_KEY_PREFIX_LEN,
+                        help='S3 keys are prefixed with hashes of this length')
     parser.add_argument('-l', '--loglevel',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
@@ -40,13 +41,9 @@ def main():
     conn = connect_s3()
     logging.info('retrieving bucket {}'.format(args.bucket_name))
     bucket = conn.get_bucket(args.bucket_name)
-    if args.prefix:
-        logging.info('reading from s3 bucket {}, prefix {}, and writing to {}'.format(
-            args.bucket_name, args.prefix, args.output_path))
-    else:
-        logging.info('reading from s3 bucket {} and writing to {}'.format(
-            args.bucket_name, args.output_path))
-    container = S3BackedCommunicationContainer(bucket, args.prefix)
+    logging.info('reading from s3 bucket {}, prefix length {}; writing to {}'.format(
+        args.bucket_name, args.prefix_len, args.output_path))
+    container = S3BackedCommunicationContainer(bucket, args.prefix_len)
     with CommunicationWriterTGZ(args.output_path) as writer:
         for comm_id in container:
             logging.info('fetching {}'.format(comm_id))

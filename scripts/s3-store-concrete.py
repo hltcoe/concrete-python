@@ -20,7 +20,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Read communications from file and write to an AWS S3 '
                     'bucket (keyed by communication id).',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('input_path',
                         help='path to input communications (uncompressed, '

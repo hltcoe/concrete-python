@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Read communications from AWS S3 bucket (keyed by '
                     'communication id) and write to a tar.gz file.',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('bucket_name', help='name of S3 bucket to read from')
     parser.add_argument('output_path',

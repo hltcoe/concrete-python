@@ -64,6 +64,7 @@ def main():
                     alive = True
                     break
                 elif args.timeout is not None and time_elapsed > args.timeout:
+                    logging.info('timed out after {}s'.format(args.timeout))
                     break
         except:
             pass

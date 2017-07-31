@@ -35,7 +35,8 @@ def main():
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel.upper())
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     # if input_path is '-', read from stdin
     if args.input_path == '-':

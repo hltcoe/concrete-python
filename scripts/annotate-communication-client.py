@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 from __future__ import unicode_literals
-import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import logging
+
+import concrete.version
 from concrete.util import CommunicationReader, CommunicationWriter, FileType
 from concrete.util.annotate_wrapper import AnnotateCommunicationClientWrapper
 from concrete.util import set_stdout_encoding
@@ -28,6 +30,9 @@ def main():
                              " takes a path to a file.")
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level='INFO')
 
     # Won't work on Windows
     if args.input == '-':

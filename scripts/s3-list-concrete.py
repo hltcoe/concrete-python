@@ -31,7 +31,8 @@ def main():
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel.upper())
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     logging.info('connecting to s3')
     conn = connect_s3()

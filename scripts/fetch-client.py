@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import argparse
 import sys
+import logging
 
 import concrete.version
 from concrete.access import FetchCommunicationService
@@ -50,6 +51,9 @@ def main():
                         "stdin, one Communication ID per line")
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level='INFO')
 
     socket = factory.createSocket(args.server, args.port)
     transport = factory.createTransport(socket)

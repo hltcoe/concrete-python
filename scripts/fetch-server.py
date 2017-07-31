@@ -41,12 +41,13 @@ from concrete.util import set_stdout_encoding
 def main():
     set_stdout_encoding()
 
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-
     parser = argparse.ArgumentParser(
         description="Command line FetchCommunicatonService server",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level='INFO')
 
     parser.add_argument("communications_source",
                         help="A path to {1} a (possibly nested) directory of "

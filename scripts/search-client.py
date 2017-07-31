@@ -3,6 +3,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import logging
 
 import requests
 
@@ -59,6 +60,9 @@ def main():
     parser.add_argument("terms", nargs="*")
     concrete.version.add_argparse_argument(parser)
     ns = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level='INFO')
 
     with SearchClientWrapper(ns.host, ns.port) as client:
         interactive_mode = True

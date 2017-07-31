@@ -126,7 +126,8 @@ def main():
                         "(e.g. '2G', '300MB')")
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel.upper())
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     comm_container = {}
     if os.path.isdir(args.fetch_source):

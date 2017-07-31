@@ -11,6 +11,11 @@ from concrete.util import set_stdout_encoding
 from concrete.util.search_wrapper import SearchClientWrapper
 import concrete.version
 
+try:
+    raw_input
+except NameError:
+    raw_input = input
+
 
 def print_search_result(result, http_lookup_url):
     for result_item in result.searchResultItems:

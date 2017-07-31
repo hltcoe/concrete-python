@@ -133,13 +133,13 @@ def main():
     out_writer = None
     if args.direction is None:
         if args.iprotocol is None or args.oprotocol is None:
-            print ("Either --direction, or both --iprotocol and --oprotocol,"
-                   " must be provided")
+            print("Either --direction, or both --iprotocol and --oprotocol,"
+                  " must be provided")
             exit(1)
     else:
         if (args.iprotocol is not None) or (args.oprotocol is not None):
-            print ("Not both --direction, and either --iprotocol or"
-                   " --oprotocol, can be provided")
+            print("Not both --direction, and either --iprotocol or"
+                  " --oprotocol, can be provided")
             exit(1)
     encoding_input = KNOWN_CONVERSIONS[args.direction][
         0] if args.iprotocol is None else PROTOCOLS[args.iprotocol]

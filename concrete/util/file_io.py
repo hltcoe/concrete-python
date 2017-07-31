@@ -24,6 +24,11 @@ from ..structure.ttypes import TokenLattice
 from .references import add_references_to_communication
 from .thrift_factory import factory
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 
 if os.name == 'nt':
     # Windows NT does not have os.{uid,gid,username,groupname} so we

@@ -392,7 +392,7 @@ set of possible values::
         - NN -> NN
         - . -> .
 
-Finally, let's write our newly-annotated Communication back to disk::
+Finally, let's write our newly annotated Communication back to disk::
 
     from concrete.util import CommunicationWriter
 

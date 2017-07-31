@@ -34,7 +34,7 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
 
     `DirectoryBackedCommunicationContainer` instances behave as
     dict-like data structures that map Communication IDs to
-    Communications.  Communications are lazily-retrieved from the
+    Communications.  Communications are lazily retrieved from the
     filesystem.
 
     Upon initialization, a `DirectoryBackedCommunicationContainer`
@@ -108,7 +108,7 @@ class FetchBackedCommunicationContainer(collections.Mapping):
 
     `FetchBackedCommunicationContainer` instances behave as dict-like data
     structures that map Communication IDs to Communications.  Communications
-    are lazily-retrieved from a :mod:`.FetchCommunicationService`.
+    are lazily retrieved from a :mod:`.FetchCommunicationService`.
 
     If you need to retrieve large amounts of data from a
     :mod:`.FetchCommunicationService`, then you SHOULD NOT USE THIS CLASS.
@@ -200,7 +200,7 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
 
     `ZipFileBackedCommunicationContainer` instances behave as dict-like
     data structures that map Communication IDs to Communications.
-    Communications are lazily-retrieved from a Zip file.
+    Communications are lazily retrieved from a Zip file.
     """
 
     def __init__(self, zipfile_path, comm_extensions=['.comm', '.concrete']):

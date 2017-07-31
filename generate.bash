@@ -89,7 +89,7 @@ find $concrete_thrift_dir -name '*.thrift' -exec \
 echo 'Deleting generated files we do not want...'
 rm -f gen-py/concrete/__init__.py
 
-echo "Removing previously-generated directories from $output_dir/..."
+echo "Removing previously generated directories from $output_dir/..."
 for f in "$output_dir/"*
 do
     if [ -d "$f" -a "$f" != "$output_dir/util" ]
@@ -98,7 +98,7 @@ do
     fi
 done
 
-echo "Copying newly-generated classes to $output_dir/..."
+echo "Copying newly generated classes to $output_dir/..."
 cp -a gen-py/concrete/* "$output_dir/"
 
 if ! $raw

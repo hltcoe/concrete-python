@@ -1,7 +1,8 @@
 4.13.3 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix bug in wait-concrete-service.py in which timeout would sometimes
+  be ignored.
 
 
 4.13.2 (2017-08-01)

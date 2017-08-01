@@ -1,4 +1,4 @@
-4.13.3 (unreleased)
+4.13.3 (2017-08-01)
 -------------------
 
 - Fix bug in wait-concrete-service.py in which timeout would sometimes

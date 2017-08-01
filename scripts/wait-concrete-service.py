@@ -3,7 +3,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from time import sleep
+from time import sleep, time
 import argparse
 import logging
 import sys
@@ -55,7 +55,7 @@ def main():
 
     logging.info('waiting for {} service at {}:{} to come up'.format(
         args.service_name, args.host, args.port))
-    time_elapsed = 0
+    start = time()
     alive = False
     while not alive:
         try:
@@ -63,15 +63,15 @@ def main():
                 if cli.alive():
                     alive = True
                     break
-                elif args.timeout is not None and time_elapsed > args.timeout:
-                    logging.info('timed out after {}s'.format(args.timeout))
-                    break
         except:
             pass
-        logging.info('waiting {}s for {} service to come up'.format(
-            args.sleep_interval, args.service_name))
-        sleep(args.sleep_interval)
-        time_elapsed += args.sleep_interval
+        if args.timeout is not None and time() - start > args.timeout:
+            logging.info('timed out after {}s'.format(args.timeout))
+            break
+        else:
+            logging.info('waiting {}s for {} service to come up'.format(
+                args.sleep_interval, args.service_name))
+            sleep(args.sleep_interval)
 
     if alive:
         logging.info('{} service at {}:{} is up'.format(

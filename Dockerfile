@@ -60,4 +60,4 @@ RUN cd /home/concrete/concrete-python && \
     chown -R concrete:concrete /home/concrete
 
 USER concrete
-WORKDIR /home/concrete/concrete-python
+WORKDIR /home/concrete

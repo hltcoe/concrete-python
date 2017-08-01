@@ -1,6 +1,10 @@
 4.13.2 (unreleased)
 -------------------
 
+- Use home as WORKDIR in Docker image to avoid import errors.
+
+- Add .dockerignore.
+
 - Add script to wait for a Concrete service to become alive.
 
 - Add S3 fetch and store server scripts.

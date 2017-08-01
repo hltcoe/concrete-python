@@ -1,4 +1,4 @@
-4.13.2 (unreleased)
+4.13.2 (2017-08-01)
 -------------------
 
 - Use home as WORKDIR in Docker image to avoid import errors.

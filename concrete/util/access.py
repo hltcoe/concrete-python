@@ -178,7 +178,7 @@ class RelayFetchHandler(object):
 
     def getCommunicationIDs(self, offset, count):
         logging.debug('RelayFetchHandler.getCommunicationIDs(offset=%d, count=%d)' %
-                     (offset, count))
+                      (offset, count))
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.getCommunicationIDs(offset, count)
 

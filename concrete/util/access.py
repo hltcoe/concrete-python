@@ -49,7 +49,7 @@ class CommunicationContainerFetchHandler(object):
         self.communication_container = communication_container
 
     def about(self):
-        logging.info("Received about() call")
+        logging.debug("Received about() call")
         service_info = ServiceInfo()
         service_info.name = 'CommunicationContainerFetchHandler - %s' % \
                             type(self.communication_container)
@@ -57,11 +57,11 @@ class CommunicationContainerFetchHandler(object):
         return service_info
 
     def alive(self):
-        logging.info("Received alive() call")
+        logging.debug("Received alive() call")
         return True
 
     def fetch(self, fetch_request):
-        logging.info("Received FetchRequest: %s" % fetch_request)
+        logging.debug("Received FetchRequest: %s" % fetch_request)
         fetch_result = FetchResult()
         fetch_result.communications = []
         for communication_id in fetch_request.communicationIds:
@@ -73,13 +73,13 @@ class CommunicationContainerFetchHandler(object):
         return fetch_result
 
     def getCommunicationCount(self):
-        logging.info('Received getCommunicationCount()')
+        logging.debug('Received getCommunicationCount()')
         communicationCount = len(self.communication_container)
-        logging.info('- Communication Count: %d' % communicationCount)
+        logging.debug('- Communication Count: %d' % communicationCount)
         return communicationCount
 
     def getCommunicationIDs(self, offset, count):
-        logging.info('Received getCommunicationIDs() call')
+        logging.debug('Received getCommunicationIDs() call')
         return list(self.communication_container.keys())[offset:][:count]
 
 
@@ -97,14 +97,14 @@ class DirectoryBackedStoreHandler(object):
         self.store_path = store_path
 
     def about(self):
-        logging.info("DirectoryBackedStoreHandler.about() called")
+        logging.debug("DirectoryBackedStoreHandler.about() called")
         service_info = ServiceInfo()
         service_info.name = 'DirectoryBackedStoreHandler'
         service_info.version = concrete_library_version()
         return service_info
 
     def alive(self):
-        logging.info("DirectoryBackedStoreHandler.alive() called")
+        logging.debug("DirectoryBackedStoreHandler.alive() called")
         return True
 
     def store(self, communication):
@@ -113,7 +113,7 @@ class DirectoryBackedStoreHandler(object):
         Stored Communication files will be named `[COMMUNICATION_ID].comm`.
         If a file with that name already exists, it will be overwritten.
         """
-        logging.info(
+        logging.debug(
             "DirectoryBackedStoreHandler.store() called with Communication "
             "with ID '%s'" % communication.id)
         comm_filename = os.path.join(self.store_path, communication.id + '.comm')
@@ -157,27 +157,27 @@ class RelayFetchHandler(object):
         self.port = int(port)
 
     def about(self):
-        logging.info('RelayFetchHandler.about()')
+        logging.debug('RelayFetchHandler.about()')
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.about()
 
     def alive(self):
-        logging.info('RelayFetchHandler.alive()')
+        logging.debug('RelayFetchHandler.alive()')
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.alive()
 
     def fetch(self, request):
-        logging.info('RelayFetchHandler.fetch()')
+        logging.debug('RelayFetchHandler.fetch()')
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.fetch(request)
 
     def getCommunicationCount(self):
-        logging.info('RelayFetchHandler.getCommunicationCount()')
+        logging.debug('RelayFetchHandler.getCommunicationCount()')
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.getCommunicationCount()
 
     def getCommunicationIDs(self, offset, count):
-        logging.info('RelayFetchHandler.getCommunicationIDs(offset=%d, count=%d)' %
+        logging.debug('RelayFetchHandler.getCommunicationIDs(offset=%d, count=%d)' %
                      (offset, count))
         with FetchCommunicationClientWrapper(self.host, self.port) as fc:
             return fc.getCommunicationIDs(offset, count)
@@ -255,7 +255,7 @@ class S3BackedStoreHandler(object):
         Returns:
             An object of type :class:`.ServiceInfo`
         """
-        logging.info("S3BackedStoreHandler.about() called")
+        logging.debug("S3BackedStoreHandler.about() called")
         service_info = ServiceInfo()
         service_info.name = 'S3BackedStoreHandler'
         service_info.version = concrete_library_version()
@@ -268,7 +268,7 @@ class S3BackedStoreHandler(object):
         Returns:
             True or False
         """
-        logging.info("S3BackedStoreHandler.alive() called")
+        logging.debug("S3BackedStoreHandler.alive() called")
         return True
 
     def store(self, communication):
@@ -280,7 +280,7 @@ class S3BackedStoreHandler(object):
         Args:
             communication (Communication): communication to store
         """
-        logging.info(
+        logging.debug(
             "S3BackedStoreHandler.store() called with Communication "
             "with ID '%s'" % communication.id)
         buf = write_communication_to_buffer(communication)
@@ -305,14 +305,14 @@ class RedisHashBackedStoreHandler(object):
         self.writer = RedisCommunicationWriter(redis_db, key, key_type='hash')
 
     def about(self):
-        logging.info("RedisHashBackedStoreHandler.about() called")
+        logging.debug("RedisHashBackedStoreHandler.about() called")
         service_info = ServiceInfo()
         service_info.name = 'RedisHashBackedStoreHandler'
         service_info.version = concrete_library_version()
         return service_info
 
     def alive(self):
-        logging.info("RedisHashBackedStoreHandler.alive() called")
+        logging.debug("RedisHashBackedStoreHandler.alive() called")
         return True
 
     def store(self, communication):
@@ -322,7 +322,7 @@ class RedisHashBackedStoreHandler(object):
         Args:
             communication (Communication): communication to store
         """
-        logging.info(
+        logging.debug(
             "RedisHashBackedStoreHandler.store() called with Communication "
             "with ID '%s'" % communication.id)
         self.writer.write(communication)

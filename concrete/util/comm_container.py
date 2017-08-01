@@ -80,7 +80,7 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
     def __getitem__(self, communication_id):
         if communication_id in self.comm_id_to_comm_path:
             comm_path = self.comm_id_to_comm_path[communication_id]
-            logging.info("Reading Communication with ID '%s'" % comm_path)
+            logging.debug("Reading Communication with ID '%s'" % comm_path)
             if not os.path.exists(comm_path):
                 logging.error("Unable to find file with path '%s'" % comm_path)
                 raise KeyError
@@ -92,7 +92,7 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
                 comm = read_communication_from_file(comm_path)
             return comm
         else:
-            logging.info('No Communication with ID: %s' % communication_id)
+            logging.debug('No Communication with ID: %s' % communication_id)
             raise KeyError
 
     def __iter__(self):
@@ -179,10 +179,10 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
 
         logging.info("Reading in Communications from file '%s'" %
                      communications_file)
-        logging.info("Communication IDs:")
+        logging.debug("Communication IDs:")
         for (comm, _) in CommunicationReader(communications_file):
             self.comm_id_to_comm[comm.id] = comm
-            logging.info("  %s" % comm.id)
+            logging.debug("  %s" % comm.id)
         logging.info("Finished reading communications.\n")
 
     def __getitem__(self, communication_id):

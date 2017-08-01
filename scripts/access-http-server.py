@@ -29,13 +29,14 @@ from thrift.server import TServer
 from thrift.transport import TTransport
 
 from concrete.access import FetchCommunicationService, StoreCommunicationService
-from concrete.util.access import (
+from concrete.util import (
     CommunicationContainerFetchHandler,
-    DirectoryBackedStoreHandler)
-from concrete.util.comm_container import (
+    DirectoryBackedStoreHandler,
     DirectoryBackedCommunicationContainer,
     MemoryBackedCommunicationContainer,
-    ZipFileBackedCommunicationContainer)
+    ZipFileBackedCommunicationContainer,
+    set_stdout_encoding,
+)
 
 
 class AccessHTTPServer(object):
@@ -106,6 +107,8 @@ def thrift_endpoint(tserver):
 
 
 def main():
+    set_stdout_encoding()
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=''

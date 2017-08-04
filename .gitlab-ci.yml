@@ -5,10 +5,6 @@ build-test-deploy:
     - docker build -t concrete-python .
     - docker run --rm concrete-python tox -c concrete-python -e pep8,py27,py35,docs tests # configured in tox.ini
     - docker run --rm concrete-python tox -c concrete-python -e py27,py35 integration-tests
-    - # work around gitlab CI... only deploy on master
-      bash -c "[[ $CI_BUILD_REF_NAME != master ]] ||
-      (docker tag concrete-python r8n01:5000/concrete-python:latest &&
-      docker push r8n01:5000/concrete-python:latest)"
   tags:
     - shell
 

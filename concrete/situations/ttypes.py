@@ -991,7 +991,6 @@ class MentionArgument(object):
     If this MentionArgument can be identified in a document using an
     EntityMention or SituationMention, then UUID references to those
     types should be preferred and this field left as null.
-     - constituent: An alternative way to specify the same thing as tokens.
      - confidence: Confidence of this argument belonging to its SituationMention
      - propertyList: For the BinarySRL task, there may be situations
     where more than one property is attached to a single
@@ -1006,15 +1005,13 @@ class MentionArgument(object):
         (4, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ),  # 4
         (5, TType.DOUBLE, 'confidence', None, None, ),  # 5
         (6, TType.LIST, 'propertyList', (TType.STRUCT, (Property, Property.thrift_spec), False), None, ),  # 6
-        (7, TType.STRUCT, 'constituent', (concrete.structure.ttypes.ConstituentRef, concrete.structure.ttypes.ConstituentRef.thrift_spec), None, ),  # 7
     )
 
-    def __init__(self, role=None, entityMentionId=None, situationMentionId=None, tokens=None, constituent=None, confidence=None, propertyList=None,):
+    def __init__(self, role=None, entityMentionId=None, situationMentionId=None, tokens=None, confidence=None, propertyList=None,):
         self.role = role
         self.entityMentionId = entityMentionId
         self.situationMentionId = situationMentionId
         self.tokens = tokens
-        self.constituent = constituent
         self.confidence = confidence
         self.propertyList = propertyList
 
@@ -1048,12 +1045,6 @@ class MentionArgument(object):
                 if ftype == TType.STRUCT:
                     self.tokens = concrete.structure.ttypes.TokenRefSequence()
                     self.tokens.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 7:
-                if ftype == TType.STRUCT:
-                    self.constituent = concrete.structure.ttypes.ConstituentRef()
-                    self.constituent.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 5:
@@ -1108,10 +1099,6 @@ class MentionArgument(object):
             for iter55 in self.propertyList:
                 iter55.write(oprot)
             oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.constituent is not None:
-            oprot.writeFieldBegin('constituent', TType.STRUCT, 7)
-            self.constituent.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1180,7 +1167,6 @@ class SituationMention(object):
     analytics to decide what tokens (if any) they wish to include in
     this field. In particular, it is not specified whether the
     arguments' tokens should be included.
-     - constituent: An alternative way to specify the same thing as tokens.
      - confidence: A confidence score for this individual situation mention. You
     can also set a confidence score for an entire SituationMentionSet
     using the SituationMentionSet's metadata.
@@ -1338,7 +1324,7 @@ class SituationMention(object):
         None,  # 148
         None,  # 149
         (150, TType.STRUCT, 'tokens', (concrete.structure.ttypes.TokenRefSequence, concrete.structure.ttypes.TokenRefSequence.thrift_spec), None, ),  # 150
-        (151, TType.STRUCT, 'constituent', (concrete.structure.ttypes.ConstituentRef, concrete.structure.ttypes.ConstituentRef.thrift_spec), None, ),  # 151
+        None,  # 151
         None,  # 152
         None,  # 153
         None,  # 154
@@ -1390,7 +1376,7 @@ class SituationMention(object):
         (200, TType.DOUBLE, 'confidence', None, None, ),  # 200
     )
 
-    def __init__(self, uuid=None, text=None, situationType=None, situationKind=None, argumentList=None, intensity=None, polarity=None, tokens=None, constituent=None, confidence=None,):
+    def __init__(self, uuid=None, text=None, situationType=None, situationKind=None, argumentList=None, intensity=None, polarity=None, tokens=None, confidence=None,):
         self.uuid = uuid
         self.text = text
         self.situationType = situationType
@@ -1399,7 +1385,6 @@ class SituationMention(object):
         self.intensity = intensity
         self.polarity = polarity
         self.tokens = tokens
-        self.constituent = constituent
         self.confidence = confidence
 
     def read(self, iprot):
@@ -1459,12 +1444,6 @@ class SituationMention(object):
                     self.tokens.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 151:
-                if ftype == TType.STRUCT:
-                    self.constituent = concrete.structure.ttypes.ConstituentRef()
-                    self.constituent.read(iprot)
-                else:
-                    iprot.skip(ftype)
             elif fid == 200:
                 if ftype == TType.DOUBLE:
                     self.confidence = iprot.readDouble()
@@ -1514,10 +1493,6 @@ class SituationMention(object):
         if self.tokens is not None:
             oprot.writeFieldBegin('tokens', TType.STRUCT, 150)
             self.tokens.write(oprot)
-            oprot.writeFieldEnd()
-        if self.constituent is not None:
-            oprot.writeFieldBegin('constituent', TType.STRUCT, 151)
-            self.constituent.write(oprot)
             oprot.writeFieldEnd()
         if self.confidence is not None:
             oprot.writeFieldBegin('confidence', TType.DOUBLE, 200)

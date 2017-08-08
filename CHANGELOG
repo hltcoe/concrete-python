@@ -1,7 +1,10 @@
-4.13.4 (unreleased)
+4.14.0 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Updated for Concrete schema 4.14
+  - Removed `constituent` field from `MentionArgument` and
+    `SituationMention`.
+  - Added `dependencies` and `constituent` fields to `TokenRefSequence`
 
 
 4.13.3 (2017-08-01)

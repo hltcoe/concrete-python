@@ -36,71 +36,45 @@ class TokenizationKind(object):
     }
 
 
-class Token(object):
+class Constituent(object):
     """
-    A single token (typically a word) in a communication. The exact
-    definition of what counts as a token is left up to the tools that
-    generate token sequences.
-
-    Usually, each token will include at least a text string.
+    A single parse constituent (or "phrase").
 
     Attributes:
-     - tokenIndex: A 0-based tokenization-relative identifier for this token that
-    represents the order that this token appears in the
-    sentence. Together with the UUID for a Tokenization, this can be
-    used to define pointers to specific tokens. If a Tokenization
-    object contains multiple Token objects with the same id (e.g., in
-    different n-best lists), then all of their other fields *must* be
-    identical as well.
-     - text: The text associated with this token.
-    Note - we may have a destructive tokenizer (e.g., Stanford rewriting)
-    and as a result, we want to maintain this field.
-     - textSpan: Location of this token in this perspective's text (.text field).
-    In cases where this token does not correspond directly with any
-    text span in the text (such as word insertion during MT),
-    this field may be given a value indicating "approximately" where
-    the token comes from. A span covering the entire sentence may be
-    used if no more precise value seems appropriate.
-
-    NOTE: This span represents a best guess, or 'provenance':
-    it cannot be guaranteed that this text span matches the _exact_
-    text of the document, but is the annotation's best
-    effort at such a representation.
-     - rawTextSpan: Location of this token in the original, raw text (.originalText
-    field).  In cases where this token does not correspond directly
-    with any text span in the original text (such as word insertion
-    during MT), this field may be given a value indicating
-    "approximately" where the token comes from. A span covering the
-    entire sentence may be used if no more precise value seems
-    appropriate.
-
-    NOTE: This span represents a best guess, or 'provenance':
-    it cannot be guaranteed that this text span matches the _exact_
-    text of the original raw document, but is the annotation's best
-    effort at such a representation.
-     - audioSpan: Location of this token in the original audio.
-
-    NOTE: This span represents a best guess, or 'provenance':
-    it cannot be guaranteed that this text span matches the _exact_
-    text of the original document, but is the annotation's best
-    effort at such a representation.
+     - id: A parse-relative identifier for this consistuent. Together
+    with the UUID for a Parse, this can be used to define
+    pointers to specific constituents.
+     - tag: A description of this constituency node, e.g. the category "NP".
+    For leaf nodes, this should be a word and for pre-terminal nodes
+    this should be a POS tag.
+     - childList
+     - headChildIndex: The index of the head child of this constituent. I.e., the
+    head child of constituent <tt>c</tt> is
+    <tt>c.children[c.head_child_index]</tt>. A value of -1
+    indicates that no child head was identified.
+     - start: The first token (inclusive) of this constituent in the
+    parent Tokenization. Almost certainly should be populated.
+     - ending: The last token (exclusive) of this constituent in the
+    parent Tokenization. Almost certainly should be populated.
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'tokenIndex', None, None, ),  # 1
-        (2, TType.STRING, 'text', 'UTF8', None, ),  # 2
-        (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 3
-        (4, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 4
-        (5, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ),  # 5
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'tag', 'UTF8', None, ),  # 2
+        (3, TType.LIST, 'childList', (TType.I32, None, False), None, ),  # 3
+        (4, TType.I32, 'headChildIndex', None, -1, ),  # 4
+        (5, TType.I32, 'start', None, None, ),  # 5
+        (6, TType.I32, 'ending', None, None, ),  # 6
     )
 
-    def __init__(self, tokenIndex=None, text=None, textSpan=None, rawTextSpan=None, audioSpan=None,):
-        self.tokenIndex = tokenIndex
-        self.text = text
-        self.textSpan = textSpan
-        self.rawTextSpan = rawTextSpan
-        self.audioSpan = audioSpan
+    def __init__(self, id=None, tag=None, childList=None, headChildIndex=thrift_spec[4][4], start=None, ending=None,):
+        self.id = id
+        self.tag = tag
+        self.childList = childList
+        self.headChildIndex = headChildIndex
+        self.start = start
+        self.ending = ending
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -113,30 +87,37 @@ class Token(object):
                 break
             if fid == 1:
                 if ftype == TType.I32:
-                    self.tokenIndex = iprot.readI32()
+                    self.id = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.text = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.tag = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRUCT:
-                    self.textSpan = concrete.spans.ttypes.TextSpan()
-                    self.textSpan.read(iprot)
+                if ftype == TType.LIST:
+                    self.childList = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readI32()
+                        self.childList.append(_elem5)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
-                if ftype == TType.STRUCT:
-                    self.rawTextSpan = concrete.spans.ttypes.TextSpan()
-                    self.rawTextSpan.read(iprot)
+                if ftype == TType.I32:
+                    self.headChildIndex = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 5:
-                if ftype == TType.STRUCT:
-                    self.audioSpan = concrete.spans.ttypes.AudioSpan()
-                    self.audioSpan.read(iprot)
+                if ftype == TType.I32:
+                    self.start = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.ending = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             else:
@@ -148,33 +129,152 @@ class Token(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('Token')
-        if self.tokenIndex is not None:
-            oprot.writeFieldBegin('tokenIndex', TType.I32, 1)
-            oprot.writeI32(self.tokenIndex)
+        oprot.writeStructBegin('Constituent')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
             oprot.writeFieldEnd()
-        if self.text is not None:
-            oprot.writeFieldBegin('text', TType.STRING, 2)
-            oprot.writeString(self.text.encode('utf-8') if sys.version_info[0] == 2 else self.text)
+        if self.tag is not None:
+            oprot.writeFieldBegin('tag', TType.STRING, 2)
+            oprot.writeString(self.tag.encode('utf-8') if sys.version_info[0] == 2 else self.tag)
             oprot.writeFieldEnd()
-        if self.textSpan is not None:
-            oprot.writeFieldBegin('textSpan', TType.STRUCT, 3)
-            self.textSpan.write(oprot)
+        if self.childList is not None:
+            oprot.writeFieldBegin('childList', TType.LIST, 3)
+            oprot.writeListBegin(TType.I32, len(self.childList))
+            for iter6 in self.childList:
+                oprot.writeI32(iter6)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.rawTextSpan is not None:
-            oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 4)
-            self.rawTextSpan.write(oprot)
+        if self.headChildIndex is not None:
+            oprot.writeFieldBegin('headChildIndex', TType.I32, 4)
+            oprot.writeI32(self.headChildIndex)
             oprot.writeFieldEnd()
-        if self.audioSpan is not None:
-            oprot.writeFieldBegin('audioSpan', TType.STRUCT, 5)
-            self.audioSpan.write(oprot)
+        if self.start is not None:
+            oprot.writeFieldBegin('start', TType.I32, 5)
+            oprot.writeI32(self.start)
+            oprot.writeFieldEnd()
+        if self.ending is not None:
+            oprot.writeFieldBegin('ending', TType.I32, 6)
+            oprot.writeI32(self.ending)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.tokenIndex is None:
-            raise TProtocolException(message='Required field tokenIndex is unset!')
+        if self.id is None:
+            raise TProtocolException(message='Required field id is unset!')
+        if self.childList is None:
+            raise TProtocolException(message='Required field childList is unset!')
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class Parse(object):
+    """
+    A theory about the syntactic parse of a sentence.
+
+    \note If we add support for parse forests in the future, then it
+    will most likely be done by adding a new field (e.g.
+    "<tt>forest_root</tt>") that uses a new struct type to encode the
+    forest. A "<tt>kind</tt>" field might also be added (analogous to
+    <tt>Tokenization.kind</tt>) to indicate whether a parse is encoded
+    using a simple tree or a parse forest.
+
+    Attributes:
+     - uuid
+     - metadata
+     - constituentList
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
+        (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ),  # 2
+        (3, TType.LIST, 'constituentList', (TType.STRUCT, (Constituent, Constituent.thrift_spec), False), None, ),  # 3
+    )
+
+    def __init__(self, uuid=None, metadata=None, constituentList=None,):
+        self.uuid = uuid
+        self.metadata = metadata
+        self.constituentList = constituentList
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.uuid = concrete.uuid.ttypes.UUID()
+                    self.uuid.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
+                    self.metadata.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.LIST:
+                    self.constituentList = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = Constituent()
+                        _elem12.read(iprot)
+                        self.constituentList.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('Parse')
+        if self.uuid is not None:
+            oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
+            self.uuid.write(oprot)
+            oprot.writeFieldEnd()
+        if self.metadata is not None:
+            oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
+            self.metadata.write(oprot)
+            oprot.writeFieldEnd()
+        if self.constituentList is not None:
+            oprot.writeFieldBegin('constituentList', TType.LIST, 3)
+            oprot.writeListBegin(TType.STRUCT, len(self.constituentList))
+            for iter13 in self.constituentList:
+                iter13.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.uuid is None:
+            raise TProtocolException(message='Required field uuid is unset!')
+        if self.metadata is None:
+            raise TProtocolException(message='Required field metadata is unset!')
+        if self.constituentList is None:
+            raise TProtocolException(message='Required field constituentList is unset!')
         return
 
     def __repr__(self):
@@ -254,443 +354,6 @@ class ConstituentRef(object):
             raise TProtocolException(message='Required field parseId is unset!')
         if self.constituentIndex is None:
             raise TProtocolException(message='Required field constituentIndex is unset!')
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class TokenRefSequence(object):
-    """
-    A list of pointers to tokens that all belong to the same
-    tokenization.
-
-    Attributes:
-     - tokenIndexList: The tokenization-relative identifiers for each token that is
-    included in this sequence.
-     - anchorTokenIndex: An optional field that can be used to describe
-    the root of a sentence (if this sequence is a full sentence),
-    the head of a constituent (if this sequence is a constituent),
-    or some other form of "canonical" token in this sequence if,
-    for instance, it is not easy to map this sequence to a another
-    annotation that has a head.
-
-    This field is defined with respect to the Tokenization given
-    by tokenizationId, and not to this object's tokenIndexList.
-     - tokenizationId: The UUID of the tokenization that contains the tokens.
-     - textSpan: The text span in the main text (.text field) associated with this
-    TokenRefSequence.
-
-    NOTE: This span represents a best guess, or 'provenance': it
-    cannot be guaranteed that this text span matches the _exact_ text
-    of the original document, but is the annotation's best effort at
-    such a representation.
-     - rawTextSpan: The text span in the original text (.originalText field)
-    associated with this TokenRefSequence.
-
-    NOTE: This span represents a best guess, or 'provenance': it
-    cannot be guaranteed that this text span matches the _exact_ text
-    of the original raw document, but is the annotation's best effort
-    at such a representation.
-     - audioSpan: The audio span associated with this TokenRefSequence.
-
-    NOTE: This span represents a best guess, or 'provenance':
-    it cannot be guaranteed that this text span matches the _exact_
-    text of the original document, but is the annotation's best
-    effort at such a representation.
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.LIST, 'tokenIndexList', (TType.I32, None, False), None, ),  # 1
-        (2, TType.I32, 'anchorTokenIndex', None, -1, ),  # 2
-        (3, TType.STRUCT, 'tokenizationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 3
-        (4, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 4
-        (5, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 5
-        (6, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ),  # 6
-    )
-
-    def __init__(self, tokenIndexList=None, anchorTokenIndex=thrift_spec[2][4], tokenizationId=None, textSpan=None, rawTextSpan=None, audioSpan=None,):
-        self.tokenIndexList = tokenIndexList
-        self.anchorTokenIndex = anchorTokenIndex
-        self.tokenizationId = tokenizationId
-        self.textSpan = textSpan
-        self.rawTextSpan = rawTextSpan
-        self.audioSpan = audioSpan
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.LIST:
-                    self.tokenIndexList = []
-                    (_etype3, _size0) = iprot.readListBegin()
-                    for _i4 in range(_size0):
-                        _elem5 = iprot.readI32()
-                        self.tokenIndexList.append(_elem5)
-                    iprot.readListEnd()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I32:
-                    self.anchorTokenIndex = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRUCT:
-                    self.tokenizationId = concrete.uuid.ttypes.UUID()
-                    self.tokenizationId.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRUCT:
-                    self.textSpan = concrete.spans.ttypes.TextSpan()
-                    self.textSpan.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.STRUCT:
-                    self.rawTextSpan = concrete.spans.ttypes.TextSpan()
-                    self.rawTextSpan.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 6:
-                if ftype == TType.STRUCT:
-                    self.audioSpan = concrete.spans.ttypes.AudioSpan()
-                    self.audioSpan.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('TokenRefSequence')
-        if self.tokenIndexList is not None:
-            oprot.writeFieldBegin('tokenIndexList', TType.LIST, 1)
-            oprot.writeListBegin(TType.I32, len(self.tokenIndexList))
-            for iter6 in self.tokenIndexList:
-                oprot.writeI32(iter6)
-            oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.anchorTokenIndex is not None:
-            oprot.writeFieldBegin('anchorTokenIndex', TType.I32, 2)
-            oprot.writeI32(self.anchorTokenIndex)
-            oprot.writeFieldEnd()
-        if self.tokenizationId is not None:
-            oprot.writeFieldBegin('tokenizationId', TType.STRUCT, 3)
-            self.tokenizationId.write(oprot)
-            oprot.writeFieldEnd()
-        if self.textSpan is not None:
-            oprot.writeFieldBegin('textSpan', TType.STRUCT, 4)
-            self.textSpan.write(oprot)
-            oprot.writeFieldEnd()
-        if self.rawTextSpan is not None:
-            oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 5)
-            self.rawTextSpan.write(oprot)
-            oprot.writeFieldEnd()
-        if self.audioSpan is not None:
-            oprot.writeFieldBegin('audioSpan', TType.STRUCT, 6)
-            self.audioSpan.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        if self.tokenIndexList is None:
-            raise TProtocolException(message='Required field tokenIndexList is unset!')
-        if self.tokenizationId is None:
-            raise TProtocolException(message='Required field tokenizationId is unset!')
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class TaggedToken(object):
-    """
-    Attributes:
-     - tokenIndex: A pointer to the token being tagged.
-
-    Token indices are 0-based. These indices are also 0-based.
-     - tag: A string containing the annotation.
-    If the tag set you are using is not case sensitive,
-    then all part of speech tags should be normalized to upper case.
-     - confidence: Confidence of the annotation.
-     - tagList: A list of strings that represent a distribution of possible
-    tags for this token.
-
-    If populated, the 'tag' field should also be populated
-    with the "best" value from this list.
-     - confidenceList: A list of doubles that represent confidences associated with
-    the tags in the 'tagList' field.
-
-    If populated, the 'confidence' field should also be populated
-    with the confidence associated with the "best" tag in 'tagList'.
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'tokenIndex', None, None, ),  # 1
-        (2, TType.STRING, 'tag', 'UTF8', None, ),  # 2
-        (3, TType.DOUBLE, 'confidence', None, None, ),  # 3
-        (4, TType.LIST, 'tagList', (TType.STRING, 'UTF8', False), None, ),  # 4
-        (5, TType.LIST, 'confidenceList', (TType.DOUBLE, None, False), None, ),  # 5
-    )
-
-    def __init__(self, tokenIndex=None, tag=None, confidence=None, tagList=None, confidenceList=None,):
-        self.tokenIndex = tokenIndex
-        self.tag = tag
-        self.confidence = confidence
-        self.tagList = tagList
-        self.confidenceList = confidenceList
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.tokenIndex = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.tag = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.DOUBLE:
-                    self.confidence = iprot.readDouble()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.LIST:
-                    self.tagList = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                        self.tagList.append(_elem12)
-                    iprot.readListEnd()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.LIST:
-                    self.confidenceList = []
-                    (_etype16, _size13) = iprot.readListBegin()
-                    for _i17 in range(_size13):
-                        _elem18 = iprot.readDouble()
-                        self.confidenceList.append(_elem18)
-                    iprot.readListEnd()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('TaggedToken')
-        if self.tokenIndex is not None:
-            oprot.writeFieldBegin('tokenIndex', TType.I32, 1)
-            oprot.writeI32(self.tokenIndex)
-            oprot.writeFieldEnd()
-        if self.tag is not None:
-            oprot.writeFieldBegin('tag', TType.STRING, 2)
-            oprot.writeString(self.tag.encode('utf-8') if sys.version_info[0] == 2 else self.tag)
-            oprot.writeFieldEnd()
-        if self.confidence is not None:
-            oprot.writeFieldBegin('confidence', TType.DOUBLE, 3)
-            oprot.writeDouble(self.confidence)
-            oprot.writeFieldEnd()
-        if self.tagList is not None:
-            oprot.writeFieldBegin('tagList', TType.LIST, 4)
-            oprot.writeListBegin(TType.STRING, len(self.tagList))
-            for iter19 in self.tagList:
-                oprot.writeString(iter19.encode('utf-8') if sys.version_info[0] == 2 else iter19)
-            oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.confidenceList is not None:
-            oprot.writeFieldBegin('confidenceList', TType.LIST, 5)
-            oprot.writeListBegin(TType.DOUBLE, len(self.confidenceList))
-            for iter20 in self.confidenceList:
-                oprot.writeDouble(iter20)
-            oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class TokenTagging(object):
-    """
-    A theory about some token-level annotation.
-    The TokenTagging consists of a mapping from tokens
-    (using token ids) to string tags (e.g. part-of-speech tags or lemmas).
-
-    The mapping defined by a TokenTagging may be partial --
-    i.e., some tokens may not be assigned any part of speech tags.
-
-    For lattice tokenizations, you may need to create multiple
-    part-of-speech taggings (for different paths through the lattice),
-    since the appropriate tag for a given token may depend on the path
-    taken. For example, you might define a separate
-    TokenTagging for each of the top K paths, which leaves all
-    tokens that are not part of the path unlabeled.
-
-    Currently, we use strings to encode annotations. In
-    the future, we may add fields for encoding specific tag sets
-    (eg treebank tags), or for adding compound tags.
-
-    Attributes:
-     - uuid: The UUID of this TokenTagging object.
-     - metadata: Information about where the annotation came from.
-    This should be used to tell between gold-standard annotations
-    and automatically-generated theories about the data
-     - taggedTokenList: The mapping from tokens to annotations.
-    This may be a partial mapping.
-     - taggingType: An ontology-backed string that represents the
-    type of token taggings this TokenTagging object
-    produces.
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
-        (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ),  # 2
-        (3, TType.LIST, 'taggedTokenList', (TType.STRUCT, (TaggedToken, TaggedToken.thrift_spec), False), None, ),  # 3
-        (4, TType.STRING, 'taggingType', 'UTF8', None, ),  # 4
-    )
-
-    def __init__(self, uuid=None, metadata=None, taggedTokenList=None, taggingType=None,):
-        self.uuid = uuid
-        self.metadata = metadata
-        self.taggedTokenList = taggedTokenList
-        self.taggingType = taggingType
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.uuid = concrete.uuid.ttypes.UUID()
-                    self.uuid.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRUCT:
-                    self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
-                    self.metadata.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.LIST:
-                    self.taggedTokenList = []
-                    (_etype24, _size21) = iprot.readListBegin()
-                    for _i25 in range(_size21):
-                        _elem26 = TaggedToken()
-                        _elem26.read(iprot)
-                        self.taggedTokenList.append(_elem26)
-                    iprot.readListEnd()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRING:
-                    self.taggingType = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('TokenTagging')
-        if self.uuid is not None:
-            oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
-            self.uuid.write(oprot)
-            oprot.writeFieldEnd()
-        if self.metadata is not None:
-            oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
-            self.metadata.write(oprot)
-            oprot.writeFieldEnd()
-        if self.taggedTokenList is not None:
-            oprot.writeFieldBegin('taggedTokenList', TType.LIST, 3)
-            oprot.writeListBegin(TType.STRUCT, len(self.taggedTokenList))
-            for iter27 in self.taggedTokenList:
-                iter27.write(oprot)
-            oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.taggingType is not None:
-            oprot.writeFieldBegin('taggingType', TType.STRING, 4)
-            oprot.writeString(self.taggingType.encode('utf-8') if sys.version_info[0] == 2 else self.taggingType)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        if self.uuid is None:
-            raise TProtocolException(message='Required field uuid is unset!')
-        if self.metadata is None:
-            raise TProtocolException(message='Required field metadata is unset!')
-        if self.taggedTokenList is None:
-            raise TProtocolException(message='Required field taggedTokenList is unset!')
         return
 
     def __repr__(self):
@@ -952,11 +615,11 @@ class DependencyParse(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.dependencyList = []
-                    (_etype31, _size28) = iprot.readListBegin()
-                    for _i32 in range(_size28):
-                        _elem33 = Dependency()
-                        _elem33.read(iprot)
-                        self.dependencyList.append(_elem33)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = Dependency()
+                        _elem19.read(iprot)
+                        self.dependencyList.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -987,8 +650,8 @@ class DependencyParse(object):
         if self.dependencyList is not None:
             oprot.writeFieldBegin('dependencyList', TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.dependencyList))
-            for iter34 in self.dependencyList:
-                iter34.write(oprot)
+            for iter20 in self.dependencyList:
+                iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.structureInformation is not None:
@@ -1019,45 +682,71 @@ class DependencyParse(object):
         return not (self == other)
 
 
-class Constituent(object):
+class Token(object):
     """
-    A single parse constituent (or "phrase").
+    A single token (typically a word) in a communication. The exact
+    definition of what counts as a token is left up to the tools that
+    generate token sequences.
+
+    Usually, each token will include at least a text string.
 
     Attributes:
-     - id: A parse-relative identifier for this consistuent. Together
-    with the UUID for a Parse, this can be used to define
-    pointers to specific constituents.
-     - tag: A description of this constituency node, e.g. the category "NP".
-    For leaf nodes, this should be a word and for pre-terminal nodes
-    this should be a POS tag.
-     - childList
-     - headChildIndex: The index of the head child of this constituent. I.e., the
-    head child of constituent <tt>c</tt> is
-    <tt>c.children[c.head_child_index]</tt>. A value of -1
-    indicates that no child head was identified.
-     - start: The first token (inclusive) of this constituent in the
-    parent Tokenization. Almost certainly should be populated.
-     - ending: The last token (exclusive) of this constituent in the
-    parent Tokenization. Almost certainly should be populated.
+     - tokenIndex: A 0-based tokenization-relative identifier for this token that
+    represents the order that this token appears in the
+    sentence. Together with the UUID for a Tokenization, this can be
+    used to define pointers to specific tokens. If a Tokenization
+    object contains multiple Token objects with the same id (e.g., in
+    different n-best lists), then all of their other fields *must* be
+    identical as well.
+     - text: The text associated with this token.
+    Note - we may have a destructive tokenizer (e.g., Stanford rewriting)
+    and as a result, we want to maintain this field.
+     - textSpan: Location of this token in this perspective's text (.text field).
+    In cases where this token does not correspond directly with any
+    text span in the text (such as word insertion during MT),
+    this field may be given a value indicating "approximately" where
+    the token comes from. A span covering the entire sentence may be
+    used if no more precise value seems appropriate.
+
+    NOTE: This span represents a best guess, or 'provenance':
+    it cannot be guaranteed that this text span matches the _exact_
+    text of the document, but is the annotation's best
+    effort at such a representation.
+     - rawTextSpan: Location of this token in the original, raw text (.originalText
+    field).  In cases where this token does not correspond directly
+    with any text span in the original text (such as word insertion
+    during MT), this field may be given a value indicating
+    "approximately" where the token comes from. A span covering the
+    entire sentence may be used if no more precise value seems
+    appropriate.
+
+    NOTE: This span represents a best guess, or 'provenance':
+    it cannot be guaranteed that this text span matches the _exact_
+    text of the original raw document, but is the annotation's best
+    effort at such a representation.
+     - audioSpan: Location of this token in the original audio.
+
+    NOTE: This span represents a best guess, or 'provenance':
+    it cannot be guaranteed that this text span matches the _exact_
+    text of the original document, but is the annotation's best
+    effort at such a representation.
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'id', None, None, ),  # 1
-        (2, TType.STRING, 'tag', 'UTF8', None, ),  # 2
-        (3, TType.LIST, 'childList', (TType.I32, None, False), None, ),  # 3
-        (4, TType.I32, 'headChildIndex', None, -1, ),  # 4
-        (5, TType.I32, 'start', None, None, ),  # 5
-        (6, TType.I32, 'ending', None, None, ),  # 6
+        (1, TType.I32, 'tokenIndex', None, None, ),  # 1
+        (2, TType.STRING, 'text', 'UTF8', None, ),  # 2
+        (3, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 3
+        (4, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 4
+        (5, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ),  # 5
     )
 
-    def __init__(self, id=None, tag=None, childList=None, headChildIndex=thrift_spec[4][4], start=None, ending=None,):
-        self.id = id
-        self.tag = tag
-        self.childList = childList
-        self.headChildIndex = headChildIndex
-        self.start = start
-        self.ending = ending
+    def __init__(self, tokenIndex=None, text=None, textSpan=None, rawTextSpan=None, audioSpan=None,):
+        self.tokenIndex = tokenIndex
+        self.text = text
+        self.textSpan = textSpan
+        self.rawTextSpan = rawTextSpan
+        self.audioSpan = audioSpan
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1070,37 +759,30 @@ class Constituent(object):
                 break
             if fid == 1:
                 if ftype == TType.I32:
-                    self.id = iprot.readI32()
+                    self.tokenIndex = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.tag = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.text = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.LIST:
-                    self.childList = []
-                    (_etype38, _size35) = iprot.readListBegin()
-                    for _i39 in range(_size35):
-                        _elem40 = iprot.readI32()
-                        self.childList.append(_elem40)
-                    iprot.readListEnd()
+                if ftype == TType.STRUCT:
+                    self.textSpan = concrete.spans.ttypes.TextSpan()
+                    self.textSpan.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
-                if ftype == TType.I32:
-                    self.headChildIndex = iprot.readI32()
+                if ftype == TType.STRUCT:
+                    self.rawTextSpan = concrete.spans.ttypes.TextSpan()
+                    self.rawTextSpan.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 5:
-                if ftype == TType.I32:
-                    self.start = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 6:
-                if ftype == TType.I32:
-                    self.ending = iprot.readI32()
+                if ftype == TType.STRUCT:
+                    self.audioSpan = concrete.spans.ttypes.AudioSpan()
+                    self.audioSpan.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -1112,42 +794,33 @@ class Constituent(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('Constituent')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.I32, 1)
-            oprot.writeI32(self.id)
+        oprot.writeStructBegin('Token')
+        if self.tokenIndex is not None:
+            oprot.writeFieldBegin('tokenIndex', TType.I32, 1)
+            oprot.writeI32(self.tokenIndex)
             oprot.writeFieldEnd()
-        if self.tag is not None:
-            oprot.writeFieldBegin('tag', TType.STRING, 2)
-            oprot.writeString(self.tag.encode('utf-8') if sys.version_info[0] == 2 else self.tag)
+        if self.text is not None:
+            oprot.writeFieldBegin('text', TType.STRING, 2)
+            oprot.writeString(self.text.encode('utf-8') if sys.version_info[0] == 2 else self.text)
             oprot.writeFieldEnd()
-        if self.childList is not None:
-            oprot.writeFieldBegin('childList', TType.LIST, 3)
-            oprot.writeListBegin(TType.I32, len(self.childList))
-            for iter41 in self.childList:
-                oprot.writeI32(iter41)
-            oprot.writeListEnd()
+        if self.textSpan is not None:
+            oprot.writeFieldBegin('textSpan', TType.STRUCT, 3)
+            self.textSpan.write(oprot)
             oprot.writeFieldEnd()
-        if self.headChildIndex is not None:
-            oprot.writeFieldBegin('headChildIndex', TType.I32, 4)
-            oprot.writeI32(self.headChildIndex)
+        if self.rawTextSpan is not None:
+            oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 4)
+            self.rawTextSpan.write(oprot)
             oprot.writeFieldEnd()
-        if self.start is not None:
-            oprot.writeFieldBegin('start', TType.I32, 5)
-            oprot.writeI32(self.start)
-            oprot.writeFieldEnd()
-        if self.ending is not None:
-            oprot.writeFieldBegin('ending', TType.I32, 6)
-            oprot.writeI32(self.ending)
+        if self.audioSpan is not None:
+            oprot.writeFieldBegin('audioSpan', TType.STRUCT, 5)
+            self.audioSpan.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.id is None:
-            raise TProtocolException(message='Required field id is unset!')
-        if self.childList is None:
-            raise TProtocolException(message='Required field childList is unset!')
+        if self.tokenIndex is None:
+            raise TProtocolException(message='Required field tokenIndex is unset!')
         return
 
     def __repr__(self):
@@ -1162,34 +835,388 @@ class Constituent(object):
         return not (self == other)
 
 
-class Parse(object):
+class TokenRefSequence(object):
     """
-    A theory about the syntactic parse of a sentence.
-
-    \note If we add support for parse forests in the future, then it
-    will most likely be done by adding a new field (e.g.
-    "<tt>forest_root</tt>") that uses a new struct type to encode the
-    forest. A "<tt>kind</tt>" field might also be added (analogous to
-    <tt>Tokenization.kind</tt>) to indicate whether a parse is encoded
-    using a simple tree or a parse forest.
+    A list of pointers to tokens that all belong to the same
+    tokenization.
 
     Attributes:
-     - uuid
-     - metadata
-     - constituentList
+     - tokenIndexList: The tokenization-relative identifiers for each token that is
+    included in this sequence.
+     - anchorTokenIndex: An optional field that can be used to describe
+    the root of a sentence (if this sequence is a full sentence),
+    the head of a constituent (if this sequence is a constituent),
+    or some other form of "canonical" token in this sequence if,
+    for instance, it is not easy to map this sequence to a another
+    annotation that has a head.
+
+    This field is defined with respect to the Tokenization given
+    by tokenizationId, and not to this object's tokenIndexList.
+     - tokenizationId: The UUID of the tokenization that contains the tokens.
+     - textSpan: The text span in the main text (.text field) associated with this
+    TokenRefSequence.
+
+    NOTE: This span represents a best guess, or 'provenance': it
+    cannot be guaranteed that this text span matches the _exact_ text
+    of the original document, but is the annotation's best effort at
+    such a representation.
+     - rawTextSpan: The text span in the original text (.originalText field)
+    associated with this TokenRefSequence.
+
+    NOTE: This span represents a best guess, or 'provenance': it
+    cannot be guaranteed that this text span matches the _exact_ text
+    of the original raw document, but is the annotation's best effort
+    at such a representation.
+     - audioSpan: The audio span associated with this TokenRefSequence.
+
+    NOTE: This span represents a best guess, or 'provenance':
+    it cannot be guaranteed that this text span matches the _exact_
+    text of the original document, but is the annotation's best
+    effort at such a representation.
+     - dependencies: Use this field to reference a dependency tree fragment
+    such as a shortest path or all the dependents in a constituent.
+     - constituent: Use this field to specify an entire constituent in a parse tree.
+    Prefer textSpan over this field unless a node in a tree is needed.
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.LIST, 'tokenIndexList', (TType.I32, None, False), None, ),  # 1
+        (2, TType.I32, 'anchorTokenIndex', None, -1, ),  # 2
+        (3, TType.STRUCT, 'tokenizationId', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 3
+        (4, TType.STRUCT, 'textSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 4
+        (5, TType.STRUCT, 'rawTextSpan', (concrete.spans.ttypes.TextSpan, concrete.spans.ttypes.TextSpan.thrift_spec), None, ),  # 5
+        (6, TType.STRUCT, 'audioSpan', (concrete.spans.ttypes.AudioSpan, concrete.spans.ttypes.AudioSpan.thrift_spec), None, ),  # 6
+        (7, TType.LIST, 'dependencies', (TType.STRUCT, (Dependency, Dependency.thrift_spec), False), None, ),  # 7
+        (8, TType.STRUCT, 'constituent', (ConstituentRef, ConstituentRef.thrift_spec), None, ),  # 8
+    )
+
+    def __init__(self, tokenIndexList=None, anchorTokenIndex=thrift_spec[2][4], tokenizationId=None, textSpan=None, rawTextSpan=None, audioSpan=None, dependencies=None, constituent=None,):
+        self.tokenIndexList = tokenIndexList
+        self.anchorTokenIndex = anchorTokenIndex
+        self.tokenizationId = tokenizationId
+        self.textSpan = textSpan
+        self.rawTextSpan = rawTextSpan
+        self.audioSpan = audioSpan
+        self.dependencies = dependencies
+        self.constituent = constituent
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.LIST:
+                    self.tokenIndexList = []
+                    (_etype24, _size21) = iprot.readListBegin()
+                    for _i25 in range(_size21):
+                        _elem26 = iprot.readI32()
+                        self.tokenIndexList.append(_elem26)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.anchorTokenIndex = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.tokenizationId = concrete.uuid.ttypes.UUID()
+                    self.tokenizationId.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRUCT:
+                    self.textSpan = concrete.spans.ttypes.TextSpan()
+                    self.textSpan.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRUCT:
+                    self.rawTextSpan = concrete.spans.ttypes.TextSpan()
+                    self.rawTextSpan.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRUCT:
+                    self.audioSpan = concrete.spans.ttypes.AudioSpan()
+                    self.audioSpan.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.LIST:
+                    self.dependencies = []
+                    (_etype30, _size27) = iprot.readListBegin()
+                    for _i31 in range(_size27):
+                        _elem32 = Dependency()
+                        _elem32.read(iprot)
+                        self.dependencies.append(_elem32)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRUCT:
+                    self.constituent = ConstituentRef()
+                    self.constituent.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('TokenRefSequence')
+        if self.tokenIndexList is not None:
+            oprot.writeFieldBegin('tokenIndexList', TType.LIST, 1)
+            oprot.writeListBegin(TType.I32, len(self.tokenIndexList))
+            for iter33 in self.tokenIndexList:
+                oprot.writeI32(iter33)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.anchorTokenIndex is not None:
+            oprot.writeFieldBegin('anchorTokenIndex', TType.I32, 2)
+            oprot.writeI32(self.anchorTokenIndex)
+            oprot.writeFieldEnd()
+        if self.tokenizationId is not None:
+            oprot.writeFieldBegin('tokenizationId', TType.STRUCT, 3)
+            self.tokenizationId.write(oprot)
+            oprot.writeFieldEnd()
+        if self.textSpan is not None:
+            oprot.writeFieldBegin('textSpan', TType.STRUCT, 4)
+            self.textSpan.write(oprot)
+            oprot.writeFieldEnd()
+        if self.rawTextSpan is not None:
+            oprot.writeFieldBegin('rawTextSpan', TType.STRUCT, 5)
+            self.rawTextSpan.write(oprot)
+            oprot.writeFieldEnd()
+        if self.audioSpan is not None:
+            oprot.writeFieldBegin('audioSpan', TType.STRUCT, 6)
+            self.audioSpan.write(oprot)
+            oprot.writeFieldEnd()
+        if self.dependencies is not None:
+            oprot.writeFieldBegin('dependencies', TType.LIST, 7)
+            oprot.writeListBegin(TType.STRUCT, len(self.dependencies))
+            for iter34 in self.dependencies:
+                iter34.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.constituent is not None:
+            oprot.writeFieldBegin('constituent', TType.STRUCT, 8)
+            self.constituent.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.tokenIndexList is None:
+            raise TProtocolException(message='Required field tokenIndexList is unset!')
+        if self.tokenizationId is None:
+            raise TProtocolException(message='Required field tokenizationId is unset!')
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class TaggedToken(object):
+    """
+    Attributes:
+     - tokenIndex: A pointer to the token being tagged.
+
+    Token indices are 0-based. These indices are also 0-based.
+     - tag: A string containing the annotation.
+    If the tag set you are using is not case sensitive,
+    then all part of speech tags should be normalized to upper case.
+     - confidence: Confidence of the annotation.
+     - tagList: A list of strings that represent a distribution of possible
+    tags for this token.
+
+    If populated, the 'tag' field should also be populated
+    with the "best" value from this list.
+     - confidenceList: A list of doubles that represent confidences associated with
+    the tags in the 'tagList' field.
+
+    If populated, the 'confidence' field should also be populated
+    with the confidence associated with the "best" tag in 'tagList'.
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'tokenIndex', None, None, ),  # 1
+        (2, TType.STRING, 'tag', 'UTF8', None, ),  # 2
+        (3, TType.DOUBLE, 'confidence', None, None, ),  # 3
+        (4, TType.LIST, 'tagList', (TType.STRING, 'UTF8', False), None, ),  # 4
+        (5, TType.LIST, 'confidenceList', (TType.DOUBLE, None, False), None, ),  # 5
+    )
+
+    def __init__(self, tokenIndex=None, tag=None, confidence=None, tagList=None, confidenceList=None,):
+        self.tokenIndex = tokenIndex
+        self.tag = tag
+        self.confidence = confidence
+        self.tagList = tagList
+        self.confidenceList = confidenceList
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.tokenIndex = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.tag = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.DOUBLE:
+                    self.confidence = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.LIST:
+                    self.tagList = []
+                    (_etype38, _size35) = iprot.readListBegin()
+                    for _i39 in range(_size35):
+                        _elem40 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.tagList.append(_elem40)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.LIST:
+                    self.confidenceList = []
+                    (_etype44, _size41) = iprot.readListBegin()
+                    for _i45 in range(_size41):
+                        _elem46 = iprot.readDouble()
+                        self.confidenceList.append(_elem46)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('TaggedToken')
+        if self.tokenIndex is not None:
+            oprot.writeFieldBegin('tokenIndex', TType.I32, 1)
+            oprot.writeI32(self.tokenIndex)
+            oprot.writeFieldEnd()
+        if self.tag is not None:
+            oprot.writeFieldBegin('tag', TType.STRING, 2)
+            oprot.writeString(self.tag.encode('utf-8') if sys.version_info[0] == 2 else self.tag)
+            oprot.writeFieldEnd()
+        if self.confidence is not None:
+            oprot.writeFieldBegin('confidence', TType.DOUBLE, 3)
+            oprot.writeDouble(self.confidence)
+            oprot.writeFieldEnd()
+        if self.tagList is not None:
+            oprot.writeFieldBegin('tagList', TType.LIST, 4)
+            oprot.writeListBegin(TType.STRING, len(self.tagList))
+            for iter47 in self.tagList:
+                oprot.writeString(iter47.encode('utf-8') if sys.version_info[0] == 2 else iter47)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.confidenceList is not None:
+            oprot.writeFieldBegin('confidenceList', TType.LIST, 5)
+            oprot.writeListBegin(TType.DOUBLE, len(self.confidenceList))
+            for iter48 in self.confidenceList:
+                oprot.writeDouble(iter48)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class TokenTagging(object):
+    """
+    A theory about some token-level annotation.
+    The TokenTagging consists of a mapping from tokens
+    (using token ids) to string tags (e.g. part-of-speech tags or lemmas).
+
+    The mapping defined by a TokenTagging may be partial --
+    i.e., some tokens may not be assigned any part of speech tags.
+
+    For lattice tokenizations, you may need to create multiple
+    part-of-speech taggings (for different paths through the lattice),
+    since the appropriate tag for a given token may depend on the path
+    taken. For example, you might define a separate
+    TokenTagging for each of the top K paths, which leaves all
+    tokens that are not part of the path unlabeled.
+
+    Currently, we use strings to encode annotations. In
+    the future, we may add fields for encoding specific tag sets
+    (eg treebank tags), or for adding compound tags.
+
+    Attributes:
+     - uuid: The UUID of this TokenTagging object.
+     - metadata: Information about where the annotation came from.
+    This should be used to tell between gold-standard annotations
+    and automatically generated theories about the data
+     - taggedTokenList: The mapping from tokens to annotations.
+    This may be a partial mapping.
+     - taggingType: An ontology-backed string that represents the
+    type of token taggings this TokenTagging object
+    produces.
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.STRUCT, 'uuid', (concrete.uuid.ttypes.UUID, concrete.uuid.ttypes.UUID.thrift_spec), None, ),  # 1
         (2, TType.STRUCT, 'metadata', (concrete.metadata.ttypes.AnnotationMetadata, concrete.metadata.ttypes.AnnotationMetadata.thrift_spec), None, ),  # 2
-        (3, TType.LIST, 'constituentList', (TType.STRUCT, (Constituent, Constituent.thrift_spec), False), None, ),  # 3
+        (3, TType.LIST, 'taggedTokenList', (TType.STRUCT, (TaggedToken, TaggedToken.thrift_spec), False), None, ),  # 3
+        (4, TType.STRING, 'taggingType', 'UTF8', None, ),  # 4
     )
 
-    def __init__(self, uuid=None, metadata=None, constituentList=None,):
+    def __init__(self, uuid=None, metadata=None, taggedTokenList=None, taggingType=None,):
         self.uuid = uuid
         self.metadata = metadata
-        self.constituentList = constituentList
+        self.taggedTokenList = taggedTokenList
+        self.taggingType = taggingType
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1214,13 +1241,18 @@ class Parse(object):
                     iprot.skip(ftype)
             elif fid == 3:
                 if ftype == TType.LIST:
-                    self.constituentList = []
-                    (_etype45, _size42) = iprot.readListBegin()
-                    for _i46 in range(_size42):
-                        _elem47 = Constituent()
-                        _elem47.read(iprot)
-                        self.constituentList.append(_elem47)
+                    self.taggedTokenList = []
+                    (_etype52, _size49) = iprot.readListBegin()
+                    for _i53 in range(_size49):
+                        _elem54 = TaggedToken()
+                        _elem54.read(iprot)
+                        self.taggedTokenList.append(_elem54)
                     iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.taggingType = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -1232,7 +1264,7 @@ class Parse(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('Parse')
+        oprot.writeStructBegin('TokenTagging')
         if self.uuid is not None:
             oprot.writeFieldBegin('uuid', TType.STRUCT, 1)
             self.uuid.write(oprot)
@@ -1241,12 +1273,16 @@ class Parse(object):
             oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
             self.metadata.write(oprot)
             oprot.writeFieldEnd()
-        if self.constituentList is not None:
-            oprot.writeFieldBegin('constituentList', TType.LIST, 3)
-            oprot.writeListBegin(TType.STRUCT, len(self.constituentList))
-            for iter48 in self.constituentList:
-                iter48.write(oprot)
+        if self.taggedTokenList is not None:
+            oprot.writeFieldBegin('taggedTokenList', TType.LIST, 3)
+            oprot.writeListBegin(TType.STRUCT, len(self.taggedTokenList))
+            for iter55 in self.taggedTokenList:
+                iter55.write(oprot)
             oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.taggingType is not None:
+            oprot.writeFieldBegin('taggingType', TType.STRING, 4)
+            oprot.writeString(self.taggingType.encode('utf-8') if sys.version_info[0] == 2 else self.taggingType)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1256,8 +1292,8 @@ class Parse(object):
             raise TProtocolException(message='Required field uuid is unset!')
         if self.metadata is None:
             raise TProtocolException(message='Required field metadata is unset!')
-        if self.constituentList is None:
-            raise TProtocolException(message='Required field constituentList is unset!')
+        if self.taggedTokenList is None:
+            raise TProtocolException(message='Required field taggedTokenList is unset!')
         return
 
     def __repr__(self):
@@ -1306,11 +1342,11 @@ class LatticePath(object):
             elif fid == 2:
                 if ftype == TType.LIST:
                     self.tokenList = []
-                    (_etype52, _size49) = iprot.readListBegin()
-                    for _i53 in range(_size49):
-                        _elem54 = Token()
-                        _elem54.read(iprot)
-                        self.tokenList.append(_elem54)
+                    (_etype59, _size56) = iprot.readListBegin()
+                    for _i60 in range(_size56):
+                        _elem61 = Token()
+                        _elem61.read(iprot)
+                        self.tokenList.append(_elem61)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1331,8 +1367,8 @@ class LatticePath(object):
         if self.tokenList is not None:
             oprot.writeFieldBegin('tokenList', TType.LIST, 2)
             oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
-            for iter55 in self.tokenList:
-                iter55.write(oprot)
+            for iter62 in self.tokenList:
+                iter62.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1523,11 +1559,11 @@ class TokenLattice(object):
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.arcList = []
-                    (_etype59, _size56) = iprot.readListBegin()
-                    for _i60 in range(_size56):
-                        _elem61 = Arc()
-                        _elem61.read(iprot)
-                        self.arcList.append(_elem61)
+                    (_etype66, _size63) = iprot.readListBegin()
+                    for _i67 in range(_size63):
+                        _elem68 = Arc()
+                        _elem68.read(iprot)
+                        self.arcList.append(_elem68)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1558,8 +1594,8 @@ class TokenLattice(object):
         if self.arcList is not None:
             oprot.writeFieldBegin('arcList', TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.arcList))
-            for iter62 in self.arcList:
-                iter62.write(oprot)
+            for iter69 in self.arcList:
+                iter69.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.cachedBestPath is not None:
@@ -1614,11 +1650,11 @@ class TokenList(object):
             if fid == 1:
                 if ftype == TType.LIST:
                     self.tokenList = []
-                    (_etype66, _size63) = iprot.readListBegin()
-                    for _i67 in range(_size63):
-                        _elem68 = Token()
-                        _elem68.read(iprot)
-                        self.tokenList.append(_elem68)
+                    (_etype73, _size70) = iprot.readListBegin()
+                    for _i74 in range(_size70):
+                        _elem75 = Token()
+                        _elem75.read(iprot)
+                        self.tokenList.append(_elem75)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1635,8 +1671,8 @@ class TokenList(object):
         if self.tokenList is not None:
             oprot.writeFieldBegin('tokenList', TType.LIST, 1)
             oprot.writeListBegin(TType.STRUCT, len(self.tokenList))
-            for iter69 in self.tokenList:
-                iter69.write(oprot)
+            for iter76 in self.tokenList:
+                iter76.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1881,44 +1917,44 @@ class Tokenization(object):
             elif fid == 6:
                 if ftype == TType.LIST:
                     self.tokenTaggingList = []
-                    (_etype73, _size70) = iprot.readListBegin()
-                    for _i74 in range(_size70):
-                        _elem75 = TokenTagging()
-                        _elem75.read(iprot)
-                        self.tokenTaggingList.append(_elem75)
+                    (_etype80, _size77) = iprot.readListBegin()
+                    for _i81 in range(_size77):
+                        _elem82 = TokenTagging()
+                        _elem82.read(iprot)
+                        self.tokenTaggingList.append(_elem82)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.parseList = []
-                    (_etype79, _size76) = iprot.readListBegin()
-                    for _i80 in range(_size76):
-                        _elem81 = Parse()
-                        _elem81.read(iprot)
-                        self.parseList.append(_elem81)
+                    (_etype86, _size83) = iprot.readListBegin()
+                    for _i87 in range(_size83):
+                        _elem88 = Parse()
+                        _elem88.read(iprot)
+                        self.parseList.append(_elem88)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 8:
                 if ftype == TType.LIST:
                     self.dependencyParseList = []
-                    (_etype85, _size82) = iprot.readListBegin()
-                    for _i86 in range(_size82):
-                        _elem87 = DependencyParse()
-                        _elem87.read(iprot)
-                        self.dependencyParseList.append(_elem87)
+                    (_etype92, _size89) = iprot.readListBegin()
+                    for _i93 in range(_size89):
+                        _elem94 = DependencyParse()
+                        _elem94.read(iprot)
+                        self.dependencyParseList.append(_elem94)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 9:
                 if ftype == TType.LIST:
                     self.spanLinkList = []
-                    (_etype91, _size88) = iprot.readListBegin()
-                    for _i92 in range(_size88):
-                        _elem93 = SpanLink()
-                        _elem93.read(iprot)
-                        self.spanLinkList.append(_elem93)
+                    (_etype98, _size95) = iprot.readListBegin()
+                    for _i99 in range(_size95):
+                        _elem100 = SpanLink()
+                        _elem100.read(iprot)
+                        self.spanLinkList.append(_elem100)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1955,29 +1991,29 @@ class Tokenization(object):
         if self.tokenTaggingList is not None:
             oprot.writeFieldBegin('tokenTaggingList', TType.LIST, 6)
             oprot.writeListBegin(TType.STRUCT, len(self.tokenTaggingList))
-            for iter94 in self.tokenTaggingList:
-                iter94.write(oprot)
+            for iter101 in self.tokenTaggingList:
+                iter101.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.parseList is not None:
             oprot.writeFieldBegin('parseList', TType.LIST, 7)
             oprot.writeListBegin(TType.STRUCT, len(self.parseList))
-            for iter95 in self.parseList:
-                iter95.write(oprot)
+            for iter102 in self.parseList:
+                iter102.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.dependencyParseList is not None:
             oprot.writeFieldBegin('dependencyParseList', TType.LIST, 8)
             oprot.writeListBegin(TType.STRUCT, len(self.dependencyParseList))
-            for iter96 in self.dependencyParseList:
-                iter96.write(oprot)
+            for iter103 in self.dependencyParseList:
+                iter103.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.spanLinkList is not None:
             oprot.writeFieldBegin('spanLinkList', TType.LIST, 9)
             oprot.writeListBegin(TType.STRUCT, len(self.spanLinkList))
-            for iter97 in self.spanLinkList:
-                iter97.write(oprot)
+            for iter104 in self.spanLinkList:
+                iter104.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -2245,11 +2281,11 @@ class Section(object):
             elif fid == 2:
                 if ftype == TType.LIST:
                     self.sentenceList = []
-                    (_etype101, _size98) = iprot.readListBegin()
-                    for _i102 in range(_size98):
-                        _elem103 = Sentence()
-                        _elem103.read(iprot)
-                        self.sentenceList.append(_elem103)
+                    (_etype108, _size105) = iprot.readListBegin()
+                    for _i109 in range(_size105):
+                        _elem110 = Sentence()
+                        _elem110.read(iprot)
+                        self.sentenceList.append(_elem110)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -2284,21 +2320,21 @@ class Section(object):
             elif fid == 7:
                 if ftype == TType.LIST:
                     self.numberList = []
-                    (_etype107, _size104) = iprot.readListBegin()
-                    for _i108 in range(_size104):
-                        _elem109 = iprot.readI32()
-                        self.numberList.append(_elem109)
+                    (_etype114, _size111) = iprot.readListBegin()
+                    for _i115 in range(_size111):
+                        _elem116 = iprot.readI32()
+                        self.numberList.append(_elem116)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 8:
                 if ftype == TType.LIST:
                     self.lidList = []
-                    (_etype113, _size110) = iprot.readListBegin()
-                    for _i114 in range(_size110):
-                        _elem115 = concrete.language.ttypes.LanguageIdentification()
-                        _elem115.read(iprot)
-                        self.lidList.append(_elem115)
+                    (_etype120, _size117) = iprot.readListBegin()
+                    for _i121 in range(_size117):
+                        _elem122 = concrete.language.ttypes.LanguageIdentification()
+                        _elem122.read(iprot)
+                        self.lidList.append(_elem122)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -2319,8 +2355,8 @@ class Section(object):
         if self.sentenceList is not None:
             oprot.writeFieldBegin('sentenceList', TType.LIST, 2)
             oprot.writeListBegin(TType.STRUCT, len(self.sentenceList))
-            for iter116 in self.sentenceList:
-                iter116.write(oprot)
+            for iter123 in self.sentenceList:
+                iter123.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.textSpan is not None:
@@ -2342,15 +2378,15 @@ class Section(object):
         if self.numberList is not None:
             oprot.writeFieldBegin('numberList', TType.LIST, 7)
             oprot.writeListBegin(TType.I32, len(self.numberList))
-            for iter117 in self.numberList:
-                oprot.writeI32(iter117)
+            for iter124 in self.numberList:
+                oprot.writeI32(iter124)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.lidList is not None:
             oprot.writeFieldBegin('lidList', TType.LIST, 8)
             oprot.writeListBegin(TType.STRUCT, len(self.lidList))
-            for iter118 in self.lidList:
-                iter118.write(oprot)
+            for iter125 in self.lidList:
+                iter125.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.audioSpan is not None:

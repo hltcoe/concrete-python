@@ -57,26 +57,29 @@ def main():
                         help="Print output of searchService.getCapabilities()")
     parser.add_argument("--corpora", action="store_true",
                         help="Print output of searchService.getCorpora()")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument("terms", nargs="*")
     concrete.version.add_argparse_argument(parser)
-    ns = parser.parse_args()
+    args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
-                        level='INFO')
+                        level=args.loglevel.upper())
 
-    with SearchClientWrapper(ns.host, ns.port) as client:
+    with SearchClientWrapper(args.host, args.port) as client:
         interactive_mode = True
 
-        if ns.about or ns.alive or ns.capabilities or ns.corpora or ns.terms:
+        if args.about or args.alive or args.capabilities or args.corpora or args.terms:
             interactive_mode = False
 
-        if ns.about:
+        if args.about:
             print("SearchService.about() returned %s" % client.about())
-        if ns.alive:
+        if args.alive:
             print("SearchService.alive() returned %s" % client.alive())
-        if ns.capabilities:
+        if args.capabilities:
             print("SearchService.getCapabilities() returned %s" % client.getCapabilities())
-        if ns.corpora:
+        if args.corpora:
             print("SearchService.getCorpora() returned %s" % client.getCorpora())
 
         if interactive_mode:
@@ -88,18 +91,18 @@ def main():
                     break
                 if line:
                     terms = line.split()
-                    query = SearchQuery(k=ns.k,
+                    query = SearchQuery(k=args.k,
                                         rawQuery=line,
                                         terms=terms,
                                         type=SearchType.COMMUNICATIONS,
-                                        userId=ns.user_id)
-                    print_search_result(client.search(query), ns.http_lookup_url)
-        elif ns.terms:
-            query = SearchQuery(k=ns.k,
-                                rawQuery=' '.join(ns.terms),
-                                terms=ns.terms,
+                                        userId=args.user_id)
+                    print_search_result(client.search(query), args.http_lookup_url)
+        elif args.terms:
+            query = SearchQuery(k=args.k,
+                                rawQuery=' '.join(args.terms),
+                                terms=args.terms,
                                 type=SearchType.COMMUNICATIONS,
-                                userId=ns.user_id)
+                                userId=args.user_id)
             print_search_result(client.search(query), None)
 
 

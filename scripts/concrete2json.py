@@ -4,9 +4,9 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import concrete.version
 import argparse
 import codecs
+import logging
 
 from thrift import TSerialization
 from thrift.protocol import TJSONProtocol
@@ -16,6 +16,7 @@ from concrete.util import (
     tokenlattice_file_to_json,
     read_communication_from_file)
 from concrete.util import set_stdout_encoding
+import concrete.version
 
 
 def main():
@@ -33,12 +34,18 @@ def main():
                         help="Removes timestamps from JSON output")
     parser.add_argument('--remove-uuids', action='store_true',
                         help="Removes UUIDs from JSON output")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument('concrete_file',
                         help='path to input concrete communication file')
     parser.add_argument('json_file', nargs='?', default='-',
                         help='path to output json file')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     if args.protocol == 'simple':
         if args.concrete_type == 'communication':

@@ -22,6 +22,9 @@ def main():
                              " connect.")
     parser.add_argument('port', type=int,
                         help="Port of annotate service to which to connect.")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument('--input', default='-',
                         help="Input source to use. '-' for stdin; otherwise"
                              " takes a path to a file.")
@@ -32,7 +35,7 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
-                        level='INFO')
+                        level=args.loglevel.upper())
 
     # Won't work on Windows
     if args.input == '-':

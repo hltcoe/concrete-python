@@ -64,8 +64,7 @@ def main():
         description='Read tweets formatted in the Twitter JSON API and write'
                     ' communications',
     )
-    parser.set_defaults(log_level='INFO', num_proc=1, chunk_size=10000,
-                        log_interval=10000)
+    parser.set_defaults(num_proc=1, chunk_size=10000, log_interval=10000)
     parser.add_argument('tweet_path', type=str,
                         help='Input twitter JSON file path (- for stdin)')
     parser.add_argument('concrete_host', type=str,
@@ -79,9 +78,9 @@ def main():
                              'in redis (default: append to left)')
     parser.add_argument('--log-interval', type=int,
                         help='log an info message every log-interval tweets')
-    parser.add_argument('--log-level', type=str,
-                        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
-                        help='Logging verbosity level (to stderr)')
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument('--log-conf-path', type=str,
                         help='Path to log config file (overrides log-level).'
                              ' Format is json encoding of logging.config'
@@ -104,26 +103,24 @@ def main():
                         help='Skip invalid communications (increases runtime)'
                              ' (by default, validation is not performed)')
     concrete.version.add_argparse_argument(parser)
-    ns = parser.parse_args()
+    args = parser.parse_args()
 
     # Won't work on Windows
-    tweet_path = '/dev/fd/0' if ns.tweet_path == '-' else ns.tweet_path
+    tweet_path = '/dev/fd/0' if args.tweet_path == '-' else args.tweet_path
 
-    if ns.log_conf_path:
-        with open(ns.log_conf_path) as f:
+    if args.log_conf_path:
+        with open(args.log_conf_path) as f:
             logging.config.dictConfig(json.load(f))
     else:
-        logging.basicConfig(
-            level=ns.log_level,
-            format='%(asctime)-15s %(levelname)s: %(message)s'
-        )
+        logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                            level=args.loglevel.upper())
 
-    if ns.tweet_path != '-' and mimetypes.guess_type(tweet_path)[1] == 'gzip':
+    if args.tweet_path != '-' and mimetypes.guess_type(tweet_path)[1] == 'gzip':
         tweet_reader = gzip.open(tweet_path, 'r')
     else:
         tweet_reader = open(tweet_path, 'rb')
 
-    if ns.catch_ioerror:
+    if args.catch_ioerror:
         def _catch(g):
             it = iter(g)
             while True:
@@ -134,28 +131,28 @@ def main():
                     raise StopIteration('Caught IOError.')
         tweet_reader = _catch(tweet_reader)
 
-    if ns.skip_bad_lines:
-        if ns.skip_invalid_comms:
+    if args.skip_bad_lines:
+        if args.skip_invalid_comms:
             map_func = json_str_to_validated_concrete_bytes_skip_bad_lines
         else:
             map_func = json_str_to_concrete_bytes_skip_bad_lines
     else:
-        if ns.skip_invalid_comms:
+        if args.skip_invalid_comms:
             map_func = json_str_to_validated_concrete_bytes
         else:
             map_func = json_str_to_concrete_bytes
 
-    writer = RedisWriter(Redis(ns.concrete_host, ns.concrete_port),
-                         ns.concrete_key, key_type='list',
-                         right_to_left=not ns.left_to_right)
+    writer = RedisWriter(Redis(args.concrete_host, args.concrete_port),
+                         args.concrete_key, key_type='list',
+                         right_to_left=not args.left_to_right)
     if True:  # simplify diff with tweets2concrete.py
         i = 0
 
-        p = Pool(ns.num_proc)
+        p = Pool(args.num_proc)
         for concrete_bytes in p.imap(map_func, tweet_reader,
-                                     ns.chunk_size):
+                                     args.chunk_size):
             if concrete_bytes is not None:
-                if (i + 1) % ns.log_interval == 0:
+                if (i + 1) % args.log_interval == 0:
                     logging.info('writing tweet %d...' % (i + 1))
                 writer.write(concrete_bytes)
                 i += 1

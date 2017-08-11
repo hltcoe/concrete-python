@@ -68,36 +68,34 @@ def main():
                              ' each text file is a document)')
     parser.add_argument('--log-interval', type=int,
                         help='Log an info message every log-interval docs')
-    parser.add_argument('--log-level', type=str,
-                        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
-                        help='Logging verbosity level (to stderr)')
     add_annotation_level_argparse_argument(parser)
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     concrete.version.add_argparse_argument(parser)
-    ns = parser.parse_args()
+    args = parser.parse_args()
 
     # Won't work on Windows
     text_tarball_path = (
         '/dev/fd/0'
-        if ns.text_tarball_path == '-'
-        else ns.text_tarball_path
+        if args.text_tarball_path == '-'
+        else args.text_tarball_path
     )
     concrete_tarball_path = (
         '/dev/fd/1'
-        if ns.concrete_tarball_path == '-'
-        else ns.concrete_tarball_path
+        if args.concrete_tarball_path == '-'
+        else args.concrete_tarball_path
     )
-    per_line = ns.per_line
-    annotation_level = ns.annotation_level
+    per_line = args.per_line
+    annotation_level = args.annotation_level
 
-    logging.basicConfig(
-        level=ns.log_level,
-        format='%(asctime)-15s %(levelname)s: %(message)s'
-    )
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     with CommunicationWriterTGZ(concrete_tarball_path) as writer:
         for (i, comm) in enumerate(load(text_tarball_path, per_line,
                                         annotation_level)):
-            if (i + 1) % ns.log_interval == 0:
+            if (i + 1) % args.log_interval == 0:
                 logging.info(u'writing doc %d (%s)...' % (i + 1, comm.id))
             writer.write(comm, comm.id)
 

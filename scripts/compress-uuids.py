@@ -6,13 +6,13 @@ compressible UUID scheme
 '''
 from __future__ import unicode_literals
 
-import concrete.version
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import logging
+
 from concrete.util.file_io import CommunicationReader, CommunicationWriterTGZ
 from concrete.util.concrete_uuid import compress_uuids as _compress_uuids
 from concrete.util import set_stdout_encoding
-
-import logging
+import concrete.version
 
 
 def compress_uuids(input_path, output_path, verify=False, uuid_map_path=None,
@@ -53,9 +53,9 @@ def main():
                         help='Input tarball path (- for stdin)')
     parser.add_argument('output_path', type=str,
                         help='Output tarball path (- for stdout)')
-    parser.add_argument('--log-level', type=str,
-                        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR'),
-                        help='Logging verbosity level (to stderr)')
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument('--verify', action='store_true',
                         help='Verify within-communication links are satisfied'
                              ' after conversion')
@@ -68,20 +68,18 @@ def main():
     parser.add_argument('--uuid-map-path', type=str,
                         help='Output path of UUID map')
     concrete.version.add_argparse_argument(parser)
-    ns = parser.parse_args()
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     # Won't work on Windows
-    input_path = '/dev/fd/0' if ns.input_path == '-' else ns.input_path
-    output_path = '/dev/fd/1' if ns.output_path == '-' else ns.output_path
+    input_path = '/dev/fd/0' if args.input_path == '-' else args.input_path
+    output_path = '/dev/fd/1' if args.output_path == '-' else args.output_path
 
-    logging.basicConfig(
-        level=ns.log_level,
-        format='%(asctime)-15s %(levelname)s: %(message)s'
-    )
-
-    compress_uuids(input_path, output_path, verify=ns.verify,
-                   single_analytic=ns.single_analytic,
-                   uuid_map_path=ns.uuid_map_path)
+    compress_uuids(input_path, output_path, verify=args.verify,
+                   single_analytic=args.single_analytic,
+                   uuid_map_path=args.uuid_map_path)
 
 
 if __name__ == "__main__":

@@ -46,6 +46,9 @@ def main():
     parser.add_argument("--save-as-tgz", metavar="TGZ_FILENAME",
                         help="Save fetched Communications to a TGZ archive containing files "
                         "named '[COMMUNICATION_ID].concrete'")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument("comm_id", nargs="*", help="IDs of Communications to be fetched. "
                         "If '-' is specified, a list of Communication IDs will be read from "
                         "stdin, one Communication ID per line")
@@ -53,7 +56,7 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
-                        level='INFO')
+                        level=args.loglevel.upper())
 
     socket = factory.createSocket(args.server, args.port)
     transport = factory.createTransport(socket)

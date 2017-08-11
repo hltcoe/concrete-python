@@ -29,8 +29,14 @@ def main():
                         type=str,
                         help='file to read communications from '
                              '(if not specified, read from standard input)')
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     # Won't work on Windows
     if args.communication_file is None:
@@ -39,9 +45,6 @@ def main():
     else:
         reader_kwargs = dict()
         input_path = args.communication_file
-
-    logging.basicConfig(
-        format='%(levelname)7s:  %(message)s', level=logging.INFO)
 
     for (comm, filename) in CommunicationReader(input_path, **reader_kwargs):
         logging.info(u"Inspecting Communication with ID '%s" % comm.id)

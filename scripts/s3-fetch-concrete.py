@@ -29,7 +29,7 @@ def main():
                              'gz, bz2, tar, zip, etc.)')
     parser.add_argument('--prefix-len', type=int, default=DEFAULT_S3_KEY_PREFIX_LEN,
                         help='S3 keys are prefixed with hashes of this length')
-    parser.add_argument('-l', '--loglevel',
+    parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
     concrete.version.add_argparse_argument(parser)

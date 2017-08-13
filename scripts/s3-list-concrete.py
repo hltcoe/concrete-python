@@ -25,7 +25,7 @@ def main():
     parser.add_argument('bucket_name', help='name of S3 bucket to read from')
     parser.add_argument('--prefix-len', type=int, default=DEFAULT_S3_KEY_PREFIX_LEN,
                         help='S3 keys are prefixed with hashes of this length')
-    parser.add_argument('-l', '--loglevel',
+    parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
     concrete.version.add_argparse_argument(parser)

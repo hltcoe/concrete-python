@@ -35,15 +35,18 @@ from __future__ import unicode_literals
 
 import argparse
 import gzip
+import logging
+import mimetypes
+
 from thrift import TSerialization
 from thrift.protocol import (
     TCompactProtocol, TBinaryProtocol, TJSONProtocol
 )
 from thrift.transport import TTransport
+
 from concrete import Communication
 import concrete.version
 from concrete.util import set_stdout_encoding
-import mimetypes
 
 PROTOCOLS = {
     "binary": TBinaryProtocol.TBinaryProtocolAcceleratedFactory,
@@ -66,6 +69,9 @@ def make_parser():
                         help='input file path')
     parser.add_argument('--output-file', type=str, required=True,
                         help='output file path')
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument(
         '--direction', choices=KNOWN_CONVERSIONS.keys(), required=False)
     parser.add_argument(
@@ -127,6 +133,10 @@ def main():
 
     parser = make_parser()
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
+
     mimetypes.init()
     (ifile_type, ifile_encoding) = mimetypes.guess_type(args.input_file)
     (ofile_type, ofile_encoding) = mimetypes.guess_type(args.output_file)

@@ -41,7 +41,7 @@ def main():
     parser.add_argument('--sleep-interval', type=int, default=5)
     parser.add_argument('--timeout', type=int,
                         help='Default: no timeout')
-    parser.add_argument('-l', '--loglevel',
+    parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
     concrete.version.add_argparse_argument(parser)

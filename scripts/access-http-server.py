@@ -117,7 +117,7 @@ def main():
     parser.add_argument('--host', default='localhost',
                         help='Host interface to listen on')
     parser.add_argument('-p', '--port', type=int, default=8080)
-    parser.add_argument('-l', '--loglevel',
+    parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
     parser.add_argument('--static-path', default='.',

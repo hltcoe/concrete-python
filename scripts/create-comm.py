@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import codecs
+import logging
 
 import concrete.version
 from concrete.util.file_io import write_communication_to_file
@@ -27,15 +28,21 @@ def main():
     parser.add_argument('concrete_path', type=str,
                         help='Output concrete file path (- for stdout)')
     add_annotation_level_argparse_argument(parser)
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     concrete.version.add_argparse_argument(parser)
-    ns = parser.parse_args()
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     # Won't work on Windows
-    text_path = '/dev/fd/0' if ns.text_path == '-' else ns.text_path
+    text_path = '/dev/fd/0' if args.text_path == '-' else args.text_path
     concrete_path = (
-        '/dev/fd/1' if ns.concrete_path == '-' else ns.concrete_path
+        '/dev/fd/1' if args.concrete_path == '-' else args.concrete_path
     )
-    annotation_level = ns.annotation_level
+    annotation_level = args.annotation_level
 
     with codecs.open(text_path, encoding='utf-8') as f:
         comm = create_comm(text_path, f.read(),

@@ -14,6 +14,7 @@ import os
 import os.path
 import subprocess
 import tempfile
+import logging
 
 from concrete.util import communication_file_to_json
 from concrete.util import set_stdout_encoding
@@ -28,10 +29,16 @@ def main():
                         help="Include UUIDs in JSON output")
     parser.add_argument('--include-timestamps', action='store_true',
                         help="Include timestamps in JSON output")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument('file_one')
     parser.add_argument('file_two')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     tmp_path = tempfile.mkdtemp()
 

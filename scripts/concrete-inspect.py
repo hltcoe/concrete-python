@@ -212,6 +212,9 @@ Filtering annotations:
                              "loading (may prevent some 'NoneType' errors but "
                              "is incompatible with some annotations)",
                         action="store_true")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     parser.add_argument("--dependency-tool",
                         type=str,
                         help='Deprecated:  Filter --dependency output by tool.')
@@ -265,6 +268,9 @@ Filtering annotations:
                         'from standard input')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     add_references = not args.no_references
 

@@ -46,9 +46,6 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
-                        level='INFO')
-
     parser.add_argument("communications_source",
                         help="A path to {1} a (possibly nested) directory of "
                         "Communications named using the convention "
@@ -65,8 +62,14 @@ def main():
     parser.add_argument("--max-file-size", type=str, default="1GiB",
                         help="Maximum size of (non-ZIP) files that can be read into memory "
                         "(e.g. '2G', '300MB')")
+    parser.add_argument('-l', '--loglevel', '--log-level',
+                        help='Logging verbosity level threshold (to stderr)',
+                        default='info')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     if os.path.isdir(args.communications_source):
         comm_container = DirectoryBackedCommunicationContainer(args.communications_source)

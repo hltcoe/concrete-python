@@ -22,13 +22,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="Validate a Concrete Communication file")
     parser.add_argument('communication_file')
-    parser.add_argument('-l', '--loglevel',
+    parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(levelname)7s:  %(message)s', level=args.loglevel.upper())
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                        level=args.loglevel.upper())
 
     validate_communication_file(args.communication_file)
 

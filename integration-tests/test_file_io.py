@@ -2,13 +2,16 @@ from __future__ import unicode_literals
 import gzip
 import os
 import tarfile
-import time
+from time import time, localtime
+from calendar import timegm
+import zipfile
 
 from concrete.util import (
     CommunicationReader,
     CommunicationWriter,
     CommunicationWriterTar,
     CommunicationWriterTGZ,
+    CommunicationWriterZip,
     read_communication_from_file,
     FileType
 )
@@ -532,7 +535,7 @@ def test_CommunicationWriterTar_single_file(output_file, login_info):
 
     assert "simple_1.concrete" == tarinfo.name
     assert tarinfo.isreg()
-    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert tarinfo.mtime > time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
@@ -560,7 +563,7 @@ def test_CommunicationWriterTar_single_file_ctx_mgr(output_file, login_info):
 
     assert "simple_1.concrete" == tarinfo.name
     assert tarinfo.isreg()
-    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert tarinfo.mtime > time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
@@ -646,7 +649,7 @@ def test_CommunicationWriterTar_single_file_default_name(output_file,
 
     assert comm.id + '.concrete' == tarinfo.name
     assert tarinfo.isreg()
-    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert tarinfo.mtime > time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
@@ -678,7 +681,7 @@ def test_CommunicationWriterTGZ_single_file(output_file, login_info):
 
     assert "simple_1.concrete" == tarinfo.name
     assert tarinfo.isreg()
-    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert tarinfo.mtime > time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
@@ -706,7 +709,7 @@ def test_CommunicationWriterTGZ_single_file_ctx_mgr(output_file, login_info):
 
     assert "simple_1.concrete" == tarinfo.name
     assert tarinfo.isreg()
-    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert tarinfo.mtime > time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
@@ -739,7 +742,7 @@ def test_CommunicationWriterTGZ_single_file_default_name(output_file,
 
     assert comm.id + '.concrete' == tarinfo.name
     assert tarinfo.isreg()
-    assert tarinfo.mtime > time.time() - TIME_MARGIN
+    assert tarinfo.mtime > time() - TIME_MARGIN
     assert os.stat('tests/testdata/simple_1.concrete').st_size == tarinfo.size
     assert 0o644 == tarinfo.mode
     assert login_info['uid'] == tarinfo.uid
@@ -749,5 +752,113 @@ def test_CommunicationWriterTGZ_single_file_default_name(output_file,
 
     tarinfo = f.next()
     assert tarinfo is None
+
+    f.close()
+
+
+def test_CommunicationWriterZip_single_file(output_file, login_info):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    writer = CommunicationWriterZip()
+    try:
+        writer.open(output_file)
+        writer.write(comm, "simple_1.concrete")
+    finally:
+        writer.close()
+
+    assert zipfile.is_zipfile(output_file)
+
+    f = zipfile.ZipFile(output_file)
+
+    [zipinfo] = f.infolist()
+
+    assert "simple_1.concrete" == zipinfo.filename
+    assert timegm(zipinfo.date_time) > timegm(localtime()) - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == zipinfo.file_size
+
+    f.close()
+
+
+def test_CommunicationWriterZip_single_file_ctx_mgr(output_file, login_info):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    with CommunicationWriterZip(output_file) as writer:
+        writer.write(comm, "simple_1.concrete")
+
+    assert zipfile.is_zipfile(output_file)
+
+    f = zipfile.ZipFile(output_file)
+
+    [zipinfo] = f.infolist()
+
+    assert "simple_1.concrete" == zipinfo.filename
+    assert timegm(zipinfo.date_time) > timegm(localtime()) - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == zipinfo.file_size
+
+    f.close()
+
+
+def test_CommunicationWriterZip_single_file_fixed_point(output_file,
+                                                        login_info):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    with CommunicationWriterZip(output_file) as writer:
+        writer.write(comm, "simple_1.concrete")
+
+    assert zipfile.is_zipfile(output_file)
+
+    f = zipfile.ZipFile(output_file)
+
+    [zipinfo] = f.infolist()
+
+    assert "simple_1.concrete" == zipinfo.filename
+    actual_data = f.open(zipinfo).read()
+    with open('tests/testdata/simple_1.concrete', 'rb') as expected_f:
+        expected_data = expected_f.read()
+        assert expected_data == actual_data
+
+    f.close()
+
+
+def test_CommunicationWriterZip_single_file_fixed_point_unicode(output_file,
+                                                                login_info):
+    comm = read_communication_from_file(
+        "tests/testdata/les-deux-chandeliers.concrete"
+    )
+    with CommunicationWriterZip(output_file) as writer:
+        writer.write(comm, "les-deux-chandeliers.concrete")
+
+    assert zipfile.is_zipfile(output_file)
+
+    f = zipfile.ZipFile(output_file)
+
+    [zipinfo] = f.infolist()
+
+    assert "les-deux-chandeliers.concrete" == zipinfo.filename
+    actual_data = f.open(zipinfo).read()
+    with open('tests/testdata/les-deux-chandeliers.concrete',
+              'rb') as expected_f:
+        expected_data = expected_f.read()
+        assert expected_data == actual_data
+
+    f.close()
+
+
+def test_CommunicationWriterZip_single_file_default_name(output_file,
+                                                         login_info):
+    comm = read_communication_from_file("tests/testdata/simple_1.concrete")
+    writer = CommunicationWriterZip()
+    try:
+        writer.open(output_file)
+        writer.write(comm)
+    finally:
+        writer.close()
+
+    assert zipfile.is_zipfile(output_file)
+
+    f = zipfile.ZipFile(output_file)
+
+    [zipinfo] = f.infolist()
+
+    assert comm.id + '.concrete' == zipinfo.filename
+    assert timegm(zipinfo.date_time) > timegm(localtime()) - TIME_MARGIN
+    assert os.stat('tests/testdata/simple_1.concrete').st_size == zipinfo.file_size
 
     f.close()

@@ -514,9 +514,8 @@ class CommunicationWriter(object):
 
     Sample usage::
 
-        writer = CommunicationWriter('foo.concrete')
-        writer.write(existing_comm_object)
-        writer.close()
+        with CommunicationWriter('foo.concrete') as writer:
+            writer.write(existing_comm_object)
     """
 
     def __init__(self, filename=None, gzip=False):
@@ -568,15 +567,14 @@ class CommunicationWriter(object):
 
 
 class CommunicationWriterTar(object):
-    """Class for writing one or more Communications to a .TAR archive
+    """Class for writing one or more Communications to a .tar archive
 
     Sample usage::
 
-        writer = CommunicationWriterTar('multiple_comms.tar')
-        writer.write(comm_object_one, 'comm_one.concrete')
-        writer.write(comm_object_two, 'comm_two.concrete')
-        writer.write(comm_object_three, 'comm_three.concrete')
-        writer.close()
+        with CommunicationWriterTar('multiple_comms.tar') as writer:
+            writer.write(comm_object_one, 'comm_one.concrete')
+            writer.write(comm_object_two, 'comm_two.concrete')
+            writer.write(comm_object_three, 'comm_three.concrete')
     """
 
     def __init__(self, tar_filename=None, gzip=False):
@@ -585,7 +583,7 @@ class CommunicationWriterTar(object):
             tar_filename (str): if specified, open file at this path
                 during construction (a file can alternatively be opened
                 after construction using the open method)
-            gzip (bool): Flag indicating if .TAR file should be
+            gzip (bool): Flag indicating if .tar file should be
                 compressed with gzip
         """
         self.gzip = gzip
@@ -645,16 +643,77 @@ class CommunicationWriterTar(object):
 
 
 class CommunicationWriterTGZ(CommunicationWriterTar):
-    """Class for writing one or more Communications to a .TAR.GZ archive
+    """Class for writing one or more Communications to a .tar.gz (.tgz)
+    archive
 
     Sample usage::
 
-        writer = CommunicationWriterTGZ('multiple_comms.tgz')
-        writer.write(comm_object_one, 'comm_one.concrete')
-        writer.write(comm_object_two, 'comm_two.concrete')
-        writer.write(comm_object_three, 'comm_three.concrete')
-        writer.close()
+        with CommunicationWriterTGZ('multiple_comms.tar.gz') as writer:
+            writer.write(comm_object_one, 'comm_one.concrete')
+            writer.write(comm_object_two, 'comm_two.concrete')
+            writer.write(comm_object_three, 'comm_three.concrete')
     """
 
     def __init__(self, tar_filename=None):
         super(CommunicationWriterTGZ, self).__init__(tar_filename, gzip=True)
+
+
+class CommunicationWriterZip(object):
+    '''Class for writing one or more Communications to a .zip archive
+
+    Sample usage::
+
+        with CommunicationWriterZip('multiple_comms.zip') as writer:
+            writer.write(comm_object_one, 'comm_one.concrete')
+            writer.write(comm_object_two, 'comm_two.concrete')
+            writer.write(comm_object_three, 'comm_three.concrete')
+    '''
+
+    def __init__(self, zip_filename=None):
+        '''
+        Args:
+            zip_filename (str): if specified, open file at this path
+                during construction (a file can alternatively be opened
+                after construction using the open method)
+        '''
+        if zip_filename is not None:
+            self.open(zip_filename)
+
+    def open(self, zip_filename=None):
+        '''
+        Open specified zip file for writing.
+
+        Args:
+            zip_filename (str): path to file to open for writing
+        '''
+        self.zip_f = zipfile.ZipFile(zip_filename, 'w')
+
+    def close(self):
+        '''
+        Close zip file.
+        '''
+        self.zip_f.close()
+
+    def write(self, comm, comm_filename=None):
+        '''
+        Write communication to zip file.'
+
+        Args:
+            comm (Communication): communication to write to zip file
+            comm_filename (str): desired filename of communication
+                within zip file (by default the filename will be the
+                communication id appended with a .concrete extension)
+        '''
+        if comm_filename is None:
+            comm_filename = comm.id + '.concrete'
+
+        thrift_bytes = TSerialization.serialize(
+            comm, protocol_factory=factory.protocolFactory)
+
+        self.zip_f.writestr(comm_filename, thrift_bytes)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()

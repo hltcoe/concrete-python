@@ -656,3 +656,64 @@ class CommunicationWriterTGZ(CommunicationWriterTar):
 
     def __init__(self, tar_filename=None):
         super(CommunicationWriterTGZ, self).__init__(tar_filename, gzip=True)
+
+
+class CommunicationWriterZip(object):
+    '''Class for writing one or more Communications to a .zip archive
+
+    Sample usage::
+
+        with CommunicationWriterZip('multiple_comms.zip') as writer:
+            writer.write(comm_object_one, 'comm_one.concrete')
+            writer.write(comm_object_two, 'comm_two.concrete')
+            writer.write(comm_object_three, 'comm_three.concrete')
+    '''
+
+    def __init__(self, zip_filename=None):
+        '''
+        Args:
+            zip_filename (str): if specified, open file at this path
+                during construction (a file can alternatively be opened
+                after construction using the open method)
+        '''
+        if zip_filename is not None:
+            self.open(zip_filename)
+
+    def open(self, zip_filename=None):
+        '''
+        Open specified zip file for writing.
+
+        Args:
+            zip_filename (str): path to file to open for writing
+        '''
+        self.zip_f = zipfile.ZipFile(zip_filename, 'w')
+
+    def close(self):
+        '''
+        Close zip file.
+        '''
+        self.zip_f.close()
+
+    def write(self, comm, comm_filename=None):
+        '''
+        Write communication to zip file.'
+
+        Args:
+            comm (Communication): communication to write to zip file
+            comm_filename (str): desired filename of communication
+                within zip file (by default the filename will be the
+                communication id appended with a .concrete extension)
+        '''
+        if comm_filename is None:
+            comm_filename = comm.id + '.concrete'
+
+        thrift_bytes = TSerialization.serialize(
+            comm, protocol_factory=factory.protocolFactory)
+
+        self.zip_f.writestr(comm_filename, thrift_bytes)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()

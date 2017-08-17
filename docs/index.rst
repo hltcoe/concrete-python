@@ -19,6 +19,7 @@ Thrift schema for Concrete, which can be found in the
    :caption: Contents:
 
    README.rst
+   advanced_usage.rst
    concrete.rst
    CONTRIBUTING.rst
 

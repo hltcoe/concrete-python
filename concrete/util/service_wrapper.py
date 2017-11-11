@@ -139,7 +139,7 @@ class SubprocessConcreteServiceWrapper(object):
             try:
                 s = create_connection((self.host, self.port))
                 s.close()
-            except:
+            except Exception:
                 s = None
 
                 sleep(self.SLEEP_INTERVAL)

@@ -63,7 +63,7 @@ def main():
                 if cli.alive():
                     alive = True
                     break
-        except:
+        except Exception:
             pass
         if args.timeout is not None and time() - start > args.timeout:
             logging.info('timed out after {}s'.format(args.timeout))

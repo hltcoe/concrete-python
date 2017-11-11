@@ -91,5 +91,5 @@ def is_accelerated():
         transport = TTransport.TMemoryBuffer()
         TCompactProtocol.TCompactProtocolAccelerated(transport, fallback=False)
         return True
-    except:
+    except Exception:
         return False

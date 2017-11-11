@@ -44,7 +44,7 @@ def json_str_to_concrete_bytes_skip_bad_lines(tweet_str):
     try:
         tweet_str = tweet_str.decode('utf-8')
         return json_str_to_concrete_bytes(tweet_str)
-    except:
+    except Exception:
         return None
 
 
@@ -52,7 +52,7 @@ def json_str_to_validated_concrete_bytes_skip_bad_lines(tweet_str):
     try:
         tweet_str = tweet_str.decode('utf-8')
         return json_str_to_concrete_bytes(tweet_str)
-    except:
+    except Exception:
         return None
 
 

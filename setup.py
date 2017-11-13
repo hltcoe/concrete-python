@@ -65,7 +65,7 @@ if __name__ == '__main__':
             'networkx',
             'thrift==0.10.0',
             'redis>=2.10.0',
-            'pycountry==1.20',
+            'pycountry>=17.9.23',
             'requests',
         ],
 

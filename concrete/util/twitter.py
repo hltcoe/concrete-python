@@ -307,9 +307,9 @@ def twitter_lid_to_iso639_3(twitter_lid):
         str: the ISO639-3 code corresponding to twitter_lid
     """
     if len(twitter_lid) == 2:
-        return ISO_LANGS.get(iso639_1_code=twitter_lid).iso639_3_code
+        return ISO_LANGS.get(alpha_2=twitter_lid).alpha_3
     elif '-' in twitter_lid and len(twitter_lid) == 5:
         spl = twitter_lid[0:2]
-        return ISO_LANGS.get(iso639_1_code=spl).iso639_3_code
+        return ISO_LANGS.get(alpha_2=spl).alpha_3
     else:
         return twitter_lid

@@ -129,6 +129,7 @@ def test_create_comm_complex():
 
     assert validate_communication(comm)
 
+
 def test_create_comm_complex_sections():
     comm = create_comm('one', '\n\n\nFOO\r\n\r\n\n\n\nBAR\n\nFU\nBAR\n\t\n\n   \n')
     assert 'one' == comm.id
@@ -149,6 +150,7 @@ def test_create_comm_complex_sections():
     assert 18 == sect.textSpan.start
     assert 24 == sect.textSpan.ending
     assert 2 == len(sect.sentenceList)
+
 
 def test_create_comm_empty_al_none():
     comm = create_comm('one', annotation_level=AL_NONE)

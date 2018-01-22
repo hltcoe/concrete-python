@@ -84,14 +84,9 @@ def test_create_comm_complex():
     comm = create_comm('one', '\n\nsimple comm\t\t.\nor ...\n\nisit?\n')
     assert 'one' == comm.id
     assert '\n\nsimple comm\t\t.\nor ...\n\nisit?\n' == comm.text
-    assert 3 == len(comm.sectionList)
+    assert 2 == len(comm.sectionList)
 
     sect = comm.sectionList[0]
-    assert 0 == sect.textSpan.start
-    assert 0 == sect.textSpan.ending
-    assert 0 == len(sect.sentenceList)
-
-    sect = comm.sectionList[1]
     assert 2 == sect.textSpan.start
     assert 23 == sect.textSpan.ending
     assert 2 == len(sect.sentenceList)
@@ -119,10 +114,10 @@ def test_create_comm_complex():
     assert 1 == tl[1].tokenIndex
     assert '...' == tl[1].text
 
-    sect = comm.sectionList[2]
+    sect = comm.sectionList[1]
     assert 25 == sect.textSpan.start
-    assert 31 == sect.textSpan.ending
-    assert 2 == len(sect.sentenceList)
+    assert 30 == sect.textSpan.ending
+    assert 1 == len(sect.sentenceList)
     sent = sect.sentenceList[0]
     assert 25 == sent.textSpan.start
     assert 30 == sent.textSpan.ending
@@ -131,14 +126,29 @@ def test_create_comm_complex():
     assert 0 == tl[0].tokenIndex
     assert 'isit?' == tl[0].text
     assert 'isit?' == comm.text[tl[0].textSpan.start:tl[0].textSpan.ending]
-    sent = sect.sentenceList[1]
-    assert 31 == sent.textSpan.start
-    assert 31 == sent.textSpan.ending
-    tl = sent.tokenization.tokenList.tokenList
-    assert 0 == len(tl)
 
     assert validate_communication(comm)
 
+def test_create_comm_complex_sections():
+    comm = create_comm('one', '\n\n\nFOO\r\n\r\n\n\n\nBAR\n\nFU\nBAR\n\t\n\n   \n')
+    assert 'one' == comm.id
+    assert '\n\n\nFOO\r\n\r\n\n\n\nBAR\n\nFU\nBAR\n\t\n\n   \n' == comm.text
+    assert 3 == len(comm.sectionList)
+
+    sect = comm.sectionList[0]
+    assert 3 == sect.textSpan.start
+    assert 6 == sect.textSpan.ending
+    assert 1 == len(sect.sentenceList)
+
+    sect = comm.sectionList[1]
+    assert 13 == sect.textSpan.start
+    assert 16 == sect.textSpan.ending
+    assert 1 == len(sect.sentenceList)
+
+    sect = comm.sectionList[2]
+    assert 18 == sect.textSpan.start
+    assert 24 == sect.textSpan.ending
+    assert 2 == len(sect.sentenceList)
 
 def test_create_comm_empty_al_none():
     comm = create_comm('one', annotation_level=AL_NONE)
@@ -227,21 +237,16 @@ def test_create_comm_complex_al_section():
     assert 'one' == comm.id
     assert '\n\nsimple comm\t\t.\nor ...\n\nisit?\n' == comm.text
 
-    assert 3 == len(comm.sectionList)
+    assert 2 == len(comm.sectionList)
 
     sect = comm.sectionList[0]
-    assert 0 == sect.textSpan.start
-    assert 0 == sect.textSpan.ending
-    assert sect.sentenceList is None
-
-    sect = comm.sectionList[1]
     assert 2 == sect.textSpan.start
     assert 23 == sect.textSpan.ending
     assert sect.sentenceList is None
 
-    sect = comm.sectionList[2]
+    sect = comm.sectionList[1]
     assert 25 == sect.textSpan.start
-    assert 31 == sect.textSpan.ending
+    assert 30 == sect.textSpan.ending
     assert sect.sentenceList is None
 
     assert validate_communication(comm)
@@ -300,14 +305,9 @@ def test_create_comm_complex_al_sentence():
                        annotation_level=AL_SENTENCE)
     assert 'one' == comm.id
     assert '\n\nsimple comm\t\t.\nor ...\n\nisit?\n' == comm.text
-    assert 3 == len(comm.sectionList)
+    assert 2 == len(comm.sectionList)
 
     sect = comm.sectionList[0]
-    assert 0 == sect.textSpan.start
-    assert 0 == sect.textSpan.ending
-    assert 0 == len(sect.sentenceList)
-
-    sect = comm.sectionList[1]
     assert 2 == sect.textSpan.start
     assert 23 == sect.textSpan.ending
     assert 2 == len(sect.sentenceList)
@@ -320,17 +320,13 @@ def test_create_comm_complex_al_sentence():
     assert 23 == sent.textSpan.ending
     assert sent.tokenization is None
 
-    sect = comm.sectionList[2]
+    sect = comm.sectionList[1]
     assert 25 == sect.textSpan.start
-    assert 31 == sect.textSpan.ending
-    assert 2 == len(sect.sentenceList)
+    assert 30 == sect.textSpan.ending
+    assert 1 == len(sect.sentenceList)
     sent = sect.sentenceList[0]
     assert 25 == sent.textSpan.start
     assert 30 == sent.textSpan.ending
-    assert sent.tokenization is None
-    sent = sect.sentenceList[1]
-    assert 31 == sent.textSpan.start
-    assert 31 == sent.textSpan.ending
     assert sent.tokenization is None
 
     assert validate_communication(comm)

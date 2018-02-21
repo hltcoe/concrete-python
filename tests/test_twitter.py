@@ -113,6 +113,8 @@ def test_twitter_lid_conversion():
     assert 'zho' == twitter_lid_to_iso639_3('zh-tw')
     assert 'und' == twitter_lid_to_iso639_3('und')
     assert 'eng' == twitter_lid_to_iso639_3('eng')
+    assert 'und' == twitter_lid_to_iso639_3('xx')
+    assert 'und' == twitter_lid_to_iso639_3('id')
 
 
 @mark.parametrize('omitted_fields,omitted_assertions', [

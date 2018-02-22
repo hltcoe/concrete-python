@@ -293,23 +293,54 @@ def capture_tweet_lid(tweet):
 
 
 def twitter_lid_to_iso639_3(twitter_lid):
-    """
-    Convert Twitter Language ID string to ISO639-3 code
+    """Convert Twitter Language ID string to ISO639-3 code
 
-    Ref: https://dev.twitter.com/rest/reference/get/help/languages
+    Ref:
+        https://developer.twitter.com/en/docs/developer-utilities/supported-languages/api-reference/get-help-languages
 
     Args:
         twitter_lid (str): This can be an iso639-3 code (no-op),
             iso639-1 2-letter abbr (converted to 3), or combo
             (split by '-', then first part converted)
 
+            Per the Twitter documentation, "The language code may be
+            formatted as ISO 639-1 alpha-2 (en), ISO 639-3 alpha-3
+            (msa), or ISO 639-1 alpha-2 combined with an ISO 3166-1
+            alpha-2 localization (zh-tw)."
+
     Returns:
         str: the ISO639-3 code corresponding to twitter_lid
+
     """
+    def _iso639_1_to_iso639_3(iso639_1):
+        try:
+            return ISO_LANGS.get(alpha_2=iso639_1).alpha_3
+        except KeyError:
+            # As of early 2018, Twitter is (at least sometimes) using
+            # the incorrect ISO-639-1 language code for Indonesian.
+            #
+            # This issue was acknowledged by Twitter tech support in this
+            # 2015 forum post:
+            #   https://twittercommunity.com/t/hebrew-and-indonesian-getting-incorrect-lang-codes/13044/3
+            #
+            # The 2015 forum post mentions that Twitter is using the incorrect
+            # language code for both Hebrew and Indonesian, but as of 2018
+            # Twitter is using the correct ISO-639-1 code for Hebrew.
+            #
+            # The list of Twitter language codes (including the incorrect
+            # Indonesian code) could be found here:
+            #   https://developer.twitter.com/en/docs/tweets/filter-realtime/guides/premium-operators
+            #   http://support.gnip.com/sources/twitter/powertrack_operators.html
+            # The ISO-639-1 character codes are correct for all 60+ languages currently
+            # supported by Twitter, except for Indonesian.
+            if iso639_1 == 'in':
+                return ISO_LANGS.get(alpha_2='id').alpha_3
+            else:
+                return 'und'
+
     if len(twitter_lid) == 2:
-        return ISO_LANGS.get(alpha_2=twitter_lid).alpha_3
-    elif '-' in twitter_lid and len(twitter_lid) == 5:
-        spl = twitter_lid[0:2]
-        return ISO_LANGS.get(alpha_2=spl).alpha_3
+        return _iso639_1_to_iso639_3(twitter_lid)
+    elif twitter_lid.find('-') == 2 and len(twitter_lid) == 5:
+        return _iso639_1_to_iso639_3(twitter_lid[0:2])
     else:
         return twitter_lid

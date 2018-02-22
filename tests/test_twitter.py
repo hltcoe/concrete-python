@@ -113,8 +113,12 @@ def test_twitter_lid_conversion():
     assert 'zho' == twitter_lid_to_iso639_3('zh-tw')
     assert 'und' == twitter_lid_to_iso639_3('und')
     assert 'eng' == twitter_lid_to_iso639_3('eng')
+    # Three-letter language codes are not validated as ISO-639-3 codes
+    assert 'xxx' == twitter_lid_to_iso639_3('xxx')
+    # Two-letter language codes are validated
     assert 'und' == twitter_lid_to_iso639_3('xx')
-    assert 'und' == twitter_lid_to_iso639_3('id')
+    # Special handling for Indonesian, due to Twitter using incorrect ISO-639-1 code
+    assert 'ind' == twitter_lid_to_iso639_3('in')
 
 
 @mark.parametrize('omitted_fields,omitted_assertions', [

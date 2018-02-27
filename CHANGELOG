@@ -1,7 +1,12 @@
 4.14.1 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improved newline handling for concrete.util.simple_comm.create_comm()
+  - Leading and trailing document newlines no longer generate empty
+    sentences
+  - Multiple lines of whitespace are now treated as section breaks;
+    previous behavior was that only '\n\n' was used for section
+    breaks
 
 
 4.14.0 (2017-08-08)

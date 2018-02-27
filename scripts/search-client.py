@@ -18,13 +18,28 @@ except NameError:
 
 
 def execute_search_query(search_client, terms, k):
-    logging.debug("executing query '{}'".format(' '.join(terms)))
+    logging.debug("executing query '{}'".format(u' '.join(terms)))
     query = SearchQuery(type=SearchType.COMMUNICATIONS, terms=terms, k=k)
     result = search_client.search(query)
     return [
         (item.communicationId, item.score)
         for item in result.searchResultItems
     ]
+
+
+def unicode_arg(s):
+    """Convert argparse argument to Unicode string
+
+    On Python 3, no conversion is necessary
+    On Python 2, we convert bytestring to unicode using file system encoding
+
+    See:
+      https://codereview.stackexchange.com/questions/124434/get-argument-as-unicode-string-from-argparse-in-python-2-and-3
+    """
+    if sys.version_info >= (3, 0):
+        return s
+    else:
+        return s.decode(sys.getfilesystemencoding())
 
 
 def main():
@@ -66,7 +81,7 @@ def main():
     parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
-    parser.add_argument('terms', metavar='term', nargs='*',
+    parser.add_argument('terms', metavar='term', nargs='*', type=unicode_arg,
                         help='Single query to perform (mutually exclusive with -b -and -i)')
     concrete.version.add_argparse_argument(parser)
     args = parser.parse_args()

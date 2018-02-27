@@ -6,8 +6,6 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import logging
 import sys
 
-import requests
-
 from concrete.search.ttypes import SearchQuery, SearchType
 from concrete.util import set_stdout_encoding
 from concrete.util.search_wrapper import SearchClientWrapper

@@ -237,10 +237,44 @@ def create_comm(comm_id, text='',
                 create_section(sec_text, sec_start, sec_end, section_kind,
                                aug, metadata_tool, metadata_timestamp,
                                annotation_level)
-                for (sec_text, sec_start, sec_end) in _split(text, '\n\n')
+                for (sec_text, sec_start, sec_end) in _split_sections(text)
             ] if text.strip() else []
         ) if sections else None,
     )
+
+
+def _split_sections(s):
+    """Split string into sections when there are two or more "empty" lines
+
+    Args:
+        s (str): text to split
+
+    Returns:
+        list of tuples representing the split pieces of the section;
+        each tuple contains a string (a piece of `s`), an integer
+        indicating where that section starts in `s`, and an integer
+        indicating where that section ends in `s` (exclusive), in
+        that order
+    """
+    # Ignore whitespace at beginning/end of document
+    m = re.match('^(?:\s*\r?\n)*(.*?)(?:\s*\r?\n)*$', s, re.DOTALL)
+    stripped_start_offset = m.span(1)[0]
+    stripped_end_offset = m.span(1)[1]
+    stripped = s[stripped_start_offset:stripped_end_offset]
+
+    offsets = []
+    offsets.append(stripped_start_offset)
+    for sec_break in [sm.span() for sm in re.finditer(r'(?:\s*\r?\n){2,}', stripped, re.DOTALL)]:
+        offsets.append(sec_break[0] + stripped_start_offset)
+        offsets.append(sec_break[1] + stripped_start_offset)
+    offsets.append(stripped_end_offset)
+
+    sections = []
+    it = iter(offsets)
+    for (start, end) in zip(it, it):
+        sections.append((s[start:end], start, end))
+
+    return sections
 
 
 def create_simple_comm(comm_id, sentence_string="Super simple sentence ."):

@@ -1,7 +1,11 @@
 4.14.1 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Twitter (sometimes) uses the incorrect ISO-639-1 code for
+  Indonesian.  The code should be 'id', but Twitter sometimes uses
+  'in'.  `concrete.util.twitter.twitter_lid_to_iso639_3()` now
+  converts this incorrect ISO-639-1 code to the correct ISO-639-3 code
+  for Indonesian ('ind').
 
 
 4.14.0 (2017-08-08)

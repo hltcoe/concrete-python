@@ -1,12 +1,23 @@
 4.14.1 (unreleased)
 -------------------
 
+- Improvements to `scripts/search-client.py`
+  - Command line argument for hostname changed from positional
+    argument to optional `--host` flag
+  - Command line argument for port changed from positional
+    argument to optional `--port` flag
+  - Added batch mode for command line queries
+  - Search terms with Non-ASCII characters now properly supported on
+    both Python 2 and Python 3
+  - Added `--with-scores` flag to print search result scores
+
 - Improved newline handling for concrete.util.simple_comm.create_comm()
   - Leading and trailing document newlines no longer generate empty
     sentences
   - Multiple lines of whitespace are now treated as section breaks;
     previous behavior was that only '\n\n' was used for section
     breaks
+
 - Twitter (sometimes) uses the incorrect ISO-639-1 code for
   Indonesian.  The code should be 'id', but Twitter sometimes uses
   'in'.  `concrete.util.twitter.twitter_lid_to_iso639_3()` now

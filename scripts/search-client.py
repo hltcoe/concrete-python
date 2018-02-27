@@ -114,7 +114,7 @@ def main():
             logging.info('enter a blank query to exit')
             line = raw_input('> ')
             while line:
-                terms = line.split('\t')
+                terms = unicode_arg(line).split('\t')
                 for (comm_id, score) in execute_search_query(search_client, terms, args.k):
                     if args.with_scores:
                         print('{}	{}'.format(comm_id, score))

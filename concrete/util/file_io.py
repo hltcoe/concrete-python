@@ -277,6 +277,8 @@ class ThriftReader(object):
         """
         filetype = FileType.lookup(filetype)
 
+        self._seek_supported = True
+
         self._thrift_type = thrift_type
         if postprocess is None:
             def _noop(obj):
@@ -406,15 +408,21 @@ class ThriftReader(object):
         Returns:
             tuple containing Thrift object and its filename
         '''
-        if self.transport.fileobj:
-            file_pos_0 = self.transport.fileobj.tell()
+        if self.transport.fileobj and self._seek_supported:
+            try:
+                file_pos_0 = self.transport.fileobj.tell()
+            except IOError as e:
+                if e.errno == 29:  # Illegal seek
+                    self._seek_supported = False
+                else:
+                    raise e
         try:
             thrift_obj = self._thrift_type()
             thrift_obj.read(self.protocol)
             self._postprocess(thrift_obj)
             return (thrift_obj, self._source_filename)
         except EOFError:
-            if self.transport.fileobj:
+            if self.transport.fileobj and self._seek_supported:
                 # If the file position moved after the read() call, we weren't truly
                 # at the End Of File.  Deserializing a Thrift object that is missing
                 # required fields can cause this type of EOFError.

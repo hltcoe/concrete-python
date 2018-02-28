@@ -386,6 +386,7 @@ class ThriftReader(object):
         in the sequence.
 
         Raises:
+            EOFError: unexpected EOF, probably caused by deserializing an invalid Thrift object
             StopIteration: if there are no more communications
 
         Returns:
@@ -395,21 +396,37 @@ class ThriftReader(object):
 
     def _next_from_stream(self):
         '''
-        Return tuple containing next communication (and filename)
+        Return tuple containing next Thrift object (and filename)
         from an uncompressed stream.
 
         Raises:
-            StopIteration: if there are no more communications
+            EOFError: unexpected EOF, probably caused by deserializing an invalid Thrift object
+            StopIteration: if there are no more Thrift objects
 
         Returns:
-            tuple containing Communication object and its filename
+            tuple containing Thrift object and its filename
         '''
+        if self.transport.fileobj:
+            file_pos_0 = self.transport.fileobj.tell()
         try:
-            comm = self._thrift_type()
-            comm.read(self.protocol)
-            self._postprocess(comm)
-            return (comm, self._source_filename)
-        except EOFError:
+            thrift_obj = self._thrift_type()
+            thrift_obj.read(self.protocol)
+            self._postprocess(thrift_obj)
+            return (thrift_obj, self._source_filename)
+        except EOFError as e:
+            if self.transport.fileobj:
+                # If the file position moved after the read() call, we weren't truly
+                # at the End Of File.  Deserializing a Thrift object that is missing
+                # required fields can cause this type of EOFError.
+                file_pos = self.transport.fileobj.tell()
+                if file_pos != file_pos_0:
+                    self.transport.close()
+                    raise EOFError(
+                        'While trying to read Thrift object of type %s starting at byte %d. '
+                        'Most likely cause is deserialization error due to missing required '
+                        'fields.'
+                        %
+                        (type(self._thrift_type()), file_pos_0))
             self.transport.close()
             raise StopIteration
 

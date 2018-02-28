@@ -413,7 +413,7 @@ class ThriftReader(object):
             thrift_obj.read(self.protocol)
             self._postprocess(thrift_obj)
             return (thrift_obj, self._source_filename)
-        except EOFError as e:
+        except EOFError:
             if self.transport.fileobj:
                 # If the file position moved after the read() call, we weren't truly
                 # at the End Of File.  Deserializing a Thrift object that is missing

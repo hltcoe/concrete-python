@@ -16,7 +16,7 @@ from concrete.util import (
     FileType
 )
 
-from pytest import fixture
+from pytest import fixture, raises
 from tempfile import mkstemp
 
 
@@ -423,6 +423,25 @@ def test_CommunicationReader_tar_gz_file_unicode():
     assert len(comms) == 2
     assert 'les-deux-chandeliers/l0.txt' == comms[0].id
     assert 'les-deux-chandeliers/l1.txt' == comms[1].id
+
+
+def test_CommunicationReader_truncated_file():
+    reader = CommunicationReader('tests/testdata/truncated.comm')
+    with raises(EOFError):
+        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+
+
+def test_CommunicationReader_truncated_gz_file():
+    reader = CommunicationReader('tests/testdata/truncated.comm.gz')
+    with raises(EOFError):
+        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+
+
+def test_CommunicationReader_truncated_tgz_file():
+    reader = CommunicationReader('tests/testdata/simple_1_and_truncated.tar.gz')
+    (simple_comm, _) = reader.next()
+    with raises(EOFError):
+        (truncated_comm, _) = reader.next()
 
 
 def test_CommunicationWriter_fixed_point(output_file):

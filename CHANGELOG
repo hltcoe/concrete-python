@@ -1,6 +1,9 @@
 4.14.1 (unreleased)
 -------------------
 
+- CommunicationReader.__next__() now throws EOFError when reading a
+  truncated (invalid) Communication file.
+
 - Improvements to `scripts/search-client.py`
   - Command line argument for hostname changed from positional
     argument to optional `--host` flag

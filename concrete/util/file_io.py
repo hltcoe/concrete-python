@@ -277,6 +277,8 @@ class ThriftReader(object):
         """
         filetype = FileType.lookup(filetype)
 
+        self._seek_supported = True
+
         self._thrift_type = thrift_type
         if postprocess is None:
             def _noop(obj):
@@ -386,6 +388,7 @@ class ThriftReader(object):
         in the sequence.
 
         Raises:
+            EOFError: unexpected EOF, probably caused by deserializing an invalid Thrift object
             StopIteration: if there are no more communications
 
         Returns:
@@ -395,21 +398,39 @@ class ThriftReader(object):
 
     def _next_from_stream(self):
         '''
-        Return tuple containing next communication (and filename)
+        Return tuple containing next Thrift object (and filename)
         from an uncompressed stream.
 
         Raises:
-            StopIteration: if there are no more communications
+            EOFError: unexpected EOF, probably caused by deserializing an invalid Thrift object
+            StopIteration: if there are no more Thrift objects
 
         Returns:
-            tuple containing Communication object and its filename
+            tuple containing Thrift object and its filename
         '''
+        if self.transport.fileobj and self._seek_supported:
+            try:
+                file_pos_0 = self.transport.fileobj.tell()
+            except IOError as e:
+                if e.errno == 29:  # Illegal seek
+                    self._seek_supported = False
+                else:
+                    raise e
         try:
-            comm = self._thrift_type()
-            comm.read(self.protocol)
-            self._postprocess(comm)
-            return (comm, self._source_filename)
+            thrift_obj = self._thrift_type()
+            thrift_obj.read(self.protocol)
+            self._postprocess(thrift_obj)
+            return (thrift_obj, self._source_filename)
         except EOFError:
+            if self.transport.fileobj and self._seek_supported:
+                # If the file position moved after the read() call, we weren't truly
+                # at the End Of File.
+                file_pos = self.transport.fileobj.tell()
+                if file_pos != file_pos_0:
+                    self.transport.close()
+                    raise EOFError(
+                        'While trying to read Thrift object of type %s starting at byte %d. ' %
+                        (type(self._thrift_type()), file_pos_0))
             self.transport.close()
             raise StopIteration
 

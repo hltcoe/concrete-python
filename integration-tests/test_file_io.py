@@ -431,6 +431,19 @@ def test_CommunicationReader_truncated_file():
         [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
 
 
+def test_CommunicationReader_truncated_gz_file():
+    reader = CommunicationReader('tests/testdata/truncated.comm.gz')
+    with raises(EOFError):
+        [comms, filenames] = zip(*[(c, f) for (c, f) in reader])
+
+
+def test_CommunicationReader_truncated_tgz_file():
+    reader = CommunicationReader('tests/testdata/simple_1_and_truncated.tar.gz')
+    (simple_comm, _) = reader.next()
+    with raises(EOFError):
+        (truncated_comm, _) = reader.next()
+
+
 def test_CommunicationWriter_fixed_point(output_file):
     input_file = 'tests/testdata/simple_1.concrete'
     comm = read_communication_from_file(input_file)

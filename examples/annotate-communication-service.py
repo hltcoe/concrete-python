@@ -3,15 +3,12 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 import argparse
-
-from concrete.util.annotate_wrapper import AnnotateCommunicationServiceWrapper
-from concrete.util.net import find_port
-
-
 from time import time
 
-from concrete.services import AnnotateCommunicationService
+from concrete.annotate import AnnotateCommunicationService
 from concrete.metadata.ttypes import AnnotationMetadata
+from concrete.util.annotate_wrapper import AnnotateCommunicationServiceWrapper
+from concrete.util.net import find_port
 
 
 class NoopAnnotateCommunicationService(AnnotateCommunicationService.Iface):

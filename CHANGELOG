@@ -27,6 +27,9 @@
   converts this incorrect ISO-639-1 code to the correct ISO-639-3 code
   for Indonesian ('ind').
 
+- Fixed import errors in `examples/annotate-communication-service.py`
+  caused by schema changes
+
 
 4.14.0 (2017-08-08)
 -------------------

@@ -424,16 +424,12 @@ class ThriftReader(object):
         except EOFError:
             if self.transport.fileobj and self._seek_supported:
                 # If the file position moved after the read() call, we weren't truly
-                # at the End Of File.  Deserializing a Thrift object that is missing
-                # required fields can cause this type of EOFError.
+                # at the End Of File.
                 file_pos = self.transport.fileobj.tell()
                 if file_pos != file_pos_0:
                     self.transport.close()
                     raise EOFError(
-                        'While trying to read Thrift object of type %s starting at byte %d. '
-                        'Most likely cause is deserialization error due to missing required '
-                        'fields.'
-                        %
+                        'While trying to read Thrift object of type %s starting at byte %d. ' %
                         (type(self._thrift_type()), file_pos_0))
             self.transport.close()
             raise StopIteration

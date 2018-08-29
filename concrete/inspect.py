@@ -49,7 +49,7 @@ def _get_tagged_token_strs_by_token_index(tagged_tokens, num_tokens):
 
 def print_conll_style_tags_for_communication(
         comm, char_offsets=False, dependency=False, lemmas=False, ner=False,
-        pos=False,
+        pos=False, starts=False,
         dependency_tool=None, dependency_parse_filter=None,
         lemmas_tool=None, lemmas_filter=None,
         ner_tool=None, ner_filter=None,
@@ -158,6 +158,11 @@ def print_conll_style_tags_for_communication(
             field_lists.append(
                 _get_char_offset_tags_for_tokenization(comm, tokenization))
 
+        if starts:
+            header_fields.append(u'START')
+            field_lists.append(
+                _get_start_tags_for_tokenization(comm, tokenization))
+
         if lemmas:
             for token_tagging in lemmas_filter(
                     get_token_taggings(tokenization, u'LEMMA')):
@@ -224,6 +229,7 @@ def print_conll_style_tags_for_communication(
         ([u'INDEX'] * _max_num_header_fields(u'INDEX')) +
         ([u'TOKEN'] * _max_num_header_fields(u'TOKEN')) +
         ([u'CHAR'] * _max_num_header_fields(u'CHAR')) +
+        ([u'START'] * _max_num_header_fields(u'START')) +
         ([u'LEMMA'] * _max_num_header_fields(u'LEMMA')) +
         ([u'POS'] * _max_num_header_fields(u'POS')) +
         ([u'NER'] * _max_num_header_fields(u'NER')) +
@@ -767,6 +773,28 @@ def _get_char_offset_tags_for_tokenization(comm, tokenization):
                     char_offset_tags[i] = comm.text[
                         token.textSpan.start:token.textSpan.ending]
         return char_offset_tags
+
+
+def _get_start_tags_for_tokenization(comm, tokenization):
+    '''
+    Return list of numbers (as strings) corresponding to the offsets
+    of tokens in :class:`.Tokenization` `tokenization` in the
+    communication text (where tokens without `textSpan` fields are
+    represented by None in the output list), or return None if
+    `tokenization` is None.
+
+    Args:
+        comm (Communication):
+        tokenization (Tokenization):
+    '''
+    if tokenization.tokenList:
+        start_tags = [None] * len(tokenization.tokenList.tokenList)
+
+        if comm.text:
+            for i, token in enumerate(tokenization.tokenList.tokenList):
+                if token.textSpan:
+                    start_tags[i] = str(token.textSpan.start)
+        return start_tags
 
 
 def _sorted_dep_lists_for_tokenization(tokenization,

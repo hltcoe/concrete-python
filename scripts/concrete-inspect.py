@@ -131,6 +131,10 @@ Filtering annotations:
                              "s (not the text stored in the tokenization) in '"
                              "CoNLL-style' format",
                         action="store_true")
+    parser.add_argument("--starts",
+                        help="Print starting indices (offsets) of tokens in "
+                             "communication text, in 'CoNLL-style' format",
+                        action="store_true")
     parser.add_argument("--dependency",
                         help="Print HEAD and DEPREL tags for first dependency "
                              "parse in 'CoNLL-style' format",
@@ -283,7 +287,8 @@ Filtering annotations:
                                     filetype=FileType.STREAM)
 
     # check that an annotation argument was specified
-    if not (args.char_offsets or args.dependency or args.lemmas or args.ner or
+    if not (args.char_offsets or args.starts or
+            args.dependency or args.lemmas or args.ner or
             args.pos or args.entities or args.mentions or args.metadata or
             args.sections or args.situation_mentions or args.situations or
             args.text or args.tokens or args.treebank or args.id or
@@ -381,11 +386,12 @@ Filtering annotations:
             concrete.inspect.print_penn_treebank_for_communication(
                 comm, tool=args.treebank_tool,
                 parse_filter=_get_annotation_filter('treebank'))
-        if (args.char_offsets or args.dependency or args.lemmas or args.ner or
-                args.pos or args.other_tag):
+        if (args.char_offsets or args.starts or args.dependency or
+                args.lemmas or args.ner or args.pos or args.other_tag):
             print_header_if('conll', args.annotation_headers)
             concrete.inspect.print_conll_style_tags_for_communication(
                 comm, char_offsets=args.char_offsets,
+                starts=args.starts,
                 dependency=args.dependency,
                 lemmas=args.lemmas, ner=args.ner, pos=args.pos,
                 other_tags=dict(

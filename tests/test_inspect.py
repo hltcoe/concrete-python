@@ -258,6 +258,21 @@ def test_print_conll_other_tags_repeated_ner_filtered(capsys):
     assert '3\tshe\tner_2/1\tSHE\n' in out
 
 
+def test_print_conll_start_tags(capsys):
+    print_conll_style_tags_for_communication(
+        comm_with_other_tags(),
+        starts=True)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\tSTART\n'
+        '-----\t-----\t-----\n'
+        '1\tThe\t0\n'
+        '2\tquick\t4\n'
+        '3\tbrown\t10\n'
+    )
+
+
 def test_print_situation_mentions(capsys):
     comm = _comm_with_properties(0)
     print_situation_mentions(comm)

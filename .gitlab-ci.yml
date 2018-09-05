@@ -1,4 +1,5 @@
 build-test-deploy:
+  image: docker:latest
   before_script:
     - docker info
   script:

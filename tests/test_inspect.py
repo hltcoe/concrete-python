@@ -159,6 +159,14 @@ over the lazy dog .
 Or did she ?
 ''')
     print_conll_style_tags_for_communication(comm, ner=True)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\n'
+        '-----\t-----\n'
+        '1\tThe\n'
+        '2\tquick\n'
+    )
 
 
 def test_print_conll_missing_char_offsets(capsys):
@@ -168,6 +176,14 @@ def test_print_conll_missing_char_offsets(capsys):
             token.textSpan = None
     print_conll_style_tags_for_communication(
         comm_without_token_textspans, char_offsets=True)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\tCHAR\n'
+        '-----\t-----\t----\n'
+        '1\tThe\t\n'
+        '2\tquick\t\n'
+    )
 
 
 def test_print_conll_other_tags_ignore_all(capsys):

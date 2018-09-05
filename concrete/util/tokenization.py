@@ -85,16 +85,20 @@ def get_token_taggings(tokenization, tagging_type, case_sensitive=False):
     Returns:
         List of :class:`.TokenTagging` objects of `taggingType` equal
         to `tagging_type`, in same order as they appeared in the
-        tokenization.
+        tokenization.  If no matching :class:`.TokenTagging` objects
+        exist, return an empty list.
     """
-    return [
-        tt for tt in tokenization.tokenTaggingList
-        if (
-            (tt.taggingType == tagging_type)
-            if case_sensitive else
-            (tt.taggingType.lower() == tagging_type.lower())
-        )
-    ]
+    if not tokenization.tokenTaggingList:
+        return []
+    else:
+        return [
+            tt for tt in tokenization.tokenTaggingList
+            if (
+                (tt.taggingType == tagging_type)
+                if case_sensitive else
+                (tt.taggingType.lower() == tagging_type.lower())
+            )
+        ]
 
 
 def get_tagged_tokens(tokenization, tagging_type, tool=None):

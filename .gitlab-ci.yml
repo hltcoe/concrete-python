@@ -1,5 +1,8 @@
 build-test-deploy:
-  image: docker:latest
+  image:
+    - docker:latest
+  services:
+    - docker:dind
   before_script:
     - docker info
   script:

@@ -1,4 +1,7 @@
 build-test-deploy:
+  image: docker:latest
+  services:
+    - docker:dind
   before_script:
     - docker info
   script:
@@ -6,7 +9,7 @@ build-test-deploy:
     - docker run --rm concrete-python tox -c concrete-python -e pep8,py27,py35,docs tests # configured in tox.ini
     - docker run --rm concrete-python tox -c concrete-python -e py27,py35 integration-tests
   tags:
-    - shell
+    - docker
 
 mac-python-test:
   before_script:

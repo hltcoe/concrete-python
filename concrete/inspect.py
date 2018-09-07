@@ -751,15 +751,14 @@ def _get_char_offset_tags_for_tokenization(comm, tokenization):
     '''
     Return list of `comm.text` substrings corresponding to the tokens in
     :class:`.Tokenization` `tokenization` (where tokens without
-    `textSpan` fields are represented by None in the output list), or
-    return None if `tokenization` is None.
+    `textSpan` fields are represented by empty strings in the output list).
 
     Args:
         comm (Communication):
         tokenization (Tokenization):
     '''
     if tokenization.tokenList:
-        char_offset_tags = [None] * len(tokenization.tokenList.tokenList)
+        char_offset_tags = [''] * len(tokenization.tokenList.tokenList)
 
         if comm.text:
             for i, token in enumerate(tokenization.tokenList.tokenList):

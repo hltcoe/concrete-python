@@ -12,6 +12,7 @@ from concrete.inspect import (
 )
 from concrete.util import generate_UUID, create_comm
 from concrete.util.references import add_references_to_communication
+from concrete.util.tokenization import get_tokenizations, get_tokens
 from concrete import (
     AnnotationMetadata,
     Communication,
@@ -140,6 +141,49 @@ Or did she ?
                 for (i, tagging_type) in enumerate(additional_tagging_types)
             ]
     return comm
+
+
+def test_print_conll_char_offsets(capsys):
+    print_conll_style_tags_for_communication(
+        comm_with_other_tags(), char_offsets=True)
+
+
+def test_print_conll_missing_tags(capsys):
+    # We don't use comm_with_other_tags() here because we want to test
+    # the case where:
+    #   tokenization.TokenTaggingList = None
+    comm = create_comm('quick', '''\
+The quick brown fox jumped
+over the lazy dog .
+
+Or did she ?
+''')
+    print_conll_style_tags_for_communication(comm, ner=True)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\n'
+        '-----\t-----\n'
+        '1\tThe\n'
+        '2\tquick\n'
+    )
+
+
+def test_print_conll_missing_char_offsets(capsys):
+    comm_without_token_textspans = comm_with_other_tags()
+    for tokenization in get_tokenizations(comm_without_token_textspans):
+        for token in get_tokens(tokenization):
+            token.textSpan = None
+    print_conll_style_tags_for_communication(
+        comm_without_token_textspans, char_offsets=True)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\tCHAR\n'
+        '-----\t-----\t----\n'
+        '1\tThe\t\n'
+        '2\tquick\t\n'
+    )
 
 
 def test_print_conll_other_tags_ignore_all(capsys):

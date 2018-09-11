@@ -273,6 +273,21 @@ def test_print_conll_start_tags(capsys):
     )
 
 
+def test_print_conll_ending_tags(capsys):
+    print_conll_style_tags_for_communication(
+        comm_with_other_tags(),
+        endings=True)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert out.startswith(
+        'INDEX\tTOKEN\tENDING\n'
+        '-----\t-----\t------\n'
+        '1\tThe\t3\n'
+        '2\tquick\t9\n'
+        '3\tbrown\t15\n'
+    )
+
+
 def test_print_situation_mentions(capsys):
     comm = _comm_with_properties(0)
     print_situation_mentions(comm)

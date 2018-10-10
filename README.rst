@@ -113,12 +113,12 @@ tagging, and dependency parse in a CoNLL_-like columnar format::
     -----	-----	---	---	----	------
     1	John	NNP	PER	2	compound
     2	Smith	NNP	PER	10	nsubjpass
-    3	,	,			
+    3	,	,
     4	manager	NN		2	appos
     5	of	IN		7	case
     6	ACMÉ	NNP	ORG	7	compound
     7	INC	NNP	ORG	4	nmod
-    8	,	,			
+    8	,	,
     9	was	VBD		10	auxpass
     10	bit	NN		0	ROOT
     11	by	IN		13	case
@@ -127,13 +127,13 @@ tagging, and dependency parse in a CoNLL_-like columnar format::
     14	on	IN		15	case
     15	March	DATE-NNP		13	nmod
     16	10th	JJ		15	amod
-    17	,	,			
+    17	,	,
     18	2013	CD		13	amod
-    19	.	.			
+    19	.	.
 
     1	He	PRP		2	nsubj
     2	died	VBD		0	ROOT
-    3	!	.			
+    3	!	.
 
     1	John	NNP	PER	3	nmod:poss
     2	's	POS		1	case
@@ -141,7 +141,7 @@ tagging, and dependency parse in a CoNLL_-like columnar format::
     4	Mary	NNP	PER	5	nsubj
     5	expressed	VBD		0	ROOT
     6	sorrow	NN		5	dobj
-    7	.	.			
+    7	.	.
 
 Reading Concrete
 ~~~~~~~~~~~~~~~~
@@ -468,23 +468,23 @@ by section::
 
 Output::
 
-    Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05), from 81 to 82:
+    Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05)[kind: SectionKind.PASSAGE], from 81 to 82:
 
 
 
-    Section 1 (54902d75-1841-4d8d-b4c5-390d4ef1a47a), from 85 to 162:
+    Section 1 (54902d75-1841-4d8d-b4c5-390d4ef1a47a)[kind: SectionKind.PASSAGE], from 85 to 162:
 
     John Smith, manager of ACMÉ INC, was bit by a dog on March 10th, 2013.
     </P>
 
 
-    Section 2 (7ec8b7d9-6be0-4c62-af57-3c6c48bad711), from 165 to 180:
+    Section 2 (7ec8b7d9-6be0-4c62-af57-3c6c48bad711)[kind: SectionKind.PASSAGE], from 165 to 180:
 
     He died!
     </P>
 
 
-    Section 3 (68da91a1-5beb-4129-943d-170c40c7d0f7), from 183 to 228:
+    Section 3 (68da91a1-5beb-4129-943d-170c40c7d0f7)[kind: SectionKind.PASSAGE], from 183 to 228:
 
     John's daughter Mary expressed sorrow.
     </P>
@@ -684,11 +684,11 @@ structure of the Communication::
 
 Output::
 
-    Section 0 (a188dcdd-1ade-be5d-41c4-fd4d81f71685), from 0 to 30:
+    Section 0 (a188dcdd-1ade-be5d-41c4-fd4d81f71685)[kind: passage], from 0 to 30:
     The dog ran .
     The cat jumped .
-    
-    Section 1 (a188dcdd-1ade-be5d-41c4-fd4d81f7168a), from 32 to 57:
+
+    Section 1 (a188dcdd-1ade-be5d-41c4-fd4d81f7168a)[kind: passage], from 32 to 57:
     The dolphin teleported .
 
 Other scripts

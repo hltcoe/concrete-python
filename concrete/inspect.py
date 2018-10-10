@@ -430,8 +430,8 @@ def print_sections(comm, tool=None, communication_filter=None):
                 print(u"Section %s does not have a textSpan ")
                 "field set" % (sect.uuid.uuidString)
                 continue
-            print(u"Section %d (%s), from %d to %d:" % (
-                sect_idx, sect.uuid.uuidString, ts.start, ts.ending))
+            print(u"Section %d (%s)[kind: %s], from %d to %d:" % (
+                sect_idx, sect.uuid.uuidString, sect.kind, ts.start, ts.ending))
             print(u"%s" % (text[ts.start:ts.ending]))
             print()
         print()

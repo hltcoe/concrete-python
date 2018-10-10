@@ -780,23 +780,23 @@ def test_print_sections_for_communication(comm_path, first, args,
     expected_output = output_prefix
     if first:
         expected_output += u'''\
-Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05), from 81 to 82:
+Section 0 (0ab68635-c83d-4b02-b8c3-288626968e05)[kind: SectionKind.PASSAGE], from 81 to 82:
 
 
 
-Section 1 (54902d75-1841-4d8d-b4c5-390d4ef1a47a), from 85 to 162:
+Section 1 (54902d75-1841-4d8d-b4c5-390d4ef1a47a)[kind: SectionKind.PASSAGE], from 85 to 162:
 
 John Smith, manager of ACMÉ INC, was bit by a dog on March 10th, 2013.
 </P>
 
 
-Section 2 (7ec8b7d9-6be0-4c62-af57-3c6c48bad711), from 165 to 180:
+Section 2 (7ec8b7d9-6be0-4c62-af57-3c6c48bad711)[kind: SectionKind.PASSAGE], from 165 to 180:
 
 He died!
 </P>
 
 
-Section 3 (68da91a1-5beb-4129-943d-170c40c7d0f7), from 183 to 228:
+Section 3 (68da91a1-5beb-4129-943d-170c40c7d0f7)[kind: SectionKind.PASSAGE], from 183 to 228:
 
 John's daughter Mary expressed sorrow.
 </P>

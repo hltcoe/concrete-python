@@ -16,7 +16,7 @@ mac-python-test:
     - python --version
     - tox --version
   script:
-    - tox -e pep8,py27,py35,docs tests
-    - tox -e py27,py35 integration-tests
+    - tox -e pep8,py27,docs tests
+    - tox -e py27 integration-tests
   tags:
     - mac-shell-no-docker

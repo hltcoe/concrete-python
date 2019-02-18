@@ -55,7 +55,7 @@ if __name__ == '__main__':
             'concrete.util',
         ],
 
-        scripts=glob.glob('scripts/*')
+        scripts=glob.glob('scripts/*.py')
                   + glob.glob('concrete/services/*-remote'),
 
         install_requires=[

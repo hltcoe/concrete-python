@@ -127,7 +127,7 @@ def create_sentence(sen_text, sen_start, sen_end,
                     ),
                 )
                 for (i, match)
-                in enumerate([m for m in re.finditer('\S+', sen_text)])
+                in enumerate([m for m in re.finditer(r'\S+', sen_text)])
             ]),
         ) if tokens else None,
     )
@@ -257,7 +257,7 @@ def _split_sections(s):
         that order
     """
     # Ignore whitespace at beginning/end of document
-    m = re.match('^(?:\s*\r?\n)*(.*?)(?:\s*\r?\n)*$', s, re.DOTALL)
+    m = re.match(r'^(?:\s*\r?\n)*(.*?)(?:\s*\r?\n)*$', s, re.DOTALL)
     stripped_start_offset = m.span(1)[0]
     stripped_end_offset = m.span(1)[1]
     stripped = s[stripped_start_offset:stripped_end_offset]

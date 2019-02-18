@@ -313,8 +313,19 @@ def twitter_lid_to_iso639_3(twitter_lid):
 
     """
     def _iso639_1_to_iso639_3(iso639_1):
+        if iso639_1 == 'in':
+            return ISO_LANGS.get(alpha_2='id').alpha_3
+
         try:
-            return ISO_LANGS.get(alpha_2=iso639_1).alpha_3
+            # pycountry 18.12.8 changed the behavior of pycountry.languages.get().
+            # Prior versions raised a KeyError if the language was not found, but
+            # starting with pycountry 18.12.8, None is returned instead:
+            #   https://pypi.org/project/pycountry/18.12.8/
+            iso_lang = ISO_LANGS.get(alpha_2=iso639_1)
+            if iso_lang:
+                return iso_lang.alpha_3
+            else:
+                return 'und'
         except KeyError:
             # As of early 2018, Twitter is (at least sometimes) using
             # the incorrect ISO-639-1 language code for Indonesian.
@@ -333,10 +344,7 @@ def twitter_lid_to_iso639_3(twitter_lid):
             #   http://support.gnip.com/sources/twitter/powertrack_operators.html
             # The ISO-639-1 character codes are correct for all 60+ languages currently
             # supported by Twitter, except for Indonesian.
-            if iso639_1 == 'in':
-                return ISO_LANGS.get(alpha_2='id').alpha_3
-            else:
-                return 'und'
+            return 'und'
 
     if len(twitter_lid) == 2:
         return _iso639_1_to_iso639_3(twitter_lid)

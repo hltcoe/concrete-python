@@ -3,6 +3,9 @@ from multiprocessing import Process
 from time import sleep
 from socket import create_connection
 
+from thrift.protocol import TJSONProtocol
+from thrift.transport import THttpClient
+
 from .thrift_factory import factory
 
 
@@ -86,6 +89,42 @@ class ConcreteServiceWrapper(object):
         server = factory.createServer(self.processor, host, port)
 
         server.serve()
+
+
+class HTTPConcreteServiceClientWrapper(object):
+    '''
+    Base class for a wrapper around an HTTP Concrete service client.
+    Implements the context manager interface so client can be controlled
+    using the `with:` statement (client connection is closed when the
+    `with:` scope is exited).
+    '''
+    def __init__(self, uri):
+        '''
+        Args:
+            uri (str):
+        '''
+        if not hasattr(self, 'concrete_service_class'):
+            raise NotImplementedError(
+                "Child classes of HTTPConcreteServiceClientWrapper must set " +
+                "the 'concrete_service_class' attribute to a class that " +
+                "implements a Concrete Service")
+
+        self.uri = uri
+
+    def __enter__(self):
+        '''
+        Create and open connection
+        '''
+        self.transport = THttpClient.THttpClient(uri_or_host=self.uri)
+        protocol = TJSONProtocol.TJSONProtocol(self.transport)
+        cli = self.concrete_service_class.Client(protocol)
+        return cli
+
+    def __exit__(self, type, value, traceback):
+        '''
+        Close connection.
+        '''
+        self.transport.close()
 
 
 class SubprocessConcreteServiceWrapper(object):

@@ -21,8 +21,7 @@ def main():
 
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter,
-        description=
-        "Interface with a Concrete AnnotateCommunicationService server. "
+        description="Interface with a Concrete AnnotateCommunicationService server. "
         "Supports either THttp/TJSONProtocol (using the '--uri' flag) "
         "or TSocket/TCompactProtocol (using '--host'/'--port')"
     )
@@ -74,7 +73,7 @@ def main():
                 with CommunicationWriter(output_path) as writer:
                     for (comm, _) in reader:
                         writer.write(client.annotate(comm))
-        except (ConnectionRefusedError, TTransportException) as ex:
+        except (ConnectionRefusedError, TTransportException):
             pass
 
 

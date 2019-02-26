@@ -74,7 +74,7 @@ def main():
                 with CommunicationWriter(output_path) as writer:
                     for (comm, _) in reader:
                         writer.write(client.annotate(comm))
-        except (ConnectionRefusedError, TTransportException):
+        except TTransportException:
             pass
 
 

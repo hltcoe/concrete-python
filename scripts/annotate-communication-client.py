@@ -65,8 +65,9 @@ def main():
         except TProtocolException as ex:
             logging.error(ex)
             logging.error(
-                "Please check if the URI '{}' points to an AnnotateCommunicationService "
-                "using the Thrift THttp transport and TJSONProtocol encoding".format(args.uri))
+                "Successfully connected to the URI '{}' using HTTP, but the URI does not "
+                "appear to be an AnnotateCommunicationService endpoint that uses the "
+                "Thrift THttp transport and TJSONProtocol encoding".format(args.uri))
     else:
         try:
             with AnnotateCommunicationClientWrapper(args.host, args.port) as client:

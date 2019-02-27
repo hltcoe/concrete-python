@@ -4,6 +4,7 @@ from ..access import (
 from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
+    HTTPConcreteServiceClientWrapper,
     SubprocessConcreteServiceWrapper)
 
 
@@ -23,6 +24,18 @@ SubprocessFetchCommunicationServiceWrapper = type(
     'SubprocessFetchCommunicationServiceWrapper',
     (SubprocessConcreteServiceWrapper,),
     {'concrete_service_wrapper_class': FetchCommunicationServiceWrapper})
+
+
+HTTPFetchCommunicationClientWrapper = type(
+    'HTTPFetchCommunicationClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
+    {'concrete_service_class': FetchCommunicationService})
+
+
+HTTPStoreCommunicationClientWrapper = type(
+    'HTTPStoreCommunicationClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
+    {'concrete_service_class': StoreCommunicationService})
 
 
 StoreCommunicationClientWrapper = type(

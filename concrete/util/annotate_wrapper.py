@@ -2,6 +2,7 @@ from ..annotate import AnnotateCommunicationService
 from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
+    HTTPConcreteServiceClientWrapper,
     SubprocessConcreteServiceWrapper)
 
 
@@ -14,6 +15,12 @@ AnnotateCommunicationClientWrapper = type(
 AnnotateCommunicationServiceWrapper = type(
     'AnnotateCommunicationServiceWrapper',
     (ConcreteServiceWrapper,),
+    {'concrete_service_class': AnnotateCommunicationService})
+
+
+HTTPAnnotateCommunicationClientWrapper = type(
+    'HTTPAnnotateCommunicationClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
     {'concrete_service_class': AnnotateCommunicationService})
 
 

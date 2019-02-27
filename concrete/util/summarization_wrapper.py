@@ -3,12 +3,19 @@ from ..summarization import (
 from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
+    HTTPConcreteServiceClientWrapper,
     SubprocessConcreteServiceWrapper)
 
 
 SummarizationClientWrapper = type(
     'SummarizationClientWrapper',
     (ConcreteServiceClientWrapper,),
+    {'concrete_service_class': SummarizationService})
+
+
+HTTPSummarizationClientWrapper = type(
+    'HTTPSummarizationClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
     {'concrete_service_class': SummarizationService})
 
 

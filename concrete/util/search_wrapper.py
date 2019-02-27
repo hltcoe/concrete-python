@@ -2,7 +2,14 @@ from ..search import SearchService, SearchProxyService, FeedbackService
 from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
+    HTTPConcreteServiceClientWrapper,
     SubprocessConcreteServiceWrapper)
+
+
+HTTPSearchClientWrapper = type(
+    'HTTPSearchClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
+    {'concrete_service_class': SearchService})
 
 
 SearchClientWrapper = type(

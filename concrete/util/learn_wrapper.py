@@ -4,6 +4,7 @@ from ..learn import (
 from .service_wrapper import (
     ConcreteServiceClientWrapper,
     ConcreteServiceWrapper,
+    HTTPConcreteServiceClientWrapper,
     SubprocessConcreteServiceWrapper)
 
 
@@ -16,6 +17,12 @@ ActiveLearnerClientClientWrapper = type(
 ActiveLearnerClientServiceWrapper = type(
     'ActiveLearnerClientServiceWrapper',
     (ConcreteServiceWrapper,),
+    {'concrete_service_class': ActiveLearnerClientService})
+
+
+HTTPActiveLearnerClientClientWrapper = type(
+    'HTTPActiveLearnerClientClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
     {'concrete_service_class': ActiveLearnerClientService})
 
 
@@ -34,6 +41,12 @@ ActiveLearnerServerClientWrapper = type(
 ActiveLearnerServerServiceWrapper = type(
     'ActiveLearnerServerServiceWrapper',
     (ConcreteServiceWrapper,),
+    {'concrete_service_class': ActiveLearnerServerService})
+
+
+HTTPActiveLearnerServerClientWrapper = type(
+    'HTTPActiveLearnerServerClientWrapper',
+    (HTTPConcreteServiceClientWrapper,),
     {'concrete_service_class': ActiveLearnerServerService})
 
 

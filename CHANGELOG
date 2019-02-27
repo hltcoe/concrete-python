@@ -1,6 +1,11 @@
 4.14.1 (unreleased)
 -------------------
 
+- Added `--uri` flag for THttp/TJSONProtocol support to
+`scripts/annotate-communication-client.py`
+
+- Added Concrete Service wrappers using Thrift THttp/TJSONProtocol
+
 - CommunicationReader.__next__() now throws EOFError when reading a
   truncated (invalid) Communication file.
 

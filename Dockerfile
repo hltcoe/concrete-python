@@ -1,9 +1,9 @@
 # Build 'accelerated' concrete-python with C bindings for Python Thrift
 FROM python:3.5-stretch 
 
-RUN curl -O http://apache.mirrors.pair.com/thrift/0.10.0/thrift-0.10.0.tar.gz && \
-    tar xvfz thrift-0.10.0.tar.gz && \
-    cd thrift-0.10.0 && \
+RUN curl -O http://apache.mirrors.pair.com/thrift/0.11.0/thrift-0.11.0.tar.gz && \
+    tar xvfz thrift-0.11.0.tar.gz && \
+    cd thrift-0.11.0 && \
     ./configure --with-python  && \
     make && \
     make install 

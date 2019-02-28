@@ -1,8 +1,8 @@
 --- a/concrete/structure/ttypes.py
 +++ b/concrete/structure/ttypes.py
-@@ -1993,8 +1993,14 @@ class Tokenization(object):
+@@ -1916,8 +1916,14 @@ class Tokenization(object):
          return
- 
+
      def __repr__(self):
 +        # The implementation of this function is NOT auto-generated
 +        # Prevent infinite recursion caused by backpointer added by
@@ -14,5 +14,5 @@
 -             for key, value in self.__dict__.items()]
 +             for key, value in dict_without_backpointer.items()]
          return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
- 
+
      def __eq__(self, other):

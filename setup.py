@@ -63,7 +63,7 @@ if __name__ == '__main__':
             'bottle',
             'humanfriendly',
             'networkx',
-            'thrift==0.10.0',
+            'thrift==0.11.0',
             'redis>=2.10.0',
             'pycountry>=17.9.23',
             'requests',

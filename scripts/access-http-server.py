@@ -145,6 +145,9 @@ def main():
     fetch_handler = CommunicationContainerFetchHandler(comm_container)
     store_handler = DirectoryBackedStoreHandler(args.store_path)
 
+    logging.info('Fetch endpoint: http://{}:{}/fetch_http_endpoint/'.format(args.host, args.port))
+    logging.info('Store endpoint: http://{}:{}/store_http_endpoint/'.format(args.host, args.port))
+
     ahs = AccessHTTPServer(args.host, args.port, args.static_path, fetch_handler, store_handler)
     ahs.serve()
 

@@ -2,7 +2,8 @@
 -------------------
 
 - Added `--uri` flag for THttp/TJSONProtocol support to
-`scripts/annotate-communication-client.py`
+`scripts/annotate-communication-client.py` and
+`scripts/fetch-client.py`
 
 - Added Concrete Service wrappers using Thrift THttp/TJSONProtocol
 

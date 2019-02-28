@@ -1,22 +1,111 @@
-build-test-deploy:
-  image: docker:latest
-  services:
-    - docker:dind
-  before_script:
-    - docker info
+image: docker:latest
+services:
+  - docker:dind
+
+stages:
+  - build
+  - stylecheck
+  - test
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+build-accelerated:
+  stage: build
   script:
-    - docker build -t concrete-python .
-    - docker run --rm concrete-python tox -c concrete-python -e pep8,py27,py35,docs tests # configured in tox.ini
-    - docker run --rm concrete-python tox -c concrete-python -e py27,py35 integration-tests
+    - docker build -t $CONTAINER_TEST_IMAGE --file Dockerfile .
+    - docker push $CONTAINER_TEST_IMAGE
+  only:
+    - master
+    - tags
   tags:
     - docker
 
-mac-python-test:
-  before_script:
-    - python --version
-    - tox --version
+build-py27:
+  stage: build
   script:
-    - tox -e pep8,py27,docs tests
-    - tox -e py27 integration-tests
+    - docker build -t $CONTAINER_TEST_IMAGE-py27 --file Dockerfile.py27 .
+    - docker push $CONTAINER_TEST_IMAGE-py27
   tags:
-    - mac-shell-no-docker
+    - docker
+
+build-py35:
+  stage: build
+  script:
+    - docker build -t $CONTAINER_TEST_IMAGE-py35 --file Dockerfile.py35 .
+    - docker push $CONTAINER_TEST_IMAGE-py35
+  tags:
+    - docker
+
+# pep8 runs different tests for different Python versions
+test-py27-pep8:
+  stage: stylecheck
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py27
+    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e pep8
+  tags:
+    - docker
+
+# Until there is a compelling reason to generate the docs for
+# both Python 2.7 and 3.5, doc-generation for 2.7 disabled
+#test-py27-docs:
+#  stage: test
+#  script:
+#    - docker pull $CONTAINER_TEST_IMAGE-py27
+#    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e docs
+#  tags:
+#    - docker
+
+test-py27-tests:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py27
+    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e tests
+  tags:
+    - docker
+
+test-py27-integration-tests:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py27
+    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e integration-tests
+  tags:
+    - docker
+
+# pep8 runs different tests for different Python versions
+test-py35-pep8:
+  stage: stylecheck
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py35
+    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e pep8
+  tags:
+    - docker
+
+test-py35-docs:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py35
+    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e docs
+  tags:
+    - docker
+
+test-py35-tests:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py35
+    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e tests
+  tags:
+    - docker
+
+test-py35-integration-tests:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE-py35
+    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e integration-tests
+  tags:
+    - docker

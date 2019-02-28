@@ -10,24 +10,30 @@ import sys
 import logging
 
 import concrete.version
-from concrete.access import FetchCommunicationService
 from concrete.access.ttypes import FetchRequest
-from concrete.util.file_io import CommunicationWriterTGZ
-from concrete.util.thrift_factory import factory
 from concrete.util import set_stdout_encoding
+from concrete.util.access_wrapper import (
+    FetchCommunicationClientWrapper,
+    HTTPFetchCommunicationClientWrapper
+)
+from concrete.util.file_io import CommunicationWriterTGZ
 
 
 def main():
     set_stdout_encoding()
 
     parser = argparse.ArgumentParser(
-        description="Command line client for interacting with a FetchCommunicationService server",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Interface with a Concrete FetchCommunicationService server. "
+        "Supports either THttp/TJSONProtocol (using the '--uri' flag) "
+        "or TSocket/TCompactProtocol (using '--host'/'--port')"
     )
+    parser.add_argument("--host", default="localhost",
+                        help="Hostname of TSocket/TCompactProtocol FetchCommunicationService")
     parser.add_argument("-p", "--port", type=int, default=9090,
-                        help="Port of FetchCommunicationService server")
-    parser.add_argument("-s", "--server", default="localhost",
-                        help="Hostname of FetchCommunicationService server")
+                        help="Port of TSocket/TCompactProtocol FetchCommunicationService")
+    parser.add_argument('--uri', '--url',
+                        help="URI of THttpServer/TJSONProtocol FetchCommunicationService")
     parser.add_argument("--about", action="store_true",
                         help="Print value of fetch_service.about()")
     parser.add_argument("--alive", action="store_true",
@@ -58,42 +64,42 @@ def main():
     logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
                         level=args.loglevel.upper())
 
-    socket = factory.createSocket(args.server, args.port)
-    transport = factory.createTransport(socket)
-    protocol = factory.createProtocol(transport)
-    client = FetchCommunicationService.Client(protocol)
-    transport.open()
+    if args.uri:
+        fetch_wrapper = HTTPFetchCommunicationClientWrapper(args.uri)
+    else:
+        fetch_wrapper = FetchCommunicationClientWrapper(args.host, args.port)
 
-    if args.comm_id:
-        fetch_request = FetchRequest()
-        if len(args.comm_id) == 1 and args.comm_id[0] == '-':
-            fetch_request.communicationIds = [line.strip() for line in sys.stdin.readlines()]
-        else:
-            fetch_request.communicationIds = args.comm_id
-        fetch_result = client.fetch(fetch_request)
-        print("Received FetchResult: '%s'" % fetch_result)
+    with fetch_wrapper as client:
+        if args.comm_id:
+            fetch_request = FetchRequest()
+            if len(args.comm_id) == 1 and args.comm_id[0] == '-':
+                fetch_request.communicationIds = [line.strip() for line in sys.stdin.readlines()]
+            else:
+                fetch_request.communicationIds = args.comm_id
+            fetch_result = client.fetch(fetch_request)
+            print("Received FetchResult: '%s'" % fetch_result)
 
-    if args.about:
-        print("FetchCommunicationService.about() returned %s" % client.about())
-    if args.alive:
-        print("FetchCommunicationService.alive() returned %s" % client.alive())
-    if args.count:
-        print("FetchCommunicationService.getCommunicationCount() returned %d" %
-              client.getCommunicationCount())
-    if args.get_ids:
-        print("FetchCommunicationService.getCommunicationIDs(offset=%d, count=%d) returned:" %
-              (args.get_ids_offset, args.get_ids_count))
-        for comm_id in client.getCommunicationIDs(args.get_ids_offset, args.get_ids_count):
-            print("  %s" % comm_id)
+        if args.about:
+            print("FetchCommunicationService.about() returned %s" % client.about())
+        if args.alive:
+            print("FetchCommunicationService.alive() returned %s" % client.alive())
+        if args.count:
+            print("FetchCommunicationService.getCommunicationCount() returned %d" %
+                  client.getCommunicationCount())
+        if args.get_ids:
+            print("FetchCommunicationService.getCommunicationIDs(offset=%d, count=%d) returned:" %
+                  (args.get_ids_offset, args.get_ids_count))
+            for comm_id in client.getCommunicationIDs(args.get_ids_offset, args.get_ids_count):
+                print("  %s" % comm_id)
 
-    if args.save_as_tgz and args.comm_id:
-        if fetch_result.communications:
-            with CommunicationWriterTGZ(args.save_as_tgz) as writer:
-                for comm in fetch_result.communications:
-                    comm_filename = '%s.concrete' % comm.id
-                    print("Saving Communication to TGZ archive '%s' as '%s'" %
-                          (args.save_as_tgz, comm_filename))
-                    writer.write(comm, comm_filename)
+        if args.save_as_tgz and args.comm_id:
+            if fetch_result.communications:
+                with CommunicationWriterTGZ(args.save_as_tgz) as writer:
+                    for comm in fetch_result.communications:
+                        comm_filename = '%s.concrete' % comm.id
+                        print("Saving Communication to TGZ archive '%s' as '%s'" %
+                              (args.save_as_tgz, comm_filename))
+                        writer.write(comm, comm_filename)
 
 
 if __name__ == '__main__':

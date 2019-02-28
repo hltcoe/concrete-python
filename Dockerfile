@@ -1,63 +1,12 @@
-FROM centos:7
+# Build 'accelerated' concrete-python with C bindings for Python Thrift
+FROM python:3.5-stretch 
 
-RUN yum update -y && yum clean all
-
-RUN yum install -y \
-        autoconf \
-        automake \
-        bzip2-devel \
-        bzip2-libs \
-        gcc \
-        gcc-c++ \
-        git \
-        libtool \
-        libzip \
-        libzip-devel \
-        m4 \
-        make \
-        openssl \
-        openssl-devel \
-        openssl-libs \
-        pkgconfig \
-        python \
-        python-devel \
-        tar \
-        zlib \
-        zlib-devel
-
-RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
-    pip install --upgrade setuptools && \
-    pip install --upgrade setuptools && \
-    pip install --upgrade \
-        thrift==0.10.0 \
-        tox>=1.6.1
-
-WORKDIR /tmp
-RUN mkdir -p /usr/local/{include,lib}
-
-RUN curl https://www.python.org/ftp/python/3.5.3/Python-3.5.3.tgz | tar -xz && \
-    pushd Python-3.5.3 && \
-    ./configure --prefix=/usr/local && \
+RUN curl -O http://apache.mirrors.pair.com/thrift/0.10.0/thrift-0.10.0.tar.gz && \
+    tar xvfz thrift-0.10.0.tar.gz && \
+    cd thrift-0.10.0 && \
+    ./configure --with-python  && \
     make && \
-    make altinstall && \
-    popd && \
-    rm -rf Python-3.5.3
-
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3.5 && \
-    pip3.5 install --upgrade setuptools && \
-    pip3.5 install --upgrade setuptools && \
-    pip3.5 install --upgrade \
-        thrift==0.10.0
-
-RUN ldconfig -v
-
-RUN useradd -m -U -s /bin/bash concrete && \
-    passwd -l concrete
-ADD . /home/concrete/concrete-python
-RUN cd /home/concrete/concrete-python && \
-    python setup.py install && \
-    python setup.py clean && \
-    chown -R concrete:concrete /home/concrete
-
-USER concrete
-WORKDIR /home/concrete
+    make install 
+ADD . /tmp/concrete-python
+RUN cd /tmp/concrete-python && \
+    python setup.py install

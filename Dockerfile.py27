@@ -1,0 +1,6 @@
+FROM python:2.7-alpine
+
+ADD . /tmp/concrete-python
+WORKDIR /tmp/concrete-python
+RUN pip install tox
+RUN python setup.py install

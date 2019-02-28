@@ -1,4 +1,4 @@
-4.14.1 (unreleased)
+4.14.1 (2019-02-28)
 -------------------
 
 - Added `scripts/comms2csv.py` and `scripts/csv2comms.py` script for

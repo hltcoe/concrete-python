@@ -50,6 +50,10 @@ unaccelerated protocol automatically.)  If you are on Linux, a suitable
 C++ compiler will be listed as ``g++`` or ``gcc-c++`` in your package
 manager.
 
+If you are using macOS Mojave with the Homebrew package manager
+(https://brew.sh), you can install the accelerated protocol using
+the script ``install-mojave-homebrew-accelerated-thrift.sh``.
+
 
 Installation
 ------------

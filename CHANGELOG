@@ -1,7 +1,9 @@
 4.14.2 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Added shell script `install-mojave-homebrew-accelerated-thrift.sh`
+  for installing accelerated Thrift on macOS using the Homebrew
+  package manager.
 
 
 4.14.1 (2019-02-28)

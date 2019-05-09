@@ -25,7 +25,7 @@ def main():
             json_comm = row[args.comm_field]
             comm = Communication()
             TSerialization.deserialize(
-                comm, json_comm,
+                comm, json_comm.encode('utf-8'),
                 protocol_factory=TJSONProtocol.TJSONProtocolFactory())
             writer.write(comm, comm.id + '.comm')
 

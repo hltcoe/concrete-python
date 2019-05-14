@@ -36,8 +36,7 @@ Please see LICENSE_ for more information.
 Requirements
 ------------
 
-concrete-python is tested on Python 2.7 or 3.5 (it does not run on
-Python 2.6; it may run on more Python 3.x versions) and requires the
+concrete-python is tested on Python 3.5 and requires the
 Thrift Python library, among other Python libraries.  These are
 installed automatically by ``setup.py`` or ``pip``.  The Thrift
 compiler is *not* required.

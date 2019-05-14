@@ -44,7 +44,7 @@ Contributing code
    ``.gitlab-ci.yml`` (``.travis.yml`` and ``appveyor.yml`` for public
    builds); tox is configured in ``tox.ini``.  The build
    includes unit tests, integration tests, and style checks and runs on
-   Python 2.7 and 3.5 across multiple platforms; if it fails, please
+   Python 3.5 across multiple platforms; if it fails, please
    find the error in the build log, fix it, and try again.
 9. Add a line to ``CHANGELOG`` under the current version-in-progress
    describing your changes simply and concisely.  Add yourself to ``AUTHORS``

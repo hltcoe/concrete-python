@@ -26,54 +26,11 @@ build-accelerated:
   tags:
     - docker
 
-build-py27:
-  stage: build
-  script:
-    - docker build -t $CONTAINER_TEST_IMAGE-py27 --file Dockerfile.py27 .
-    - docker push $CONTAINER_TEST_IMAGE-py27
-  tags:
-    - docker
-
 build-py35:
   stage: build
   script:
     - docker build -t $CONTAINER_TEST_IMAGE-py35 --file Dockerfile.py35 .
     - docker push $CONTAINER_TEST_IMAGE-py35
-  tags:
-    - docker
-
-# pep8 runs different tests for different Python versions
-test-py27-pep8:
-  stage: stylecheck
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE-py27
-    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e pep8
-  tags:
-    - docker
-
-# Until there is a compelling reason to generate the docs for
-# both Python 2.7 and 3.5, doc-generation for 2.7 disabled
-#test-py27-docs:
-#  stage: test
-#  script:
-#    - docker pull $CONTAINER_TEST_IMAGE-py27
-#    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e docs
-#  tags:
-#    - docker
-
-test-py27-tests:
-  stage: test
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE-py27
-    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e tests
-  tags:
-    - docker
-
-test-py27-integration-tests:
-  stage: test
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE-py27
-    - docker run $CONTAINER_TEST_IMAGE-py27 tox -e integration-tests
   tags:
     - docker
 
@@ -98,7 +55,7 @@ test-py35-tests:
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
-    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e tests
+    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e py35 tests
   tags:
     - docker
 
@@ -106,6 +63,6 @@ test-py35-integration-tests:
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
-    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e integration-tests
+    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e py35 integration-tests
   tags:
     - docker

@@ -10,7 +10,6 @@ install:
 
 build_script:
 # configured in tox.ini
-- tox -e pep8
-- tox -e docs
+- tox -e pep8,docs
 - tox -e py35 tests
 - tox -e py35 integration-tests

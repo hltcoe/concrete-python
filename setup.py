@@ -38,6 +38,7 @@ if __name__ == '__main__':
             'concrete.audio',
             'concrete.clustering',
             'concrete.communication',
+            'concrete.context',
             'concrete.email',
             'concrete.entities',
             'concrete.exceptions',

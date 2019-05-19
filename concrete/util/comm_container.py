@@ -61,6 +61,9 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
              directory_path (str): Path to directory containing Communications files
              comm_extensions (str[]): List of strings specifying filename extensions
                                          to be associated with Communications
+             add_references (bool): If True, calls
+               :func:`concrete.util.references.add_references_to_communication`
+               on any retrieved :class:`.Communication`
         """
         self._add_references = add_references
 
@@ -168,6 +171,9 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
         Args:
             communications_file (str): String specifying name of Communications file
             max_file_size (int): Maximum file size, in bytes
+            add_references (bool): If True, calls
+               :func:`concrete.util.references.add_references_to_communication`
+               on any retrieved :class:`.Communication`
         """
         self._add_references = add_references
         self.comm_id_to_comm = {}
@@ -218,6 +224,9 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
             zipfile_path (str): Path to Zip file containing Communications
             comm_extensions (str[]): List of strings specifying filename extensions
                                  associated with Communications
+            add_references (bool): If True, calls
+               :func:`concrete.util.references.add_references_to_communication`
+               on any retrieved :class:`.Communication`
         """
         self._add_references = add_references
 
@@ -255,12 +264,14 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
     Communications are lazily retrieved from a Redis hash.
     """
 
-    def __init__(self, redis_db, key,
-                 add_references=True):
+    def __init__(self, redis_db, key, add_references=True):
         """
         Args:
             redis_db (redis.Redis): Redis database connection object
             key (str): Key in redis database where hash is located
+            add_references (bool): If True, calls
+               :func:`concrete.util.references.add_references_to_communication`
+               on any retrieved :class:`.Communication`
         """
         self._add_references = add_references
 
@@ -315,6 +326,9 @@ class S3BackedCommunicationContainer(collections.Mapping):
                 enables S3 to better partition the bucket contents,
                 yielding higher performance and a lower chance of
                 getting rate-limited by AWS.
+            add_references (bool): If True, calls
+               :func:`concrete.util.references.add_references_to_communication`
+               on any retrieved :class:`.Communication`
         """
         self._add_references = add_references
         self.bucket = bucket

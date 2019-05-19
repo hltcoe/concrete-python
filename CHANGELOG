@@ -1,7 +1,8 @@
-4.15.1 (unreleased)
+4.15.0.1 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixed bug where `concrete.context` code was not included in 4.15.0
+  release
 
 
 4.15.0 (2019-05-19)

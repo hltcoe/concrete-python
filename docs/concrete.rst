@@ -34,6 +34,7 @@ write ``from concrete import Communication``.
     concrete.audio
     concrete.clustering
     concrete.communication
+    concrete.context
     concrete.email
     concrete.entities
     concrete.exceptions

@@ -1,5 +1,14 @@
-4.14.2 (unreleased)
+4.15.0 (unreleased)
 -------------------
+
+- Updated to Concrete schema 4.15, which adds `Context` structure and
+  `AnnotateWithContextService` service.  `Context`s are intended to be
+  used to convey additional information alongside a `Communication` to
+  be annotated.
+
+- Dropped support for Python 2.7
+
+- Added `add_references` flag to CommunicationContainer classes
 
 - Added shell script `install-mojave-homebrew-accelerated-thrift.sh`
   for installing accelerated Thrift on macOS using the Homebrew

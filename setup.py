@@ -9,6 +9,10 @@ VERSION_RE = re.compile(
 )
 
 
+with open("README.rst", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+
 def get_version():
     with open(VERSION_FILE_PATH) as f:
         for line in f:
@@ -23,6 +27,7 @@ if __name__ == '__main__':
         name="concrete",
         version=get_version(),
         description="Python modules and scripts for working with Concrete",
+        long_description=long_description,
 
         packages=[
             'concrete',
@@ -84,6 +89,9 @@ if __name__ == '__main__':
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3 :: Only',
             'Topic :: Database :: Front-Ends',
             'Topic :: Multimedia :: Sound/Audio :: Speech',
             'Topic :: Scientific/Engineering :: Artificial Intelligence',

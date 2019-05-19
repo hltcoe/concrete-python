@@ -14,6 +14,7 @@ from .annotate.ttypes import *  # noqa
 from .audio.ttypes import *  # noqa
 from .clustering.ttypes import *  # noqa
 from .communication.ttypes import *  # noqa
+from .context.ttypes import *  # noqa
 from .email.ttypes import *  # noqa
 from .entities.ttypes import *  # noqa
 from .exceptions.ttypes import *  # noqa

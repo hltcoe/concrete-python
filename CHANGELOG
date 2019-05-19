@@ -1,4 +1,4 @@
-4.15.0 (unreleased)
+4.15.0 (2019-05-19)
 -------------------
 
 - Updated to Concrete schema 4.15, which adds `Context` structure and

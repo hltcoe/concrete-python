@@ -129,7 +129,8 @@ def test_redis_hash_backed_comm_container_getitem(
     mock_read_communication_from_buffer.side_effect = [sentinel.comm]
     assert cc[sentinel.comm_id] == sentinel.comm
     redis_db.hget.assert_called_once_with(key, sentinel.comm_id)
-    mock_read_communication_from_buffer.assert_called_once_with(sentinel.comm_buf)
+    mock_read_communication_from_buffer.assert_called_once_with(sentinel.comm_buf,
+                                                                add_references=True)
 
 
 @patch('concrete.util.comm_container.unprefix_s3_key')
@@ -224,4 +225,5 @@ def test_s3_backed_comm_container_getitem(
     assert cc[sentinel.comm_id] == sentinel.comm
     bucket.get_key.assert_called_once_with(sentinel.prefixed_name)
     mock_prefix_s3_key.assert_called_once_with(sentinel.comm_id, sentinel.prefix_len)
-    mock_read_communication_from_buffer.assert_called_once_with(sentinel.comm_buf)
+    mock_read_communication_from_buffer.assert_called_once_with(sentinel.comm_buf,
+                                                                add_references=True)

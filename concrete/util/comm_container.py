@@ -54,13 +54,16 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
     """
 
     def __init__(self, directory_path,
-                 comm_extensions=['.comm', '.concrete', '.gz']):
+                 comm_extensions=['.comm', '.concrete', '.gz'],
+                 add_references=True):
         """
         Args:
              directory_path (str): Path to directory containing Communications files
              comm_extensions (str[]): List of strings specifying filename extensions
                                          to be associated with Communications
         """
+        self._add_references = add_references
+
         self.comm_id_to_comm_path = {}
 
         logging.info("Caching names of files with extensions [%s] in '%s'" %
@@ -87,9 +90,11 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
             if os.path.splitext(comm_path)[1] == '.gz':
                 with gzip.open(comm_path) as gzip_file:
                     buf = gzip_file.read()
-                    comm = read_communication_from_buffer(buf)
+                    comm = read_communication_from_buffer(buf,
+                                                          add_references=self._add_references)
             else:
-                comm = read_communication_from_file(comm_path)
+                comm = read_communication_from_file(comm_path,
+                                                    add_references=self._add_references)
             return comm
         else:
             logging.debug('No Communication with ID: %s' % communication_id)
@@ -157,12 +162,14 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
     using a :class:`.CommunicationReader` instance.
     """
 
-    def __init__(self, communications_file, max_file_size=1073741824):
+    def __init__(self, communications_file, max_file_size=1073741824,
+                 add_references=True):
         """
         Args:
             communications_file (str): String specifying name of Communications file
             max_file_size (int): Maximum file size, in bytes
         """
+        self._add_references = add_references
         self.comm_id_to_comm = {}
 
         comm_file_size = os.path.getsize(communications_file)
@@ -180,7 +187,8 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
         logging.info("Reading in Communications from file '%s'" %
                      communications_file)
         logging.debug("Communication IDs:")
-        for (comm, _) in CommunicationReader(communications_file):
+        for (comm, _) in CommunicationReader(communications_file,
+                                             add_references=self._add_references):
             self.comm_id_to_comm[comm.id] = comm
             logging.debug("  %s" % comm.id)
         logging.info("Finished reading communications.\n")
@@ -203,13 +211,16 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
     Communications are lazily retrieved from a Zip file.
     """
 
-    def __init__(self, zipfile_path, comm_extensions=['.comm', '.concrete']):
+    def __init__(self, zipfile_path, comm_extensions=['.comm', '.concrete'],
+                 add_references=True):
         """
         Args:
             zipfile_path (str): Path to Zip file containing Communications
             comm_extensions (str[]): List of strings specifying filename extensions
                                  associated with Communications
         """
+        self._add_references = add_references
+
         self.comm_id_to_filename = {}
         self.zipfile = zipfile.ZipFile(zipfile_path, 'r')
         for filename in self.zipfile.namelist():
@@ -223,7 +234,8 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
     def __getitem__(self, communication_id):
         filename = self.comm_id_to_filename[communication_id]
         buf = self.zipfile.read(filename)
-        comm = read_communication_from_buffer(buf)
+        comm = read_communication_from_buffer(buf,
+                                              add_references=self._add_references)
         return comm
 
     def __iter__(self):
@@ -243,12 +255,15 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
     Communications are lazily retrieved from a Redis hash.
     """
 
-    def __init__(self, redis_db, key):
+    def __init__(self, redis_db, key,
+                 add_references=True):
         """
         Args:
             redis_db (redis.Redis): Redis database connection object
             key (str): Key in redis database where hash is located
         """
+        self._add_references = add_references
+
         self.redis_db = redis_db
         self.key = key
 
@@ -256,7 +271,8 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
         buf = self.redis_db.hget(self.key, communication_id)
         if buf is None:
             raise KeyError
-        comm = read_communication_from_buffer(buf)
+        comm = read_communication_from_buffer(buf,
+                                              add_references=self._add_references)
         return comm
 
     def __contains__(self, communication_id):
@@ -285,7 +301,8 @@ class S3BackedCommunicationContainer(collections.Mapping):
         http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.html
     """
 
-    def __init__(self, bucket, prefix_len=DEFAULT_S3_KEY_PREFIX_LEN):
+    def __init__(self, bucket, prefix_len=DEFAULT_S3_KEY_PREFIX_LEN,
+                 add_references=True):
         """
         Args:
             bucket (boto.s3.bucket.Bucket): S3 bucket object
@@ -299,6 +316,7 @@ class S3BackedCommunicationContainer(collections.Mapping):
                 yielding higher performance and a lower chance of
                 getting rate-limited by AWS.
         """
+        self._add_references = add_references
         self.bucket = bucket
         self.prefix_len = prefix_len
 
@@ -308,7 +326,8 @@ class S3BackedCommunicationContainer(collections.Mapping):
         if key is None:
             raise KeyError
         buf = key.get_contents_as_string()
-        comm = read_communication_from_buffer(buf)
+        comm = read_communication_from_buffer(buf,
+                                              add_references=self._add_references)
         return comm
 
     def __contains__(self, communication_id):

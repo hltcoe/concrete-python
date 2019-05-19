@@ -28,7 +28,7 @@ information, please see the `online documentation`_.
 License
 -------
 
-Copyright 2012-2017 Johns Hopkins University HLTCOE. All rights
+Copyright 2012-2019 Johns Hopkins University HLTCOE. All rights
 reserved.  This software is released under the 2-clause BSD license.
 Please see LICENSE_ for more information.
 

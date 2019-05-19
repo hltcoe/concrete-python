@@ -12,6 +12,7 @@ from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
 import sys
+import concrete.context.ttypes
 import concrete.metadata.ttypes
 import concrete.language.ttypes
 import concrete.structure.ttypes
@@ -22,6 +23,7 @@ import concrete.email.ttypes
 import concrete.twitter.ttypes
 import concrete.audio.ttypes
 import concrete.communication.ttypes
+import concrete.services.ttypes
 
 from thrift.transport import TTransport
 all_structs = []

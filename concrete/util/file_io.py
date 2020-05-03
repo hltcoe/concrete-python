@@ -599,7 +599,22 @@ class CommunicationWriterTar(object):
     """
 
     def __init__(self, tar_filename=None, gzip=False):
-        """
+        # Without text on the first line of this docstring, the sphinx 3.0.3 build process
+        # (invoked using 'tox -e docs') fails with the error message:
+        #
+        #   /tmp/concrete-python/concrete/util/file_io.py:docstring of
+        #     concrete.util.file_io.CommunicationWriterTGZ:13:Unexpected indentation.
+        #   316 ERROR: InvocationError for command /tmp/concrete-python/.tox/docs/bin/sphinx-build
+        #     -M html docs .tox/docs/tmp -W (exited with code 2)
+        #
+        # The sphinx error message complains about a CommunicationWriterTGZ docstring, even
+        # though the problematic docstring is in CommunicationWriterTar.__init__(), where
+        # CommunicationWriterTar is the parent class for CommunicationWriterTGZ.
+        #
+        # The docstring for CommunicationWriterZip.__init__() has the same format as the
+        # docstring that was causing the sphinx error.
+        """Initialize
+
         Args:
             tar_filename (str): if specified, open file at this path
                 during construction (a file can alternatively be opened
@@ -674,7 +689,6 @@ class CommunicationWriterTGZ(CommunicationWriterTar):
             writer.write(comm_object_two, 'comm_two.concrete')
             writer.write(comm_object_three, 'comm_three.concrete')
     """
-
     def __init__(self, tar_filename=None):
         super(CommunicationWriterTGZ, self).__init__(tar_filename, gzip=True)
 

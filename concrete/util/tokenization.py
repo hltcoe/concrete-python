@@ -44,8 +44,8 @@ def get_tokens(tokenization, suppress_warnings=False):
 
     if tokenization.kind is None:
         if not suppress_warnings:
-            logging.warn('Tokenization.kind is None but is required in '
-                         'Concrete; using tokenList')
+            logging.warning('Tokenization.kind is None but is required in '
+                            'Concrete; using tokenList')
 
         token_list = tokenization.tokenList
         if token_list.tokenList is not None:

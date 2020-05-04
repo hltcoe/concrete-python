@@ -1,7 +1,8 @@
 4.15.2 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixed incompatibility with Python 3.8 caused by use of deprecated
+  name for Python standard library class
 
 
 4.15.1 (2019-05-19)

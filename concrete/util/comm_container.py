@@ -1,7 +1,7 @@
 """Communication Containers - mapping Communication IDs to Communications
 
 Classes that behave like a read-only dictionary (implementing Python's
-`collections.Mapping` interface) and map Communication ID strings to
+`collections.abc.Mapping` interface) and map Communication ID strings to
 Communications.
 
 The classes abstract away the storage backend.  If you need to
@@ -29,7 +29,7 @@ from .file_io import (
 from .mem_io import read_communication_from_buffer
 
 
-class DirectoryBackedCommunicationContainer(collections.Mapping):
+class DirectoryBackedCommunicationContainer(collections.abc.Mapping):
     """Maps Comm IDs to Comms, retrieving Comms from the filesystem
 
     `DirectoryBackedCommunicationContainer` instances behave as
@@ -110,7 +110,7 @@ class DirectoryBackedCommunicationContainer(collections.Mapping):
         return len(self.comm_id_to_comm_path)
 
 
-class FetchBackedCommunicationContainer(collections.Mapping):
+class FetchBackedCommunicationContainer(collections.abc.Mapping):
     """Maps Comm IDs to Comms, retrieving Comms from a
     :mod:`.FetchCommunicationService` server
 
@@ -156,7 +156,7 @@ class FetchBackedCommunicationContainer(collections.Mapping):
             return fc.getCommunicationCount()
 
 
-class MemoryBackedCommunicationContainer(collections.Mapping):
+class MemoryBackedCommunicationContainer(collections.abc.Mapping):
     """Maps Comm IDs to Comms by loading all Comms in file into memory
 
     `FetchBackedCommunicationContainer` instances behave as dict-like
@@ -209,7 +209,7 @@ class MemoryBackedCommunicationContainer(collections.Mapping):
         return len(self.comm_id_to_comm)
 
 
-class ZipFileBackedCommunicationContainer(collections.Mapping):
+class ZipFileBackedCommunicationContainer(collections.abc.Mapping):
     """Maps Comm IDs to Comms, retrieving Comms from a Zip file
 
     `ZipFileBackedCommunicationContainer` instances behave as dict-like
@@ -254,7 +254,7 @@ class ZipFileBackedCommunicationContainer(collections.Mapping):
         return len(self.comm_id_to_filename)
 
 
-class RedisHashBackedCommunicationContainer(collections.Mapping):
+class RedisHashBackedCommunicationContainer(collections.abc.Mapping):
     """
     Provides access to Communications stored in a Redis hash,
     assuming the key of each communication is its Communication id.
@@ -296,7 +296,7 @@ class RedisHashBackedCommunicationContainer(collections.Mapping):
         return self.redis_db.hlen(self.key)
 
 
-class S3BackedCommunicationContainer(collections.Mapping):
+class S3BackedCommunicationContainer(collections.abc.Mapping):
     """
     Provides access to Communications stored in an AWS S3 bucket,
     assuming the key of each communication is its Communication id

@@ -8,6 +8,8 @@ from mock import Mock, sentinel
 from concrete.inspect import (
     _get_conll_tags_for_tokenization,
     print_situation_mentions,
+    print_situations,
+    print_entities,
     print_conll_style_tags_for_communication,
 )
 from concrete.util import generate_UUID, create_comm
@@ -20,12 +22,16 @@ from concrete import (
     DependencyParse,
     EntityMention,
     EntityMentionSet,
+    Entity,
+    EntitySet,
     MentionArgument,
     Property,
     Section,
     Sentence,
     SituationMention,
     SituationMentionSet,
+    Situation,
+    SituationSet,
     TextSpan,
     TokenRefSequence,
     Tokenization,
@@ -58,6 +64,10 @@ def _comm_with_properties(num_properties):
     meta_ems = AnnotationMetadata(tool='ems-tool', timestamp=ts)
     ems = EntityMentionSet(uuid=generate_UUID(), metadata=meta_ems,
                            mentionList=[em])
+    e = Entity(uuid=generate_UUID(), mentionIdList=[em.uuid])
+    meta_es = AnnotationMetadata(tool='es-tool', timestamp=ts)
+    es = EntitySet(uuid=generate_UUID(), metadata=meta_es,
+                   entityList=[e])
     meta_prop = AnnotationMetadata(tool='Annotator1',
                                    timestamp=ts)
     props = list(
@@ -72,12 +82,19 @@ def _comm_with_properties(num_properties):
     meta_sms = AnnotationMetadata(tool='sms-tool', timestamp=ts)
     sms = SituationMentionSet(uuid=generate_UUID(), metadata=meta_sms,
                               mentionList=[sm])
+    s = Situation(uuid=generate_UUID(), situationType='situationType',
+                  mentionIdList=[sm.uuid])
+    meta_sset = AnnotationMetadata(tool='sset-tool', timestamp=ts)
+    sset = SituationSet(uuid=generate_UUID(), metadata=meta_sset,
+                        situationList=[s])
     meta_comm = AnnotationMetadata(tool='tool', timestamp=ts)
     comm = Communication(uuid=generate_UUID(), id='id', text='text',
                          type='type', metadata=meta_comm,
                          sectionList=[section],
                          situationMentionSetList=[sms],
-                         entityMentionSetList=[ems])
+                         situationSetList=[sset],
+                         entityMentionSetList=[ems],
+                         entitySetList=[es])
     add_references_to_communication(comm)
     return comm
 
@@ -394,6 +411,26 @@ def test_print_situation_mentions_with_properties(capsys, num_properties):
     assert 1 == out.count("Annotator1")
     assert num_properties == out.count("Property")
     assert num_properties == out.count("4.0")
+
+
+def test_print_situations(capsys):
+    comm = _comm_with_properties(0)
+    print_situations(comm)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert re.search(r'Situation\s+(\d+)-(\d+):\n', out)
+    assert re.search(r'situationType:', out)
+    assert re.search(r'SituationMention\s+(\d+)-(\d+)-(\d+):\n', out)
+
+
+def test_print_entities(capsys):
+    comm = _comm_with_properties(0)
+    print_entities(comm)
+    (out, err) = capsys.readouterr()
+    assert err == ''
+    assert re.search(r'Entity\s+(\d+)-(\d+):\n', out)
+    assert re.search(r'EntityMention\s+(\d+)-(\d+)-(\d+):\n', out)
+    assert re.search(r'entityType:', out)
 
 
 def test_get_conll_tags_no_token_list():

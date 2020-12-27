@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from pytest import fixture, mark
+from pytest import fixture, mark, param
 from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
 from concrete.util import compress_uuids
@@ -80,19 +80,19 @@ def test_compress_uuids(output_file, args):
     (dict(add_references=False), dict(single_analytic=False)),
     (dict(add_references=False), dict(single_analytic=True)),
     (dict(add_references=True), dict()),
-    mark.xfail(
-        (dict(add_references=True), dict(verify=True)),
-        strict=True,
+    param(
+        dict(add_references=True), dict(verify=True),
+        marks=[mark.xfail(strict=True)],
     ),
     (dict(add_references=True), dict(verify=False)),
-    mark.xfail(
-        (dict(add_references=True), dict(verify=True, single_analytic=True)),
-        strict=True,
+    param(
+        dict(add_references=True), dict(verify=True, single_analytic=True),
+        marks=[mark.xfail(strict=True)],
     ),
     (dict(add_references=True), dict(verify=False, single_analytic=True)),
-    mark.xfail(
-        (dict(add_references=True), dict(verify=True, single_analytic=False)),
-        strict=True,
+    param(
+        dict(add_references=True), dict(verify=True, single_analytic=False),
+        marks=[mark.xfail(strict=True)],
     ),
     (dict(add_references=True), dict(verify=False, single_analytic=False)),
     (dict(add_references=True), dict(single_analytic=False)),

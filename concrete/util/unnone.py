@@ -1,18 +1,18 @@
 from __future__ import unicode_literals
 
 
-def lun(l):
+def lun(lst):
     '''
-    If l is None return an empty list, else return l.
+    If lst is None return an empty list, else return lst.
     Simplifies iteration over list fields that might be unset.
 
     Args:
-        l (list): input list (or None)
+        lst (list): input list (or None)
 
     Return
-        l, or an empty list if l is None
+        lst, or an empty list if lst is None
     '''
-    return list() if (l is None) else l
+    return list() if (lst is None) else lst
 
 
 def dun(d):

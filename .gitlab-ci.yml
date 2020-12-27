@@ -55,7 +55,11 @@ test-py35-tests:
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
-    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e py35 tests
+    - touch coverage.xml
+    - docker run --mount type=bind,source=$PWD/coverage.xml,target=/tmp/concrete-python/coverage.xml $CONTAINER_TEST_IMAGE-py35 tox -e cov tests
+  artifacts:
+    reports:
+      cobertura: coverage.xml
   tags:
     - docker
 

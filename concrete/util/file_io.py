@@ -679,8 +679,7 @@ class CommunicationWriterTar(object):
 
 
 class CommunicationWriterTGZ(CommunicationWriterTar):
-    """Class for writing one or more Communications to a .tar.gz (.tgz)
-    archive
+    """Class for writing one or more Communications to a .tar.gz (.tgz) archive
 
     Sample usage::
 
@@ -690,6 +689,12 @@ class CommunicationWriterTGZ(CommunicationWriterTar):
             writer.write(comm_object_three, 'comm_three.concrete')
     """
     def __init__(self, tar_filename=None):
+        """
+        Args:
+            tar_filename (str): if specified, open file at this path
+                during construction (a file can alternatively be opened
+                after construction using the open method)
+        """
         super(CommunicationWriterTGZ, self).__init__(tar_filename, gzip=True)
 
 
@@ -731,7 +736,7 @@ class CommunicationWriterZip(object):
 
     def write(self, comm, comm_filename=None):
         '''
-        Write communication to zip file.'
+        Write communication to zip file.
 
         Args:
             comm (Communication): communication to write to zip file

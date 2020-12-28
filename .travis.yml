@@ -17,5 +17,5 @@ script:
   # configured in tox.ini
   - tox -e pep8
   - tox -e docs
-  - tox -e py35 --cov=concrete tests
+  - tox -e cov tests
   - tox -e py35 integration-tests

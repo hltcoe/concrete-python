@@ -5,11 +5,9 @@ from __future__ import unicode_literals
 from pytest import fixture, mark
 from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
-import os
 import sys
 import json
 from subprocess import Popen, PIPE
-from tempfile import mkstemp
 
 
 def assert_first_comm(comm):
@@ -27,12 +25,10 @@ def assert_second_comm(comm):
 
 
 @fixture
-def log_conf(request):
-    (fd, log_path) = mkstemp()
-    os.close(fd)
+def log_conf(tmpdir):
+    log_path = str(tmpdir / 'log')
+    conf_path = str(tmpdir / 'log.conf')
 
-    (fd, conf_path) = mkstemp()
-    os.close(fd)
     with open(conf_path, 'w') as f:
         json.dump(
             dict(
@@ -57,27 +53,12 @@ def log_conf(request):
             f
         )
 
-    def _remove():
-        if os.path.exists(conf_path):
-            os.remove(conf_path)
-        if os.path.exists(log_path):
-            os.remove(log_path)
-
-    request.addfinalizer(_remove)
-    return (conf_path, log_path)
+    yield (conf_path, log_path)
 
 
 @fixture
-def output_file(request):
-    (fd, path) = mkstemp()
-    os.close(fd)
-
-    def _remove():
-        if os.path.exists(path):
-            os.remove(path)
-
-    request.addfinalizer(_remove)
-    return path
+def output_file(tmpdir):
+    yield str(tmpdir / 'output.comm')
 
 
 def test_tweets2concrete(output_file):

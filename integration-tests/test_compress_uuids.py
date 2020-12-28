@@ -6,20 +6,11 @@ from concrete.util import compress_uuids
 import os
 import sys
 from subprocess import Popen, PIPE
-from tempfile import mkstemp
 
 
 @fixture
-def output_file(request):
-    (fd, path) = mkstemp()
-    os.close(fd)
-
-    def _remove():
-        if os.path.exists(path):
-            os.remove(path)
-
-    request.addfinalizer(_remove)
-    return path
+def output_file(tmpdir):
+    yield str(tmpdir / 'output.comm')
 
 
 @mark.parametrize('args', [

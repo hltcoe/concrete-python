@@ -128,7 +128,7 @@ def main():
                     x = next(it)
                     yield x
                 except IOError:
-                    raise StopIteration('Caught IOError.')
+                    return
         tweet_reader = _catch(tweet_reader)
 
     if args.skip_bad_lines:

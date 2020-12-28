@@ -17,7 +17,6 @@ from concrete.util import (
 )
 
 from pytest import fixture, raises
-from tempfile import mkstemp
 
 
 TIME_MARGIN = 60 * 60
@@ -47,20 +46,8 @@ def login_info():
 
 
 @fixture
-def output_file(request):
-    (fd, path) = mkstemp()
-    os.close(fd)
-
-    def _remove():
-        if os.path.exists(path):
-            os.remove(path)
-
-    request.addfinalizer(_remove)
-    return path
-
-
-def test_output_file_finalizer_sanity(output_file):
-    assert True
+def output_file(tmpdir):
+    yield str(tmpdir / 'output.comm')
 
 
 def test_CommunicationReader_single_file():

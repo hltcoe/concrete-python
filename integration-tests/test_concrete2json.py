@@ -4,11 +4,9 @@
 from __future__ import unicode_literals
 from pytest import fixture, mark
 import io
-import os
 import sys
 import json
 from subprocess import Popen, PIPE
-from tempfile import mkstemp
 
 
 SERIF_TEXT = '''\
@@ -55,16 +53,8 @@ def assert_simple_json_protocol_ok(json_path, expected_text):
 
 
 @fixture
-def output_file(request):
-    (fd, path) = mkstemp()
-    os.close(fd)
-
-    def _remove():
-        if os.path.exists(path):
-            os.remove(path)
-
-    request.addfinalizer(_remove)
-    return path
+def output_file(tmpdir):
+    yield str(tmpdir / 'output.comm')
 
 
 @mark.parametrize('args,text,assertion', [

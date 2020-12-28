@@ -1,21 +1,23 @@
-image: docker:latest
-services:
-  - docker:dind
-
 stages:
   - build
   - stylecheck
   - test
 
-variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-
-before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+.dind:
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  tags:
+    - docker
 
 build-accelerated:
+  extends: .dind
   stage: build
   script:
     - docker build -t $CONTAINER_TEST_IMAGE --file Dockerfile .
@@ -23,35 +25,31 @@ build-accelerated:
   only:
     - master
     - tags
-  tags:
-    - docker
 
 build-py35:
+  extends: .dind
   stage: build
   script:
     - docker build -t $CONTAINER_TEST_IMAGE-py35 --file Dockerfile.py35 .
     - docker push $CONTAINER_TEST_IMAGE-py35
-  tags:
-    - docker
 
 # pep8 runs different tests for different Python versions
 test-py35-pep8:
+  extends: .dind
   stage: stylecheck
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
     - docker run $CONTAINER_TEST_IMAGE-py35 tox -e pep8
-  tags:
-    - docker
 
 test-py35-docs:
+  extends: .dind
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
     - docker run $CONTAINER_TEST_IMAGE-py35 tox -e docs
-  tags:
-    - docker
 
 test-py35-tests:
+  extends: .dind
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
@@ -60,13 +58,41 @@ test-py35-tests:
   artifacts:
     reports:
       cobertura: coverage.xml
-  tags:
-    - docker
 
 test-py35-integration-tests:
+  extends: .dind
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE-py35
     - docker run $CONTAINER_TEST_IMAGE-py35 tox -e py35 integration-tests
+
+.test-compat:
+  stage: test
+  before_script:
+    - python setup.py install
+    - pip install flake8
+    - pip install -r test-requirements.txt
+  script:
+    - flake8
+    - pytest tests integration-tests
+  only:
+    - master
+    - tags
   tags:
     - docker
+
+test-py36:
+  extends: .test-compat
+  image: python:3.6
+
+test-py37:
+  extends: .test-compat
+  image: python:3.7
+
+test-py38:
+  extends: .test-compat
+  image: python:3.8
+
+test-py39:
+  extends: .test-compat
+  image: python:3.9

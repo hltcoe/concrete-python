@@ -67,7 +67,7 @@ test-integration-tests:
     - flake8
     - pytest tests integration-tests
   only:
-    - master
+    - main
     - tags
   tags:
     - docker

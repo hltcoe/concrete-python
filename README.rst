@@ -807,6 +807,6 @@ UUID mismatches.
 .. _`online documentation`: http://hltcoe.github.io/concrete-python/
 .. _`Apache Thrift`: http://thrift.apache.org
 .. _`Concrete GitHub repository`: https://github.com/hltcoe/concrete
-.. _serif_dog-bites-man.concrete: https://github.com/hltcoe/concrete-python/raw/master/tests/testdata/serif_dog-bites-man.concrete
+.. _serif_dog-bites-man.concrete: https://github.com/hltcoe/concrete-python/raw/main/tests/testdata/serif_dog-bites-man.concrete
 .. _CoNLL: http://ufal.mff.cuni.cz/conll2009-st/task-description.html
-.. _LICENSE: https://github.com/hltcoe/concrete-python/blob/master/LICENSE
+.. _LICENSE: https://github.com/hltcoe/concrete-python/blob/main/LICENSE

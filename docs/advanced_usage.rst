@@ -210,6 +210,6 @@ Expected output::
 
 
 
-.. _serif_dog-bites-man.concrete: https://github.com/hltcoe/concrete-python/raw/master/tests/testdata/serif_dog-bites-man.concrete
+.. _serif_dog-bites-man.concrete: https://github.com/hltcoe/concrete-python/raw/main/tests/testdata/serif_dog-bites-man.concrete
 .. _serif_example.concrete: https://github.com/hltcoe/quicklime/raw/master/serif_example.concrete
 .. _`not in the schema`: http://hltcoe.github.io/concrete/schema/entities.html#Struct_Entity

@@ -18,7 +18,7 @@ def test_comm_container_fetch_handler():
     }
 
     impl = CommunicationContainerFetchHandler(comm_container)
-    host = 'localhost'
+    host = '127.0.0.1'
     port = find_port()
 
     with SubprocessFetchCommunicationServiceWrapper(impl, host, port):
@@ -37,7 +37,7 @@ def test_fetch_backed_container():
     }
 
     impl = CommunicationContainerFetchHandler(comm_container)
-    host = 'localhost'
+    host = '127.0.0.1'
     port = find_port()
 
     with SubprocessFetchCommunicationServiceWrapper(impl, host, port):
@@ -57,12 +57,12 @@ def test_relay_container_fetch_handler():
     }
 
     impl = CommunicationContainerFetchHandler(comm_container)
-    host = 'localhost'
+    host = '127.0.0.1'
     port = find_port()
 
     with SubprocessFetchCommunicationServiceWrapper(impl, host, port):
         relay_impl = RelayFetchHandler(host, port)
-        relay_host = 'localhost'
+        relay_host = '127.0.0.1'
         relay_port = find_port()
 
         with SubprocessFetchCommunicationServiceWrapper(relay_impl, relay_host, relay_port):

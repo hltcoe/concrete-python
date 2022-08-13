@@ -38,7 +38,7 @@ class NoopAnnotateCommunicationService(AnnotateCommunicationService.Iface):
 
 def test_annotate():
     impl = NoopAnnotateCommunicationService()
-    host = 'localhost'
+    host = '127.0.0.1'
     port = find_port()
     timeout = 5
 
@@ -68,7 +68,7 @@ def test_annotate():
 
 def test_get_metadata():
     impl = NoopAnnotateCommunicationService()
-    host = 'localhost'
+    host = '127.0.0.1'
     port = find_port()
     timeout = 5
 

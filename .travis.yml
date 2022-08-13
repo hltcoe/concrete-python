@@ -18,4 +18,4 @@ script:
   - tox -e pep8
   - tox -e docs
   - tox -e cov tests
-  - tox -e py35 integration-tests
+  - tox -e py37 integration-tests

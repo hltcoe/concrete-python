@@ -3,7 +3,7 @@ version: '{build}-{branch}'
 skip_branch_with_pr: false
 
 install:
-- set PATH=C:\Python35-x64\scripts;C:\Python35-x64;%PATH%
+- set PATH=C:\Python37-x64\scripts;C:\Python37-x64;%PATH%
 - pip install tox
 - git config core.symlinks true
 - git reset --hard
@@ -12,4 +12,4 @@ build_script:
 # configured in tox.ini
 - tox -e pep8,docs
 - tox -e cov tests
-- tox -e py35 integration-tests
+- tox -e py37 integration-tests

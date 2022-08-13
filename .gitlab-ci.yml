@@ -16,55 +16,46 @@ stages:
   tags:
     - docker
 
-build-accelerated:
+build:
   extends: .dind
   stage: build
   script:
-    - docker build -t $CONTAINER_TEST_IMAGE --file Dockerfile .
+    - docker build -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
-  only:
-    - master
-    - tags
 
-build-py35:
-  extends: .dind
-  stage: build
-  script:
-    - docker build -t $CONTAINER_TEST_IMAGE-py35 --file Dockerfile.py35 .
-    - docker push $CONTAINER_TEST_IMAGE-py35
-
-# pep8 runs different tests for different Python versions
-test-py35-pep8:
+test-pep8:
   extends: .dind
   stage: stylecheck
   script:
-    - docker pull $CONTAINER_TEST_IMAGE-py35
-    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e pep8
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run $CONTAINER_TEST_IMAGE tox -e pep8
 
-test-py35-docs:
+test-docs:
   extends: .dind
   stage: test
   script:
-    - docker pull $CONTAINER_TEST_IMAGE-py35
-    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e docs
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run $CONTAINER_TEST_IMAGE tox -e docs
 
-test-py35-tests:
+test-unit-tests:
   extends: .dind
   stage: test
   script:
-    - docker pull $CONTAINER_TEST_IMAGE-py35
+    - docker pull $CONTAINER_TEST_IMAGE
     - touch coverage.xml
-    - docker run --mount type=bind,source=$PWD/coverage.xml,target=/tmp/concrete-python/coverage.xml $CONTAINER_TEST_IMAGE-py35 tox -e cov tests
+    - docker run --mount type=bind,source=$PWD/coverage.xml,target=/tmp/concrete-python/coverage.xml $CONTAINER_TEST_IMAGE tox -e cov tests
   artifacts:
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
 
-test-py35-integration-tests:
+test-integration-tests:
   extends: .dind
   stage: test
   script:
-    - docker pull $CONTAINER_TEST_IMAGE-py35
-    - docker run $CONTAINER_TEST_IMAGE-py35 tox -e py35 integration-tests
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run $CONTAINER_TEST_IMAGE tox -e py37 integration-tests
 
 .test-compat:
   stage: test
@@ -81,14 +72,6 @@ test-py35-integration-tests:
   tags:
     - docker
 
-test-py36:
-  extends: .test-compat
-  image: python:3.6
-
-test-py37:
-  extends: .test-compat
-  image: python:3.7
-
 test-py38:
   extends: .test-compat
   image: python:3.8
@@ -96,3 +79,7 @@ test-py38:
 test-py39:
   extends: .test-compat
   image: python:3.9
+
+test-py310:
+  extends: .test-compat
+  image: python:3.10

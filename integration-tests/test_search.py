@@ -37,7 +37,7 @@ class FooSearch(SearchService.Iface):
 
 def test_search_communications():
     impl = FooSearch()
-    host = 'localhost'
+    host = '127.0.0.1'
     port = find_port()
     timeout = 5
 

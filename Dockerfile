@@ -1,13 +1,17 @@
 # Build 'accelerated' concrete-python with C bindings for Python Thrift
-FROM python:3.6-stretch
+FROM python:3.7-bullseye
 
-RUN curl -O http://apache.mirrors.pair.com/thrift/0.11.0/thrift-0.11.0.tar.gz && \
-    tar xvfz thrift-0.11.0.tar.gz && \
-    cd thrift-0.11.0 && \
+RUN curl -O https://dlcdn.apache.org/thrift/0.16.0/thrift-0.16.0.tar.gz && \
+    tar xvfz thrift-0.16.0.tar.gz && \
+    cd thrift-0.16.0 && \
     ./configure --with-python  && \
     make && \
     make install
-ADD . /tmp/concrete-python
-RUN cd /tmp/concrete-python && \
-    python setup.py install
+
+RUN pip install tox
+
+ADD . /opt/concrete-python
+WORKDIR /opt/concrete-python
+RUN python setup.py install
+
 RUN thrift-is-accelerated.py

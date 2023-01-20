@@ -431,17 +431,17 @@ def test_redis_communication_reader_len(right_to_left, inferred, key_type, pop, 
     len(reader)
 
     if key_type == 'set':
-        assert redis.scard.called_once_with(sentinel.key)
+        redis.scard.assert_called_once_with(sentinel.key)
         assert not redis.llen.called
         assert not redis.hlen.called
     elif key_type == 'list':
         assert not redis.scard.called
-        assert redis.llen.called_once_with(sentinel.key)
+        redis.llen.assert_called_once_with(sentinel.key)
         assert not redis.hlen.called
     elif key_type == 'hash':
         assert not redis.scard.called
         assert not redis.llen.called
-        assert redis.hlen.called_once_with(sentinel.key)
+        redis.hlen.assert_called_once_with(sentinel.key)
     else:
         raise ValueError('unexpected key type {}'.format(key_type))
 

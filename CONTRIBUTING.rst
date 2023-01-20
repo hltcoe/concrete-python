@@ -27,13 +27,13 @@ Contributing code
 5. Run the test again, ensuring that it now passes.
 6. Run all tests and style checks, ensuring that they pass::
 
-       tox
+       tox run
 
    Optionally, run integration tests (you must have Redis_ server
    version 2.8 or later in your path; do ``redis-server --version``
    to check)::
 
-       tox integration-tests
+       tox run -- integration-tests
 
 7. If you created a new module (file) or package (directory) in the library,
    please see "Adding new modules and packages" in the next section.
@@ -125,7 +125,7 @@ When a push is made to the GitHub repository the
 You can run the automatic validation and generate the HTML
 documentation locally by doing::
 
-    tox -e docs
+    tox run -e docs
 
 The generated HTML documentation is stored it in ``.tox/docs/tmp/html``
 (relative to the top of your repository).  Open this file path in a

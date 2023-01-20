@@ -600,7 +600,7 @@ class CommunicationWriterTar(object):
 
     def __init__(self, tar_filename=None, gzip=False):
         # Without text on the first line of this docstring, the sphinx 3.0.3 build process
-        # (invoked using 'tox -e docs') fails with the error message:
+        # (invoked using 'tox run -e docs') fails with the error message:
         #
         #   /tmp/concrete-python/concrete/util/file_io.py:docstring of
         #     concrete.util.file_io.CommunicationWriterTGZ:13:Unexpected indentation.

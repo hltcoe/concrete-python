@@ -27,5 +27,5 @@ fi
 
 if ! command -v tox
 then
-    sudo pip3.5 install --upgrade tox
+    sudo pip3.5 install --upgrade 'tox>=4'
 fi

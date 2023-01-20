@@ -15,7 +15,7 @@ install:
 
 script:
   # configured in tox.ini
-  - tox -e pep8
-  - tox -e docs
-  - tox -e cov tests
-  - tox -e py37 integration-tests
+  - tox run -e pep8
+  - tox run -e docs
+  - tox run -e cov -- tests
+  - tox run -e py37 -- integration-tests

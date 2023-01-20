@@ -8,7 +8,7 @@ RUN curl -O http://archive.apache.org/dist/thrift/0.16.0/thrift-0.16.0.tar.gz &&
     make && \
     make install
 
-RUN pip install tox
+RUN pip install 'tox>=4'
 
 ADD . /opt/concrete-python
 WORKDIR /opt/concrete-python

@@ -28,14 +28,14 @@ test-pep8:
   stage: stylecheck
   script:
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox -e pep8
+    - docker run $CONTAINER_TEST_IMAGE tox run -e pep8
 
 test-docs:
   extends: .dind
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox -e docs
+    - docker run $CONTAINER_TEST_IMAGE tox run -e docs
 
 test-unit-tests:
   extends: .dind
@@ -43,7 +43,7 @@ test-unit-tests:
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - touch coverage.xml
-    - docker run --mount type=bind,source=$PWD/coverage.xml,target=/tmp/concrete-python/coverage.xml $CONTAINER_TEST_IMAGE tox -e cov tests
+    - docker run --mount type=bind,source=$PWD/coverage.xml,target=/tmp/concrete-python/coverage.xml $CONTAINER_TEST_IMAGE tox run -e cov -- tests
   artifacts:
     reports:
       coverage_report:
@@ -55,7 +55,7 @@ test-integration-tests:
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox -e py37 integration-tests
+    - docker run $CONTAINER_TEST_IMAGE tox run -e py37 -- integration-tests
 
 .test-compat:
   stage: test

@@ -1,7 +1,11 @@
-4.15.3 (unreleased)
+4.17.0 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Update to Concrete schema 4.17, which adds convert package with
+  ConvertCommunicationService, property package with Property type
+  abstracted from situations, and id, canonical name, and property list
+  fields to situation and entity types
+- Fix stale build
 
 
 4.15.2 (2023-01-19)

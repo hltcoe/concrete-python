@@ -17,18 +17,18 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from concrete.annotate import AnnotateCommunicationService
-from concrete.annotate.ttypes import *
+from concrete.convert import ConvertCommunicationService
+from concrete.convert.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  Communication annotate(Communication original)')
-    print('  AnnotationMetadata getMetadata()')
-    print('  string getDocumentation()')
-    print('  void shutdown()')
+    print('  string fromConcrete(Communication original)')
+    print('  Communication toConcrete(string original)')
+    print('  ServiceInfo about()')
+    print('  bool alive()')
     print('')
     sys.exit(0)
 
@@ -105,32 +105,32 @@ else:
     else:
         transport = TTransport.TBufferedTransport(socket)
 protocol = TBinaryProtocol(transport)
-client = AnnotateCommunicationService.Client(protocol)
+client = ConvertCommunicationService.Client(protocol)
 transport.open()
 
-if cmd == 'annotate':
+if cmd == 'fromConcrete':
     if len(args) != 1:
-        print('annotate requires 1 args')
+        print('fromConcrete requires 1 args')
         sys.exit(1)
-    pp.pprint(client.annotate(eval(args[0]),))
+    pp.pprint(client.fromConcrete(eval(args[0]),))
 
-elif cmd == 'getMetadata':
-    if len(args) != 0:
-        print('getMetadata requires 0 args')
+elif cmd == 'toConcrete':
+    if len(args) != 1:
+        print('toConcrete requires 1 args')
         sys.exit(1)
-    pp.pprint(client.getMetadata())
+    pp.pprint(client.toConcrete(args[0],))
 
-elif cmd == 'getDocumentation':
+elif cmd == 'about':
     if len(args) != 0:
-        print('getDocumentation requires 0 args')
+        print('about requires 0 args')
         sys.exit(1)
-    pp.pprint(client.getDocumentation())
+    pp.pprint(client.about())
 
-elif cmd == 'shutdown':
+elif cmd == 'alive':
     if len(args) != 0:
-        print('shutdown requires 0 args')
+        print('alive requires 0 args')
         sys.exit(1)
-    pp.pprint(client.shutdown())
+    pp.pprint(client.alive())
 
 else:
     print('Unrecognized method %s' % cmd)

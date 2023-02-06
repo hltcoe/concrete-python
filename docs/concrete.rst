@@ -35,6 +35,7 @@ write ``from concrete import Communication``.
     concrete.clustering
     concrete.communication
     concrete.context
+    concrete.convert
     concrete.email
     concrete.entities
     concrete.exceptions
@@ -43,6 +44,7 @@ write ``from concrete import Communication``.
     concrete.linking
     concrete.metadata
     concrete.nitf
+    concrete.property
     concrete.search
     concrete.services
     concrete.situations

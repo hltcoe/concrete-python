@@ -12,4 +12,10 @@ from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
 import sys
-from .ttypes import *
+import concrete.communication.ttypes
+import concrete.services.ttypes
+
+from thrift.transport import TTransport
+all_structs = []
+fix_spec(all_structs)
+del all_structs

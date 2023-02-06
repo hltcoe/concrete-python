@@ -148,8 +148,8 @@ manually inspected (``git diff``) for sanity.  Note that this will not
 delete previously-generated files that are no longer produced by
 thrift (whose entries were removed from the schema).
 
-**Note**: Often ``generate.bash`` is not sufficient: the patches (in
-``patches/``) document where it (thrift) falls short on the
+**Note**: Often ``generate.bash`` is not sufficient: see the patches
+(in ``patches/``) document where it (thrift) falls short on the
 previously-compiled schema.  Additionally, if new packages
 (namespaces) are added to the schema, they must be added to
 ``setup.py``, ``setup.cfg``, and ``concrete/__init__.py``.

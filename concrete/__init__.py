@@ -15,6 +15,7 @@ from .audio.ttypes import *  # noqa
 from .clustering.ttypes import *  # noqa
 from .communication.ttypes import *  # noqa
 from .context.ttypes import *  # noqa
+from .convert.ttypes import *  # noqa
 from .email.ttypes import *  # noqa
 from .entities.ttypes import *  # noqa
 from .exceptions.ttypes import *  # noqa
@@ -23,6 +24,7 @@ from .learn.ttypes import *  # noqa
 from .linking.ttypes import *  # noqa
 from .metadata.ttypes import *  # noqa
 from .nitf.ttypes import *  # noqa
+from .property.ttypes import *  # noqa
 from .search.ttypes import *  # noqa
 from .services.ttypes import *  # noqa
 from .services.results.ttypes import *  # noqa

@@ -12,37 +12,32 @@ from thrift.protocol.TProtocol import TProtocolException
 from thrift.TRecursive import fix_spec
 
 import sys
+import concrete.metadata.ttypes
 
 from thrift.transport import TTransport
 all_structs = []
 
 
-class Sound(object):
+class Property(object):
     """
-    A sound wave. A separate optional field is defined for each
-    suppported format. Typically, a Sound object will only define
-    a single field.
-
-    Note: we may want to have separate fields for separate channels
-    (left vs right), etc.
+    Attached to situations, entities, or arguments (or mentions thereof)
+    to support multi-label annotations.
 
     Attributes:
-     - wav
-     - mp3
-     - sph
-     - path: An absolute path to a file on disk where the sound file can be
-    found. It is assumed that this path will be accessable from any
-    machine that the system is run on (i.e., it should be a shared
-    disk, or possibly a mirrored directory).
+     - value: The required value of the property.
+     - metadata: Metadata to support this particular property object.
+     - polarity: This value is typically boolean, 0.0 or 1.0, but we use a
+    float in order to potentially capture cases where an annotator is
+    highly confident that the value is underspecified, via a value of
+    0.5.
 
     """
 
 
-    def __init__(self, wav=None, mp3=None, sph=None, path=None,):
-        self.wav = wav
-        self.mp3 = mp3
-        self.sph = sph
-        self.path = path
+    def __init__(self, value=None, metadata=None, polarity=None,):
+        self.value = value
+        self.metadata = metadata
+        self.polarity = polarity
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -55,22 +50,18 @@ class Sound(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.wav = iprot.readBinary()
+                    self.value = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.STRING:
-                    self.mp3 = iprot.readBinary()
+                if ftype == TType.STRUCT:
+                    self.metadata = concrete.metadata.ttypes.AnnotationMetadata()
+                    self.metadata.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRING:
-                    self.sph = iprot.readBinary()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRING:
-                    self.path = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                if ftype == TType.DOUBLE:
+                    self.polarity = iprot.readDouble()
                 else:
                     iprot.skip(ftype)
             else:
@@ -82,27 +73,27 @@ class Sound(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('Sound')
-        if self.wav is not None:
-            oprot.writeFieldBegin('wav', TType.STRING, 1)
-            oprot.writeBinary(self.wav)
+        oprot.writeStructBegin('Property')
+        if self.value is not None:
+            oprot.writeFieldBegin('value', TType.STRING, 1)
+            oprot.writeString(self.value.encode('utf-8') if sys.version_info[0] == 2 else self.value)
             oprot.writeFieldEnd()
-        if self.mp3 is not None:
-            oprot.writeFieldBegin('mp3', TType.STRING, 2)
-            oprot.writeBinary(self.mp3)
+        if self.metadata is not None:
+            oprot.writeFieldBegin('metadata', TType.STRUCT, 2)
+            self.metadata.write(oprot)
             oprot.writeFieldEnd()
-        if self.sph is not None:
-            oprot.writeFieldBegin('sph', TType.STRING, 3)
-            oprot.writeBinary(self.sph)
-            oprot.writeFieldEnd()
-        if self.path is not None:
-            oprot.writeFieldBegin('path', TType.STRING, 4)
-            oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
+        if self.polarity is not None:
+            oprot.writeFieldBegin('polarity', TType.DOUBLE, 3)
+            oprot.writeDouble(self.polarity)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
     def validate(self):
+        if self.value is None:
+            raise TProtocolException(message='Required field value is unset!')
+        if self.metadata is None:
+            raise TProtocolException(message='Required field metadata is unset!')
         return
 
     def __repr__(self):
@@ -115,13 +106,12 @@ class Sound(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(Sound)
-Sound.thrift_spec = (
+all_structs.append(Property)
+Property.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'wav', 'BINARY', None, ),  # 1
-    (2, TType.STRING, 'mp3', 'BINARY', None, ),  # 2
-    (3, TType.STRING, 'sph', 'BINARY', None, ),  # 3
-    (4, TType.STRING, 'path', 'UTF8', None, ),  # 4
+    (1, TType.STRING, 'value', 'UTF8', None, ),  # 1
+    (2, TType.STRUCT, 'metadata', [concrete.metadata.ttypes.AnnotationMetadata, None], None, ),  # 2
+    (3, TType.DOUBLE, 'polarity', None, None, ),  # 3
 )
 fix_spec(all_structs)
 del all_structs

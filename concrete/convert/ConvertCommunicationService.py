@@ -21,40 +21,82 @@ all_structs = []
 
 
 class Iface(concrete.services.Service.Iface):
-    def summarize(self, query):
+    """
+    Convert service methods for converting between Concrete
+    Communications and other formats.
+
+    """
+    def fromConcrete(self, original):
         """
+        Converts a Concrete Communication to another format.
+
+        The output is encoded as a bytestring.
+        It is up to the implementing service to ensure that
+        the output format is valid.
+
+        Can throw a ConcreteThriftException upon error
+        (invalid input, etc.).
+
         Parameters:
-         - query
+         - original
 
         """
         pass
 
-    def getCapabilities(self):
+    def toConcrete(self, original):
+        """
+        Converts another format to a Concrete Communication.
+
+        The input is encoded as a bytestring.
+        It is up to the implementing service to ensure that
+        the input format is valid.
+
+        Can throw a ConcreteThriftException upon error
+        (invalid input, etc.).
+
+        Parameters:
+         - original
+
+        """
         pass
 
 
 class Client(concrete.services.Service.Client, Iface):
+    """
+    Convert service methods for converting between Concrete
+    Communications and other formats.
+
+    """
     def __init__(self, iprot, oprot=None):
         concrete.services.Service.Client.__init__(self, iprot, oprot)
 
-    def summarize(self, query):
+    def fromConcrete(self, original):
         """
+        Converts a Concrete Communication to another format.
+
+        The output is encoded as a bytestring.
+        It is up to the implementing service to ensure that
+        the output format is valid.
+
+        Can throw a ConcreteThriftException upon error
+        (invalid input, etc.).
+
         Parameters:
-         - query
+         - original
 
         """
-        self.send_summarize(query)
-        return self.recv_summarize()
+        self.send_fromConcrete(original)
+        return self.recv_fromConcrete()
 
-    def send_summarize(self, query):
-        self._oprot.writeMessageBegin('summarize', TMessageType.CALL, self._seqid)
-        args = summarize_args()
-        args.query = query
+    def send_fromConcrete(self, original):
+        self._oprot.writeMessageBegin('fromConcrete', TMessageType.CALL, self._seqid)
+        args = fromConcrete_args()
+        args.original = original
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_summarize(self):
+    def recv_fromConcrete(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -62,27 +104,42 @@ class Client(concrete.services.Service.Client, Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = summarize_result()
+        result = fromConcrete_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "summarize failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "fromConcrete failed: unknown result")
 
-    def getCapabilities(self):
-        self.send_getCapabilities()
-        return self.recv_getCapabilities()
+    def toConcrete(self, original):
+        """
+        Converts another format to a Concrete Communication.
 
-    def send_getCapabilities(self):
-        self._oprot.writeMessageBegin('getCapabilities', TMessageType.CALL, self._seqid)
-        args = getCapabilities_args()
+        The input is encoded as a bytestring.
+        It is up to the implementing service to ensure that
+        the input format is valid.
+
+        Can throw a ConcreteThriftException upon error
+        (invalid input, etc.).
+
+        Parameters:
+         - original
+
+        """
+        self.send_toConcrete(original)
+        return self.recv_toConcrete()
+
+    def send_toConcrete(self, original):
+        self._oprot.writeMessageBegin('toConcrete', TMessageType.CALL, self._seqid)
+        args = toConcrete_args()
+        args.original = original
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_getCapabilities(self):
+    def recv_toConcrete(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -90,21 +147,21 @@ class Client(concrete.services.Service.Client, Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = getCapabilities_result()
+        result = toConcrete_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "getCapabilities failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "toConcrete failed: unknown result")
 
 
 class Processor(concrete.services.Service.Processor, Iface, TProcessor):
     def __init__(self, handler):
         concrete.services.Service.Processor.__init__(self, handler)
-        self._processMap["summarize"] = Processor.process_summarize
-        self._processMap["getCapabilities"] = Processor.process_getCapabilities
+        self._processMap["fromConcrete"] = Processor.process_fromConcrete
+        self._processMap["toConcrete"] = Processor.process_toConcrete
         self._on_message_begin = None
 
     def on_message_begin(self, func):
@@ -127,13 +184,13 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_summarize(self, seqid, iprot, oprot):
-        args = summarize_args()
+    def process_fromConcrete(self, seqid, iprot, oprot):
+        args = fromConcrete_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = summarize_result()
+        result = fromConcrete_result()
         try:
-            result.success = self._handler.summarize(args.query)
+            result.success = self._handler.fromConcrete(args.original)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -148,18 +205,18 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("summarize", msg_type, seqid)
+        oprot.writeMessageBegin("fromConcrete", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_getCapabilities(self, seqid, iprot, oprot):
-        args = getCapabilities_args()
+    def process_toConcrete(self, seqid, iprot, oprot):
+        args = toConcrete_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = getCapabilities_result()
+        result = toConcrete_result()
         try:
-            result.success = self._handler.getCapabilities()
+            result.success = self._handler.toConcrete(args.original)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -174,7 +231,7 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("getCapabilities", msg_type, seqid)
+        oprot.writeMessageBegin("toConcrete", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -182,16 +239,16 @@ class Processor(concrete.services.Service.Processor, Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class summarize_args(object):
+class fromConcrete_args(object):
     """
     Attributes:
-     - query
+     - original
 
     """
 
 
-    def __init__(self, query=None,):
-        self.query = query
+    def __init__(self, original=None,):
+        self.original = original
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -204,8 +261,8 @@ class summarize_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.query = SummarizationRequest()
-                    self.query.read(iprot)
+                    self.original = concrete.communication.ttypes.Communication()
+                    self.original.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -217,10 +274,10 @@ class summarize_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('summarize_args')
-        if self.query is not None:
-            oprot.writeFieldBegin('query', TType.STRUCT, 1)
-            self.query.write(oprot)
+        oprot.writeStructBegin('fromConcrete_args')
+        if self.original is not None:
+            oprot.writeFieldBegin('original', TType.STRUCT, 1)
+            self.original.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -238,14 +295,149 @@ class summarize_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(summarize_args)
-summarize_args.thrift_spec = (
+all_structs.append(fromConcrete_args)
+fromConcrete_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'query', [SummarizationRequest, None], None, ),  # 1
+    (1, TType.STRUCT, 'original', [concrete.communication.ttypes.Communication, None], None, ),  # 1
 )
 
 
-class summarize_result(object):
+class fromConcrete_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = iprot.readBinary()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = concrete.services.ttypes.ServicesException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('fromConcrete_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRING, 0)
+            oprot.writeBinary(self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(fromConcrete_result)
+fromConcrete_result.thrift_spec = (
+    (0, TType.STRING, 'success', 'BINARY', None, ),  # 0
+    (1, TType.STRUCT, 'ex', [concrete.services.ttypes.ServicesException, None], None, ),  # 1
+)
+
+
+class toConcrete_args(object):
+    """
+    Attributes:
+     - original
+
+    """
+
+
+    def __init__(self, original=None,):
+        self.original = original
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.original = iprot.readBinary()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('toConcrete_args')
+        if self.original is not None:
+            oprot.writeFieldBegin('original', TType.STRING, 1)
+            oprot.writeBinary(self.original)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(toConcrete_args)
+toConcrete_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'original', 'BINARY', None, ),  # 1
+)
+
+
+class toConcrete_result(object):
     """
     Attributes:
      - success
@@ -269,7 +461,7 @@ class summarize_result(object):
                 break
             if fid == 0:
                 if ftype == TType.STRUCT:
-                    self.success = Summary()
+                    self.success = concrete.communication.ttypes.Communication()
                     self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -287,7 +479,7 @@ class summarize_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('summarize_result')
+        oprot.writeStructBegin('toConcrete_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -312,134 +504,9 @@ class summarize_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(summarize_result)
-summarize_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [Summary, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [concrete.services.ttypes.ServicesException, None], None, ),  # 1
-)
-
-
-class getCapabilities_args(object):
-
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('getCapabilities_args')
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(getCapabilities_args)
-getCapabilities_args.thrift_spec = (
-)
-
-
-class getCapabilities_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.LIST:
-                    self.success = []
-                    (_etype24, _size21) = iprot.readListBegin()
-                    for _i25 in range(_size21):
-                        _elem26 = SummarizationCapability()
-                        _elem26.read(iprot)
-                        self.success.append(_elem26)
-                    iprot.readListEnd()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = concrete.services.ttypes.ServicesException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('getCapabilities_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.LIST, 0)
-            oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter27 in self.success:
-                iter27.write(oprot)
-            oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(getCapabilities_result)
-getCapabilities_result.thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRUCT, [SummarizationCapability, None], False), None, ),  # 0
+all_structs.append(toConcrete_result)
+toConcrete_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [concrete.communication.ttypes.Communication, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [concrete.services.ttypes.ServicesException, None], None, ),  # 1
 )
 fix_spec(all_structs)

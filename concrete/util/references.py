@@ -29,14 +29,16 @@ def add_references_to_communication(comm):
     This function adds these reference variables:
 
     - `tokenization` to each :class:`.TokenRefSequence`
-    - `entityMention` to each :class:`.Argument`
+    - `entity` to each :class:`.Argument`
+    - `situation` to each :class:`.Argument`
+    - `entityMention` to each :class:`.MentionArgument`
+    - `situationMention` to each :class:`.MentionArgument`
     - `sentence` backpointer to each :class:`.Tokenization`
     - `parentMention` backpointer to appropriate :class:`.EntityMention`
 
     And adds these lists of reference variables:
 
     - `mentionList` to each :class:`.Entity`
-    - `situationMention` to each :class:`.Argument`
     - `mentionList` to each :class:`.Situation`
     - `childMentionList` to each :class:`.EntityMention`
 
@@ -149,4 +151,13 @@ def add_references_to_communication(comm):
                             comm.situationMentionForUUID[mentionId.uuidString])
                 else:
                     situation.mentionList = None
+                for argument in situation.argumentList:
+                    if argument.entityId:
+                        argument.entity = comm.entityForUUID[argument.entityId.uuidString]
+                    else:
+                        argument.entity = None
+                    if argument.situationId:
+                        argument.situation = comm.situationForUUID[argument.situationId.uuidString]
+                    else:
+                        argument.situation = None
                 situation.situationSet = situationSet

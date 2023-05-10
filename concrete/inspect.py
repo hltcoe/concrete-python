@@ -490,7 +490,62 @@ def print_situations(comm, tool=None, situation_set_filter=None):
                                                s_set.metadata.tool))
             for s_idx, situation in enumerate(s_set.situationList):
                 print(u"  Situation %d-%d:" % (s_set_idx, s_idx))
-                _p(6, 18, u"situationType", situation.situationType)
+                if situation.id:
+                    _p(6, 18, u"id", situation.id)
+                if situation.canonicalName:
+                    _p(6, 18, u"canonicalName", situation.canonicalName)
+                if situation.situationType:
+                    _p(6, 18, u"situationType", situation.situationType)
+                if situation.situationKind:
+                    _p(6, 18, u"situationKind", situation.situationKind)
+                if situation.intensity:
+                    _p(6, 18, u"intensity", str(situation.intensity))
+                if situation.polarity:
+                    _p(6, 18, u"polarity", str(situation.polarity))
+                if situation.confidence:
+                    _p(6, 18, u"confidence", str(situation.confidence))
+                if situation.timeML:
+                    print(u" " * 6 + u"timeML:")
+                    if situation.timeML.timeMLClass:
+                        _p(10, 18, u"timeMLClass", situation.timeML.timeMLClass)
+                    if situation.timeML.timeMLTense:
+                        _p(10, 18, u"timeMLTense", situation.timeML.timeMLTense)
+                    if situation.timeML.timeMLAspect:
+                        _p(10, 18, u"timeMLAspect", situation.timeML.timeMLAspect)
+                for arg_idx, a in enumerate(lun(situation.argumentList)):
+                    print(u" " * 6 + u"Argument %d:" % arg_idx)
+                    if a.role:
+                        _p(10, 18, u"role", a.role)
+                    if a.entity:
+                        print(u" " * 10 + u"Entity:")
+                        if a.entity.id:
+                            _p(14, 14, u"id", a.entity.id)
+                        if a.entity.canonicalName:
+                            _p(14, 14, u"canonicalName", a.entity.canonicalName)
+                        if a.entity.type:
+                            _p(14, 14, u"type", a.entity.type)
+                    if a.propertyList:
+                        # PROTO-ROLE PROPERTIES: Format a separate list for each
+                        # distinct annotator (metadata.tool) which tool should be
+                        # either None or a string. Sort by annotator
+                        # (metadata.tool) and then by property (p.value)
+                        last_tool = False
+                        for p in sorted(a.propertyList,
+                                        key=lambda x: (x.metadata.tool, x.value)):
+                            tool = p.metadata.tool
+                            if tool != last_tool:
+                                print(u" " * 10 + u"Properties (%s):" % tool)
+                                last_tool = tool
+                            _p(14, 14, p.value, u"%1.1f" % p.polarity)
+                    if a.situation:
+                        print(u" " * 10 + u"situation:")
+                        if situation.id:
+                            _p(14, 14, u"id", situation.id)
+                        if situation.canonicalName:
+                            _p(14, 14, u"canonicalName", situation.canonicalName)
+                        if situation.situationType:
+                            _p(14, 14, u"situationType", situation.situationType)
+
                 for sm_idx, sm in enumerate(lun(situation.mentionList)):
                     print(u" " * 6 + u"SituationMention %d-%d-%d:" % (
                         s_set_idx, s_idx, sm_idx))
@@ -507,6 +562,10 @@ def _print_situation_mention(situationMention):
     Args:
         situationMention (SituationMention):
     """
+    if situationMention.id:
+        _p(10, 20, u"id", situationMention.id)
+    if situationMention.canonicalName:
+        _p(10, 20, u"canonicalName", situationMention.canonicalName)
     if situationMention.text:
         _p(10, 20, u"text", situationMention.text)
     if situationMention.situationType:
@@ -515,6 +574,10 @@ def _print_situation_mention(situationMention):
         _p(10, 20, u"situationKind", situationMention.situationKind)
     if situationMention.intensity:
         _p(10, 20, u"intensity", str(situationMention.intensity))
+    if situationMention.polarity:
+        _p(10, 20, u"polarity", str(situationMention.polarity))
+    if situationMention.confidence:
+        _p(10, 20, u"confidence", str(situationMention.confidence))
     for arg_idx, ma in enumerate(lun(situationMention.argumentList)):
         print(u" " * 10 + u"Argument %d:" % arg_idx)
         if ma.role:
@@ -542,6 +605,10 @@ def _print_situation_mention(situationMention):
         # SituationMentions referenced by top-level SituationMentions
         if ma.situationMention:
             print(u" " * 14 + u"situationMention:")
+            if situationMention.id:
+                _p(18, 20, u"id", situationMention.id)
+            if situationMention.canonicalName:
+                _p(18, 20, u"canonicalName", situationMention.canonicalName)
             if situationMention.text:
                 _p(18, 20, u"text", situationMention.text)
             if situationMention.situationType:

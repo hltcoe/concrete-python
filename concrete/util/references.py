@@ -4,6 +4,8 @@
 """
 from __future__ import unicode_literals
 
+from .unnone import lun
+
 
 def add_references_to_communication(comm):
     """Create references for each :class:`.UUID` 'pointer'
@@ -113,7 +115,7 @@ def add_references_to_communication(comm):
             for situationMention in situationMentionSet.mentionList:
                 comm.situationMentionForUUID[situationMention.uuid.uuidString]\
                     = situationMention
-                for argument in situationMention.argumentList:
+                for argument in lun(situationMention.argumentList):
                     if argument.entityMentionId:
                         argument.entityMention = comm.entityMentionForUUID[
                             argument.entityMentionId.uuidString]
@@ -151,7 +153,7 @@ def add_references_to_communication(comm):
                             comm.situationMentionForUUID[mentionId.uuidString])
                 else:
                     situation.mentionList = None
-                for argument in situation.argumentList:
+                for argument in lun(situation.argumentList):
                     if argument.entityId:
                         argument.entity = comm.entityForUUID[argument.entityId.uuidString]
                     else:

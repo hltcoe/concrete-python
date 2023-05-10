@@ -457,8 +457,7 @@ def print_situation_mentions(comm, tool=None, situation_mention_set_filter=None)
     _filter = filter_unnone(tool_to_filter(tool, situation_mention_set_filter))
     for sm_set_idx, sm_set in enumerate(lun(comm.situationMentionSetList)):
         if _filter([sm_set]):
-            print(u"Situation Set %d (%s):" % (sm_set_idx,
-                                               sm_set.metadata.tool))
+            print(u"SituationMention Set %d (%s):" % (sm_set_idx, sm_set.metadata.tool))
             for sm_idx, sm in enumerate(sm_set.mentionList):
                 print(u"  SituationMention %d-%d:" % (sm_set_idx, sm_idx))
                 _print_situation_mention(sm)
@@ -564,8 +563,6 @@ def _print_situation_mention(situationMention):
     """
     if situationMention.id:
         _p(10, 20, u"id", situationMention.id)
-    if situationMention.canonicalName:
-        _p(10, 20, u"canonicalName", situationMention.canonicalName)
     if situationMention.text:
         _p(10, 20, u"text", situationMention.text)
     if situationMention.situationType:
@@ -607,8 +604,6 @@ def _print_situation_mention(situationMention):
             print(u" " * 14 + u"situationMention:")
             if situationMention.id:
                 _p(18, 20, u"id", situationMention.id)
-            if situationMention.canonicalName:
-                _p(18, 20, u"canonicalName", situationMention.canonicalName)
             if situationMention.text:
                 _p(18, 20, u"text", situationMention.text)
             if situationMention.situationType:

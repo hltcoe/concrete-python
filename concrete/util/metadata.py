@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 from datetime import datetime
 import json
-import logging
 
 
 EPOCH = datetime.utcfromtimestamp(0)
@@ -295,7 +294,6 @@ def tool_to_filter(tool, explicit_filter=None):
     if tool is None:
         return explicit_filter
     else:
-        logging.warning('tool is deprecated; please pass filter instead')
         if explicit_filter is None:
             return lambda annotations: filter_annotations(
                 annotations,

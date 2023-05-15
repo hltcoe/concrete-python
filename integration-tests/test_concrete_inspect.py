@@ -139,7 +139,7 @@ def test_print_conll_style_tags_for_communication(comm_path, which, args,
     ) + '\n'
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -241,7 +241,7 @@ Entity Set 1 (Serif: doc-values):
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -267,7 +267,7 @@ def test_print_situation_mentions(comm_path, first, second, args,
     expected_output = output_prefix
     if first:
         expected_output += u'''\
-Situation Set 0 (Serif: relations):
+SituationMention Set 0 (Serif: relations):
   SituationMention 0-0:
           situationType:      ORG-AFF.Employment
           Argument 0:
@@ -290,7 +290,7 @@ Situation Set 0 (Serif: relations):
 '''
     if second:
         expected_output += u'''\
-Situation Set 1 (Serif: events):
+SituationMention Set 1 (Serif: events):
   SituationMention 1-0:
           text:               died
           situationType:      Life.Die
@@ -302,7 +302,7 @@ Situation Set 1 (Serif: events):
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -335,12 +335,16 @@ Situation Set 0 (Serif: relations):
 Situation Set 1 (Serif: events):
   Situation 1-0:
       situationType:    Life.Die
+      Argument 0:
+          role:             Victim
+          Entity:
+              type:         PER.Individual
 
 
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -388,7 +392,7 @@ John's daughter Mary expressed sorrow.
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -441,7 +445,7 @@ Mary expressed sorrow .
         '</ENTITY>' if second else '')
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -480,7 +484,7 @@ John 's daughter Mary expressed sorrow .\
     expected_output += '\n\n'
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -542,7 +546,7 @@ def test_print_penn_treebank_for_communication(comm_path, first, args,
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -624,7 +628,7 @@ def test_print_metadata_for_communication(comm_path, which, args,
         expected_output += '\n'
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -674,7 +678,7 @@ John's daughter Mary expressed sorrow.
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -701,7 +705,7 @@ tests/testdata/serif_dog-bites-man.xml
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -736,7 +740,7 @@ urgency: low:0.750
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -790,7 +794,7 @@ tests/testdata/serif_dog-bites-man.xml
     expected_output += second_output_prefix
     if second:
         expected_output += u'''\
-Situation Set 0 (Serif: relations):
+SituationMention Set 0 (Serif: relations):
   SituationMention 0-0:
           situationType:      ORG-AFF.Employment
           Argument 0:
@@ -813,7 +817,7 @@ Situation Set 0 (Serif: relations):
 '''
     if third:
         expected_output += u'''\
-Situation Set 1 (Serif: events):
+SituationMention Set 1 (Serif: events):
   SituationMention 1-0:
           text:               died
           situationType:      Life.Die
@@ -825,7 +829,7 @@ Situation Set 1 (Serif: events):
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -882,7 +886,7 @@ malheureux.
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -939,7 +943,7 @@ malheureux.
 '''
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode
@@ -974,7 +978,7 @@ def test_print_multiple_communications_count(simple_comms_tgz_path, first,
         expected_output += 'three\n'
     assert [] == [
         line for line in stderr.decode('utf-8').split(os.linesep)
-        if line.strip() and u'deprecated' not in line
+        if line.strip()
     ]
     assert expected_output == stdout.decode('utf-8').replace(os.linesep, '\n')
     assert 0 == p.returncode

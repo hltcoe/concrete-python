@@ -72,10 +72,10 @@ def print_conll_style_tags_for_communication(
         char_offsets (bool): Flag for printing token text specified by
           a :class:`.Token`'s (optional) :class:`.TextSpan`
         dependency (bool): Flag for printing dependency parse HEAD tags
-        dependency_tool (str): Deprecated.
-            If not `None`, only print information for
+        dependency_tool (str): If not `None`, only print information for
             :class:`.DependencyParse` objects if they have a matching
-            `metadata.tool` field
+            `metadata.tool` field.
+            Mutually exclusive with filter function.
         dependency_parse_filter (func): If not None, print information
             for only those :class:`.DependencyParse` objects that pass
             this filter.  Should be a function that takes a list of
@@ -83,10 +83,10 @@ def print_conll_style_tags_for_communication(
             list of annotations (possibly filtered and re-ordered).
         lemmas (bool): Flag for printing lemma tags
             (:class:`.TokenTagging` objects of type LEMMA)
-        lemmas_tool (str): Deprecated.
-            If not `None`, only print information for
+        lemmas_tool (str): If not `None`, only print information for
             :class:`.TokenTagging` objects of type LEMMA if they have
-            a matching `metadata.tool` field
+            a matching `metadata.tool` field.
+            Mutually exclusive with filter function.
         lemmas_filter (func): If not None, print information
             for only those LEMMA taggings that pass
             this filter.  Should be a function that takes a list of
@@ -94,10 +94,10 @@ def print_conll_style_tags_for_communication(
             list of annotations (possibly filtered and re-ordered).
         ner (bool): Flag for printing Named Entity Recognition tags
             (:class:`.TokenTagging` objects of type NER)
-        ner_tool (str): Deprecated.
-            If not `None`, only print information for
+        ner_tool (str): If not `None`, only print information for
             :class:`.TokenTagging` objects of type NER if they have
-            a matching `metadata.tool` field
+            a matching `metadata.tool` field.
+            Mutually exclusive with filter function.
         ner_filter (func): If not None, print information
             for only those NER taggings that pass
             this filter.  Should be a function that takes a list of
@@ -105,10 +105,10 @@ def print_conll_style_tags_for_communication(
             list of annotations (possibly filtered and re-ordered).
         pos (bool): Flag for printing Part-of-Speech tags
             (:class:`.TokenTagging` objects of type POS)
-        pos_tool (str): Deprecated.
-            If not `None`, only print information for
+        pos_tool (str): If not `None`, only print information for
             :class:`.TokenTagging` objects of type POS if they have
-            a matching `metadata.tool` field
+            a matching `metadata.tool` field.
+            Mutually exclusive with filter function.
         pos_filter (func): If not None, print information
             for only those POS taggings that pass
             this filter.  Should be a function that takes a list of
@@ -285,10 +285,10 @@ def print_entities(comm, tool=None, entity_set_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for
+        tool (str): If not `None`, only print information for
                     :class:`.EntitySet` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         entity_set_filter (func): If not None, print information
             for only those :class:`.EntitySet` objects that pass
             this filter.  Should be a function that takes a list of
@@ -318,10 +318,10 @@ def print_metadata(comm, tool=None, annotation_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print :class:`.AnnotationMetadata`
+        tool (str): If not `None`, only print :class:`.AnnotationMetadata`
                     information for objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         annotation_filter (func): If not None, print information
             for only those objects that pass this filter.  Should be a
             function that takes a list of annotations (objects with
@@ -411,10 +411,10 @@ def print_sections(comm, tool=None, communication_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for
+        tool (str): If not `None`, only print information for
                     :class:`.Section` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         communication_filter (func): If not None, print information
             for only those :class:`.Communication` objects that pass
             this filter.  Should be a function that takes a list of
@@ -444,10 +444,10 @@ def print_situation_mentions(comm, tool=None, situation_mention_set_filter=None)
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for
+        tool (str): If not `None`, only print information for
                     :class:`.SituationMention` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         situation_mention_set_filter (func): If not None, print information
             for only those :class:`.SituationMentionSet` objects that pass
             this filter.  Should be a function that takes a list of
@@ -457,8 +457,7 @@ def print_situation_mentions(comm, tool=None, situation_mention_set_filter=None)
     _filter = filter_unnone(tool_to_filter(tool, situation_mention_set_filter))
     for sm_set_idx, sm_set in enumerate(lun(comm.situationMentionSetList)):
         if _filter([sm_set]):
-            print(u"Situation Set %d (%s):" % (sm_set_idx,
-                                               sm_set.metadata.tool))
+            print(u"SituationMention Set %d (%s):" % (sm_set_idx, sm_set.metadata.tool))
             for sm_idx, sm in enumerate(sm_set.mentionList):
                 print(u"  SituationMention %d-%d:" % (sm_set_idx, sm_idx))
                 _print_situation_mention(sm)
@@ -473,10 +472,10 @@ def print_situations(comm, tool=None, situation_set_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for
+        tool (str): If not `None`, only print information for
                     :class:`.Situation` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         situation_set_filter (func): If not None, print information
             for only those :class:`.SituationSet` objects that pass
             this filter.  Should be a function that takes a list of
@@ -490,7 +489,62 @@ def print_situations(comm, tool=None, situation_set_filter=None):
                                                s_set.metadata.tool))
             for s_idx, situation in enumerate(s_set.situationList):
                 print(u"  Situation %d-%d:" % (s_set_idx, s_idx))
-                _p(6, 18, u"situationType", situation.situationType)
+                if situation.id:
+                    _p(6, 18, u"id", situation.id)
+                if situation.canonicalName:
+                    _p(6, 18, u"canonicalName", situation.canonicalName)
+                if situation.situationType:
+                    _p(6, 18, u"situationType", situation.situationType)
+                if situation.situationKind:
+                    _p(6, 18, u"situationKind", situation.situationKind)
+                if situation.intensity:
+                    _p(6, 18, u"intensity", str(situation.intensity))
+                if situation.polarity:
+                    _p(6, 18, u"polarity", str(situation.polarity))
+                if situation.confidence:
+                    _p(6, 18, u"confidence", str(situation.confidence))
+                if situation.timeML:
+                    print(u" " * 6 + u"timeML:")
+                    if situation.timeML.timeMLClass:
+                        _p(10, 18, u"timeMLClass", situation.timeML.timeMLClass)
+                    if situation.timeML.timeMLTense:
+                        _p(10, 18, u"timeMLTense", situation.timeML.timeMLTense)
+                    if situation.timeML.timeMLAspect:
+                        _p(10, 18, u"timeMLAspect", situation.timeML.timeMLAspect)
+                for arg_idx, a in enumerate(lun(situation.argumentList)):
+                    print(u" " * 6 + u"Argument %d:" % arg_idx)
+                    if a.role:
+                        _p(10, 18, u"role", a.role)
+                    if a.entity:
+                        print(u" " * 10 + u"Entity:")
+                        if a.entity.id:
+                            _p(14, 14, u"id", a.entity.id)
+                        if a.entity.canonicalName:
+                            _p(14, 14, u"canonicalName", a.entity.canonicalName)
+                        if a.entity.type:
+                            _p(14, 14, u"type", a.entity.type)
+                    if a.propertyList:
+                        # PROTO-ROLE PROPERTIES: Format a separate list for each
+                        # distinct annotator (metadata.tool) which tool should be
+                        # either None or a string. Sort by annotator
+                        # (metadata.tool) and then by property (p.value)
+                        last_tool = False
+                        for p in sorted(a.propertyList,
+                                        key=lambda x: (x.metadata.tool, x.value)):
+                            tool = p.metadata.tool
+                            if tool != last_tool:
+                                print(u" " * 10 + u"Properties (%s):" % tool)
+                                last_tool = tool
+                            _p(14, 14, p.value, u"%1.1f" % p.polarity)
+                    if a.situation:
+                        print(u" " * 10 + u"situation:")
+                        if situation.id:
+                            _p(14, 14, u"id", situation.id)
+                        if situation.canonicalName:
+                            _p(14, 14, u"canonicalName", situation.canonicalName)
+                        if situation.situationType:
+                            _p(14, 14, u"situationType", situation.situationType)
+
                 for sm_idx, sm in enumerate(lun(situation.mentionList)):
                     print(u" " * 6 + u"SituationMention %d-%d-%d:" % (
                         s_set_idx, s_idx, sm_idx))
@@ -507,6 +561,8 @@ def _print_situation_mention(situationMention):
     Args:
         situationMention (SituationMention):
     """
+    if situationMention.id:
+        _p(10, 20, u"id", situationMention.id)
     if situationMention.text:
         _p(10, 20, u"text", situationMention.text)
     if situationMention.situationType:
@@ -515,6 +571,10 @@ def _print_situation_mention(situationMention):
         _p(10, 20, u"situationKind", situationMention.situationKind)
     if situationMention.intensity:
         _p(10, 20, u"intensity", str(situationMention.intensity))
+    if situationMention.polarity:
+        _p(10, 20, u"polarity", str(situationMention.polarity))
+    if situationMention.confidence:
+        _p(10, 20, u"confidence", str(situationMention.confidence))
     for arg_idx, ma in enumerate(lun(situationMention.argumentList)):
         print(u" " * 10 + u"Argument %d:" % arg_idx)
         if ma.role:
@@ -542,6 +602,8 @@ def _print_situation_mention(situationMention):
         # SituationMentions referenced by top-level SituationMentions
         if ma.situationMention:
             print(u" " * 14 + u"situationMention:")
+            if situationMention.id:
+                _p(18, 20, u"id", situationMention.id)
             if situationMention.text:
                 _p(18, 20, u"text", situationMention.text)
             if situationMention.situationType:
@@ -571,10 +633,10 @@ def print_text_for_communication(comm, tool=None, communication_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print `text` field of
+        tool (str): If not `None`, only print `text` field of
                     :class:`.Communication` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         communication_filter (func): If not None, print information
             for only those :class:`.Communication` objects that pass
             this filter.  Should be a function that takes a list of
@@ -591,10 +653,10 @@ def print_id_for_communication(comm, tool=None, communication_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print ID of
+        tool (str): If not `None`, only print ID of
                     :class:`.Communication` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         communication_filter (func): If not None, print information
             for only those :class:`.Communication` objects that pass
             this filter.  Should be a function that takes a list of
@@ -613,10 +675,10 @@ def print_communication_taggings_for_communication(
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for
+        tool (str): If not `None`, only print information for
                     :class:`.CommunicationTagging` objects with a
-                    matching `metadata.tool` field
+                    matching `metadata.tool` field.
+                    Mutually exclusive with filter function.
         communication_tagging_filter (func): If not None, print information
             for only those :class:`.CommunicationTagging` objects that pass
             this filter.  Should be a function that takes a list of
@@ -638,12 +700,12 @@ def print_tokens_with_entityMentions(comm, tool=None, entity_mention_set_filter=
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for tokens
+        tool (str): If not `None`, only print information for tokens
                     that are associated with an
                     :class:`.EntityMention` that is part of an
                     :class:`.EntityMentionSet` with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         entity_mention_set_filter (func): If not None, print information
             for only those :class:`.EntityMentionSet` objects that pass
             this filter.  Should be a function that takes a list of
@@ -686,10 +748,10 @@ def print_tokens_for_communication(comm, tool=None, tokenization_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print token text for
+        tool (str): If not `None`, only print token text for
                     :class:`.Communication` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         tokenization_filter (func): If not None, print information
             for only those :class:`.Tokenization` objects that pass
             this filter.  Should be a function that takes a list of
@@ -714,10 +776,10 @@ def print_penn_treebank_for_communication(comm, tool=None, parse_filter=None):
 
     Args:
         comm (Communication):
-        tool (str): Deprecated.
-                    If not `None`, only print information for
+        tool (str): If not `None`, only print information for
                     :class:`.Tokenization` objects with a matching
-                    `metadata.tool` field
+                    `metadata.tool` field.
+                    Mutually exclusive with filter function.
         parse_filter (func): If not None, print information
             for only those :class:`.Parse` objects that pass
             this filter.  Should be a function that takes a list of

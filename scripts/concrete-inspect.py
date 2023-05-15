@@ -300,30 +300,6 @@ Filtering annotations:
         parser.print_help()
         sys.exit(1)
 
-    # show deprecation warnings for --x-tool
-    if (args.dependency_tool or
-            args.lemmas_tool or
-            args.ner_tool or
-            args.pos_tool or
-            args.entities_tool or
-            args.mentions_tool or
-            args.metadata_tool or
-            args.sections_tool or
-            args.situation_mentions_tool or
-            args.situations_tool or
-            args.text_tool or
-            args.tokens_tool or
-            args.treebank_tool or
-            args.id_tool or
-            args.communication_taggings_tool):
-        if args.filter_annotations:
-            parser.print_help()
-            sys.exit(1)
-        else:
-            logging.warning(
-                '--*-tool is deprecated; please use --filter-annotations '
-                'instead')
-
     # check that --x-tool was not specified without --x
     if ((args.dependency_tool and not args.dependency) or
             (args.lemmas_tool and not args.lemmas) or

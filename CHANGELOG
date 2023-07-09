@@ -1,7 +1,10 @@
 4.18.1 (unreleased)
 -------------------
 
-- Updated build to use Python 3.8, GitHub Actions
+- Build Updates:
+  - Fix coverage report generation in GitLab build
+  - Created GitHub Actions build
+  - Switched to Python 3.8 as minimal version
 - Fixed CommunicationReader to skip directories in zip archives
 
 

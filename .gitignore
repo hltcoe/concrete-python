@@ -14,3 +14,4 @@
 /setuptools*.zip
 /setuptools*.egg
 /testfixtures*.egg
+/coverage.xml

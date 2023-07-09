@@ -1,7 +1,7 @@
 stages:
-  - build
-  - stylecheck
   - test
+  - docker-build
+  - docker-test
 
 .dind:
   image: docker:latest
@@ -16,70 +16,56 @@ stages:
   tags:
     - docker
 
-build:
+docker-build:
   extends: .dind
-  stage: build
+  stage: docker-build
   script:
     - docker build -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
-test-pep8:
+docker-tests:
   extends: .dind
-  stage: stylecheck
+  stage: docker-test
   script:
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox run -e pep8
+    - docker run $CONTAINER_TEST_IMAGE tox run -e pep8,docs
+    - docker run $CONTAINER_TEST_IMAGE tox run -e py -- tests
+    - docker run $CONTAINER_TEST_IMAGE tox run -e py -- integration-tests
 
-test-docs:
-  extends: .dind
+coverage-test:
+  image: python:3.8
   stage: test
+  before_script:
+    - pip install tox
   script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox run -e docs
-
-test-unit-tests:
-  extends: .dind
-  stage: test
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - touch coverage.xml
-    - docker run --mount type=bind,source=$PWD/coverage.xml,target=/tmp/concrete-python/coverage.xml $CONTAINER_TEST_IMAGE tox run -e cov -- tests
+    - tox run -e pep8
+    - tox run -e cov -- tests
+  tags:
+    - docker
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
+        path: coverage.xml
 
-test-integration-tests:
-  extends: .dind
-  stage: test
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox run -e py -- integration-tests
-
-.test-compat:
+.compatibility-tests:
   stage: test
   before_script:
-    - python setup.py install
-    - pip install flake8
-    - pip install -r test-requirements.txt
+    - pip install tox
   script:
-    - flake8
-    - pytest tests integration-tests
-  only:
-    - main
-    - tags
+    - tox run -e pep8
+    - tox run -e py -- tests
   tags:
     - docker
 
-test-py38:
-  extends: .test-compat
-  image: python:3.8
-
 test-py39:
-  extends: .test-compat
+  extends: .compatibility-tests
   image: python:3.9
 
 test-py310:
-  extends: .test-compat
+  extends: .compatibility-tests
   image: python:3.10
+
+test-py311:
+  extends: .compatibility-tests
+  image: python:3.11

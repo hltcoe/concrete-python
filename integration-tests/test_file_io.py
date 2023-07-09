@@ -178,6 +178,36 @@ def test_CommunicationReader_zip_file():
     assert u'simple_3.concrete' == filenames[2]
 
 
+def test_CommunicationReader_dir_without_recursive():
+    with raises(ValueError):
+        CommunicationReader("tests/testdata/a/c")
+
+
+def test_CommunicationReader_dir():
+    reader = CommunicationReader("tests/testdata/a/c", recursive=True)
+    [filenames, comms] = zip(*sorted((f, c) for (c, f) in reader))
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert u'two' == comms[0].id
+    assert u'three' == comms[1].id
+    assert u'tests/testdata/a/c/simple_2.concrete' == filenames[0]
+    assert u'tests/testdata/a/c/simple_3.concrete' == filenames[1]
+
+
+def test_CommunicationReader_nested_dir():
+    reader = CommunicationReader("tests/testdata/a", recursive=True)
+    [filenames, comms] = zip(*sorted((f, c) for (c, f) in reader))
+    assert hasattr(comms[0], 'sentenceForUUID')
+    assert hasattr(comms[1], 'sentenceForUUID')
+    assert hasattr(comms[2], 'sentenceForUUID')
+    assert u'one' == comms[0].id
+    assert u'two' == comms[1].id
+    assert u'three' == comms[2].id
+    assert u'tests/testdata/a/b/simple_1.concrete' == filenames[0]
+    assert u'tests/testdata/a/c/simple_2.concrete' == filenames[1]
+    assert u'tests/testdata/a/c/simple_3.concrete' == filenames[2]
+
+
 def test_CommunicationReader_explicit_single_file():
     filename = u'tests/testdata/simple_1.concrete'
     reader = CommunicationReader(filename, filetype=FileType.STREAM)

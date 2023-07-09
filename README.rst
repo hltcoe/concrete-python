@@ -1,8 +1,10 @@
 Tutorial
 ========
 
-.. image:: https://travis-ci.org/hltcoe/concrete-python.svg
-   :target: https://travis-ci.org/hltcoe/concrete-python
+.. image:: https://badge.fury.io/py/concrete.svg
+   :target: https://badge.fury.io/py/concrete
+.. image:: https://github.com/hltcoe/concrete-python/actions/workflows/tox.yml/badge.svg
+   :target: https://github.com/hltcoe/concrete-python/actions/workflows/tox.yml
 .. image:: https://ci.appveyor.com/api/projects/status/0346c3lu11vj8xqj?svg=true
    :target: https://ci.appveyor.com/project/cjmay/concrete-python-f3iqf
 

@@ -1,7 +1,8 @@
 4.18.1 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Updated build to use Python 3.8, GitHub Actions
+- Fixed CommunicationReader to skip directories in zip archives
 
 
 4.18.0 (2023-07-09)

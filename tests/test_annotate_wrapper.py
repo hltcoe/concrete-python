@@ -32,12 +32,6 @@ def annotate_service_wrapper():
         def shutdown(self):
             raise NotImplementedError
 
-        def about(self):
-            raise NotImplementedError
-
-        def alive(self):
-            raise NotImplementedError
-
     implementation = Implementation()
 
     return AnnotateCommunicationServiceWrapper(implementation)

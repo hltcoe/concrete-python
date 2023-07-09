@@ -55,7 +55,7 @@ test-integration-tests:
   stage: test
   script:
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run $CONTAINER_TEST_IMAGE tox run -e py37 -- integration-tests
+    - docker run $CONTAINER_TEST_IMAGE tox run -e py -- integration-tests
 
 .test-compat:
   stage: test

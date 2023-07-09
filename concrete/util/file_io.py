@@ -309,8 +309,11 @@ class ThriftReader(object):
         elif filetype == FileType.ZIP:
             self.filetype = 'zip'
             self.zip = zipfile.ZipFile(filename, 'r')
-            self.zip_infolist = self.zip.infolist()
-            self.zip_infolist_index = 0
+            self.zip_info_stream = (
+                zipinfo
+                for zipinfo in self.zip.infolist()
+                if not zipinfo.is_dir()
+            )
 
         elif filetype == FileType.STREAM:
             self.filetype = 'stream'
@@ -328,7 +331,7 @@ class ThriftReader(object):
             if os.path.isdir(filename):
                 if recursive:
                     self.filetype = 'dir'
-                    self.object_stream = (
+                    self.item_stream = (
                         thrift_obj
                         for (dirpath, _, entries) in os.walk(filename, followlinks=followlinks)
                         for entry in entries
@@ -352,8 +355,11 @@ class ThriftReader(object):
             elif zipfile.is_zipfile(filename):
                 self.filetype = 'zip'
                 self.zip = zipfile.ZipFile(filename, 'r')
-                self.zip_infolist = self.zip.infolist()
-                self.zip_infolist_index = 0
+                self.zip_info_stream = (
+                    zipinfo
+                    for zipinfo in self.zip.infolist()
+                    if not zipinfo.is_dir()
+                )
 
             elif mimetypes.guess_type(filename)[1] == 'gzip':
                 # this is not a true stream---is_tarfile will have
@@ -409,7 +415,7 @@ class ThriftReader(object):
         elif self.filetype == 'zip':
             return self._next_from_zip()
         elif self.filetype == 'dir':
-            return next(self.object_stream)
+            return next(self.item_stream)
         else:
             raise ValueError('unknown filetype %s' % self.filetype)
 
@@ -508,10 +514,8 @@ class ThriftReader(object):
         Returns:
             tuple containing Communication object and its filename
         '''
-        if self.zip_infolist_index >= len(self.zip_infolist):
-            raise StopIteration
-        zipinfo = self.zip_infolist[self.zip_infolist_index]
-        self.zip_infolist_index += 1
+        zipinfo = next(self.zip_info_stream)
+        print(zipinfo.is_dir())
         comm = TSerialization.deserialize(
             self._thrift_type(),
             self.zip.open(zipinfo).read(),

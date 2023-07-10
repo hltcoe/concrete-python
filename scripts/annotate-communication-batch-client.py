@@ -2,14 +2,15 @@
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import logging
+import sys
 
 from thrift.protocol.TProtocol import TProtocolException
 
 import concrete.version
-from concrete.util import CommunicationReader, CommunicationWriterZip, FileType
-from concrete.util.annotate_wrapper import (
-    AnnotateCommunicationBatchClientWrapper,
-    HTTPAnnotateCommunicationBatchClientWrapper
+from concrete import ServicesException
+from concrete.util import (
+    CommunicationReader, CommunicationWriterZip, FileType,
+    AnnotateCommunicationBatchClientWrapper, HTTPAnnotateCommunicationBatchClientWrapper,
 )
 
 
@@ -57,14 +58,23 @@ def main():
         input_path = args.input
     output_path = '/dev/fd/1' if args.output == '-' else args.output
 
-    reader = CommunicationReader(input_path, **reader_kwargs)
+    def _run(client):
+        reader = CommunicationReader(input_path, **reader_kwargs)
+        try:
+            annotated_comms = client.annotate([comm for (comm, _) in reader])
+        except ServicesException as ex:
+            logging.error(f'Service raised exception: {ex.message}')
+            logging.info('Check server log for more information')
+            sys.exit(1)
+
+        with CommunicationWriterZip(output_path) as writer:
+            for annotated_comm in annotated_comms:
+                writer.write(annotated_comm)
+
     if args.uri:
         try:
             with HTTPAnnotateCommunicationBatchClientWrapper(args.uri) as client:
-                annotated_comms = client.annotate([comm for (comm, _) in reader])
-                with CommunicationWriterZip(output_path) as writer:
-                    for annotated_comm in annotated_comms:
-                        writer.write(annotated_comm)
+                _run(client)
         except TProtocolException:
             logging.exception(
                 "Successfully connected to the URI '{}' using HTTP, but the URI does not "
@@ -72,10 +82,7 @@ def main():
                 "Thrift THttp transport and TJSONProtocol encoding".format(args.uri))
     else:
         with AnnotateCommunicationBatchClientWrapper(args.host, args.port) as client:
-            annotated_comms = client.annotate([comm for (comm, _) in reader])
-            with CommunicationWriterZip(output_path) as writer:
-                for annotated_comm in annotated_comms:
-                    writer.write(annotated_comm)
+            _run(client)
 
 
 if __name__ == "__main__":

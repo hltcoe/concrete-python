@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-__version__ = '4.18.2'
+__version__ = '4.18.3.dev0'
 
 
 def concrete_library_version():

@@ -1,4 +1,4 @@
-4.18.2 (unreleased)
+4.18.2 (2023-07-10)
 -------------------
 
 - Fix bug, improve error reporting in annotate batch client.

@@ -61,7 +61,7 @@ def main():
     if args.uri:
         try:
             with HTTPAnnotateCommunicationBatchClientWrapper(args.uri) as client:
-                annotated_comms = [client.annotate(comm) for (comm, _) in reader]
+                annotated_comms = client.annotate([comm for (comm, _) in reader])
                 with CommunicationWriterZip(output_path) as writer:
                     for annotated_comm in annotated_comms:
                         writer.write(annotated_comm)
@@ -72,7 +72,7 @@ def main():
                 "Thrift THttp transport and TJSONProtocol encoding".format(args.uri))
     else:
         with AnnotateCommunicationBatchClientWrapper(args.host, args.port) as client:
-            annotated_comms = [client.annotate(comm) for (comm, _) in reader]
+            annotated_comms = client.annotate([comm for (comm, _) in reader])
             with CommunicationWriterZip(output_path) as writer:
                 for annotated_comm in annotated_comms:
                     writer.write(annotated_comm)

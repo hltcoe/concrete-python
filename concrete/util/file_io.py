@@ -515,7 +515,6 @@ class ThriftReader(object):
             tuple containing Communication object and its filename
         '''
         zipinfo = next(self.zip_info_stream)
-        print(zipinfo.is_dir())
         comm = TSerialization.deserialize(
             self._thrift_type(),
             self.zip.open(zipinfo).read(),

@@ -3,6 +3,7 @@
 
 - Fix bug, improve error reporting in annotate batch client.
 - Remove errant print statement.
+- Use fixed base image to reduce Docker build time.
 
 
 4.18.1 (2023-07-09)

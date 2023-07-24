@@ -270,20 +270,18 @@ class AnalyticUUIDGeneratorFactory(object):
     processing the communication.  Often each program represents a
     single analytic, so common usage is::
 
-        augf = AnalyticUUIDGeneratorFactory(comm)
-        aug = augf.create()
+        uuid_generator = AnalyticUUIDGeneratorFactory(comm).create()
         for <each annotation object created by this analytic>:
-            annotation = next(aug)
+            annotation.uuid = next(uuid_generator)
             <add annotation to communication>
 
     or if you're creating a new Communication::
 
-        augf = AnalyticUUIDGeneratorFactory()
-        aug = augf.create()
+        uuid_generator = AnalyticUUIDGeneratorFactory().create()
         comm = <create communication>
-        comm.uuid = next(aug)
+        comm.uuid = next(uuid_generator)
         for <each annotation object created by this analytic>:
-            annotation = next(aug)
+            annotation.uuid = next(uuid_generator)
             <add annotation to communication>
 
     where the annotation objects might be objects of type

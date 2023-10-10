@@ -38,7 +38,7 @@ def write_communication_to_buffer(comm):
         comm (Communication): communication to serialize
 
     Returns:
-        Communication: Communication read from buffer
+        bytes: serialized communication
     '''
     transport = TMemoryBuffer()
     protocol = factory.createProtocol(transport)

@@ -19,6 +19,8 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import datetime
+
 import sphinx_rtd_theme
 
 from concrete.version import concrete_library_version
@@ -48,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'concrete'
-copyright = u'2019, HLTCOE'
+copyright = f'{datetime.datetime.now().year}, HLTCOE'
 author = u'HLTCOE'
 
 # The version info for the project you're documenting, acts as replacement for

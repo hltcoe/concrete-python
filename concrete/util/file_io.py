@@ -689,8 +689,11 @@ class CommunicationWriterTar(object):
         Args:
             comm (Communication): communication to write to tar file
             comm_filename (str): desired filename of communication
-                within tar file (by default the filename will be the
-                communication id appended with a .concrete extension)
+                within tar file; by default the filename will be the
+                communication id appended with a .concrete extension
+                (it is the user's responsibility to ensure there
+                are no special characters like forward slashes in the
+                communication id!)
         """
         if comm_filename is None:
             comm_filename = comm.id + '.concrete'
@@ -783,8 +786,11 @@ class CommunicationWriterZip(object):
         Args:
             comm (Communication): communication to write to zip file
             comm_filename (str): desired filename of communication
-                within zip file (by default the filename will be the
-                communication id appended with a .concrete extension)
+                within zip file; by default the filename will be the
+                communication id appended with a .concrete extension
+                (it is the user's responsibility to ensure there
+                are no special characters like forward slashes in the
+                communication id!)
         '''
         if comm_filename is None:
             comm_filename = comm.id + '.concrete'

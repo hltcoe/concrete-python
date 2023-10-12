@@ -5,7 +5,6 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import logging
 
 from thrift.protocol.TProtocol import TProtocolException
-from thrift.transport.TTransport import TTransportException
 
 import concrete.version
 from concrete.util import CommunicationReader, CommunicationWriter, FileType
@@ -62,20 +61,16 @@ def main():
                 with CommunicationWriter(output_path) as writer:
                     for (comm, _) in reader:
                         writer.write(client.annotate(comm))
-        except TProtocolException as ex:
-            logging.error(ex)
-            logging.error(
+        except TProtocolException:
+            logging.exception(
                 "Successfully connected to the URI '{}' using HTTP, but the URI does not "
                 "appear to be an AnnotateCommunicationService endpoint that uses the "
                 "Thrift THttp transport and TJSONProtocol encoding".format(args.uri))
     else:
-        try:
-            with AnnotateCommunicationClientWrapper(args.host, args.port) as client:
-                with CommunicationWriter(output_path) as writer:
-                    for (comm, _) in reader:
-                        writer.write(client.annotate(comm))
-        except TTransportException:
-            pass
+        with AnnotateCommunicationClientWrapper(args.host, args.port) as client:
+            with CommunicationWriter(output_path) as writer:
+                for (comm, _) in reader:
+                    writer.write(client.annotate(comm))
 
 
 if __name__ == "__main__":

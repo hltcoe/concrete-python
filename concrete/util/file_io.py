@@ -237,12 +237,12 @@ FileType = _FileTypeClass(
 
 class ThriftReader(object):
     """Iterator/generator class for reading one or more Thrift structures
-    from a file
+    from a file or folder
 
     The iterator returns a `(obj, filename)` tuple where obj is an object
     of type thrift_type.
 
-    Supported filetypes are:
+    Supported filetypes/folders are:
 
     - a file with a single Thrift structure
     - a file with multiple Thrift structures concatenated together
@@ -251,6 +251,8 @@ class ThriftReader(object):
       together
     - a .tar.gz file with one or more Thrift structures
     - a .zip file with one or more Thrift structures
+    - a folder containing one or more files of the preceding types
+      (requires `recursive` to be True and `filetype` to be "auto")
 
     Sample usage::
 
@@ -260,17 +262,21 @@ class ThriftReader(object):
     """
 
     def __init__(self, thrift_type, filename,
-                 postprocess=None, filetype=FileType.AUTO):
+                 postprocess=None, filetype=FileType.AUTO,
+                 recursive=False, followlinks=False):
         """
         Args:
             thrift_type: Class for Thrift type, e.g. Communication, TokenLattice
-            filename (str):
+            filename (str): path to file (or folder) to read thrift objects from
             postprocess (function): A post-processing function that is called
                 with the Thrift object as argument each time a Thrift object
                 is read from the file
             filetype (FileType): Expected type of file.  Default value is
                 `FileType.AUTO`, where function will try to automatically
                 determine file type.
+            recursive (bool): If True, reader will recurse into directories
+            followlinks (bool): If True, also follow symlinks when recursing into
+                directories
 
         Raises:
             ValueError: if filetype is not a known filetype name or id
@@ -303,8 +309,11 @@ class ThriftReader(object):
         elif filetype == FileType.ZIP:
             self.filetype = 'zip'
             self.zip = zipfile.ZipFile(filename, 'r')
-            self.zip_infolist = self.zip.infolist()
-            self.zip_infolist_index = 0
+            self.zip_info_stream = (
+                zipinfo
+                for zipinfo in self.zip.infolist()
+                if not zipinfo.is_dir()
+            )
 
         elif filetype == FileType.STREAM:
             self.filetype = 'stream'
@@ -319,15 +328,38 @@ class ThriftReader(object):
             f = bz2.BZ2File(filename, 'r')
 
         elif filetype == FileType.AUTO:
-            if tarfile.is_tarfile(filename):
+            if os.path.isdir(filename):
+                if recursive:
+                    self.filetype = 'dir'
+                    self.item_stream = (
+                        thrift_obj
+                        for (dirpath, _, entries) in os.walk(filename, followlinks=followlinks)
+                        for entry in entries
+                        for thrift_obj in ThriftReader(
+                            thrift_type,
+                            os.path.join(dirpath, entry),
+                            postprocess=postprocess,
+                            filetype=filetype,
+                            recursive=recursive,
+                            followlinks=followlinks
+                        )
+                    )
+                    self.current_reader = None
+                else:
+                    raise ValueError('path is a directory but `recursive` is False')
+
+            elif tarfile.is_tarfile(filename):
                 self.filetype = 'tar'
                 self.tar = tarfile.open(filename, 'r|*')
 
             elif zipfile.is_zipfile(filename):
                 self.filetype = 'zip'
                 self.zip = zipfile.ZipFile(filename, 'r')
-                self.zip_infolist = self.zip.infolist()
-                self.zip_infolist_index = 0
+                self.zip_info_stream = (
+                    zipinfo
+                    for zipinfo in self.zip.infolist()
+                    if not zipinfo.is_dir()
+                )
 
             elif mimetypes.guess_type(filename)[1] == 'gzip':
                 # this is not a true stream---is_tarfile will have
@@ -372,6 +404,9 @@ class ThriftReader(object):
         Raises:
             ValueError: if self.filetype (normally validated by
             constructor) is not a known filetype name or id
+            EOFError: unexpected EOF, probably caused by deserializing
+            an invalid Thrift object
+            StopIteration: if there are no more objects to read
         """
         if self.filetype == 'stream':
             return self._next_from_stream()
@@ -379,6 +414,8 @@ class ThriftReader(object):
             return self._next_from_tar()
         elif self.filetype == 'zip':
             return self._next_from_zip()
+        elif self.filetype == 'dir':
+            return next(self.item_stream)
         else:
             raise ValueError('unknown filetype %s' % self.filetype)
 
@@ -389,7 +426,7 @@ class ThriftReader(object):
 
         Raises:
             EOFError: unexpected EOF, probably caused by deserializing an invalid Thrift object
-            StopIteration: if there are no more communications
+            StopIteration: if there are no more objects to read
 
         Returns:
             tuple containing Communication object and its filename
@@ -477,10 +514,7 @@ class ThriftReader(object):
         Returns:
             tuple containing Communication object and its filename
         '''
-        if self.zip_infolist_index >= len(self.zip_infolist):
-            raise StopIteration
-        zipinfo = self.zip_infolist[self.zip_infolist_index]
-        self.zip_infolist_index += 1
+        zipinfo = next(self.zip_info_stream)
         comm = TSerialization.deserialize(
             self._thrift_type(),
             self.zip.open(zipinfo).read(),
@@ -491,11 +525,11 @@ class ThriftReader(object):
 
 class CommunicationReader(ThriftReader):
     """Iterator/generator class for reading one or more Communications from a
-    file
+    file or folder
 
     The iterator returns a `(Communication, filename)` tuple
 
-    Supported filetypes are:
+    Supported filetypes/folders are:
 
     - a file with a single Communication
     - a file with multiple Communications concatenated together
@@ -503,6 +537,8 @@ class CommunicationReader(ThriftReader):
     - a gzipped file with multiple Communications concatenated together
     - a .tar.gz file with one or more Communications
     - a .zip file with one or more Communications
+    - a folder containing one or more files of the preceding types
+      (requires `recursive` to be True and `filetype` to be "auto")
 
     Sample usage::
 
@@ -510,16 +546,20 @@ class CommunicationReader(ThriftReader):
             do_something(comm)
     """
 
-    def __init__(self, filename, add_references=True, filetype=FileType.AUTO):
+    def __init__(self, filename, add_references=True, filetype=FileType.AUTO,
+                 recursive=False, followlinks=False):
         """
         Args:
-            filename (str): path of file to read from
+            filename (str): path of file or folder to read from
             add_references (bool): If True, calls
                :func:`concrete.util.references.add_references_to_communication`
                on all :class:`.Communication` objects read from file
             filetype (FileType): Expected type of file.  Default value is
                 `FileType.AUTO`, where function will try to automatically
                 determine file type.
+            recursive (bool): If True, reader will recurse into directories
+            followlinks (bool): If True, also follow symlinks when recursing into
+                directories
         """
         super(CommunicationReader, self).__init__(
             Communication,
@@ -527,7 +567,9 @@ class CommunicationReader(ThriftReader):
             postprocess=(add_references_to_communication
                          if add_references
                          else None),
-            filetype=filetype)
+            filetype=filetype,
+            recursive=recursive,
+            followlinks=followlinks)
 
 
 class CommunicationWriter(object):
@@ -647,8 +689,11 @@ class CommunicationWriterTar(object):
         Args:
             comm (Communication): communication to write to tar file
             comm_filename (str): desired filename of communication
-                within tar file (by default the filename will be the
-                communication id appended with a .concrete extension)
+                within tar file; by default the filename will be the
+                communication id appended with a .concrete extension
+                (it is the user's responsibility to ensure there
+                are no special characters like forward slashes in the
+                communication id!)
         """
         if comm_filename is None:
             comm_filename = comm.id + '.concrete'
@@ -741,8 +786,11 @@ class CommunicationWriterZip(object):
         Args:
             comm (Communication): communication to write to zip file
             comm_filename (str): desired filename of communication
-                within zip file (by default the filename will be the
-                communication id appended with a .concrete extension)
+                within zip file; by default the filename will be the
+                communication id appended with a .concrete extension
+                (it is the user's responsibility to ensure there
+                are no special characters like forward slashes in the
+                communication id!)
         '''
         if comm_filename is None:
             comm_filename = comm.id + '.concrete'

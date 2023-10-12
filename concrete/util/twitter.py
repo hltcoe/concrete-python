@@ -136,7 +136,7 @@ def json_tweet_object_to_TweetInfo(tweet):
                 entries will be used to set fields on concrete_object
         """
         for key in twitter_dict.keys():
-            if type(twitter_dict[key]) != dict:
+            if not isinstance(twitter_dict[key], dict):
                 camelcased_key = snake_case_to_camelcase(key)
                 if hasattr(concrete_object, camelcased_key):
                     setattr(concrete_object, camelcased_key, twitter_dict[key])

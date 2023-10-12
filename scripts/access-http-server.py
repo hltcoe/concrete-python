@@ -103,6 +103,7 @@ def thrift_endpoint(tserver):
     headers = dict()
     headers['Content-Length'] = len(bytestring)
     headers['Content-Type'] = "application/x-thrift"
+    headers['Access-Control-Allow-Origin'] = "*"
     return bottle.HTTPResponse(bytestring, **headers)
 
 

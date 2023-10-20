@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from pytest import fixture, mark
 from concrete.util import CommunicationReader
 from concrete.validate import validate_communication
+import os
 import sys
 from subprocess import Popen, PIPE
 
@@ -19,8 +20,8 @@ qu'elle posa sur la table tout allumés.
 —Monsieur le curé, dit l'homme, vous êtes bon. Vous ne me méprisez \
 pas. Vous me recevez chez vous. Vous allumez vos cierges pour moi. \
 Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \
-malheureux.
-'''
+malheureux.\
+''' + os.linesep
 
 
 @fixture

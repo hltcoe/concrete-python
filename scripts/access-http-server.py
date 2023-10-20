@@ -48,8 +48,9 @@ class AccessHTTPServer(object):
     STORE_HANDLER = None
     STORE_TSERVER = None
     STATIC_PATH = None
+    CORS = False
 
-    def __init__(self, host, port, static_path, fetch_handler, store_handler):
+    def __init__(self, host, port, static_path, fetch_handler, store_handler, cors=False):
         self.host = host
         self.port = port
 
@@ -67,18 +68,20 @@ class AccessHTTPServer(object):
         AccessHTTPServer.STORE_TSERVER = TServer.TServer(
             store_processor, None, None, None, store_pfactory, store_pfactory)
 
+        AccessHTTPServer.CORS = cors
+
     def serve(self):
         bottle.run(host=self.host, port=self.port)
 
 
 @bottle.post('/fetch_http_endpoint/')
 def fetch_http_endpoint():
-    return thrift_endpoint(AccessHTTPServer.FETCH_TSERVER)
+    return thrift_endpoint(AccessHTTPServer.FETCH_TSERVER, cors=AccessHTTPServer.CORS)
 
 
 @bottle.post('/store_http_endpoint/')
 def store_http_endpoint():
-    return thrift_endpoint(AccessHTTPServer.STORE_TSERVER)
+    return thrift_endpoint(AccessHTTPServer.STORE_TSERVER, cors=AccessHTTPServer.CORS)
 
 
 @bottle.route('/<filepath:path>')
@@ -86,7 +89,7 @@ def server_static(filepath):
     return bottle.static_file(filepath, root=AccessHTTPServer.STATIC_PATH)
 
 
-def thrift_endpoint(tserver):
+def thrift_endpoint(tserver, cors=False):
     """Thrift RPC endpoint
     """
     itrans = TTransport.TFileObjectTransport(bottle.request.body)
@@ -103,6 +106,8 @@ def thrift_endpoint(tserver):
     headers = dict()
     headers['Content-Length'] = len(bytestring)
     headers['Content-Type'] = "application/x-thrift"
+    if cors:
+        headers['Access-Control-Allow-Origin'] = "*"
     return bottle.HTTPResponse(bytestring, **headers)
 
 
@@ -120,6 +125,8 @@ def main():
     parser.add_argument('-l', '--loglevel', '--log-level',
                         help='Logging verbosity level threshold (to stderr)',
                         default='info')
+    parser.add_argument('--cors', action='store_true',
+                        help='Enable CORS in HTTP server')
     parser.add_argument('--static-path', default='.',
                         help='Path where HTML files are stored')
     parser.add_argument('--store-path', default='.',
@@ -148,7 +155,8 @@ def main():
     logging.info('Fetch endpoint: http://{}:{}/fetch_http_endpoint/'.format(args.host, args.port))
     logging.info('Store endpoint: http://{}:{}/store_http_endpoint/'.format(args.host, args.port))
 
-    ahs = AccessHTTPServer(args.host, args.port, args.static_path, fetch_handler, store_handler)
+    ahs = AccessHTTPServer(args.host, args.port, args.static_path, fetch_handler, store_handler,
+                           cors=args.cors)
     ahs.serve()
 
 

@@ -19,11 +19,29 @@ jobs:
           tox run -e cov -- tests
           tox run -e py -- integration-tests
 
-  compatibility-tests:
+  linux-compatibility-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python: ["3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tox (and any other packages)
+        run: pip install tox
+      - name: Run tox
+        run: |
+          tox run -e pep8
+          tox run -e py -- tests
+
+  windows-compatibility-tests:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python: ["3.8", "3.9", "3.10", "3.11"]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python

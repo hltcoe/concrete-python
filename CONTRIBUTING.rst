@@ -19,7 +19,7 @@ Contributing code
 3. Write a test for your new feature/bugfix and run it, ensuring
    that it fails on the current implementation::
 
-      py.test tests/test_my_code.py
+      pytest tests/test_my_code.py
 
    NameErrors, ImportErrors, SyntaxErrors, etc. do not count (they indicate the
    API is wrong).
@@ -29,9 +29,7 @@ Contributing code
 
        tox run
 
-   Optionally, run integration tests (you must have Redis_ server
-   version 2.8 or later in your path; do ``redis-server --version``
-   to check)::
+   Optionally, run integration tests::
 
        tox run -- integration-tests
 
@@ -41,10 +39,10 @@ Contributing code
    ``n-issue-abbrev`` where ``n`` is the issue number and
    ``issue-abbrev`` is a very short abbreviation of the issue title)
    and ensure that the build passes.  The build is defined in
-   ``.gitlab-ci.yml`` (``.travis.yml`` and ``appveyor.yml`` for public
+   ``.gitlab-ci.yml`` (``.github/workflows`` for public
    builds); tox is configured in ``tox.ini``.  The build
    includes unit tests, integration tests, and style checks and runs on
-   Python 3.5 across multiple platforms; if it fails, please
+   Python 3.8 across multiple platforms; if it fails, please
    find the error in the build log, fix it, and try again.
 9. Add a line to ``CHANGELOG`` under the current version-in-progress
    describing your changes simply and concisely.  Add yourself to ``AUTHORS``

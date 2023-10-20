@@ -1,6 +1,15 @@
-name: Python tests
+name: Tests
 
-on: [push]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - 'main'
 
 jobs:
   main-tests:
@@ -21,6 +30,40 @@ jobs:
 
   compatibility-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tox (and any other packages)
+        run: pip install tox
+      - name: Run tox
+        run: |
+          tox run -e pep8
+          tox run -e py -- tests
+
+  windows-main-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Install tox (and any other packages)
+        run: pip install tox
+      - name: Run tox
+        run: |
+          tox run -e pep8
+          tox run -e py -- tests
+          tox run -e py -- integration-tests
+
+  windows-compatibility-tests:
+    runs-on: windows-latest
     strategy:
       matrix:
         python: ["3.9", "3.10", "3.11"]

@@ -29,7 +29,7 @@ env:
 
 jobs:
   push_to_registry:
-    name: Push Docker image to Docker Hub
+    name: Build and push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -62,11 +62,11 @@ jobs:
           load: true
           tags: ${{ env.TEST_TAG }}
 
-      - name: Test
+      - name: Test Docker image
         run: |
           docker run --rm ${{ env.TEST_TAG }} tox -e pep8,py
       
-      - name: Build and push Docker image
+      - name: Push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .

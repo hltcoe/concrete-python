@@ -10,7 +10,7 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Build and push Docker image
+name: Docker build and push
 
 on:
   workflow_dispatch:
@@ -29,7 +29,7 @@ env:
 
 jobs:
   push_to_registry:
-    name: Build and push Docker image to Docker Hub
+    name: Build and push Docker image
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo

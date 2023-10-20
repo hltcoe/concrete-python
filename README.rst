@@ -5,8 +5,8 @@ Tutorial
    :target: https://badge.fury.io/py/concrete
 .. image:: https://github.com/hltcoe/concrete-python/actions/workflows/tox.yml/badge.svg
    :target: https://github.com/hltcoe/concrete-python/actions/workflows/tox.yml
-.. image:: https://ci.appveyor.com/api/projects/status/0346c3lu11vj8xqj?svg=true
-   :target: https://ci.appveyor.com/project/cjmay/concrete-python-f3iqf
+.. image:: https://github.com/hltcoe/concrete-python/actions/workflows/docker-build-and-push.yml/badge.svg
+   :target: https://github.com/hltcoe/concrete-python/actions/workflows/docker-build-and-push.yml
 
 
 Concrete-python is the Python interface to Concrete_, a

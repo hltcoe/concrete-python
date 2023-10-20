@@ -1,15 +1,25 @@
-clone_depth: 1
-version: '{build}-{branch}'
-skip_branch_with_pr: false
+# appveyor.yml - https://www.appveyor.com/docs/lang/python
+---
+image:
+  - Visual Studio 2019
+
+environment:
+  matrix:
+  # - TOXENV: py27  # end-of-life-branches
+  # - TOXENV: py35
+  # - TOXENV: py36
+  # - TOXENV: py37
+  - TOXENV: py38    # https://devguide.python.org/versions
+  - TOXENV: py39
+  - TOXENV: py310
+  - TOXENV: py311
+
+build: false
 
 install:
-- set PATH=C:\Python38-x64\scripts;C:\Python38-x64;%PATH%
-- pip install 'tox>=4'
-- git config core.symlinks true
-- git reset --hard
+  # - py --list
+  # - py -m pip install --upgrade pip
+  - py -m pip install tox
 
-build_script:
-# configured in tox.ini
-- tox run -e pep8,docs
-- tox run -e cov -- tests
-- tox run -e py -- integration-tests
+test_script:
+  - py -m tox

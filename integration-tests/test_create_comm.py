@@ -12,11 +12,11 @@ from subprocess import Popen, PIPE
 
 @fixture
 def text():
-    return u'''\
+    return '''\
 Madame Magloire comprit, et elle alla chercher sur la cheminée de la \
 chambre à coucher de monseigneur les deux chandeliers d'argent \
-qu'elle posa sur la table tout allumés.
-
+qu'elle posa sur la table tout allumés.\
+''' + os.linesep + os.linesep + '''\
 —Monsieur le curé, dit l'homme, vous êtes bon. Vous ne me méprisez \
 pas. Vous me recevez chez vous. Vous allumez vos cierges pour moi. \
 Je ne vous ai pourtant pas caché d'où je viens et que je suis un homme \

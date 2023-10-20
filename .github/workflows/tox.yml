@@ -1,6 +1,15 @@
 name: Tests
 
-on: [push]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - 'main'
 
 jobs:
   main-tests:

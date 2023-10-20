@@ -23,6 +23,10 @@ on:
     branches:
       - 'main'
 
+env:
+  DOCKER_REPO: hltcoe/concrete-python
+  TEST_TAG: hltcoe/concrete-python:ci-test
+
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -42,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@35e9aff4f5d665b5aa8a8f2adffaf8a1b5f49cc0
         with:
-          images: hltcoe/concrete-python
+          images: ${{ env.DOCKER_REPO }}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -50,12 +54,22 @@ jobs:
             type=ref,event=pr
             # set latest tag for default branch
             type=raw,value=latest,enable={{is_default_branch}},priority=2000
+
+      - name: Build and export to Docker
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          load: true
+          tags: ${{ env.TEST_TAG }}
+
+      - name: Test
+        run: |
+          docker run --rm ${{ env.TEST_TAG }} tox -e pep8,py
       
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
-          file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

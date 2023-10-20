@@ -1,0 +1,24 @@
+# appveyor.yml - https://www.appveyor.com/docs/lang/python
+---
+image:
+  - Visual Studio 2019
+
+environment:
+  matrix:
+    - TOXENV: py38
+    - TOXENV: py39
+    - TOXENV: py310
+    - TOXENV: py311
+
+build: false
+
+install:
+  # - py --list
+  # - py -m pip install --upgrade pip
+  - py -m pip install tox
+
+build_script:
+  - echo help
+
+test_script:
+  - py -m tox run -e pep8,py

@@ -19,7 +19,7 @@ jobs:
           tox run -e cov -- tests
           tox run -e py -- integration-tests
 
-  linux-compatibility-tests:
+  compatibility-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,6 +36,22 @@ jobs:
         run: |
           tox run -e pep8
           tox run -e py -- tests
+
+  windows-main-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Install tox (and any other packages)
+        run: pip install tox
+      - name: Run tox
+        run: |
+          tox run -e pep8
+          tox run -e py -- tests
+          tox run -e py -- integration-tests
 
   windows-compatibility-tests:
     runs-on: windows-latest
